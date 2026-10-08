@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#E4E9EF}a{color:#0377A8}a:hover{color:#003781}</style></helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:72px;font-family:Figtree,Arial,sans-serif;color:#0E1E33;background:#E4E9EF;width:max-content">
+  <section style="display:grid;grid-template-columns:560px 1fr;gap:64px;width:2960px">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0377A8">Quotation Tool · UI mockups</div>
+      <h1 style="margin:0;font-size:48px;line-height:1.08;color:#003781;letter-spacing:-.02em">Seven steps, redesigned for clarity</h1>
+      <p style="margin:0;font-size:18px;line-height:1.6;color:#3A4756">PRSA quote for Mr Alex Murphy, built from the repo's own data: fund list, SRIs, charges, strategy suitability ranges and pack sections. Numbers are consistent across screens.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;font-size:15px;line-height:1.6;color:#3A4756">
+      <div style="background:#fff;border-radius:14px;padding:26px;display:flex;flex-direction:column;gap:8px"><b style="font-size:17px;color:#0E1E33">Navigation</b>Left rail replaces the top tabs. Each completed step shows what was entered, so the rail doubles as a running summary of the quote. Footer actions name the next step.</div>
+      <div style="background:#fff;border-radius:14px;padding:26px;display:flex;flex-direction:column;gap:8px"><b style="font-size:17px;color:#0E1E33">Results lead with outcomes</b>Like the competitor tools, the headline is value at retirement, today's money, income and total charge. Tables sit below the chart and are trimmed to key years.</div>
+      <div style="background:#fff;border-radius:14px;padding:26px;display:flex;flex-direction:column;gap:8px"><b style="font-size:17px;color:#0E1E33">Pack as a guided sub-flow</b>Contents → cover letter → Statement of Suitability → review. The SoS editor reads like a document, with auto-filled text in grey and prompts in amber.</div>
+      <div style="background:#fff;border-radius:14px;padding:26px;display:flex;flex-direction:column;gap:8px"><b style="font-size:17px;color:#0E1E33">From the broker meeting</b>Sustainability yes/no, risk profiler named in the SoS, portfolio risk next to client risk, SFDR shown per fund, own cover letter upload, KIDs at the end, optional application form. Marked "New".</div>
+      <div style="background:#fff;border-radius:14px;padding:26px;display:flex;flex-direction:column;gap:8px"><b style="font-size:17px;color:#0E1E33">Can be built with today's data</b>Everything shown comes from existing data or calculations. Left out for now: equity/bond split (no look-through data), portfolio volatility and fund performance charts (no return series).</div>
+      <div style="background:#fff;border-radius:14px;padding:26px;display:flex;flex-direction:column;gap:8px"><b style="font-size:17px;color:#0E1E33">System</b>Figtree standing in for Allianz Neo · navy #003781 primary, teal #0377A8 for links and focus · ESMA SRI colours from the code · 12px card radius, 44px inputs, hairline borders.</div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <h2 style="margin:0;font-size:22px;color:#003781">Steps 1–4 · Setup</h2>
+    <div style="display:flex;gap:40px;align-items:flex-start">
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="01-Adviser" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="02-Product-and-Client" hint-size="1440px,900px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;align-items:flex-start">
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="03-Attitude-to-Risk" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="04-Plan-Details" hint-size="1440px,900px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <h2 style="margin:0;font-size:22px;color:#003781">Step 5 · Portfolio</h2>
+    <div style="display:flex;gap:40px;align-items:flex-start">
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="05a-Portfolio-Strategy" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="05b-Portfolio-Choose-Funds" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="05c-Portfolio-Allocate" hint-size="1440px,900px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <h2 style="margin:0;font-size:22px;color:#003781">Step 6 · Results</h2>
+    <div style="display:flex;gap:40px;align-items:flex-start">
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="06-Results" tab="proj" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="06-Results" tab="chg" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="06-Results" tab="rem" hint-size="1440px,900px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <h2 style="margin:0;font-size:22px;color:#003781">Step 7 · Quotation pack</h2>
+    <div style="display:flex;gap:40px;align-items:flex-start">
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="07-Quotation-Pack" view="contents" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="07-Quotation-Pack" view="sos" hint-size="1440px,900px"></dc-import></div>
+      <div style="box-shadow:0 10px 40px rgba(14,30,51,.12)"><dc-import name="07-Quotation-Pack" view="review" hint-size="1440px,900px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <h2 style="margin:0;font-size:22px;color:#003781">Generated PDF pages</h2>
+    <dc-import name="08-PDF-Pages" hint-size="2550px,1220px"></dc-import>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <h2 style="margin:0;font-size:22px;color:#003781">Mobile · key screens</h2>
+    <dc-import name="09-Mobile" hint-size="1840px,940px"></dc-import>
+  </section>
+</div>
+</x-dc>
+</body>
+</html>

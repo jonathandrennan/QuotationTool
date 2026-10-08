@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#F4F7FA}a{color:#0377A8}a:hover{color:#003781}</style></helmet>
+<div data-screen-label="07 Quotation pack" style="width:1440px;min-height:900px;display:flex;background:linear-gradient(to right,#fff 271px,#E2E8EF 271px 272px,#F4F7FA 272px);font-family:Figtree,Arial,sans-serif;color:#0E1E33">
+  <dc-import name="QTSidebar" step="{{ 7 }}" style="align-self:stretch;display:flex" hint-size="272px,900px"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="flex:1;padding:40px 64px 48px;display:flex;flex-direction:column;gap:26px">
+      <header style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0377A8">Step 7 of 7</div>
+          <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:700;color:#003781;letter-spacing:-.01em">{{ title }}</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+          <sc-for list="{{ subs }}" as="s" hint-placeholder-count="4">
+            <span style="{{ s.wrap }}"><span style="{{ s.dot }}">{{ s.mark }}</span>{{ s.label }}</span>
+            <sc-if value="{{ s.sep }}" hint-placeholder-val="{{ true }}"><span style="width:28px;height:1px;background:#C9D3DE"></span></sc-if>
+          </sc-for>
+        </div>
+      </header>
+
+      <sc-if value="{{ isContents }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+              <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;overflow:hidden">
+                <div style="display:flex;align-items:baseline;gap:8px;padding:14px 20px;background:#F7FAFC;border-bottom:1px solid #E2E8EF"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#003781">{{ g.title }}</span><span style="font-size:12px;color:#5E6B78">{{ g.note }}</span></div>
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 20px;border-top:1px solid #EEF2F6">
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                      <span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600">{{ it.name }}<sc-if value="{{ it.isNew }}" hint-placeholder-val="{{ false }}"><span style="padding:1px 7px;border-radius:4px;background:#FDF4E7;color:#8A4708;font-size:11px;font-weight:700">New</span></sc-if></span>
+                      <span style="font-size:12px;color:#5E6B78">{{ it.sub }}</span>
+                    </div>
+                    <span style="{{ it.ctl }}">{{ it.ctlText }}</span>
+                  </div>
+                </sc-for>
+              </section>
+            </sc-for>
+          </div>
+          <aside style="position:sticky;top:40px;background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:16px;font-weight:700">Pack order</span><span style="font-size:12px;color:#5E6B78">9 sections</span></div>
+            <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+              <sc-for list="{{ order }}" as="o" hint-placeholder-count="12">
+                <li style="display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #F1F4F7;font-size:13px"><span style="font-size:11px;color:#8A96A3;font-variant-numeric:tabular-nums">{{ o.n }}</span><span>{{ o.name }}</span><span style="font-size:11px;color:#8A96A3">{{ o.tag }}</span></li>
+              </sc-for>
+            </ol>
+          </aside>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSos }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;align-items:start">
+          <aside style="position:sticky;top:40px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:12px;background:#fff;border:1px solid #E2E8EF">
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">Prompts completed</span><b style="color:#A3540B;font-variant-numeric:tabular-nums">6 of 10</b></div>
+              <div style="height:6px;border-radius:3px;background:#EEF2F6;overflow:hidden"><div style="width:60%;height:100%;background:#E8A33D"></div></div>
+            </div>
+            <nav style="display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ outline }}" as="o" hint-placeholder-count="9">
+                <div style="{{ o.row }}"><span>{{ o.name }}</span><span style="{{ o.badge }}">{{ o.state }}</span></div>
+              </sc-for>
+            </nav>
+            <div style="font-size:12px;color:#5E6B78;line-height:1.5">Text in grey boxes is filled from your answers. Amber prompts need your own words before the pack can be generated.</div>
+          </aside>
+          <article style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;box-shadow:0 12px 32px rgba(14,30,51,.05);overflow:hidden">
+            <div style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-bottom:1px solid #EEF2F6;font-size:13px;color:#3A4756">
+              <span style="padding:5px 9px;border-radius:6px;font-weight:700">B</span><span style="padding:5px 9px;border-radius:6px">Heading</span><span style="padding:5px 9px;border-radius:6px">• List</span>
+              <span style="margin-left:auto;padding:6px 12px;border-radius:6px;background:#FDF4E7;color:#8A4708;font-weight:700">Next prompt ↓</span>
+              <span style="padding:6px 10px;color:#0377A8;font-weight:600">Reset to template</span>
+            </div>
+            <div style="padding:40px 56px 48px;display:flex;flex-direction:column;gap:14px;font-size:15px;line-height:1.65;color:#1E2B3B;max-width:760px">
+              <h3 style="margin:0;font-size:18px;color:#003781">Your attitude to risk</h3>
+              <p style="margin:0">Based on the risk profiling we carried out with you, your attitude to investment risk corresponds to a risk rating of <span style="padding:1px 5px;border-radius:4px;background:#EEF2F6">4 (Medium)</span> on the 1 to 7 Summary Risk Indicator scale. You have told us that a fall of up to 20% in a single year would not change your plans, as you do not expect to draw on this fund for at least 18 years.</p>
+              <h3 style="margin:12px 0 0;font-size:18px;color:#003781">Your sustainability preferences</h3>
+              <p style="margin:0"><span style="padding:1px 5px;border-radius:4px;background:#EEF2F6">You told us you have sustainability preferences. All of the recommended funds are classified under Article 8 of the Sustainable Finance Disclosure Regulation.</span></p>
+              <h3 style="margin:12px 0 0;font-size:18px;color:#003781">Our recommendation</h3>
+              <p style="margin:0">We recommend the <span style="padding:1px 5px;border-radius:4px;background:#EEF2F6">Allianz Vantage Non-Standard PRSA (A5)</span>, with <span style="padding:1px 5px;border-radius:4px;background:#EEF2F6">a transfer of €20,000, a single contribution of €50,000 and regular contributions of €500 a month</span>, invested in <span style="padding:1px 5px;border-radius:4px;background:#EEF2F6">your own selection of four funds</span>. The indicative risk of this portfolio is 4, in line with your risk rating.</p>
+              <h3 style="margin:12px 0 0;font-size:18px;color:#003781">Why we believe this is suitable for you</h3>
+              <ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
+                <li>Consolidating your previous employer's pension and your savings into one PRSA keeps your retirement planning in one place, with contributions you can vary.</li>
+                <li><span style="padding:2px 8px;border-radius:5px;background:#FDF4E7;box-shadow:inset 0 0 0 1.5px #E8A33D;color:#8A4708;font-weight:600">Why the strategy or funds suit the client's attitude to risk and term to retirement</span><span style="display:inline-block;width:1.5px;height:18px;background:#0E1E33;vertical-align:middle;margin-left:2px"></span></li>
+              </ul>
+              <h3 style="margin:12px 0 0;font-size:18px;color:#003781">Charges and remuneration</h3>
+              <p style="margin:0">The total effect of the charges on your plan is equivalent to reducing the assumed growth rate by <span style="padding:1px 5px;border-radius:4px;background:#EEF2F6">1.95%</span> per annum. <span style="padding:1px 5px;border-radius:4px;background:#EEF2F6">We will receive initial remuneration of €2,950 and trail remuneration of 0.25% a year of your fund value.</span> Full details are set out in the Charges section and the Remuneration Statement in this pack.</p>
+            </div>
+          </article>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start">
+          <section style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px">
+              <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="8">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="aspect-ratio:210/297;background:#fff;border-radius:6px;box-shadow:0 1px 2px rgba(14,30,51,.08),0 6px 18px rgba(14,30,51,.06);padding:14px 12px;display:flex;flex-direction:column;gap:6px;box-sizing:border-box">
+                    <div style="{{ t.band }}"></div>
+                    <div style="font-size:9px;font-weight:700;color:#003781;line-height:1.2">{{ t.name }}</div>
+                    <div style="height:3px;width:90%;border-radius:2px;background:#EEF2F6"></div>
+                    <div style="height:3px;width:76%;border-radius:2px;background:#EEF2F6"></div>
+                    <div style="{{ t.block }}"></div>
+                    <div style="height:3px;width:84%;border-radius:2px;background:#EEF2F6"></div>
+                    <div style="height:3px;width:60%;border-radius:2px;background:#EEF2F6"></div>
+                  </div>
+                  <span style="font-size:12px;color:#5E6B78">{{ t.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+          <aside style="position:sticky;top:40px;background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:18px">
+            <span style="font-size:16px;font-weight:700">Ready to generate</span>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+              <div style="display:flex;gap:10px;align-items:center"><span style="width:20px;height:20px;border-radius:50%;background:#E6F2EA;color:#0B7A3E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>Cover letter complete</div>
+              <div style="display:flex;gap:10px;align-items:center"><span style="width:20px;height:20px;border-radius:50%;background:#E6F2EA;color:#0B7A3E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>Statement of Suitability: 10 of 10 prompts</div>
+              <div style="display:flex;gap:10px;align-items:center"><span style="width:20px;height:20px;border-radius:50%;background:#E6F2EA;color:#0B7A3E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>Results reviewed</div>
+              <div style="display:flex;gap:10px;align-items:center"><span style="width:20px;height:20px;border-radius:50%;background:#E6F2EA;color:#0B7A3E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>Risk aligned, no override needed</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:10px;background:#F4F7FA;font-size:13px;color:#3A4756">
+              <span style="font-weight:700;color:#0E1E33">Quotation_Q-261008-GAQ6_Murphy.pdf</span><span>10 pages · A4 · ready to send</span>
+            </div>
+            <button style="height:48px;border-radius:8px;border:none;background:#003781;color:#fff;font:700 15px Figtree,Arial,sans-serif">Generate PDF</button>
+            <button style="height:44px;border-radius:8px;border:1px solid #D5DDE6;background:#fff;color:#0E1E33;font:600 14px Figtree,Arial,sans-serif">Preview full pack</button>
+            <span style="font-size:12px;color:#5E6B78;line-height:1.5">Opens the print dialog — choose Save as PDF.</span>
+          </aside>
+        </div>
+      </sc-if>
+    </div>
+    <footer style="position:sticky;bottom:0;display:flex;align-items:center;gap:16px;padding:16px 64px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #E2E8EF">
+      <button style="height:44px;padding:0 20px;border-radius:8px;border:1px solid #D5DDE6;background:#fff;color:#0E1E33;font:600 15px Figtree,Arial,sans-serif">← Back</button>
+      <span style="margin-left:auto;font-size:13px;color:#5E6B78">{{ footNote }}</span>
+      <sc-if value="{{ showNext }}" hint-placeholder-val="{{ true }}"><button style="height:44px;padding:0 22px;border-radius:8px;border:none;background:#003781;color:#fff;font:600 15px Figtree,Arial,sans-serif">{{ nextLabel }}</button></sc-if>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;contents&quot;,&quot;sos&quot;,&quot;review&quot;],&quot;default&quot;:&quot;contents&quot;,&quot;tsType&quot;:&quot;'contents'|'sos'|'review'&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const view = this.props.view ?? 'contents';
+    const vi = { contents: 0, sos: 2, review: 3 }[view];
+    const subs = ['Contents', 'Cover letter', 'Statement of Suitability', 'Review & generate'].map((label, i) => {
+      const done = i < vi, on = i === vi;
+      return { label, sep: i < 3, mark: done ? '✓' : String(i + 1),
+        wrap: `display:flex;align-items:center;gap:7px;font-weight:${on ? 700 : 600};color:${on ? '#003781' : done ? '#0B7A3E' : '#8A96A3'}`,
+        dot: `width:22px;height:22px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;${on ? 'background:#003781;color:#fff' : done ? 'background:#E6F2EA' : 'box-shadow:inset 0 0 0 1.5px #C9D3DE'}` };
+    });
+    const tog = on => `width:38px;height:22px;border-radius:11px;position:relative;font-size:0;background:${on ? '#003781' : '#C9D3DE'};box-shadow:inset ${on ? '19px' : '3px'} 0 0 -3px ${on ? '#003781' : '#C9D3DE'}`;
+    const item = (name, sub, mode, isNew) => ({
+      name, sub, isNew: !!isNew,
+      ctl: mode === 'req' ? 'padding:3px 9px;border-radius:999px;background:#EEF2F6;color:#5E6B78;font-size:12px;font-weight:600'
+        : mode === 'soon' ? 'padding:3px 9px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px #D5DDE6;color:#8A96A3;font-size:12px;font-weight:600'
+        : `width:40px;height:24px;border-radius:12px;background:${mode === 'on' ? '#003781' : '#C9D3DE'};font-size:0;display:inline-block;background-image:radial-gradient(circle at ${mode === 'on' ? '28px' : '12px'} 12px,#fff 8px,transparent 8.5px)`,
+      ctlText: mode === 'req' ? 'Required' : mode === 'soon' ? 'Coming soon' : '.'
+    });
+    const groups = [
+      { title: 'Your documents', note: 'on your letterhead', items: [item('Cover letter', 'Use the template or write your own in the next step', 'on'), item('Statement of Suitability', 'Use the template or write your own in a later step', 'on')] },
+      { title: 'Quotation', note: 'Allianz Global Life', items: [item('Your quotation at a glance', 'One-page summary', 'on'), item('Projected benefits', '', 'req'), item('Charges', '', 'req'), item('Your investment and risk', 'Funds, risk and category split', 'on'), item('Remuneration statement', '', 'on')] },
+      { title: 'Supporting information', note: '', items: [item('Product Brochure', '', 'soon'), item('Tax information', '', 'soon'), item('Important information', '', 'req'), item('Glossary', '', 'req'), item('Fund information', 'Factsheets for the selected funds', 'soon', true), item('Key Information Documents', 'KIDs for the selected funds', 'soon', true), item('Application form', 'Pre-filled with client and plan details', 'soon', true)] }
+    ];
+    const order = ['Cover letter', 'Statement of Suitability', 'Your quotation at a glance', 'Projected benefits', 'Charges', 'Your investment and risk', 'Remuneration statement', 'Important information', 'Glossary'].map((name, i) => ({ n: i + 1, name, tag: i < 2 ? 'Letterhead' : '' }));
+    const outline = [['Your needs and objectives', 1], ['Your personal and financial circumstances', 1], ['Your attitude to risk', 1], ['Your sustainability preferences', 2], ['Our recommendation', 2], ['Why we believe this is suitable', 0, true], ['Charges and remuneration', 2], ['Risks you should be aware of', 0], ['Alternatives considered', 0], ['Transfer of your existing pension', 0]].map(([name, st, cur]) => ({
+      name, state: st === 1 ? '✓' : st === 2 ? 'Auto' : '1 left',
+      row: `display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;font-size:13px;${cur ? 'background:#fff;box-shadow:inset 0 0 0 1px #E2E8EF;font-weight:700;color:#003781' : 'color:#3A4756'}`,
+      badge: `flex:none;font-size:11px;font-weight:700;${st === 1 ? 'color:#0B7A3E' : st === 2 ? 'color:#5E6B78' : 'padding:1px 7px;border-radius:4px;background:#FDF4E7;color:#8A4708'}`
+    }));
+    const thumbs = [['Cover letter', 'p. 1', 1], ['Statement of Suitability', 'pp. 2–3', 1], ['Your quotation at a glance', 'p. 4', 0, 1], ['Projected benefits', 'p. 5', 0, 1], ['Charges', 'p. 6', 0], ['Your investment and risk', 'p. 7', 0, 1], ['Remuneration statement', 'p. 8', 0], ['Important information · Glossary', 'pp. 9–10', 0]].map(([name, label, lh, chart]) => ({
+      name, label,
+      band: `height:6px;border-radius:2px;background:${lh ? '#C9D3DE' : '#003781'};width:${lh ? '40%' : '100%'}`,
+      block: `height:${chart ? 34 : 3}px;width:${chart ? '100%' : '70%'};border-radius:3px;background:${chart ? 'linear-gradient(160deg,#EEF4FA,#DCE7F3)' : '#EEF2F6'}`
+    }));
+    const T = { contents: 'What goes in the pack', sos: 'Statement of Suitability', review: 'Review and generate' };
+    return {
+      title: T[view], subs, groups, order, outline, thumbs,
+      isContents: view === 'contents', isSos: view === 'sos', isReview: view === 'review',
+      showNext: view !== 'review',
+      nextLabel: view === 'contents' ? 'Continue to cover letter →' : 'Continue to review →',
+      footNote: view === 'sos' ? '4 prompts left' : view === 'contents' ? '9 sections selected' : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

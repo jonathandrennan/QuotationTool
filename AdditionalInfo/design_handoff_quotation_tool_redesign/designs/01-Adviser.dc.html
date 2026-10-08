@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#F4F7FA}a{color:#0377A8}a:hover{color:#003781}</style></helmet>
+<div data-screen-label="01 Adviser" style="width:1440px;min-height:900px;display:flex;background:linear-gradient(to right,#fff 271px,#E2E8EF 271px 272px,#F4F7FA 272px);font-family:Figtree,Arial,sans-serif;color:#0E1E33">
+  <dc-import name="QTSidebar" step="{{ 1 }}" style="align-self:stretch;display:flex" hint-size="272px,900px"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="flex:1;padding:48px 64px 48px;display:flex;flex-direction:column;gap:32px">
+      <header style="display:flex;flex-direction:column;gap:8px;max-width:640px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0377A8">Step 1 of 7</div>
+        <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:700;color:#003781;letter-spacing:-.01em">Adviser details</h1>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:#5E6B78;text-wrap:pretty">These appear on the cover letter, Statement of Suitability and remuneration statement. Saved in this browser for next time.</p>
+      </header>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:28px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <h2 style="margin:0;font-size:16px;font-weight:700;color:#0E1E33">Your firm</h2>
+              <p style="margin:0;font-size:13px;line-height:1.5;color:#5E6B78">Letterhead and regulatory footer on your pages.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 16px">
+              <div style="grid-column:1/-1;display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Firm name</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;border:1px solid #D5DDE6;border-radius:8px;background:#fff;font-size:15px">Test Financial Ltd</div></div>
+              <div style="grid-column:1/-1;display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Firm address</label><div style="padding:11px 14px;border:1px solid #D5DDE6;border-radius:8px;background:#fff;font-size:15px;line-height:1.5">2 Harcourt Street<br>Dublin 2, D02 X285</div></div>
+              <div style="grid-column:1/-1;display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Regulatory statement</label><div style="padding:11px 14px;border:1px solid #D5DDE6;border-radius:8px;background:#fff;font-size:15px;line-height:1.45">Test Financial Ltd is regulated by the Central Bank of Ireland.</div><div style="font-size:12px;color:#5E6B78">Shown in the footer of your pages in the pack.</div></div>
+            </div>
+          </section>
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:28px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <h2 style="margin:0;font-size:16px;font-weight:700">You</h2>
+              <p style="margin:0;font-size:13px;line-height:1.5;color:#5E6B78">Used for the signature block and contact details.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 16px">
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Adviser name</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;border:1px solid #D5DDE6;border-radius:8px;font-size:15px">Sarah Kelly</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Job title <span style="font-weight:400;color:#5E6B78">· optional</span></label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;border:2px solid #0377A8;border-radius:8px;font-size:15px;box-shadow:0 0 0 4px rgba(3,119,168,.12)">Senior Financial Adviser<span style="width:1px;height:18px;background:#0E1E33;margin-left:1px"></span></div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Email</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;border:1px solid #D5DDE6;border-radius:8px;font-size:15px">sarah.kelly@testfinancial.ie</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Phone</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;border:1px solid #D5DDE6;border-radius:8px;font-size:15px;font-variant-numeric:tabular-nums">01 476 2290</div></div>
+            </div>
+          </section>
+          <label style="display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:20px 24px">
+            <span style="flex:none;width:20px;height:20px;border-radius:5px;background:#003781;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px">✓</span>
+            <span style="font-size:14px;line-height:1.55;color:#0E1E33">I confirm that I am an authorised intermediary, that I am preparing this quotation for a client I am advising, and that the client has agreed to their personal details being used for this purpose. Client details are not stored by this tool once the page is closed.</span>
+          </label>
+        </div>
+        <aside style="position:sticky;top:48px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5E6B78">Preview on your pages</div>
+          <div style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;box-shadow:0 1px 2px rgba(14,30,51,.04),0 12px 32px rgba(14,30,51,.06);padding:24px 22px;display:flex;flex-direction:column;gap:18px;font-size:11px;line-height:1.5;color:#3A4756">
+            <div style="display:flex;justify-content:space-between;gap:8px;padding-bottom:12px;border-bottom:2px solid #003781">
+              <div style="font-size:13px;font-weight:700;color:#0E1E33">Test Financial Ltd</div>
+              <div style="text-align:right;color:#5E6B78">2 Harcourt Street<br>Dublin 2, D02 X285</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="height:6px;width:70%;border-radius:3px;background:#EDF1F5"></div>
+              <div style="height:6px;width:92%;border-radius:3px;background:#EDF1F5"></div>
+              <div style="height:6px;width:84%;border-radius:3px;background:#EDF1F5"></div>
+              <div style="height:6px;width:40%;border-radius:3px;background:#EDF1F5"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <div>Yours sincerely,</div>
+              <div style="margin-top:14px;font-size:12px;font-weight:700;color:#0E1E33">Sarah Kelly</div>
+              <div>Senior Financial Adviser</div>
+              <div>sarah.kelly@testfinancial.ie · 01 476 2290</div>
+            </div>
+            <div style="padding-top:10px;border-top:1px solid #EDF1F5;color:#8A96A3;font-size:10px">Test Financial Ltd is regulated by the Central Bank of Ireland.</div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer style="position:sticky;bottom:0;display:flex;align-items:center;gap:16px;padding:16px 64px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #E2E8EF">
+      <span style="font-size:13px;color:#5E6B78">All required fields complete</span>
+      <div style="margin-left:auto;display:flex;gap:10px">
+        <button style="height:44px;padding:0 22px;border-radius:8px;border:none;background:#003781;color:#fff;font:600 15px Figtree,Arial,sans-serif">Continue to client →</button>
+      </div>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#F4F7FA}a{color:#0377A8}a:hover{color:#003781}</style></helmet>
+<div data-screen-label="04 Plan details" style="width:1440px;min-height:900px;display:flex;background:linear-gradient(to right,#fff 271px,#E2E8EF 271px 272px,#F4F7FA 272px);font-family:Figtree,Arial,sans-serif;color:#0E1E33">
+  <dc-import name="QTSidebar" step="{{ 4 }}" style="align-self:stretch;display:flex" hint-size="272px,900px"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="flex:1;padding:48px 64px;display:flex;flex-direction:column;gap:32px">
+      <header style="display:flex;flex-direction:column;gap:8px;max-width:640px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0377A8">Step 4 of 7</div>
+        <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:700;color:#003781;letter-spacing:-.01em">Plan details</h1>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:#5E6B78">Choose the PRSA version and enter the contributions.</p>
+      </header>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:22px">
+            <h2 style="margin:0;font-size:16px;font-weight:700">PRSA type and version</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div style="padding:14px 16px;border-radius:10px;box-shadow:inset 0 0 0 2px #003781;background:#F7FAFD;display:flex;gap:12px;align-items:flex-start">
+                <span style="flex:none;width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 5px #003781;margin-top:2px"></span>
+                <div style="display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;font-weight:700;color:#003781">Non-Standard PRSA</div><div style="font-size:13px;color:#5E6B78">Full fund range, including multi-asset and building blocks</div></div>
+              </div>
+              <div style="padding:14px 16px;border-radius:10px;box-shadow:inset 0 0 0 1px #D5DDE6;display:flex;gap:12px;align-items:flex-start">
+                <span style="flex:none;width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #A9B5C1;margin-top:2px"></span>
+                <div style="display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;font-weight:600">Standard PRSA</div><div style="font-size:13px;color:#5E6B78">Capped charges, restricted fund range</div></div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:160px 160px minmax(0,1fr);gap:16px;align-items:end">
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Version</label><div style="height:44px;box-sizing:border-box;padding:0 12px 0 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid #D5DDE6;border-radius:8px;font-size:15px">A<span style="color:#5E6B78;font-size:11px">▾</span></div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Commission level</label><div style="height:44px;box-sizing:border-box;padding:0 12px 0 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid #D5DDE6;border-radius:8px;font-size:15px">A5<span style="color:#5E6B78;font-size:11px">▾</span></div></div>
+            </div>
+            <div style="border:1px solid #E2E8EF;border-radius:10px;overflow:hidden">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#F7FAFC;border-bottom:1px solid #E2E8EF"><span style="font-size:13px;font-weight:700;color:#003781">Commission and charges · A5</span><span style="font-size:12px;color:#5E6B78">Adjust in steps of 0.50%</span></div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0;font-size:14px">
+                <div style="padding:14px 18px;border-bottom:1px solid #EEF2F6;display:flex;flex-direction:column;gap:2px"><span>Annual Management Charge</span><span style="font-size:12px;color:#5E6B78">of which trail commission 0.25%</span></div>
+                <div style="padding:14px 18px;border-bottom:1px solid #EEF2F6;font-weight:700;color:#003781;display:flex;align-items:center;font-variant-numeric:tabular-nums">1.15%</div>
+                <div style="padding:12px 18px;border-bottom:1px solid #EEF2F6;display:flex;flex-direction:column;gap:2px"><span>Initial commission — single contributions</span><span style="font-size:12px;color:#A3540B;font-weight:600">Edited · standard 4.00% · <span style="color:#0377A8;text-decoration:underline">Reset</span></span></div>
+                <div style="padding:12px 18px;border-bottom:1px solid #EEF2F6;display:flex;align-items:center;gap:8px"><span style="width:30px;height:30px;border-radius:6px;border:1px solid #D5DDE6;display:flex;align-items:center;justify-content:center;color:#003781">−</span><b style="width:56px;text-align:center;color:#003781;font-variant-numeric:tabular-nums">3.50%</b><span style="width:30px;height:30px;border-radius:6px;border:1px solid #D5DDE6;display:flex;align-items:center;justify-content:center;color:#003781">+</span></div>
+                <div style="padding:12px 18px;display:flex;flex-direction:column;gap:2px"><span>Initial commission — regular contributions</span><span style="font-size:12px;color:#5E6B78">Per year of term, capped at 20% of year-1 contributions</span></div>
+                <div style="padding:12px 18px;display:flex;align-items:center;gap:8px"><span style="width:30px;height:30px;border-radius:6px;border:1px solid #D5DDE6;display:flex;align-items:center;justify-content:center;color:#003781">−</span><b style="width:56px;text-align:center;color:#003781;font-variant-numeric:tabular-nums">1.30%</b><span style="width:30px;height:30px;border-radius:6px;border:1px solid #D5DDE6;display:flex;align-items:center;justify-content:center;color:#003781">+</span></div>
+              </div>
+            </div>
+          </section>
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:22px">
+            <div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:16px;font-weight:700">Contributions</h2><p style="margin:0;font-size:13px;color:#5E6B78">Select everything that applies.</p></div>
+            <div style="display:flex;gap:10px">
+              <div style="height:40px;padding:0 16px 0 12px;border-radius:999px;background:#003781;color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span style="width:18px;height:18px;border-radius:50%;background:#fff;color:#003781;font-size:11px;display:flex;align-items:center;justify-content:center">✓</span>Transfer from another pension</div>
+              <div style="height:40px;padding:0 16px 0 12px;border-radius:999px;background:#003781;color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span style="width:18px;height:18px;border-radius:50%;background:#fff;color:#003781;font-size:11px;display:flex;align-items:center;justify-content:center">✓</span>Single contribution</div>
+              <div style="height:40px;padding:0 16px 0 12px;border-radius:999px;background:#003781;color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span style="width:18px;height:18px;border-radius:50%;background:#fff;color:#003781;font-size:11px;display:flex;align-items:center;justify-content:center">✓</span>Regular contributions</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 16px">
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Transfer value</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:8px;border:1px solid #D5DDE6;border-radius:8px;font-size:15px;font-variant-numeric:tabular-nums"><span style="color:#5E6B78">€</span>20,000</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Single contribution</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:8px;border:1px solid #D5DDE6;border-radius:8px;font-size:15px;font-variant-numeric:tabular-nums"><span style="color:#5E6B78">€</span>50,000</div></div>
+              <div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Regular contribution</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:8px;border:1px solid #D5DDE6;border-radius:8px;font-size:15px;font-variant-numeric:tabular-nums"><span style="color:#5E6B78">€</span>500<span style="margin-left:auto;font-size:13px;color:#5E6B78">per payment</span></div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Frequency</label><div style="height:44px;box-sizing:border-box;padding:0 12px 0 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid #D5DDE6;border-radius:8px;font-size:15px">Monthly<span style="color:#5E6B78;font-size:11px">▾</span></div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600">Yearly increase</label><div style="height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid #D5DDE6;border-radius:8px;font-size:15px;font-variant-numeric:tabular-nums">0<span style="color:#5E6B78">%</span></div></div>
+            </div>
+          </section>
+        </div>
+        <aside style="position:sticky;top:48px;background:#003781;color:#fff;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:18px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#A9C6E8">Contributions</div>
+          <div style="display:flex;flex-direction:column;gap:2px"><div style="font-size:13px;color:#C9DAEE">In year 1</div><div style="font-size:30px;font-weight:700;font-variant-numeric:tabular-nums">€76,000</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;font-variant-numeric:tabular-nums">
+            <div style="display:flex;justify-content:space-between"><span style="color:#C9DAEE">Transfer</span><span>€20,000</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#C9DAEE">Single</span><span>€50,000</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#C9DAEE">Regular</span><span>€6,000 a year</span></div>
+          </div>
+          <div style="height:1px;background:rgba(255,255,255,.18)"></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;font-variant-numeric:tabular-nums"><span style="color:#C9DAEE">Total to age 65</span><b>€181,000</b></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;font-variant-numeric:tabular-nums"><span style="color:#C9DAEE">Initial commission</span><b>€2,950</b></div>
+        </aside>
+      </div>
+    </div>
+    <footer style="position:sticky;bottom:0;display:flex;align-items:center;gap:16px;padding:16px 64px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #E2E8EF">
+      <button style="height:44px;padding:0 20px;border-radius:8px;border:1px solid #D5DDE6;background:#fff;color:#0E1E33;font:600 15px Figtree,Arial,sans-serif">← Back</button>
+      <button style="margin-left:auto;height:44px;padding:0 22px;border-radius:8px;border:none;background:#003781;color:#fff;font:600 15px Figtree,Arial,sans-serif">Continue to portfolio →</button>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}"></script>
+</body>
+</html>

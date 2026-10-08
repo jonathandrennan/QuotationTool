@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#F4F7FA}a{color:#0377A8}a:hover{color:#003781}</style></helmet>
+<div data-screen-label="05b Choose funds" style="width:1440px;min-height:900px;display:flex;background:linear-gradient(to right,#fff 271px,#E2E8EF 271px 272px,#F4F7FA 272px);font-family:Figtree,Arial,sans-serif;color:#0E1E33">
+  <dc-import name="QTSidebar" step="{{ 5 }}" style="align-self:stretch;display:flex" hint-size="272px,900px"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="flex:1;padding:40px 64px 48px;display:flex;flex-direction:column;gap:28px">
+      <header style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:13px;font-weight:600;color:#0377A8">← Strategy selection</div>
+        <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:700;color:#003781;letter-spacing:-.01em">Build Your Own Portfolio</h1>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+          <span style="display:flex;align-items:center;gap:7px;font-weight:700;color:#003781"><span style="width:22px;height:22px;border-radius:50%;background:#003781;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center">1</span>Choose funds</span>
+          <span style="width:28px;height:1px;background:#C9D3DE"></span>
+          <span style="display:flex;align-items:center;gap:7px;color:#8A96A3"><span style="width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #C9D3DE;font-size:11px;display:flex;align-items:center;justify-content:center">2</span>Allocate</span>
+        </div>
+      </header>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="flex:1;height:42px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:10px;border:1px solid #D5DDE6;border-radius:8px;background:#fff;font-size:14px;color:#8A96A3"><span style="width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #8A96A3"></span>Search funds</div>
+            <div style="height:42px;padding:0 14px;border-radius:8px;background:#E6F2EA;color:#0B7A3E;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700">● Sustainability preference: Article 8 funds highlighted</div>
+          </div>
+          <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 86px 70px 64px;gap:14px;padding:0 20px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8A96A3"><span></span><span>Fund</span><span style="text-align:right">Fund charge</span><span style="text-align:center">Risk</span><span style="text-align:center">SFDR</span></div>
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;background:#F7FAFC;border-bottom:1px solid #E2E8EF">
+                <span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#003781;flex:1">{{ c.name }}</span>
+                <span style="font-size:12px;color:#5E6B78">{{ c.count }}</span>
+                <span style="font-size:11px;color:#003781">▾</span>
+              </div>
+              <sc-if value="{{ c.gnote }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:10px 20px;background:#F1F7FC;font-size:12px;color:#3A4756;border-bottom:1px solid #EEF2F6">Strategy Select funds can carry the Optional Annual Guarantee — switch it on in the next step.</div>
+              </sc-if>
+              <sc-for list="{{ c.funds }}" as="f" hint-placeholder-count="3">
+                <div style="{{ f.row }}">
+                  <span style="{{ f.box }}">{{ f.tick }}</span>
+                  <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                    <span style="{{ f.nameStyle }}">{{ f.name }}</span>
+                    <span style="font-size:12px;color:#5E6B78">{{ f.sub }}</span>
+                  </div>
+                  <span style="text-align:right;font-size:14px;font-variant-numeric:tabular-nums">{{ f.fmc }}</span>
+                  <span style="display:flex;justify-content:center"><span style="{{ f.sriStyle }}">{{ f.sri }}</span></span>
+                  <span style="display:flex;justify-content:center"><span style="{{ f.sfdrStyle }}">{{ f.sfdr }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        <aside style="position:sticky;top:40px;background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px">
+          <div style="font-size:16px;font-weight:700">Selected funds</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ picked }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #EEF2F6;font-size:13px"><span>{{ p.name }}</span><span style="{{ p.sriStyle }}">{{ p.sri }}</span></div>
+            </sc-for>
+          </div>
+          <div style="font-size:13px;color:#5E6B78;line-height:1.5">Next, set the percentage for each fund. Risk and charges update as you allocate.</div>
+          <button style="height:44px;border-radius:8px;border:none;background:#003781;color:#fff;font:600 15px Figtree,Arial,sans-serif">Allocate 4 funds →</button>
+        </aside>
+      </div>
+    </div>
+    <footer style="position:sticky;bottom:0;display:flex;align-items:center;gap:16px;padding:16px 64px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #E2E8EF">
+      <button style="height:44px;padding:0 20px;border-radius:8px;border:1px solid #D5DDE6;background:#fff;color:#0E1E33;font:600 15px Figtree,Arial,sans-serif">← Back</button>
+      <span style="margin-left:auto;font-size:13px;color:#5E6B78">4 funds selected</span>
+      <button style="height:44px;padding:0 22px;border-radius:8px;border:none;background:#003781;color:#fff;font:600 15px Figtree,Arial,sans-serif">Allocate →</button>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  renderVals() {
+    const C = ['', '#1a9e5c', '#4ab566', '#a0c840', '#f5c400', '#f5820a', '#e03333', '#990000'];
+    const sriStyle = s => `width:28px;height:24px;border-radius:5px;background:${C[s]};color:${s === 4 ? '#2A2100' : '#fff'};font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center`;
+    const F = [
+      ['Fixed income & cash', [
+        ['Allianz Euro Cash', 1, '0.16%', 8, ''],
+        ['Allianz Adv. Fixed Income Sh. Duration', 2, '0.22%', 8, ''],
+        ['Allianz Adv. Fixed Income Euro', 3, '0.27%', 8, '', 1]]],
+      ['Multi-asset', [
+        ['Allianz Strategy Select 30', 4, '0.25%', 8, 'Volatility 3–8% · Guarantee available'],
+        ['Allianz DMAS SRI 15', 4, '0.49%', 8, 'Volatility 3–7%'],
+        ['Allianz Strategy Select 50', 4, '0.25%', 8, 'Volatility 6–12% · Guarantee available', 1],
+        ['Allianz DMAS SRI 50', 4, '0.59%', 8, 'Volatility 6–12%', 1],
+        ['Allianz Strategy Select 75', 5, '0.25%', 8, 'Volatility 10–16% · Guarantee available'],
+        ['Allianz DMAS SRI 75', 5, '0.65%', 8, 'Volatility 10–16%']], true],
+      ['Equity', [
+        ['Allianz Best Styles Global Equity SRI', 5, '0.45%', 8, 'Global equities, up to 30% emerging markets', 1],
+        ['HSBC MSCI World UCITS ETF', 6, '0.15%', 6, 'Index tracker · Article 6, outside sustainability preference'],
+        ['HSBC S&P 500 UCITS ETF', 6, '0.09%', 6, 'Index tracker · Article 6, outside sustainability preference'],
+        ['HSBC Euro Stoxx 50 UCITS ETF', 6, '0.05%', 6, 'Index tracker · Article 6, outside sustainability preference']]]
+    ];
+    const picked = [];
+    const cats = F.map(([name, list, gnote]) => {
+      const n = list.filter(f => f[5]).length;
+      return {
+        name, gnote: !!gnote, count: n ? `${n} of ${list.length} selected` : `${list.length} funds`,
+        funds: list.map(([nm, sri, fmc, sfdr, sub, on]) => {
+          if (on) picked.push({ name: nm.replace('Allianz ', ''), sri, sriStyle: sriStyle(sri) });
+          const dim = sfdr === 6;
+          return {
+            name: nm, sri, fmc, sub: sub || ' ', sfdr: 'Art. ' + sfdr, tick: on ? '✓' : '',
+            row: `display:grid;grid-template-columns:28px minmax(0,1fr) 86px 70px 64px;gap:14px;align-items:center;padding:13px 20px 13px 17px;border-top:1px solid #EEF2F6;border-left:3px solid ${on ? '#003781' : 'transparent'};background:${on ? '#F6FAFE' : '#fff'};opacity:${dim ? .6 : 1}`,
+            box: `width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;${on ? 'background:#003781' : 'box-shadow:inset 0 0 0 1.5px #A9B5C1'}`,
+            nameStyle: `font-size:14px;font-weight:${on ? 700 : 500};color:${on ? '#003781' : '#0E1E33'}`,
+            sriStyle: sriStyle(sri),
+            sfdrStyle: `padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;${sfdr === 8 ? 'background:#E6F2EA;color:#0B7A3E' : 'background:#F0F2F4;color:#5E6B78'}`
+          };
+        })
+      };
+    });
+    return { cats, picked };
+  }
+}
+</script>
+</body>
+</html>

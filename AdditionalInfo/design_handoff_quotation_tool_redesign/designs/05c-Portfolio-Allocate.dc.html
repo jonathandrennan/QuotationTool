@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#F4F7FA}a{color:#0377A8}a:hover{color:#003781}</style></helmet>
+<div data-screen-label="05c Allocate" style="width:1440px;min-height:900px;display:flex;background:linear-gradient(to right,#fff 271px,#E2E8EF 271px 272px,#F4F7FA 272px);font-family:Figtree,Arial,sans-serif;color:#0E1E33">
+  <dc-import name="QTSidebar" step="{{ 5 }}" style="align-self:stretch;display:flex" hint-size="272px,900px"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="flex:1;padding:40px 64px 48px;display:flex;flex-direction:column;gap:28px">
+      <header style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:13px;font-weight:600;color:#0377A8">← Change funds</div>
+        <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:700;color:#003781;letter-spacing:-.01em">Build Your Own Portfolio</h1>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+          <span style="display:flex;align-items:center;gap:7px;color:#0B7A3E;font-weight:600"><span style="width:22px;height:22px;border-radius:50%;background:#E6F2EA;font-size:11px;display:flex;align-items:center;justify-content:center">✓</span>Choose funds</span>
+          <span style="width:28px;height:1px;background:#C9D3DE"></span>
+          <span style="display:flex;align-items:center;gap:7px;font-weight:700;color:#003781"><span style="width:22px;height:22px;border-radius:50%;background:#003781;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center">2</span>Allocate</span>
+        </div>
+      </header>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;color:#3A4756"><b style="font-size:18px;color:#0B7A3E;font-variant-numeric:tabular-nums">100%</b> allocated</span><span style="font-size:13px;font-weight:600;color:#0377A8">Split equally</span></div>
+            <div style="height:10px;border-radius:5px;overflow:hidden;display:flex;gap:2px;background:#E2E8EF">
+              <div style="width:40%;background:#003781"></div><div style="width:30%;background:#3D6FB5"></div><div style="width:20%;background:#0082be"></div><div style="width:10%;background:#7fb2d9"></div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:12px minmax(0,1fr) 54px 120px;gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid #EEF2F6">
+              <span style="width:12px;height:12px;border-radius:3px;background:#003781"></span>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:700;color:#003781">Allianz Strategy Select 50</span><span style="font-size:12px;color:#5E6B78">Multi-asset · fund charge 0.25%</span></div>
+              <span style="width:28px;height:24px;border-radius:5px;background:#f5c400;color:#2A2100;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">4</span>
+              <div style="height:44px;box-sizing:border-box;padding:0 12px;display:flex;align-items:center;justify-content:flex-end;gap:4px;border:2px solid #003781;border-radius:8px;font-size:16px;font-weight:700;color:#003781;font-variant-numeric:tabular-nums">40<span style="font-weight:400;color:#5E6B78">%</span></div>
+              <div style="grid-column:2/-1;display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:8px;background:#E6F4EC">
+                <span style="width:38px;height:22px;border-radius:11px;background:#0B7A3E;position:relative;flex:none"><span style="position:absolute;top:3px;left:19px;width:16px;height:16px;border-radius:50%;background:#fff"></span></span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;font-weight:700;color:#0E1E33">Optional Annual Guarantee <span style="color:#0B7A3E">· 90% protected</span></span><span style="font-size:12px;color:#3A4756">Reset each policy anniversary · extra charge 0.75% a year on this fund</span></div>
+                <span style="width:20px;height:20px;border-radius:50%;border:1px solid #9FCBB0;color:#0B7A3E;font:italic 700 11px/18px Georgia,serif;text-align:center">i</span>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:12px minmax(0,1fr) 54px 120px;gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid #EEF2F6">
+              <span style="width:12px;height:12px;border-radius:3px;background:#3D6FB5"></span>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:700;color:#003781">Allianz DMAS SRI 50</span><span style="font-size:12px;color:#5E6B78">Multi-asset · fund charge 0.59%</span></div>
+              <span style="width:28px;height:24px;border-radius:5px;background:#f5c400;color:#2A2100;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">4</span>
+              <div style="height:44px;box-sizing:border-box;padding:0 12px;display:flex;align-items:center;justify-content:flex-end;gap:4px;border:1px solid #D5DDE6;border-radius:8px;font-size:16px;font-weight:700;color:#003781;font-variant-numeric:tabular-nums">30<span style="font-weight:400;color:#5E6B78">%</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:12px minmax(0,1fr) 54px 120px;gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid #EEF2F6">
+              <span style="width:12px;height:12px;border-radius:3px;background:#0082be"></span>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:700;color:#003781">Allianz Best Styles Global Equity SRI</span><span style="font-size:12px;color:#5E6B78">Equity · fund charge 0.45%</span></div>
+              <span style="width:28px;height:24px;border-radius:5px;background:#f5820a;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">5</span>
+              <div style="height:44px;box-sizing:border-box;padding:0 12px;display:flex;align-items:center;justify-content:flex-end;gap:4px;border:1px solid #D5DDE6;border-radius:8px;font-size:16px;font-weight:700;color:#003781;font-variant-numeric:tabular-nums">20<span style="font-weight:400;color:#5E6B78">%</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:12px minmax(0,1fr) 54px 120px;gap:16px;align-items:center;padding:20px 22px">
+              <span style="width:12px;height:12px;border-radius:3px;background:#7fb2d9"></span>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:700;color:#003781">Allianz Adv. Fixed Income Euro</span><span style="font-size:12px;color:#5E6B78">Fixed income · fund charge 0.27%</span></div>
+              <span style="width:28px;height:24px;border-radius:5px;background:#a0c840;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span>
+              <div style="height:44px;box-sizing:border-box;padding:0 12px;display:flex;align-items:center;justify-content:flex-end;gap:4px;border:1px solid #D5DDE6;border-radius:8px;font-size:16px;font-weight:700;color:#003781;font-variant-numeric:tabular-nums">10<span style="font-weight:400;color:#5E6B78">%</span></div>
+            </div>
+          </div>
+        </div>
+        <aside style="position:sticky;top:40px;background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:22px">
+          <div style="font-size:16px;font-weight:700">Portfolio at a glance</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="padding:12px 14px;border-radius:10px;background:#F4F7FA;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5E6B78">Client</span><b style="font-size:22px">4</b><span style="font-size:12px;color:#5E6B78">Medium</span></div>
+              <div style="padding:12px 14px;border-radius:10px;background:#F4F7FA;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5E6B78">Portfolio</span><b style="font-size:22px">4 <span style="font-size:13px;font-weight:500;color:#5E6B78">(4.1)</span></b><span style="font-size:12px;color:#5E6B78">Medium</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">
+              <div style="height:8px;border-radius:2px;background:#1a9e5c"></div><div style="height:8px;border-radius:2px;background:#4ab566"></div><div style="height:8px;border-radius:2px;background:#a0c840"></div><div style="height:8px;border-radius:2px;background:#f5c400;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #0E1E33"></div><div style="height:8px;border-radius:2px;background:#f5820a"></div><div style="height:8px;border-radius:2px;background:#e03333"></div><div style="height:8px;border-radius:2px;background:#990000"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;background:#E6F2EA;color:#0B7A3E;font-size:13px;font-weight:700">✓ Aligned with the client's rating</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid #EEF2F6">
+            <div style="font-size:13px;font-weight:700">Fund category split</div>
+            <div style="height:10px;border-radius:5px;overflow:hidden;display:flex"><div style="width:10%;background:#7fb2d9"></div><div style="width:70%;background:#003781"></div><div style="width:20%;background:#0082be"></div></div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#5E6B78"><span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#7fb2d9;margin-right:5px"></span>Fixed income &amp; cash <b style="color:#0E1E33">10%</b></span><span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#003781;margin-right:5px"></span>Multi-asset <b style="color:#0E1E33">70%</b></span><span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#0082be;margin-right:5px"></span>Equity <b style="color:#0E1E33">20%</b></span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;padding-top:18px;border-top:1px solid #EEF2F6;font-size:13px;font-variant-numeric:tabular-nums">
+            <div style="font-size:13px;font-weight:700">Annual charges</div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#3A4756">AMC <span style="color:#8A96A3">· incl. 0.25% trail</span></span><span>1.15%</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#3A4756">Blended fund charge</span><span>0.39%</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#3A4756">Guarantee</span><span>0.30%</span></div>
+            <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px dashed #D5DDE6;font-size:15px;font-weight:700;color:#003781"><span>Total annual charge</span><span>1.84%</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding-top:18px;border-top:1px solid #EEF2F6;font-size:13px"><span style="color:#3A4756">SFDR</span><span style="font-weight:700;color:#0B7A3E">100% Article 8 ✓</span></div>
+        </aside>
+      </div>
+    </div>
+    <footer style="position:sticky;bottom:0;display:flex;align-items:center;gap:16px;padding:16px 64px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #E2E8EF">
+      <button style="height:44px;padding:0 20px;border-radius:8px;border:1px solid #D5DDE6;background:#fff;color:#0E1E33;font:600 15px Figtree,Arial,sans-serif">← Back</button>
+      <button style="margin-left:auto;height:44px;padding:0 22px;border-radius:8px;border:none;background:#003781;color:#fff;font:600 15px Figtree,Arial,sans-serif">See results →</button>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}"></script>
+</body>
+</html>

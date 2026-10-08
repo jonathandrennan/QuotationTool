@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#F4F7FA}a{color:#0377A8}a:hover{color:#003781}</style></helmet>
+<div data-screen-label="06 Results" style="width:1440px;min-height:900px;display:flex;background:linear-gradient(to right,#fff 271px,#E2E8EF 271px 272px,#F4F7FA 272px);font-family:Figtree,Arial,sans-serif;color:#0E1E33">
+  <dc-import name="QTSidebar" step="{{ 6 }}" style="align-self:stretch;display:flex" hint-size="272px,900px"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="flex:1;padding:40px 64px 48px;display:flex;flex-direction:column;gap:24px">
+      <header style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0377A8">Step 6 of 7</div>
+          <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:700;color:#003781;letter-spacing:-.01em">Results</h1>
+          <p style="margin:0;font-size:15px;color:#5E6B78">Allianz Vantage Non-Standard PRSA (A5) · Your own fund selection · Alex Murphy</p>
+        </div>
+      </header>
+      <section style="display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;background:#fff;border:1px solid #E2E8EF;border-radius:14px;overflow:hidden">
+        <div style="padding:24px 26px;background:#003781;color:#fff;display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:13px;color:#C9DAEE">Projected value at 65</span>
+          <span style="font-size:38px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums">€307,635</span>
+          <span style="font-size:13px;color:#C9DAEE">after charges, at 5.87% growth before charges</span>
+        </div>
+        <div style="padding:24px 26px;display:flex;flex-direction:column;gap:4px;border-right:1px solid #EEF2F6">
+          <span style="font-size:13px;color:#5E6B78">In today's money</span>
+          <span style="font-size:26px;font-weight:700;color:#003781;font-variant-numeric:tabular-nums">€178,052</span>
+          <span style="font-size:13px;color:#5E6B78">allowing for 3.00% inflation</span>
+        </div>
+        <div style="padding:24px 26px;display:flex;flex-direction:column;gap:4px;border-right:1px solid #EEF2F6">
+          <span style="font-size:13px;color:#5E6B78">Estimated income</span>
+          <span style="font-size:26px;font-weight:700;color:#003781;font-variant-numeric:tabular-nums">€8,214<span style="font-size:15px;font-weight:500;color:#5E6B78"> a year</span></span>
+          <span style="font-size:13px;color:#5E6B78">in today's money</span>
+        </div>
+        <div style="padding:24px 26px;display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:13px;color:#5E6B78">Total annual charge</span>
+          <span style="font-size:26px;font-weight:700;color:#003781;font-variant-numeric:tabular-nums">1.84%</span>
+          <span style="font-size:13px;color:#5E6B78">reduces growth by 1.95% a year</span>
+        </div>
+      </section>
+      <div style="display:flex;align-items:center;gap:16px;border-bottom:1px solid #E2E8EF">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <div style="{{ t.style }}"><span style="{{ t.dot }}">{{ t.mark }}</span>{{ t.label }}</div>
+        </sc-for>
+        <span style="margin-left:auto;font-size:13px;color:#5E6B78;padding-bottom:12px">{{ reviewNote }}</span>
+      </div>
+
+      <sc-if value="{{ isProj }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start">
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:24px 24px 18px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:16px;font-weight:700">How the fund could grow</span>
+              <div style="display:flex;gap:16px;font-size:12px;color:#3A4756">
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;background:#003781"></span>After charges</span>
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:0;border-top:2px dashed #0377A8"></span>Before charges</span>
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:10px;background:#E3EAF2"></span>Contributions paid</span>
+              </div>
+            </div>
+            <div style="position:relative">
+            <sc-for list="{{ yTicks }}" as="y" hint-placeholder-count="5">
+              <span style="{{ y.style }}">{{ y.label }}</span>
+            </sc-for>
+            <sc-for list="{{ xTicks }}" as="x" hint-placeholder-count="5">
+              <span style="{{ x.style }}">{{ x.label }}</span>
+            </sc-for>
+            <svg viewBox="0 0 720 300" style="width:100%;height:auto;display:block">
+              <path d="{{ pGrid }}" stroke="#EEF2F6" fill="none"></path>
+              <path d="{{ pContrib }}" fill="#E3EAF2"></path>
+              <path d="{{ pAreaWC }}" fill="rgba(0,55,129,.07)"></path>
+              <path d="{{ pNC }}" fill="none" stroke="#0377A8" stroke-width="2" stroke-dasharray="5 4"></path>
+              <path d="{{ pWC }}" fill="none" stroke="#003781" stroke-width="2.5"></path>
+              <circle cx="{{ endX }}" cy="{{ endY }}" r="5" fill="#003781" stroke="#fff" stroke-width="2"></circle>
+            </svg>
+            </div>
+            <div style="font-size:12px;color:#5E6B78">Assumed growth 5.87% a year before charges, the portfolio's blended rate. Figures are not guaranteed.</div>
+          </section>
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:16px;font-weight:700">Fund choice</span><span style="font-size:13px;font-weight:600;color:#0377A8">Edit</span></div>
+            <div style="display:flex;flex-direction:column;font-size:13px">
+              <div style="display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #EEF2F6"><span>Strategy Select 50 <span style="color:#0B7A3E;font-weight:700">· Guarantee</span></span><b>40%</b></div>
+              <div style="display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #EEF2F6"><span>DMAS SRI 50</span><b>30%</b></div>
+              <div style="display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #EEF2F6"><span>Best Styles Global Equity SRI</span><b>20%</b></div>
+              <div style="display:flex;justify-content:space-between;gap:8px;padding:8px 0"><span>Adv. Fixed Income Euro</span><b>10%</b></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 12px;border-radius:8px;background:#F4F7FA;font-size:13px"><span style="color:#3A4756">Risk · client / portfolio</span><b>4 / 4 ✓</b></div>
+          </section>
+        </div>
+        <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px"><span style="font-size:16px;font-weight:700">Projected benefits</span><span style="font-size:13px;font-weight:600;color:#0377A8">Show every year</span></div>
+          <div style="display:grid;grid-template-columns:110px 70px repeat(4,minmax(0,1fr));padding:10px 24px;background:#F7FAFC;border-top:1px solid #EEF2F6;border-bottom:1px solid #E2E8EF;font-size:12px;font-weight:700;color:#5E6B78;text-align:right">
+            <span style="text-align:left">Year</span><span>Age</span><span>A. Contributions</span><span>B. Growth</span><span>C. Effect of charges</span><span style="color:#003781">D. Value after charges</span>
+          </div>
+          <sc-for list="{{ tRows }}" as="r" hint-placeholder-count="8">
+            <div style="{{ r.style }}"><span style="text-align:left">{{ r.year }}</span><span>{{ r.age }}</span><span>{{ r.contrib }}</span><span>{{ r.growth }}</span><span>{{ r.chg }}</span><span style="font-weight:700;color:#003781">{{ r.wc }}</span></div>
+          </sc-for>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isChg }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start">
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;overflow:hidden">
+            <div style="padding:18px 24px;font-size:16px;font-weight:700">Charges by fund</div>
+            <div style="display:grid;grid-template-columns:minmax(0,1.8fr) repeat(5,minmax(0,1fr));padding:10px 24px;background:#F7FAFC;border-top:1px solid #EEF2F6;border-bottom:1px solid #E2E8EF;font-size:12px;font-weight:700;color:#5E6B78;text-align:right">
+              <span style="text-align:left">Fund</span><span>Allocation</span><span>AMC</span><span>Fund charge</span><span>Guarantee</span><span style="color:#003781">Total</span>
+            </div>
+            <sc-for list="{{ chgRows }}" as="c" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:minmax(0,1.8fr) repeat(5,minmax(0,1fr));padding:13px 24px;border-bottom:1px solid #EEF2F6;font-size:14px;text-align:right;font-variant-numeric:tabular-nums"><span style="text-align:left">{{ c.name }}</span><span>{{ c.w }}</span><span>{{ c.amc }}</span><span>{{ c.fmc }}</span><span>{{ c.g }}</span><span style="font-weight:700">{{ c.t }}</span></div>
+            </sc-for>
+            <div style="display:grid;grid-template-columns:minmax(0,1.8fr) repeat(5,minmax(0,1fr));padding:14px 24px;background:#EEF4FA;font-size:14px;font-weight:700;color:#003781;text-align:right;font-variant-numeric:tabular-nums"><span style="text-align:left">Portfolio</span><span>100%</span><span>1.15%</span><span>0.39%</span><span>0.30%</span><span>1.84%</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:20px 24px;font-size:13px">
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="color:#5E6B78">Effect of charges</span><b style="font-size:16px;color:#003781">1.95% a year</b><span style="color:#5E6B78">growth 5.87% → 3.92%</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="color:#5E6B78">Contribution charge</span><b style="font-size:16px;color:#003781">None</b></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="color:#5E6B78">Charges to retirement</span><b style="font-size:16px;color:#003781">€96,216</b><span style="color:#5E6B78">reduction in projected value</span></div>
+            </div>
+          </section>
+          <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:18px">
+            <span style="font-size:16px;font-weight:700">Value at 65</span>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;font-variant-numeric:tabular-nums">
+              <div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between"><span style="color:#3A4756">Before charges</span><b>€403,851</b></div><div style="height:12px;border-radius:3px;background:repeating-linear-gradient(135deg,#7fb2d9 0 4px,#9DC4E3 4px 8px)"></div></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between"><span style="color:#3A4756">After charges</span><b style="color:#003781">€307,635</b></div><div style="height:12px;width:76%;border-radius:3px;background:#003781"></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:1px solid #EEF2F6">
+              <span style="font-size:13px;font-weight:700">What makes up 1.84%</span>
+              <div style="height:12px;border-radius:3px;overflow:hidden;display:flex;gap:2px"><div style="flex:0.90;background:#003781"></div><div style="flex:0.25;background:#3D6FB5"></div><div style="flex:0.39;background:#0082be"></div><div style="flex:0.30;background:#0B7A3E"></div></div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#3A4756;font-variant-numeric:tabular-nums">
+                <div style="display:flex;justify-content:space-between"><span><span style="display:inline-block;width:8px;height:8px;background:#003781;margin-right:6px"></span>AMC, excluding trail</span><span>0.90%</span></div>
+                <div style="display:flex;justify-content:space-between"><span><span style="display:inline-block;width:8px;height:8px;background:#3D6FB5;margin-right:6px"></span>Trail commission</span><span>0.25%</span></div>
+                <div style="display:flex;justify-content:space-between"><span><span style="display:inline-block;width:8px;height:8px;background:#0082be;margin-right:6px"></span>Fund charges</span><span>0.39%</span></div>
+                <div style="display:flex;justify-content:space-between"><span><span style="display:inline-block;width:8px;height:8px;background:#0B7A3E;margin-right:6px"></span>Guarantee</span><span>0.30%</span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRem }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+          <div style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6B78">Initial remuneration</span><b style="font-size:26px;color:#003781;font-variant-numeric:tabular-nums">€2,950</b><span style="font-size:13px;color:#3A4756;line-height:1.5">€1,750 · 3.50% of single <span style="color:#A3540B;font-weight:700">Edited</span><br>€1,200 · year-1 regular, capped at 20%</span></div>
+          <div style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6B78">Trail remuneration</span><b style="font-size:26px;color:#003781;font-variant-numeric:tabular-nums">€8,380</b><span style="font-size:13px;color:#3A4756">0.25% a year of fund value, projected to retirement</span></div>
+          <div style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6B78">Clawback</span><b style="font-size:26px;color:#A3540B">Applies</b><span style="font-size:13px;color:#3A4756">on cool-off or transfer in first 5 years</span></div>
+        </div>
+        <section style="background:#fff;border:1px solid #E2E8EF;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:14px">
+          <span style="font-size:16px;font-weight:700">Remuneration by year</span>
+          <div style="display:flex;align-items:flex-end;gap:6px;height:150px;padding-bottom:4px;border-bottom:1px solid #E2E8EF">
+            <sc-for list="{{ remBars }}" as="b" hint-placeholder-count="19">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-end;height:100%">
+                <div style="{{ b.style }}"></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ remBars }}" as="b" hint-placeholder-count="19"><span style="flex:1;text-align:center;font-size:11px;color:#8A96A3">{{ b.lbl }}</span></sc-for>
+          </div>
+          <div style="display:flex;gap:18px;font-size:12px;color:#3A4756"><span><span style="display:inline-block;width:10px;height:10px;background:#003781;margin-right:6px"></span>Initial</span><span><span style="display:inline-block;width:10px;height:10px;background:#7fb2d9;margin-right:6px"></span>Trail</span><span style="margin-left:auto;font-weight:600;color:#0377A8">Show table</span></div>
+        </section>
+      </sc-if>
+    </div>
+    <footer style="position:sticky;bottom:0;display:flex;align-items:center;gap:16px;padding:16px 64px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #E2E8EF">
+      <button style="height:44px;padding:0 20px;border-radius:8px;border:1px solid #D5DDE6;background:#fff;color:#0E1E33;font:600 15px Figtree,Arial,sans-serif">← Back</button>
+      <span style="margin-left:auto;font-size:13px;color:#5E6B78">{{ footNote }}</span>
+      <button style="{{ nextStyle }}">Build the quotation pack →</button>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;proj&quot;,&quot;chg&quot;,&quot;rem&quot;],&quot;default&quot;:&quot;proj&quot;,&quot;tsType&quot;:&quot;'proj'|'chg'|'rem'&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const tab = this.props.tab ?? 'proj';
+    const R = [[1,47,76000,4463,1481,78983,80463],[2,48,82000,9541,3223,88318,91541],[3,49,88000,15269,5250,98019,103269],[4,50,94000,21686,7584,108101,115686],[5,51,100000,28832,10252,118579,128832],[6,52,106000,36749,13281,129468,142749],[7,53,112000,45485,16700,140785,157485],[8,54,118000,55085,20540,152545,173085],[9,55,124000,65602,24835,164767,189602],[10,56,130000,77089,29620,177469,207089],[11,57,136000,89603,34934,190669,225603],[12,58,142000,103203,40816,204387,245203],[13,59,148000,117955,47312,218644,265955],[14,60,154000,133926,54466,233460,287926],[15,61,160000,151187,62330,248857,311187],[16,62,166000,169814,70955,264859,335814],[17,63,172000,189887,80398,281488,361887],[18,64,178000,211491,90720,298771,389491],[19,65,181000,222851,96216,307635,403851]];
+    const eur = n => '€' + Math.round(n).toLocaleString('en-IE');
+    const X0 = 56, X1 = 700, Y0 = 270, Y1 = 14, max = 420000;
+    const pts = [[0, 0, 0, 0]].concat(R.map(r => [r[0] === 19 ? 18.5 : r[0], r[2], r[5], r[6]]));
+    const xs = t => X0 + (t / 18.5) * (X1 - X0), ys = v => Y0 - (v / max) * (Y0 - Y1);
+    // contributions start at 70k on day 1
+    pts[0] = [0, 70000, 70000, 70000];
+    const line = i => pts.map((p, k) => (k ? 'L' : 'M') + xs(p[0]).toFixed(1) + ' ' + ys(p[i]).toFixed(1)).join(' ');
+    const area = i => line(i) + ` L${X1} ${Y0} L${X0} ${Y0} Z`;
+    const yv = [0, 100000, 200000, 300000, 400000];
+    const pGrid = yv.map(v => `M${X0} ${ys(v).toFixed(1)} H710`).join(' ');
+    const yTicks = yv.map(v => ({ label: v ? '€' + v / 1000 + 'k' : '€0',
+      style: `position:absolute;left:0;width:${(48 / 720) * 100}%;text-align:right;top:${(ys(v) / 300) * 100}%;transform:translateY(-50%);font-size:11px;color:#8A96A3;font-variant-numeric:tabular-nums` }));
+    const xTicks = [[0.25, '2027'], [3.25, '2030'], [8.25, '2035'], [13.25, '2040'], [18.5, 'Age 65']].map(([t, l]) => ({ label: l,
+      style: `position:absolute;top:${(286 / 300) * 100}%;left:${(xs(t) / 720) * 100}%;transform:translate(-50%,-50%);font-size:11px;color:#8A96A3;white-space:nowrap` }));
+    const show = [1, 2, 3, 4, 5, 10, 15, 19];
+    const tRows = R.filter(r => show.includes(r[0])).map(r => {
+      const ret = r[0] === 19;
+      return { year: ret ? 'Retirement' : r[0], age: r[1], contrib: eur(r[2]), growth: eur(r[3]), chg: eur(r[4]), wc: eur(r[5]),
+        style: `display:grid;grid-template-columns:110px 70px repeat(4,minmax(0,1fr));padding:12px 24px;border-bottom:1px solid #EEF2F6;font-size:14px;text-align:right;font-variant-numeric:tabular-nums;${ret ? 'background:#EEF4FA;font-weight:700;color:#003781' : ''}` };
+    });
+    const order = ['proj', 'chg', 'rem'], idx = order.indexOf(tab);
+    const tabs = [['proj', 'Projection'], ['chg', 'Charges'], ['rem', 'Remuneration']].map(([k, label], i) => {
+      const on = k === tab, seen = i <= idx;
+      return { label, mark: seen && !on ? '✓' : String(i + 1),
+        style: `display:flex;align-items:center;gap:8px;padding:0 4px 12px;margin-bottom:-1px;font-size:15px;font-weight:${on ? 700 : 500};color:${on ? '#003781' : '#3A4756'};border-bottom:3px solid ${on ? '#003781' : 'transparent'}`,
+        dot: `width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;${on ? 'background:#003781;color:#fff' : seen ? 'background:#E6F2EA;color:#0B7A3E' : 'background:#EEF2F6;color:#5E6B78'}` };
+    });
+    const done = idx === 2;
+    const chgRows = [['Strategy Select 50', '40%', '1.15%', '0.25%', '0.75%', '2.15%'], ['DMAS SRI 50', '30%', '1.15%', '0.59%', '–', '1.74%'], ['Best Styles Global Equity SRI', '20%', '1.15%', '0.45%', '–', '1.60%'], ['Adv. Fixed Income Euro', '10%', '1.15%', '0.27%', '–', '1.42%']].map(([name, w, amc, fmc, g, t]) => ({ name, w, amc, fmc, g, t }));
+    const rem = R.map(r => ({ y: r[0], init: r[0] === 1 ? 2950 : 0, trail: Math.round(r[5] * 0.0025 * (r[0] === 19 ? 0.5 : 1)) }));
+    const rmax = 3200;
+    const remBars = rem.map(r => ({ lbl: r.y === 19 ? '65' : (r.y % 2 ? r.y : ''),
+      style: `width:100%;border-radius:3px 3px 0 0;height:${((r.init + r.trail) / rmax) * 140}px;background:${r.init ? `linear-gradient(to top,#003781 ${(r.init / (r.init + r.trail)) * 100}%,#7fb2d9 0)` : '#7fb2d9'}` }));
+    return {
+      tabs, isProj: tab === 'proj', isChg: tab === 'chg', isRem: tab === 'rem',
+      reviewNote: done ? 'All three tabs reviewed' : `Review all three tabs to continue · ${idx + 1} of 3`,
+      footNote: done ? 'Ready for the pack' : 'Review Charges and Remuneration to continue',
+      nextStyle: `height:44px;padding:0 22px;border-radius:8px;border:none;background:#003781;color:#fff;font:600 15px Figtree,Arial,sans-serif;opacity:${done ? 1 : .4}`,
+      yTicks, xTicks, pGrid, pContrib: area(1), pAreaWC: area(2), pWC: line(2), pNC: line(3), endX: xs(18.5), endY: ys(307635),
+      tRows, chgRows, remBars
+    };
+  }
+}
+</script>
+</body>
+</html>
