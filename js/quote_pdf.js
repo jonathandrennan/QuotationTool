@@ -14,14 +14,18 @@ function qtLogoSvg(height) {
 }
 
 // ─── SVG line chart ───────────────────────────────────────────────────────────
-// opts = { width, height, xLabels:[...], series:[{label,color,values:[...],dash,area}],
+// opts = { width, height, xLabels:[...], series:[{label,color,values:[...],dash,width,area,fill,endDot}],
 //          yFormat:function(v){}, xTitle,
+//          legend:false        leave the legend out (the screen draws its own above the chart)
 //          xs:[...]            optional x position of each point (e.g. years since start), for uneven spacing
 //          xTicks:[{x,label}]  optional axis labels at x positions (replaces xLabels)
 //          markers:[{x,label}] optional dashed vertical lines, labelled above the plot }
+// A series with `fill` is drawn as a filled area only (e.g. contributions paid); `area` adds a
+// light tint under a line; `endDot` marks the last point.
+var QT_CHART_FONT = "'Allianz Neo', Arial, Helvetica, sans-serif";
 function qtSvgLineChart(opts) {
-  var W = opts.width || 640, H = opts.height || 260;
-  var padL = 62, padR = 14, padT = opts.markers && opts.markers.length ? 30 : 14, padB = 56;
+  var W = opts.width || 640, H = opts.height || 260, legend = opts.legend !== false;
+  var padL = 50, padR = 14, padT = opts.markers && opts.markers.length ? 30 : 12, padB = legend ? (opts.xTitle ? 56 : 44) : 26;
   var n = opts.xs ? opts.xs.length : opts.xLabels.length;
   var maxV = 0;
   opts.series.forEach(function(s) { s.values.forEach(function(v) { if (v > maxV) maxV = v; }); });
@@ -40,36 +44,42 @@ function qtSvgLineChart(opts) {
   function x(i) { return xAt(xs ? xs[i] : i); }
   function y(v) { return padT + plotH - (v / niceMax) * plotH; }
   var fmt = opts.yFormat || function(v) { return fNum(v); };
-  var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;font-family:Arial,Helvetica,sans-serif">';
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;font-family:' + QT_CHART_FONT.replace(/"/g, '') + '">';
   // grid + y labels
   for (var g = 0; g <= niceMax + 1e-9; g += step) {
     var gy = y(g).toFixed(1);
-    svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + gy + '" y2="' + gy + '" stroke="#e3e8ef" stroke-width="1"/>';
-    svg += '<text x="' + (padL - 6) + '" y="' + (+gy + 3.5) + '" font-size="10" fill="#555" text-anchor="end">' + escHtml(fmt(g)) + '</text>';
+    if (g > 0) svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + gy + '" y2="' + gy + '" stroke="#EEF2F6" stroke-width="1"/>';
+    svg += '<text x="' + (padL - 8) + '" y="' + (+gy + 3.5) + '" font-size="10.5" fill="#8A96A3" text-anchor="end">' + escHtml(fmt(g)) + '</text>';
   }
   if (opts.xTicks) {
-    opts.xTicks.forEach(function(t) {
-      var tx = xAt(t.x).toFixed(1);
-      svg += '<line x1="' + tx + '" x2="' + tx + '" y1="' + (padT + plotH) + '" y2="' + (padT + plotH + 4) + '" stroke="#8a96a3" stroke-width="1"/>';
-      svg += '<text x="' + tx + '" y="' + (padT + plotH + 15) + '" font-size="10" fill="#555" text-anchor="middle">' + escHtml(t.label) + '</text>';
+    opts.xTicks.forEach(function(t, i) {
+      var tx = xAt(t.x), last = i === opts.xTicks.length - 1 && tx > W - padR - 30;
+      svg += '<text x="' + tx.toFixed(1) + '" y="' + (padT + plotH + 17) + '" font-size="10.5" fill="#8A96A3" text-anchor="' + (last ? 'end' : 'middle') + '">' + escHtml(t.label) + '</text>';
     });
   } else {
     // x labels (thin out)
     var every = Math.max(1, Math.ceil(n / 12));
     for (var xi = 0; xi < n; xi++) {
       if (xi !== n - 1 && (xi % every !== 0 || n - 1 - xi < every * 0.6)) continue;
-      svg += '<text x="' + x(xi).toFixed(1) + '" y="' + (padT + plotH + 15) + '" font-size="10" fill="#555" text-anchor="middle">' + escHtml(opts.xLabels[xi]) + '</text>';
+      svg += '<text x="' + x(xi).toFixed(1) + '" y="' + (padT + plotH + 17) + '" font-size="10.5" fill="#8A96A3" text-anchor="middle">' + escHtml(opts.xLabels[xi]) + '</text>';
     }
   }
-  if (opts.xTitle) svg += '<text x="' + (padL + plotW / 2) + '" y="' + (padT + plotH + 29) + '" font-size="10" fill="#333" text-anchor="middle">' + escHtml(opts.xTitle) + '</text>';
-  svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + (padT + plotH) + '" y2="' + (padT + plotH) + '" stroke="#8a96a3" stroke-width="1"/>';
-  // series
+  if (opts.xTitle) svg += '<text x="' + (padL + plotW / 2) + '" y="' + (padT + plotH + 31) + '" font-size="10" fill="#5E6B78" text-anchor="middle">' + escHtml(opts.xTitle) + '</text>';
+  svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + (padT + plotH) + '" y2="' + (padT + plotH) + '" stroke="#D5DDE6" stroke-width="1"/>';
+  // series: filled areas first, then lines on top
+  function poly(s) { return x(0).toFixed(1) + ',' + y(0).toFixed(1) + ' ' + s.values.map(function(v, i) { return x(i).toFixed(1) + ',' + y(v).toFixed(1); }).join(' ') + ' ' + x(s.values.length - 1).toFixed(1) + ',' + y(0).toFixed(1); }
   opts.series.forEach(function(s) {
+    if (s.fill) svg += '<polygon points="' + poly(s) + '" fill="' + s.fill + '" stroke="none"/>';
+    else if (s.area) svg += '<polygon points="' + poly(s) + '" fill="' + s.color + '" fill-opacity="' + (s.areaOpacity || 0.07) + '" stroke="none"/>';
+  });
+  opts.series.forEach(function(s) {
+    if (s.fill) return;
     var pts = s.values.map(function(v, i) { return x(i).toFixed(1) + ',' + y(v).toFixed(1); });
-    if (s.area) {
-      svg += '<polygon points="' + x(0).toFixed(1) + ',' + y(0).toFixed(1) + ' ' + pts.join(' ') + ' ' + x(s.values.length - 1).toFixed(1) + ',' + y(0).toFixed(1) + '" fill="' + s.color + '" fill-opacity="0.12" stroke="none"/>';
+    svg += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.width || 2.2) + '"' + (s.dash ? ' stroke-dasharray="' + s.dash + '"' : '') + ' stroke-linejoin="round" stroke-linecap="round"/>';
+    if (s.endDot) {
+      var li = s.values.length - 1;
+      svg += '<circle cx="' + x(li).toFixed(1) + '" cy="' + y(s.values[li]).toFixed(1) + '" r="3.8" fill="' + s.color + '" stroke="#fff" stroke-width="1.5"/>';
     }
-    svg += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.width || 2.2) + '"' + (s.dash ? ' stroke-dasharray="' + s.dash + '"' : '') + ' stroke-linejoin="round"/>';
   });
   // markers: label sits above the plot so it never collides with the lines
   (opts.markers || []).forEach(function(m) {
@@ -79,11 +89,13 @@ function qtSvgLineChart(opts) {
   });
   // legend
   var lx = padL;
-  opts.series.forEach(function(s) {
+  if (legend) opts.series.slice().reverse().forEach(function(s) {
     var ly = H - 5;
-    svg += '<line x1="' + lx + '" x2="' + (lx + 18) + '" y1="' + (ly - 3.5) + '" y2="' + (ly - 3.5) + '" stroke="' + s.color + '" stroke-width="2.5"' + (s.dash ? ' stroke-dasharray="' + s.dash + '"' : '') + '/>';
-    svg += '<text x="' + (lx + 23) + '" y="' + ly + '" font-size="10" fill="#333">' + escHtml(s.label) + '</text>';
-    lx += 30 + s.label.length * 5.6;
+    if (s.fill) svg += '<rect x="' + lx + '" y="' + (ly - 9) + '" width="12" height="10" rx="2" fill="' + s.fill + '"/>';
+    else svg += '<line x1="' + lx + '" x2="' + (lx + 18) + '" y1="' + (ly - 3.5) + '" y2="' + (ly - 3.5) + '" stroke="' + s.color + '" stroke-width="2.5"' + (s.dash ? ' stroke-dasharray="' + s.dash + '"' : '') + '/>';
+    var tx0 = lx + (s.fill ? 17 : 23);
+    svg += '<text x="' + tx0 + '" y="' + ly + '" font-size="10" fill="#3A4756">' + escHtml(s.label) + '</text>';
+    lx = tx0 + 14 + s.label.length * 5.4;
   });
   svg += '</svg>';
   return svg;
@@ -112,26 +124,35 @@ function qtYearTicks(start, span) {
   return out;
 }
 
-// Chart series builders (used both on screen and in the PDF)
-function qtPrsaChart(r, width, height) {
+// Year ticks for a projection to retirement: counted back from the retirement date in even steps,
+// so the last tick is the retirement year itself
+function qtRetirementTicks(start, retDate, span) {
+  var gap = span <= 12 ? 1 : span <= 25 ? 2 : 5, out = [];
+  for (var k = 0; ; k++) {
+    var d = new Date(retDate.getFullYear() - k * gap, retDate.getMonth(), retDate.getDate()), x = qtYearsFrom(start, d);
+    if (x < gap * 0.5) break;
+    out.unshift({ x: x, label: String(d.getFullYear()) });
+  }
+  return out;
+}
+// Chart series builders (used both on screen and in the PDF). o = { legend } passed through.
+function qtPrsaChart(r, width, height, o) {
   var start = new Date(r.inputs.startStr), dob = new Date(r.inputs.dobStr);
   var retDate = new Date(dob.getFullYear() + r.nra, dob.getMonth(), dob.getDate()), tRet = qtYearsFrom(start, retDate);
-  var xs = [0], wc = [r.ofvRaw + r.spRaw * (1 - r.spContribCharge)], nc = [r.ofvRaw + r.spRaw], contrib = [r.ofvRaw + r.spRaw];
+  var xs = [0], wc = [r.ofvRaw + r.spRaw * (1 - r.spContribCharge)], contrib = [r.ofvRaw + r.spRaw];
   r.snapshots.forEach(function(s) {
     xs.push(s.isMat ? tRet : s.month / 12);
-    wc.push(s.fundWC); nc.push(s.fundNC); contrib.push(s.contribNC);
+    wc.push(s.fundWC); contrib.push(s.contribNC);
   });
   return qtSvgLineChart({
-    width: width, height: height, xs: xs, xTicks: qtYearTicks(start, tRet), yFormat: qtEuroAxis,
-    markers: [{ x: tRet, label: 'Retirement · age ' + r.nra + ' · ' + QT_MONTHS[retDate.getMonth()] + ' ' + retDate.getFullYear() }],
+    width: width, height: height, xs: xs, xTicks: qtRetirementTicks(start, retDate, tRet), yFormat: qtEuroAxis, legend: !o || o.legend !== false,
     series: [
-      { label: 'Projected value after charges', color: '#003781', values: wc, area: true },
-      { label: 'Before charges', color: '#0082be', values: nc, dash: '5,4', width: 1.6 },
-      { label: 'Contributions paid', color: '#8a96a3', values: contrib, width: 1.4 }
+      { label: 'Contributions paid', fill: '#E3EAF2', values: contrib },
+      { label: 'Value after charges', color: '#003781', values: wc, area: true, width: 2.5, endDot: true }
     ]
   });
 }
-function qtArfChart(r, width, height) {
+function qtArfChart(r, width, height, o) {
   var start = new Date(r.inputs.startStr), xs = [], s1 = r.p1.fundByYear, s2 = r.p2.fundByYear;
   var lastPos = 0;
   for (var k = 0; k < s1.length; k++) if (s1[k] > 0.5 || (s2[k] || 0) > 0.5) lastPos = k;
@@ -139,15 +160,15 @@ function qtArfChart(r, width, height) {
   s1 = s1.slice(0, n); s2 = s2.slice(0, n);
   for (var i = 0; i < n; i++) xs.push(i);
   return qtSvgLineChart({
-    width: width, height: height, xs: xs, xTicks: qtYearTicks(start, n - 1), yFormat: qtEuroAxis,
+    width: width, height: height, xs: xs, xTicks: qtYearTicks(start, n - 1), yFormat: qtEuroAxis, legend: !o || o.legend !== false,
     series: [
-      { label: 'Fund value at ' + pct(r.rate1) + ' growth', color: '#003781', values: s1, area: true },
-      { label: 'Fund value at ' + pct(r.rate2) + ' growth', color: '#0082be', values: s2, dash: '5,4' }
+      { label: 'Fund value at ' + pct(r.rate2) + ' growth', color: '#0377A8', values: s2, dash: '4,4', width: 1.8 },
+      { label: 'Fund value at ' + pct(r.rate1) + ' growth', color: '#003781', values: s1, area: true, width: 2.5 }
     ]
   });
 }
 
-function qtIbChart(r, width, height) {
+function qtIbChart(r, width, height, o) {
   var start = new Date(r.inputs.startStr), xs = [], s1 = r.p.fundByYear;
   var lastPos = 0;
   for (var k = 0; k < s1.length; k++) if (s1[k] > 0.5) lastPos = k;
@@ -155,8 +176,8 @@ function qtIbChart(r, width, height) {
   s1 = s1.slice(0, n);
   for (var i = 0; i < n; i++) xs.push(i);
   return qtSvgLineChart({
-    width: width, height: height, xs: xs, xTicks: qtYearTicks(start, n - 1), yFormat: qtEuroAxis,
-    series: [ { label: 'Fund value at ' + pct(r.rate) + ' growth', color: '#003781', values: s1, area: true } ]
+    width: width, height: height, xs: xs, xTicks: qtYearTicks(start, n - 1), yFormat: qtEuroAxis, legend: !o || o.legend !== false,
+    series: [ { label: 'Fund value at ' + pct(r.rate) + ' growth', color: '#003781', values: s1, area: true, width: 2.5 } ]
   });
 }
 
@@ -198,16 +219,17 @@ function qtPortfolioRisk(Q) {
 }
 
 // ─── Simple markup for adviser-edited text ────────────────────────────────────
-// "## " heading, "- " bullet, blank line = paragraph break. Returns an array of HTML
+// "## " heading, "- " bullet, **bold**, blank line = paragraph break. Returns an array of HTML
 // blocks so the paginator can split long letters across pages.
 function qtMarkupBlocks(text) {
   var lines = String(text || '').replace(/\r/g, '').split('\n');
   var blocks = [], para = [], list = [];
-  function flushPara() { if (para.length) { blocks.push('<p>' + para.map(escHtml).join('<br>') + '</p>'); para = []; } }
-  function flushList() { if (list.length) { blocks.push('<ul>' + list.map(function(l){ return '<li>' + escHtml(l) + '</li>'; }).join('') + '</ul>'); list = []; } }
+  function inl(s) { return escHtml(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); }   // **bold**
+  function flushPara() { if (para.length) { blocks.push('<p>' + para.map(inl).join('<br>') + '</p>'); para = []; } }
+  function flushList() { if (list.length) { blocks.push('<ul>' + list.map(function(l){ return '<li>' + inl(l) + '</li>'; }).join('') + '</ul>'); list = []; } }
   lines.forEach(function(l) {
     var t = l.replace(/\s+$/, '');
-    if (/^##\s+/.test(t)) { flushPara(); flushList(); blocks.push('<h3 class="kwn">' + escHtml(t.replace(/^##\s+/, '')) + '</h3>'); }
+    if (/^##\s+/.test(t)) { flushPara(); flushList(); blocks.push('<h3 class="kwn">' + inl(t.replace(/^##\s+/, '')) + '</h3>'); }
     else if (/^-\s+/.test(t)) { flushPara(); list.push(t.replace(/^-\s+/, '')); }
     else if (t === '') { flushPara(); flushList(); }
     else { flushList(); para.push(t); }
@@ -240,12 +262,13 @@ function qtCategorySplit(rows) {
 function qtBuildPack(Q) {
   var T = QT_TEXT, r = Q.r, isPrsa = Q.product === 'prsa', isArf = Q.product === 'arf', isIb = Q.product === 'ib';
   var clientName = [Q.client.first, Q.client.last].join(' ');
-  var B = []; // blocks: { html, hdr:'agl'|'broker', cls }
+  var B = []; // blocks: { html, hdr:'agl'|'broker', cls, sec }
+  var sec = '';  // pack section the blocks being added belong to (used to find each section's pages)
   function add(html, opts) {
     opts = opts || {};
     var cls = opts.cls || '', m = /^<h\d class="([^"]+)"/.exec(html);
     if (m) cls = (cls + ' ' + m[1]).trim();
-    B.push({ html: html, hdr: opts.hdr || 'agl', cls: cls });
+    B.push({ html: html, hdr: opts.hdr || 'agl', cls: cls, sec: sec });
   }
   function h2(title, newpage, hdr) { add('<h2>' + escHtml(title) + '</h2>', { cls: 'kwn' + (newpage ? ' newpage' : ''), hdr: hdr }); }
   function p(txt, cls) { add('<p' + (cls ? ' class="' + cls + '"' : '') + '>' + escHtml(txt) + '</p>'); }
@@ -256,18 +279,20 @@ function qtBuildPack(Q) {
 
   // ── 1. Cover letter (adviser letterhead) ──
   if (Q.sections.cover) {
+    sec = 'cover';
     var addr = (Q.client.address || '').split('\n').filter(function(x){ return x.trim(); });
     add('<div class="letter-top"><div>' + escHtml(Q.client.salutation + ' ' + clientName) + '<br>' + addr.map(escHtml).join('<br>') + '</div>' +
-        '<div class="r">' + escHtml(dateLong) + '<br><span class="muted">Our ref: ' + escHtml(Q.quoteRef) + '</span></div></div>',
+        '<div class="ldate">' + escHtml(dateLong) + '<br><span class="muted">Our ref: ' + escHtml(Q.quoteRef) + '</span></div></div>',
         { hdr: 'broker', cls: 'newpage' });
     add('<p class="re"><b>Re: Your ' + escHtml(Q.productName) + ' quotation</b></p>', { hdr: 'broker' });
     qtMarkupBlocks(Q.coverText).forEach(function(b) { add(b, { hdr: 'broker' }); });
-    add('<div class="sigblock"><div class="sigline"></div>' + escHtml(Q.broker.name) + '<br>' +
-        (Q.broker.title ? escHtml(Q.broker.title) + '<br>' : '') + escHtml(Q.broker.firm) + '</div>', { hdr: 'broker' });
+    add('<div class="sigblock"><b>' + escHtml(Q.broker.name) + '</b><br>' +
+        (Q.broker.title ? escHtml(Q.broker.title) + '<br>' : '') + escHtml(Q.broker.firm) + (Q.broker.email ? '<br>' + escHtml(Q.broker.email) : '') + '</div>', { hdr: 'broker' });
   }
 
   // ── 2. Statement of Suitability ──
   if (Q.sections.sos) {
+    sec = 'sos';
     add('<h1>' + escHtml(T.sections.sos) + '</h1>', { hdr: 'broker', cls: 'kwn newpage' });
     add('<table class="kv"><tr><td>Client</td><td>' + escHtml(clientName) + '</td><td>Adviser</td><td>' + escHtml(Q.broker.name) + '</td></tr>' +
         '<tr><td>Date</td><td>' + escHtml(dateLong) + '</td><td>Firm</td><td>' + escHtml(Q.broker.firm) + '</td></tr>' +
@@ -279,61 +304,52 @@ function qtBuildPack(Q) {
         '<div class="sigline short"></div>Date</div></div>', { hdr: 'broker' });
   }
 
-  // ── 3. Summary ──
+  // ── 3. At a glance ──
   if (Q.sections.summary) {
-    add('<div class="title"><div class="t1">' + escHtml(qtFill(T.docTitle, {})) + '</div><div class="t2">' + escHtml(Q.productName) + '</div>' +
-        '<div class="t3">' + escHtml(qtFill(T.docSubtitle, { clientName: clientName, brokerFirm: Q.broker.firm })) + '</div></div>', { cls: 'newpage' });
-    p(T.summaryIntro);
-    var boxes = [];
+    sec = 'summary';
+    var pfRisk = qtPortfolioRisk(Q), hero, facts = [['Start date', fmtDate(r.inputs.startStr)]];
+    add('<div class="eyebrow">' + escHtml(T.sections.summary) + '</div><h1 class="prep">' + escHtml(qtFill(T.summaryTitle, { clientName: clientName })) + '</h1>' +
+        '<div class="byline">' + escHtml(qtFill(T.summaryByline, { brokerName: Q.broker.name, brokerFirm: Q.broker.firm, date: dateLong })) + '</div>', { cls: 'newpage kwn' });
+    function lasts(pp) { return pp.fundZeroYear ? 'to age ' + pp.depletionAge : '40+ years'; }
     if (isPrsa) {
-      boxes.push(['Your plan', '<b>' + escHtml(Q.productName) + '</b><br>Start date ' + fmtDate(r.inputs.startStr) + '<br>Retirement age ' + r.nra + ' (' + (r.termMonths / 12).toFixed(1) + ' years)']);
-      var cl = [];
-      if (r.spRaw > 0) cl.push('Single ' + fEUR(r.spRaw));
-      if (r.ofvRaw > 0) cl.push('Transfer ' + fEUR(r.ofvRaw));
-      if (r.rpRaw > 0) cl.push('Regular ' + fEUR(r.rpRaw) + ' ' + r.freq + (r.esc > 0 ? ', increasing ' + r.esc + '% a year' : ''));
-      boxes.push(['Your contributions', cl.join('<br>')]);
+      hero = ['Projected value at age ' + r.nra + ', after charges', fEUR(r.fundWC), fEUR(r.realMat) + ' in today\'s money &middot; income approx. ' + fEUR(r.annualIncomeReal) + ' a year'];
+      facts.push(['Retirement', 'Age ' + r.nra + ' &middot; ' + (r.termMonths / 12).toFixed(1) + ' years']);
+      if (r.ofvRaw > 0) facts.push(['Transfer', fEUR(r.ofvRaw)]);
+      if (r.spRaw > 0) facts.push(['Single', fEUR(r.spRaw)]);
+      if (r.rpRaw > 0) facts.push(['Regular', fEUR(r.rpRaw) + ' ' + r.freq + (r.esc > 0 ? ', +' + r.esc + '% a year' : '')]);
     } else if (isArf) {
-      boxes.push(['Your plan', '<b>' + escHtml(Q.productName) + '</b><br>Start date ' + fmtDate(r.inputs.startStr) + '<br>Income from age ' + r.inputs.incomeStartAge]);
-      boxes.push(['Your contribution', 'Single contribution ' + fEUR(r.contribution) + '<br>' + escHtml(qtArfIncomeShort(r))]);
+      var ai = qtArfIncomeShort(r).replace(/^Income /, '');
+      hero = ['At ' + pct(r.rate1) + ' growth, your fund is projected to last', lasts(r.p1), 'At ' + pct(r.rate2) + ' growth: ' + lasts(r.p2)];
+      facts.push(['Contribution', fEUR(r.contribution)], ['Income', escHtml(ai.charAt(0).toUpperCase() + ai.slice(1))], ['Income from age', r.inputs.incomeStartAge]);
     } else {
-      boxes.push(['Your plan', '<b>' + escHtml(Q.productName) + '</b><br>Start date ' + fmtDate(r.inputs.startStr) + '<br>' + (r.policyholderType.charAt(0).toUpperCase() + r.policyholderType.slice(1)) + ' policyholder']);
-      var ibCl = [];
-      if (r.contribution > 0) ibCl.push('Single contribution ' + fEUR(r.contribution));
-      if (r.rp > 0) ibCl.push('Regular contribution ' + fEUR(r.rp) + ' ' + r.inputs.freq);
-      ibCl.push(escHtml(qtIbIncomeShort(r)));
-      boxes.push(['Your contribution', ibCl.join('<br>')]);
+      var inc = r.inputs.incomeType !== 'none', rows = r.p.rows, row = rows.filter(function(x) { return x.year === 10; })[0] || rows[rows.length - 1];
+      hero = inc ? ['At ' + pct(r.rate) + ' growth, your fund is projected to last', lasts(r.p), 'net growth ' + pct(r.p.netRate) + ' a year after charges']
+                 : ['Projected value after ' + row.year + ' years', fEUR(row.F), 'after charges and exit tax, at ' + pct(r.rate) + ' growth a year'];
+      facts.push(['Policyholder', r.policyholderType.charAt(0).toUpperCase() + r.policyholderType.slice(1)]);
+      if (r.contribution > 0) facts.push(['Single', fEUR(r.contribution)]);
+      if (r.rp > 0) facts.push(['Regular', fEUR(r.rp) + ' ' + r.inputs.freq]);
+      if (inc) facts.push(['Income', escHtml(qtIbIncomeShort(r).replace(/^Income /, ''))]);
     }
-    var pfRisk = qtPortfolioRisk(Q);
-    boxes.push(['Your investment and risk', '<b>' + escHtml(Q.strategyName) + '</b><br>' +
-      'Your risk rating: <b>' + Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri] + '</b><br>' +
-      (isPrsa && r.isGlidepath ? 'Strategy risk profile: <b>' + escHtml(strategyProfile(r.stratObj) || 'Medium risk') + '</b><br>' : '') +
-      pfRisk.line + qtSriScale(Q.risk.sri, pfRisk.scaleValue, pfRisk.label, 'sm')]);
-    if (isPrsa) {
-      boxes.push(['Projected at retirement', '<span class="big">' + fEUR(r.fundWC) + '</span><br>' + fEUR(r.realMat) + ' in today\'s money<br>Income approx. ' + fEUR(r.annualIncomeReal) + ' a year in today\'s money']);
-      boxes.push(['Charges', 'Total annual charge ' + pct(r.totalAnnualCharge) + (r.isGlidepath ? ' (initial mix)' : '') + '<br>Effect of charges: ' + pct(Math.max(0, r.grossRate - r.netRate)) + ' a year']);
-      boxes.push(['Adviser remuneration', 'Initial ' + fEUR(r.totalInitialComm) + '<br>Trail ' + pct(r.cc.ongoing) + ' a year of fund value']);
-    } else if (isArf) {
-      boxes.push(['Your fund over time', qtArfLastsShort(r.p1, r.rate1) + '<br>' + qtArfLastsShort(r.p2, r.rate2)]);
-      boxes.push(['Charges', 'Total annual charge ' + pct(r.p1.chargeRate) + '<br>Growth reduced from ' + pct(r.rate1) + ' to ' + pct(r.p1.netRate)]);
-      boxes.push(['Adviser remuneration', 'Initial ' + fEUR(r.initialComm) + '<br>Trail ' + pct(r.cc.ongoing) + ' a year of fund value']);
-    } else {
-      boxes.push(['Your fund over time', qtArfLastsShort(r.p, r.rate)]);
-      boxes.push(['Charges', 'Total annual charge ' + pct(r.p.chargeRate) + '<br>Growth reduced from ' + pct(r.rate) + ' to ' + pct(r.p.netRate) + '<br>Exit tax ' + pct(r.taxRate)]);
-      boxes.push(['Adviser remuneration', 'Initial ' + fEUR(r.initialComm) + '<br>Trail ' + pct(r.cc.ongoing) + ' a year of fund value']);
-    }
-    var bh = '<div class="boxes">';
-    boxes.forEach(function(b, i) { bh += '<div class="box"><div class="bn">' + (i + 1) + '</div><div><div class="bt">' + b[0] + '</div><div>' + b[1] + '</div></div></div>'; });
-    add(bh + '</div>');
-    add('<div class="chart">' + (isPrsa ? qtPrsaChart(r, 640, 125) : isArf ? qtArfChart(r, 640, 125) : qtIbChart(r, 640, 125)) + '</div>');
-    var inPack = ['cover', 'sos', 'projection', 'charges', 'funds', 'remun', 'product', 'tax', 'important', 'glossary']
-      .filter(function(k) { return Q.sections[k]; }).map(function(k) { return '<li>' + escHtml(T.sections[k]) + '</li>'; }).join('');
-    add('<div class="sumfoot"><div class="inpack"><div class="bt">' + escHtml(T.summaryInPack) + '</div><ul>' + inPack + '</ul></div>' +
-        '<div class="warn sm"><div class="bt">' + escHtml(T.summaryWarningsTitle) + '</div>' + T.warnings.map(function(w) { return '<p>' + escHtml(w) + '</p>'; }).join('') + '</div></div>');
+    add('<div class="hero"><div class="hl"><div class="k">' + hero[0] + '</div><div class="v">' + hero[1] + '</div><div class="s">' + hero[2] + '</div></div>' +
+        '<div class="hr"><table class="facts">' + facts.map(function(f) { return '<tr><td>' + f[0] + '</td><td>' + f[1] + '</td></tr>'; }).join('') + '</table></div></div>');
+    add('<div class="chart">' + (isPrsa ? qtPrsaChart(r, 640, 150) : isArf ? qtArfChart(r, 640, 150) : qtIbChart(r, 640, 150)) + '</div>');
+    var cRows;
+    if (isPrsa) cRows = [['Total annual charge', pct(r.totalAnnualCharge) + (r.isGlidepath ? ' (initial mix)' : '')], ['Effect of charges', pct(Math.max(0, r.grossRate - r.netRate)) + ' a year'],
+                         ['Initial remuneration', fEUR(r.totalInitialComm)], ['Trail', pct(r.cc.ongoing) + ' a year']];
+    else if (isArf) cRows = [['Total annual charge', pct(r.p1.chargeRate)], ['Growth after charges', pct(r.rate1) + ' &rarr; ' + pct(r.p1.netRate)],
+                             ['Initial remuneration', fEUR(r.initialComm)], ['Trail', pct(r.cc.ongoing) + ' a year']];
+    else cRows = [['Total annual charge', pct(r.p.chargeRate)], ['Growth after charges', pct(r.rate) + ' &rarr; ' + pct(r.p.netRate)], ['Exit tax', pct(r.taxRate)],
+                  ['Initial remuneration', fEUR(r.initialComm)], ['Trail', pct(r.cc.ongoing) + ' a year']];
+    add('<div class="cards2"><div class="pcard"><div class="pt">' + escHtml(T.sections.funds) + '</div><p>' + escHtml(Q.strategyName) + '. Your risk rating <b>' + Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri] + '</b>' +
+        (isPrsa && r.isGlidepath ? '; strategy risk profile <b>' + escHtml(strategyProfile(r.stratObj) || 'Medium risk') + '</b>.' : '.') + '</p><p>' + pfRisk.line + '</p>' + qtSriScale(Q.risk.sri, pfRisk.scaleValue, pfRisk.label, 'sm') + '</div>' +
+        '<div class="pcard"><div class="pt">Charges and remuneration</div><table class="kv2">' + cRows.map(function(c) { return '<tr><td>' + c[0] + '</td><td>' + c[1] + '</td></tr>'; }).join('') + '</table></div></div>');
+    add('<div class="warnbox">' + T.warnings.map(function(w) { return escHtml(w).replace(/^Warning:/, '<b>Warning:</b>'); }).join(' ') + '</div>');
     p((pfRisk.footnote ? pfRisk.footnote + ' ' : '') + T.disclaimerShort, 'small');
   }
 
   // ── 4. Projection ──
   if (Q.sections.projection) {
+    sec = 'projection';
     h2(T.sections.projection, true);
     if (isPrsa) {
       var rate = pct(r.blendedGross);
@@ -394,6 +410,7 @@ function qtBuildPack(Q) {
 
   // ── 5. Charges ──
   if (Q.sections.charges) {
+    sec = 'charges';
     h2(T.sections.charges, true);
     p(T.chargesIntro);
     p(qtFill(isPrsa ? T.prsaFundCharges : isArf ? T.arfFundCharges : T.ibFundCharges, { admin: pct(r.cc.admin) }));
@@ -450,55 +467,53 @@ function qtBuildPack(Q) {
     p(T.chargesFundNote, 'small');
   }
 
-  // ── 6. Funds & risk ──
+  // ── 6. Investment and risk ──
   if (Q.sections.funds) {
+    sec = 'funds';
     h2(T.sections.funds, true);
+    var fRisk = qtPortfolioRisk(Q), gp = isPrsa && r.isGlidepath, sfs = qtSfdrSplit(r.mix), pr6 = Math.round(r.portfolioSri);
+    var t2 = gp ? ['Strategy risk profile', escHtml(strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
+    var sus = sfs.unknown > 0.0001 ? '&ndash;' : sfs.art8 > 0.9999 ? '100% Article 8' : Math.round(sfs.art8 * 100) + '% Article 8';
+    add('<div class="tiles3"><div><span>Your risk rating</span><b>' + Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri] + '</b></div><div><span>' + t2[0] + '</span><b>' + t2[1] + '</b></div>' +
+        '<div><span>Sustainability</span><b>' + sus + '</b></div></div>');
     p(T.fundsIntro);
-    var fRisk = qtPortfolioRisk(Q);
-    if (isPrsa && r.isGlidepath) {
+    if (gp) {
       var profile = strategyProfile(r.stratObj) || 'Medium risk', fit = strategyRiskFit(r.stratObj, Q.risk.sri);
-      add('<div class="sriwrap"><div class="sril">Your risk rating: <b>' + Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri] + '</b><br>Strategy risk profile: <b>' + escHtml(profile) + '</b><br>' + fRisk.line + '</div>' +
-          qtSriScale(Q.risk.sri, fRisk.scaleValue, fRisk.label) + '</div>');
+      if (fRisk.line) add('<p>' + fRisk.line + '</p>');
       if (fit.aligned) p(T.riskMatch);
       else p(qtFill(fit.direction === 'higher' ? T.riskHigherProfile : T.riskLowerProfile, { profile: profile, clientSriLabel: ESMA_LABELS[Q.risk.sri], reason: Q.risk.reason }));
     } else {
-      add('<div class="sriwrap"><div class="sril">Your risk rating: <b>' + Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri] + '</b><br>' + fRisk.line + '</div>' + qtSriScale(Q.risk.sri, r.portfolioSri) + '</div>');
-      var pr = Math.round(r.portfolioSri);
-      if (pr === Q.risk.sri) p(T.riskMatch);
-      else p(qtFill(pr > Q.risk.sri ? T.riskHigher : T.riskLower, { portfolioSri: pr, clientSri: Q.risk.sri, reason: Q.risk.reason }));
+      if (pr6 === Q.risk.sri) p(T.riskMatch);
+      else p(qtFill(pr6 > Q.risk.sri ? T.riskHigher : T.riskLower, { portfolioSri: pr6, clientSri: Q.risk.sri, reason: Q.risk.reason }));
     }
+    var CATS = { fic: 'Fixed income', multi: 'Multi-asset', eq: 'Equity' }, CATC = { fic: '#7fb2d9', multi: '#003781', eq: '#0082be' };
+    var ft = '<table class="num split"><thead><tr><th class="l">Fund</th><th class="l">Category</th><th>Risk</th><th>SFDR</th><th>Fund charge</th><th class="em">Allocation</th></tr></thead><tbody>';
+    fundRows.forEach(function(fr) {
+      var lv = isPrsa && QT_CONTENT.guarantee.levels[fr.fund.id], sf = (qtFundInfo(fr.fund.id) || {}).sfdr;
+      ft += '<tr><td class="l">' + escHtml(fr.fund.name) + (fr.gmab ? ' &middot; <span class="g">Guarantee' + (lv ? ' ' + Math.round(lv.protected * 100) + '%' : '') + '</span>' : '') + '</td>' +
+            '<td class="l">' + CATS[fr.cat] + '</td><td>' + Math.round(fr.fund.esma) + '</td><td>' + (sf ? 'Art. ' + sf : '&ndash;') + '</td><td>' + pct(fr.fmc) + '</td><td><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
+    });
+    add(ft + '</tbody></table>', { cls: 'split' });
+    var split = qtCategorySplit(fundRows), sb = '<div class="catbar">', lg = '<div class="catleg">';
+    FUND_CATEGORIES.forEach(function(c) {
+      if (split[c.key] > 0) sb += '<div style="width:' + (split[c.key] * 100).toFixed(2) + '%;background:' + CATC[c.key] + '"></div>';
+      if (split[c.key] > 0) lg += '<span><i style="background:' + CATC[c.key] + '"></i>' + CATS[c.key] + ' ' + Math.round(split[c.key] * 100) + '%</span>';
+    });
+    var anyG = fundRows.some(function(fr) { return fr.gmab; });
+    add('<div class="splitrow' + (anyG ? '' : ' one') + '"><div><div class="bt">Fund category split</div>' + sb + '</div>' + lg + '</div></div>' +
+        (anyG ? '<div class="gnote"><b>' + escHtml(QT_CONTENT.guarantee.label) + '</b>' + escHtml(T.guaranteeFundNote) + '</div>' : '') + '</div>');
     if (fRisk.footnote) p(fRisk.footnote, 'small');
     add('<h3 class="kwn">' + escHtml(Q.strategyName) + '</h3>');
     p(qtStrategyDescription(Q));
-    var split = qtCategorySplit(fundRows);
-    var sb = '<div class="catbar">';
-    FUND_CATEGORIES.forEach(function(c, i) {
-      if (split[c.key] > 0) sb += '<div style="width:' + (split[c.key] * 100).toFixed(2) + '%;background:' + ['#7fb2d9', '#003781', '#0082be'][i] + '"></div>';
-    });
-    sb += '</div><div class="catleg">';
-    FUND_CATEGORIES.forEach(function(c, i) {
-      sb += '<span><i style="background:' + ['#7fb2d9', '#003781', '#0082be'][i] + '"></i>' + escHtml(c.label) + ' ' + (split[c.key] * 100).toFixed(1) + '%</span>';
-    });
-    add(sb + '</div>');
-    var ft = '<table class="num split"><thead><tr><th class="l">Fund</th><th>Allocation</th><th>Risk (SRI)</th><th>Guarantee</th></tr></thead><tbody>';
-    FUND_CATEGORIES.forEach(function(c) {
-      var rows = fundRows.filter(function(fr){ return fr.cat === c.key; });
-      if (!rows.length) return;
-      ft += '<tr class="cat"><td class="l" colspan="4">' + escHtml(c.label) + '</td></tr>';
-      rows.forEach(function(fr) {
-        ft += '<tr><td class="l">' + escHtml(fr.fund.name) + '</td><td>' + (fr.weight * 100).toFixed(1) + '%</td><td>' + qtSriBadge(fr.fund.esma) + '</td><td>' + (fr.gmab ? 'Yes' : '&ndash;') + '</td></tr>';
-      });
-    });
-    add(ft + '</tbody></table>', { cls: 'split' });
-    if (isPrsa && r.isGlidepath) p(T.glidepathNote);
+    if (gp) p(T.glidepathNote);
     fundRows.forEach(function(fr) {
       add('<p class="fdesc"><b>' + escHtml(fr.fund.name) + '.</b> ' + escHtml(fr.fund.desc) + '</p>');
     });
-    if (fundRows.some(function(fr){ return fr.gmab; })) p(T.guaranteeFundNote);
   }
 
   // ── 7. Remuneration ──
   if (Q.sections.remun) {
+    sec = 'remun';
     h2(T.sections.remun, true);
     p(qtFill(T.remunIntro, { brokerFirm: Q.broker.firm }));
     var rt2 = '<table class="num"><thead><tr><th class="l">Type</th><th class="l">Basis</th><th>Amount</th></tr></thead><tbody>';
@@ -553,15 +568,18 @@ function qtBuildPack(Q) {
 
   // ── 8–10. Product, tax, important ──
   if (Q.sections.product) {
+    sec = 'product';
     h2(T.sections.product, true);
     add('<ul>' + (isPrsa ? T.prsaProduct : isArf ? T.arfProduct : T.ibProduct).map(function(l){ return '<li>' + escHtml(l) + '</li>'; }).join('') + '</ul>');
   }
   if (Q.sections.tax) {
+    sec = 'tax';
     h2(T.sections.tax, !Q.sections.product);
     p(T.taxIntro, 'small');
     add('<ul>' + (isPrsa ? T.prsaTax : isArf ? T.arfTax : T.ibTax).map(function(l){ return '<li>' + escHtml(l) + '</li>'; }).join('') + '</ul>');
   }
   if (Q.sections.important) {
+    sec = 'important';
     h2(T.sections.important, !Q.sections.product && !Q.sections.tax);
     add('<div class="warn">' + T.warnings.map(function(w){ return '<p>' + escHtml(w) + '</p>'; }).join('') + '</div>');
     T.importantInfo.forEach(function(l) { p(qtFill(l, { regDoc: isPrsa ? T.regDocPrsa : isArf ? T.regDocArf : T.regDocIb })); });
@@ -571,6 +589,7 @@ function qtBuildPack(Q) {
     add('<p class="small">' + escHtml(cs.regulatory) + '<br>' + escHtml(cs.directors) + '</p>');
   }
   if (Q.sections.glossary) {
+    sec = 'glossary';
     h2(T.sections.glossary, false);
     var gt = '<table class="gloss split"><tbody>';
     T.glossary.forEach(function(g) { gt += '<tr><td><b>' + escHtml(g[0]) + '</b></td><td>' + escHtml(g[1]) + '</td></tr>'; });
@@ -578,18 +597,18 @@ function qtBuildPack(Q) {
   }
 
   // ── Assemble ──
-  var hdrAgl = '<div class="hl">' + qtLogoSvg(26) + '</div><div class="hr">' + escHtml(Q.productName) + '<br><span>Quotation</span></div>';
-  var bAddr = (Q.broker.address || '').split('\n').filter(function(x){ return x.trim(); }).map(escHtml).join(', ');
-  var hdrBroker = '<div class="hl"><div class="firm">' + escHtml(Q.broker.firm) + '</div><div class="faddr">' + bAddr + '</div></div>' +
-    '<div class="hr">' + escHtml(Q.broker.phone) + '<br>' + escHtml(Q.broker.email) + '</div>';
+  var hdrAgl = '<div class="hl">' + qtLogoSvg(20) + '</div><div class="hr">' + escHtml(Q.productName) + '<br>Quotation &middot; ' + escHtml(Q.quoteRef) + '</div>';
+  var bAddr = (Q.broker.address || '').split('\n').filter(function(x){ return x.trim(); }).map(escHtml);
+  var hdrBroker = '<div class="hl"><div class="firm">' + escHtml(Q.broker.firm) + '</div></div>' +
+    '<div class="hr">' + bAddr.concat(Q.broker.phone ? [escHtml(Q.broker.phone)] : []).join('<br>') + '</div>';
   var footAgl = escHtml(Q.quoteRef) + ' &middot; ' + escHtml(clientName) + ' &middot; ' + escHtml(fmtDate(new Date())) + ' &middot; ' + escHtml(cs.name) + ' is regulated by the Central Bank of Ireland.';
   var footBroker = escHtml(Q.quoteRef) + ' &middot; ' + escHtml(Q.broker.regStatement);
 
   var src = B.map(function(b) {
-    return '<div class="blk ' + b.cls + '" data-hdr="' + b.hdr + '">' + b.html + '</div>';
+    return '<div class="blk ' + b.cls + '" data-hdr="' + b.hdr + '" data-sec="' + b.sec + '">' + b.html + '</div>';
   }).join('');
 
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.productName + ' – Quotation – ' + clientName + ' – ' + Q.quoteRef) + '</title>' +
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.docTitle || (Q.productName + ' – Quotation – ' + clientName + ' – ' + Q.quoteRef)) + '</title>' +
     '<style>' + qtPackCss() + '</style></head><body>' +
     '<div class="topbar"><span>' + escHtml(Q.productName) + ' &ndash; Quotation &ndash; ' + escHtml(clientName) + '</span><button onclick="window.print()">Print / Save as PDF</button></div>' +
     '<template id="hdr-agl">' + hdrAgl + '</template><template id="hdr-broker">' + hdrBroker + '</template>' +
@@ -649,88 +668,106 @@ function qtStrategyDescription(Q) {
   return (prof ? T.strategyProfiles[prof] : '') + (r.stratObj && r.stratObj.gmab ? ' ' + T.guaranteeFundNote : '');
 }
 
+// Allianz Neo, as loaded by a1-elements.css in the tool itself
+var QT_PACK_FONTS = [['normal', 'Regular'], ['600', 'SemiBold'], ['bold', 'Bold']].map(function(w) {
+  var u = 'https://fonts.cdn.allianz.com/allianz-neo/AllianzNeoW04-' + w[1];
+  return '@font-face { font-family: "Allianz Neo"; font-style: normal; font-weight: ' + w[0] + '; font-display: block; src: url("' + u + '.woff2") format("woff2"), url("' + u + '.woff") format("woff"); }';
+}).join('\n');
 function qtPackCss() {
   return [
+    QT_PACK_FONTS,
     '@page { size: A4; margin: 0; }',
     '* { box-sizing: border-box; margin: 0; padding: 0; }',
-    'html, body { font-family: Arial, Helvetica, sans-serif; color: #1f2933; font-synthesis: none; -webkit-font-smoothing: antialiased; }',
+    'html, body { font-family: "Allianz Neo", Arial, Helvetica, sans-serif; color: #0E1E33; font-synthesis: none; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }',
     'body { background: #dfe3e8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
     '#src { position: absolute; left: -10000px; top: 0; width: 178mm; }',
     '.topbar { position: sticky; top: 0; z-index: 2; background: #003781; color: #fff; padding: 10px 20px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }',
-    '.topbar button { background: #fff; color: #003781; border: none; padding: 7px 18px; border-radius: 4px; font-weight: 700; cursor: pointer; }',
+    '.topbar button { background: #fff; color: #003781; border: none; padding: 7px 18px; border-radius: 6px; font: inherit; font-weight: 700; cursor: pointer; }',
     '.page { width: 210mm; height: 297mm; background: #fff; margin: 8mm auto; position: relative; overflow: hidden; page-break-after: always; break-after: page; }',
     '.page:last-child { page-break-after: auto; break-after: auto; }',
-    '.phdr { position: absolute; top: 12mm; left: 16mm; right: 16mm; height: 14mm; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.5pt solid #003781; padding-bottom: 3mm; }',
-    '.phdr .hr { text-align: right; font-size: 8pt; color: #003781; font-weight: 700; line-height: 1.35; }',
-    '.phdr .hr span { color: #5b6670; font-weight: 400; }',
-    '.phdr .firm { font-size: 14pt; font-weight: 700; color: #1f2933; }',
-    '.phdr .faddr { font-size: 7.5pt; color: #5b6670; margin-top: 2px; }',
-    '.pbody { position: absolute; top: 32mm; bottom: 18mm; left: 16mm; right: 16mm; overflow: hidden; }',
-    '.pfoot { position: absolute; bottom: 8mm; left: 16mm; right: 16mm; font-size: 6.8pt; color: #6b7682; border-top: 0.5pt solid #c9d1da; padding-top: 2mm; display: flex; justify-content: space-between; gap: 6mm; }',
+    '.phdr { position: absolute; top: 12mm; left: 16mm; right: 16mm; height: 13mm; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 0.6pt solid #D5DDE6; padding-bottom: 3mm; }',
+    '.phdr.broker { height: 16mm; align-items: flex-start; border-bottom: 1.5pt solid #0E1E33; }',
+    '.phdr .hr { text-align: right; font-size: 7.6pt; color: #5E6B78; line-height: 1.45; }',
+    '.phdr .firm { font-size: 13pt; font-weight: 700; color: #0E1E33; }',
+    '.pbody { position: absolute; top: 33mm; bottom: 18mm; left: 16mm; right: 16mm; overflow: hidden; }',
+    '.pfoot { position: absolute; bottom: 8mm; left: 16mm; right: 16mm; font-size: 6.8pt; color: #8A96A3; border-top: 0.5pt solid #E2E8EF; padding-top: 2mm; display: flex; justify-content: space-between; gap: 6mm; }',
     '.pfoot .pn { white-space: nowrap; }',
     '.blk { margin-bottom: 3.2mm; }',
-    'h1 { font-size: 17pt; color: #003781; font-weight: 700; margin-bottom: 2mm; }',
-    'h2 { font-size: 13pt; color: #003781; font-weight: 700; padding-bottom: 1.5mm; border-bottom: 0.75pt solid #9fb3c8; }',
-    'h3 { font-size: 10pt; color: #003781; font-weight: 700; margin-top: 1.5mm; }',
-    'p, li { font-size: 9pt; line-height: 1.5; }',
+    'h1 { font-size: 19pt; color: #003781; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2mm; }',
+    'h2 { font-size: 17pt; color: #003781; font-weight: 700; letter-spacing: -0.01em; padding-bottom: 1mm; }',
+    'h3 { font-size: 10.5pt; color: #003781; font-weight: 700; margin-top: 1.5mm; }',
+    'p, li { font-size: 9pt; line-height: 1.5; color: #1E2B3B; }',
     'p + p { margin-top: 2mm; }',
     'ul { padding-left: 5mm; } li { margin-bottom: 1.2mm; }',
-    'p.small { font-size: 7.8pt; color: #5b6670; }',
-    '.muted { color: #6b7682; font-size: 7.8pt; }',
+    'p.small { font-size: 7.6pt; color: #5E6B78; }',
+    '.muted { color: #5E6B78; font-size: 7.8pt; }',
     'b { font-weight: 700; }',
-    '.title .t1 { font-size: 20pt; color: #1f2933; }',
-    '.title .t2 { font-size: 20pt; color: #0082be; font-weight: 700; margin-top: 1mm; }',
-    '.title .t3 { font-size: 10pt; color: #5b6670; margin-top: 2mm; }',
-    '.boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }',
-    '.box { border: 0.75pt solid #c9d6e3; border-radius: 2mm; padding: 3mm; display: flex; gap: 3mm; font-size: 8.8pt; line-height: 1.5; }',
-    '.box .bn { flex: 0 0 6mm; height: 6mm; border-radius: 50%; background: #003781; color: #fff; font-weight: 700; font-size: 8pt; text-align: center; line-height: 6mm; }',
-    '.box .bt { font-weight: 700; color: #003781; margin-bottom: 1mm; }',
-    '.box .big { font-size: 14pt; font-weight: 700; color: #003781; }',
+    '.eyebrow { font-size: 7.6pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0377A8; margin-bottom: 1.5mm; }',
+    'h1.prep { font-size: 22pt; margin-bottom: 1mm; }',
+    '.byline { font-size: 9pt; color: #5E6B78; }',
+    '.hero { display: grid; grid-template-columns: 1.1fr 1fr; border: 0.75pt solid #E2E8EF; border-radius: 2.5mm; overflow: hidden; }',
+    '.hero .hl { background: #003781; color: #fff; padding: 5mm 5.5mm; }',
+    '.hero .k, .hero .s { font-size: 8pt; color: #DCE6F4; line-height: 1.45; }',
+    '.hero .v { font-size: 24pt; font-weight: 700; line-height: 1.15; margin: 1.5mm 0 1mm; }',
+    '.hero .hr { padding: 4mm 5mm; display: flex; align-items: center; }',
+    'table.facts td { font-size: 8.4pt; padding: 0.9mm 0; color: #5E6B78; }',
+    'table.facts td + td { text-align: right; color: #0E1E33; font-weight: 700; }',
     '.chart { margin: 1mm 0; }',
+    '.cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }',
+    '.pcard { border: 0.75pt solid #E2E8EF; border-radius: 2.5mm; padding: 4mm 4.5mm; }',
+    '.pcard .pt { font-size: 9pt; font-weight: 700; color: #003781; margin-bottom: 1.5mm; }',
+    '.pcard p { font-size: 8.4pt; }',
+    'table.kv2 td { font-size: 8.4pt; padding: 0.9mm 0; color: #5E6B78; }',
+    'table.kv2 td + td { text-align: right; color: #0E1E33; font-weight: 700; }',
+    '.warnbox { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; font-size: 7.8pt; line-height: 1.5; color: #1E2B3B; }',
+    '.tiles3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }',
+    '.tiles3 > div { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; }',
+    '.tiles3 span { display: block; font-size: 7.6pt; color: #5E6B78; }',
+    '.tiles3 b { display: block; font-size: 12pt; color: #003781; margin-top: 0.5mm; }',
+    '.g { color: #0B7A3E; font-weight: 700; }',
+    '.splitrow { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }',
+    '.splitrow.one { grid-template-columns: 1fr; }',
+    '.splitrow .bt { font-size: 8.8pt; font-weight: 700; color: #003781; margin-bottom: 1.5mm; }',
+    '.gnote { background: #E6F4EC; border-radius: 2mm; padding: 3mm 3.5mm; font-size: 7.8pt; line-height: 1.45; color: #1E2B3B; }',
+    '.gnote b { display: block; color: #0B7A3E; margin-bottom: 0.8mm; }',
     'table { width: 100%; border-collapse: collapse; }',
-    'table.num th { font-size: 7.6pt; color: #003781; font-weight: 700; text-align: right; padding: 1.5mm 1.8mm; vertical-align: bottom; border-bottom: 1.2pt solid #003781; line-height: 1.3; }',
-    'table.num tr.ltr th { border-bottom: none; font-size: 9.5pt; padding-bottom: 0; }',
-    'table.num td { font-size: 8.4pt; text-align: right; padding: 1.4mm 1.8mm; border-bottom: 0.5pt solid #e1e6ec; }',
+    'table.num th { font-size: 7.4pt; color: #5E6B78; font-weight: 700; text-align: right; padding: 1.5mm 1.8mm; vertical-align: bottom; border-bottom: 1pt solid #003781; line-height: 1.3; }',
+    'table.num th.em { color: #003781; }',
+    'table.num tr.ltr th { border-bottom: none; font-size: 9pt; color: #003781; padding-bottom: 0; }',
+    'table.num td { font-size: 8.4pt; text-align: right; padding: 1.5mm 1.8mm; border-bottom: 0.5pt solid #EEF2F6; }',
     'table.num th:first-child, table.num td:first-child { text-align: left; }',
     'table.num .l { text-align: left; }',
-    'table.num tr.mat td { font-weight: 700; color: #003781; background: #eef3fa; }',
-    'table.num tr.cat td { font-weight: 700; color: #1f2933; background: #f3f5f8; font-size: 8pt; }',
-    'table.kv td { font-size: 8.6pt; padding: 1.2mm 2mm; border-bottom: 0.5pt solid #e1e6ec; }',
-    'table.kv td:nth-child(odd) { color: #5b6670; width: 16%; }',
-    'table.gloss td { font-size: 8.6pt; padding: 1.6mm 2mm; border-bottom: 0.5pt solid #e1e6ec; vertical-align: top; line-height: 1.45; }',
+    'table.num tr.mat td { font-weight: 700; color: #003781; background: #EEF4FA; }',
+    'table.num tr.cat td { font-weight: 700; color: #0E1E33; background: #F7FAFC; font-size: 8pt; }',
+    'table.kv td { font-size: 8.6pt; padding: 1.2mm 2mm; border-bottom: 0.5pt solid #EEF2F6; }',
+    'table.kv td:nth-child(odd) { color: #5E6B78; width: 16%; }',
+    'table.gloss td { font-size: 8.6pt; padding: 1.6mm 2mm; border-bottom: 0.5pt solid #EEF2F6; vertical-align: top; line-height: 1.45; }',
     'table.gloss td:first-child { width: 34%; color: #003781; }',
-    '.imp { border-left: 2.5pt solid #003781; background: #f2f6fb; padding: 2.5mm 4mm; }',
-    '.imp b { font-size: 8.6pt; text-decoration: underline; }',
-    '.imp p { font-size: 8.6pt; font-weight: 700; margin-top: 1.2mm; }',
-    '.warn { border: 1pt solid #003781; padding: 2.5mm 4mm; }',
-    '.warn p { font-weight: 700; font-size: 8.8pt; }',
+    '.imp { border-left: 2.5pt solid #003781; background: #EEF4FA; padding: 2.5mm 4mm; border-radius: 0 1.5mm 1.5mm 0; }',
+    '.imp b { font-size: 8.6pt; }',
+    '.imp p { font-size: 8.4pt; font-weight: 700; margin-top: 1.2mm; }',
+    '.warn { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; }',
+    '.warn p { font-weight: 700; font-size: 8.6pt; }',
     '.badge { display: inline-block; padding: 0.3mm 1.6mm; border-radius: 1mm; font-size: 7.4pt; font-weight: 700; }',
     '.sricol { flex: 1; max-width: 95mm; }',
     'table.sri { width: 100%; table-layout: fixed; }',
-    'table.sri td { text-align: center; font-size: 9pt; font-weight: 700; color: #fff; padding: 1.6mm 0; border: 1.5pt solid #fff; opacity: 1; }',
-    'table.sri td.on { outline: 1.5pt solid #1f2933; outline-offset: -1.5pt; }',
-    'table.sri tr.mk td { background: none; color: #1f2933; font-size: 7.2pt; font-weight: 700; padding-top: 0.5mm; line-height: 1.2; }',
-    '.sri-ends { width: 100%; margin-top: -1mm; display: flex; justify-content: space-between; font-size: 7.2pt; color: #6b7682; }',
-    '.sricol.sm { max-width: 72mm; margin-top: 2mm; }',
-    '.sricol.sm table.sri td { font-size: 7.4pt; padding: 0.8mm 0; }',
+    'table.sri td { text-align: center; font-size: 8.6pt; font-weight: 700; color: #fff; padding: 1.4mm 0; border: 1.5pt solid #fff; }',
+    'table.sri td.on { outline: 1.5pt solid #0E1E33; outline-offset: -1.5pt; }',
+    'table.sri tr.mk td { background: none; color: #0E1E33; font-size: 7pt; font-weight: 700; padding-top: 0.5mm; line-height: 1.2; }',
+    '.sri-ends { width: 100%; margin-top: -1mm; display: flex; justify-content: space-between; font-size: 7pt; color: #5E6B78; }',
+    '.sricol.sm { max-width: none; margin-top: 2mm; }',
+    '.sricol.sm table.sri td { font-size: 7.2pt; padding: 0.8mm 0; }',
     '.sricol.sm table.sri tr.mk td { font-size: 6.4pt; }',
     '.sricol.sm .sri-ends { display: none; }',
-    '.sumfoot { display: grid; grid-template-columns: 1.25fr 1.5fr; gap: 4mm; }',
-    '.sumfoot .bt { font-weight: 700; color: #003781; font-size: 8.8pt; margin-bottom: 1mm; }',
-    '.inpack { border: 0.75pt solid #c9d6e3; border-radius: 2mm; padding: 2.5mm 3mm; }',
-    '.inpack ul { padding-left: 3.5mm; columns: 2; column-gap: 5mm; } .inpack li { font-size: 7.6pt; margin-bottom: 0.3mm; line-height: 1.35; break-inside: avoid; }',
-    '.warn.sm { padding: 2.5mm 3mm; } .warn.sm p { font-size: 7.4pt; line-height: 1.35; margin-top: 0.4mm; }',
-    '.sriwrap { display: flex; gap: 6mm; align-items: flex-start; }',
-    '.sril { flex: 0 0 52mm; font-size: 8.6pt; line-height: 1.6; }',
-    '.catbar { display: flex; height: 4mm; border-radius: 1mm; overflow: hidden; }',
-    '.catleg { display: flex; gap: 6mm; font-size: 8pt; margin-top: 1.5mm; }',
-    '.catleg i { display: inline-block; width: 3mm; height: 3mm; margin-right: 1.5mm; vertical-align: -0.4mm; }',
-    'p.fdesc { font-size: 8.2pt; color: #333; }',
-    '.letter-top { display: flex; justify-content: space-between; font-size: 9.2pt; line-height: 1.5; margin-bottom: 4mm; }',
-    '.letter-top .r { text-align: right; }',
+    '.catbar { display: flex; height: 3.5mm; border-radius: 1mm; overflow: hidden; background: #EEF2F6; }',
+    '.catleg { display: flex; flex-wrap: wrap; gap: 1mm 5mm; font-size: 7.8pt; color: #5E6B78; margin-top: 1.5mm; }',
+    '.catleg i { display: inline-block; width: 2.6mm; height: 2.6mm; border-radius: 0.6mm; margin-right: 1.4mm; vertical-align: -0.3mm; }',
+    'p.fdesc { font-size: 8.2pt; color: #3A4756; }',
+    '.letter-top { font-size: 9.2pt; line-height: 1.5; margin-bottom: 4mm; }',
+    '.letter-top .ldate { margin-top: 5mm; }',
     '.re { margin-bottom: 1mm; }',
-    '.sigblock { margin-top: 10mm; font-size: 9pt; line-height: 1.5; }',
-    '.sigline { border-bottom: 0.75pt solid #1f2933; width: 60mm; height: 12mm; margin-bottom: 1.5mm; }',
+    '.sigblock { margin-top: 9mm; font-size: 9pt; line-height: 1.55; }',
+    '.sigline { border-bottom: 0.75pt solid #0E1E33; width: 60mm; height: 12mm; margin-bottom: 1.5mm; }',
     '.sigline.short { width: 35mm; height: 9mm; }',
     '.sigs { display: flex; gap: 10mm; margin-top: 4mm; font-size: 8.6pt; }',
     '.sigs > div { flex: 1; } .sigs p { font-size: 8.6pt; }',
@@ -743,6 +780,10 @@ function qtPackCss() {
 // then opens the print dialog.
 function qtPaginatorSrc() {
   return '(' + function() {
+   var started = false;
+   function run() {
+    if (started) return;
+    started = true;
     var src = document.getElementById('src'), out = document.getElementById('pages');
     var blocks = [].slice.call(src.children);
     var body = null, cur = null, pages = [];
@@ -750,7 +791,7 @@ function qtPaginatorSrc() {
     function newPage(hdr) {
       var pg = document.createElement('div');
       pg.className = 'page';
-      pg.innerHTML = '<div class="phdr">' + tpl('hdr-' + hdr) + '</div><div class="pbody"></div>' +
+      pg.innerHTML = '<div class="phdr ' + hdr + '">' + tpl('hdr-' + hdr) + '</div><div class="pbody"></div>' +
         '<div class="pfoot"><span>' + tpl('foot-' + hdr) + '</span><span class="pn"></span></div>';
       out.appendChild(pg); pages.push(pg);
       body = pg.querySelector('.pbody'); cur = hdr;
@@ -803,6 +844,11 @@ function qtPaginatorSrc() {
     src.parentNode.removeChild(src);
     window.__paginated = pages.length;
     if (!window.__noAutoPrint) setTimeout(function() { window.print(); }, 300);
+   }
+   if (document.fonts && document.fonts.ready) {
+     var fallback = setTimeout(run, 3000);
+     document.fonts.ready.then(function() { clearTimeout(fallback); run(); });
+   } else run();
   }.toString() + ')();';
 }
 

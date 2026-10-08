@@ -10,11 +10,14 @@
 var QT_CONTENT = {
 
   // ─── Strategy cards (Portfolio step, view 1) ────────────────────────────────
+  // dis: one line per PRSA type. diy.subGuarantee is added on a Non-Standard PRSA only.
   strategyCards: {
-    diy:          { name: 'Build Your Own Portfolio', sub: 'Select individual funds tailored to your client\'s needs and risk profile' },
-    dis:          { name: 'Default Investment Strategy', sub: '' },
-    'Autopilot':  { name: 'Autopilot', sub: 'Glidepath with fund guarantee' },
-    'Life Cycle': { name: 'Life Cycle', sub: 'Glidepath' }
+    diy:          { name: 'Build Your Own Portfolio', sub: 'Select individual funds tailored to your client\'s needs and risk profile.', subGuarantee: 'Optional annual guarantee on eligible funds.' },
+    dis:          { name: 'Default Investment Strategy',
+                    nonstandard: 'Two-phase glidepath: Lifecycle, then Autopilot for the final 8 years.',
+                    standard: 'Dynamic Lifecycle glidepath, moving from Strategy Select 75 towards Strategy Select 30 as retirement nears.' },
+    'Autopilot':  { name: 'Autopilot', sub: 'Glidepath with rolling one-year fund guarantee.' },
+    'Life Cycle': { name: 'Life Cycle', sub: 'Glidepath reducing equity as retirement approaches.' }
   },
 
   // ─── Strategy info popovers ─────────────────────────────────────────────────
@@ -85,6 +88,7 @@ var QT_CONTENT = {
   // availability: 'all' (every PRSA) or 'nonstandard' (greyed out on a Standard PRSA — brochure p.31).
   // sfdr: 6 or 8 (SFDR article). volatility: target range, where the fund has one.
   // opportunities / risks: brochure wording; the three HSBC ETFs have none in the brochure.
+  // note: sub-line in the fund builder where a fund has no volatility range.
   funds: {
     ss75: {
       category: 'Protected Growth — Actively Managed', volatility: '10–16%', sfdr: 8, availability: 'all',
@@ -123,7 +127,7 @@ var QT_CONTENT = {
       risks: ['Limited yield potential of bonds with good credit quality', 'Sustainability approach narrows the universe to eligible issuers', 'Increased risk of price fluctuations through addition of stocks, emerging markets assets, and high-yield bonds', 'Risk and volatility management do not exclude potential losses', 'Currency losses against investor currency possible']
     },
     bsri: {
-      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'nonstandard',
+      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'nonstandard', note: 'Global equities, up to 30% emerging markets',
       desc: 'Concentrates on global equity markets using an SRI strategy. Up to 30% in Emerging Markets. Objective is capital growth over the long term using differing investment styles based on market assessment.',
       opportunities: ['High return potential of stocks in the long run', 'Investments specifically in the global equity markets and issuers with sustainable practices (SRI)', 'Particular opportunities through the "Best Styles" approach', 'Broad diversification across numerous securities', 'Possible extra returns through single security analysis and active management'],
       risks: ['High volatility of stocks, losses possible. The volatility of fund unit prices may be strongly increased', 'Underperformance of the global equity markets and from issuers with sustainable practices (SRI) possible', 'Underperformance of the "Best Styles" approach possible at times', 'Limited participation in the yield potential of single securities', 'Success of single security analysis and active management not guaranteed']
@@ -147,16 +151,32 @@ var QT_CONTENT = {
       risks: ['Money market rates vary', 'Price declines cannot be ruled out', 'Above-average price fluctuations of non-governmental bonds', 'Sustainability approach narrows the investment universe', 'Limited participation in the yield potential of single securities', 'Success of single security analysis and active management not guaranteed']
     },
     etfw: {
-      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all',
+      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Index tracker',
       desc: 'Tracks MSCI World Index — large and mid-cap companies from world\'s developed countries. Passively managed using optimisation technique to minimise tracking error.'
     },
     etfs: {
-      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all',
+      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Index tracker',
       desc: 'Tracks S&P 500 Index — large-sized US listed companies. Passively managed, invests in same proportion as the index.'
     },
     etfe: {
-      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all',
+      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Index tracker',
       desc: 'Tracks EURO STOXX 50 Index — 50 largest listed companies in the European Monetary Union. Passively managed.'
     }
   }
 };
+
+// Brochure content for a fund. ARF / Investment Bond funds use their own ids for the same
+// funds, so they are mapped to the PRSA entries above.
+var QT_FUND_ALIAS = { afsd: 'afisd', bsge: 'bsri', hesc: 'etfe', hmw: 'etfw', hsp: 'etfs' };
+function qtFundInfo(id) { return QT_CONTENT.funds[QT_FUND_ALIAS[id] || id] || null; }
+
+// Share of a fund mix ([{ fund, weight }]) by SFDR article: { art8, art6, unknown }, as fractions.
+function qtSfdrSplit(mix) {
+  var out = { art8: 0, art6: 0, unknown: 0 }, tot = 0;
+  (mix || []).forEach(function(m) { tot += m.weight; });
+  (mix || []).forEach(function(m) {
+    var a = (qtFundInfo(m.fund.id) || {}).sfdr, w = tot ? m.weight / tot : 0;
+    if (a === 8) out.art8 += w; else if (a === 6) out.art6 += w; else out.unknown += w;
+  });
+  return out;
+}

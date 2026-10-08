@@ -40,8 +40,6 @@ var QT_TEXT = {
   consent: 'I confirm that I am an authorised intermediary, that I am preparing this quotation for a client I am advising, and that the client has agreed to their personal details being used for this purpose. Client details are not stored by this tool once the page is closed.',
 
   // ─── Document headings ───────────────────────────────────────────────────────
-  docTitle: 'Your personalised quotation',
-  docSubtitle: 'Prepared for {clientName} by {brokerFirm}',
   disclaimerShort: 'This quotation is for illustration purposes only and does not form part of a contract. Figures are not guaranteed.',
 
   sections: {
@@ -52,16 +50,18 @@ var QT_TEXT = {
     charges:   'Charges',
     funds:     'Your investment and risk',
     remun:     'Remuneration statement',
-    product:   'About the product',
+    product:   'Product Brochure',
     tax:       'Tax information',
     important: 'Important information',
-    glossary:  'Glossary'
+    glossary:  'Glossary',
+    factsheets:'Fund information',
+    kids:      'Key Information Documents',
+    appform:   'Application form'
   },
 
   // ─── Summary page — DRAFT ────────────────────────────────────────────────────
-  summaryIntro: 'This page summarises the key details of your quotation. Each item is explained in more detail later in this document.',
-  summaryInPack: 'In this pack',
-  summaryWarningsTitle: 'Key warnings',
+  summaryTitle: 'Prepared for {clientName}',
+  summaryByline: 'by {brokerName}, {brokerFirm} · {date}',
 
   // ─── PRSA projection — from SRP ──────────────────────────────────────────────
   prsaProjectionIntro: 'The table below shows how your PRSA could grow up to your chosen retirement age of {nra}, based on the contributions shown in this quotation. Column D shows the projected value of your PRSA after all charges.',
@@ -291,7 +291,8 @@ var QT_TEXT = {
     charges:   'Details of the charges that apply',
     funds:     'Details of your investment and its risk',
     remun:     'A statement of the remuneration we receive',
-    product:   'Information about the product, tax and other important points'
+    product:   'Information about the product, tax and other important points',
+    important: 'Important information and a glossary of terms'
   },
 
   // ─── Statement of Suitability templates (adviser-editable in Step 7) — DRAFT ─
@@ -303,7 +304,10 @@ var QT_TEXT = {
     '[[Employment, income, existing pensions, other assets and liabilities]]',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
+    '',
+    '## Your sustainability preferences',
+    '{esgSentence}',
     '',
     '## Our recommendation',
     'We recommend the {productName}, with {contributionSummary}, invested in {strategyName}. {portfolioRiskSentence} {riskSentence}',
@@ -338,7 +342,10 @@ var QT_TEXT = {
     '[[Other retirement income (e.g. State Pension), assets, liabilities and dependants]]',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client\'s income, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client\'s income, and their investment horizon]]',
+    '',
+    '## Your sustainability preferences',
+    '{esgSentence}',
     '',
     '## Our recommendation',
     'We recommend the {productName}, with a single contribution of {contribution}, invested in {strategyName}. {portfolioRiskSentence} {riskSentence}',
@@ -369,10 +376,10 @@ var QT_TEXT = {
     '[[Income, savings and investments, other assets and liabilities, tax position]]',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
     '',
     '## Your sustainability preferences',
-    '[[Whether the client has sustainability preferences and, if so, how the recommended funds take account of them]]',
+    '{esgSentence}',
     '',
     '## Our recommendation',
     'We recommend the {productName}, with {contributionSummary}, invested in {strategyName}. {portfolioRiskSentence} {riskSentence}',
@@ -394,6 +401,15 @@ var QT_TEXT = {
     '## Alternatives considered',
     '[[Other products or options considered and why they were not recommended]]'
   ].join('\n'),
+
+  // Risk profiler named in "Your attitude to risk" (from Step 3, optional). DRAFT.
+  sosProfilerPhrase: ' ({profiler})',
+  // "Your sustainability preferences" — from the Step 3 answer and the SFDR classification of the
+  // recommended funds. DRAFT: new wording, needs Compliance sign-off.
+  sosEsgNo: 'You told us that you do not have sustainability preferences for this investment, so they were not a factor in our recommendation.',
+  sosEsgAllArt8: 'You told us that you have sustainability preferences. All of the recommended funds are classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which means they promote environmental or social characteristics.',
+  sosEsgPartArt8: 'You told us that you have sustainability preferences. {art8} of your portfolio is invested in funds classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which promote environmental or social characteristics. The rest is invested in funds classified under Article 6, which do not. [[How the recommendation takes account of the client\'s sustainability preferences]]',
+  sosEsgPrompt: '[[Whether the client has sustainability preferences and, if so, how the recommended funds take account of them]]',
 
   sosRiskMatch: 'This is in line with your attitude to risk.',
   sosRiskHigher: 'This is higher than your assessed attitude to risk. We have recommended it because: {reason}',
