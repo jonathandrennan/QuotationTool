@@ -1,0 +1,82 @@
+
+
+
+
+he always runs tool - can also select it. 
+
+sustainability - yes.no tick box. 
+
+risk profiler - everyone has different version of it. do we already have one/ questions?
+Zurich one is the slickest one. 
+
+Doesn't want too much in it. 
+
+
+
+Client can go against it - x came out at this amount. we have chosen thisbased on xxx
+
+Suggests a PRISMA 5 Based on risk profile. 
+
+
+PORTFOLIO BUILDER - THEY HAVE TICK BOXES FOR EACH ONE. THEN you can allocate a % at the top.
+
+
+enter them all, calculate - gives single digit risk rating, portfolio vol etc.
+
+
+Gives AMC. 
+Allocation to each asset too. 
+
+
+
+Drop down of what to include first. 
+Possibly do option of use own cover letter/statement. 
+
+Don't include application form. (Or include it)
+Include KIDS at end. 
+
+
+Charts the 4 funds that have been selected. 
+and then the blended one. 
+
+market update for the month. 
+
+would you always use the companies risk profiler - vs using anything separately maybe in voyant etc. 
+
+
+
+Aviva 
+
+First they have list of funds with drop down of description. few lines. and then a link to fact sheet,.
+
+more focused on overall charging and covering rather than breakdown. 
+
+
+he wants 1% trail
+clunkier than Zurich. 
+aviva also give fund and asset split. 
+then shows portfolio risk and client risk. portfolio needs to be the full number. 
+
+
+report:
+Free text box. 
+Available report selection. 
+Make sure the selections are specific to the product you are on.
+It makes you reselect the funds. 
+
+
+note their amc doesn't include the 25 bps trail commission. 
+
+they also have live fund performance. need that in static first.
+and a market performance.
+
+
+
+
+
+Do we provide SORP docs and POI after sale??
+
+
+
+We need tools after for report for reviewing client. e.g. at 12 month intevrals. click a button, heres your policies, market update etc.
+
