@@ -243,7 +243,7 @@ function qtFundRows(Q) {
   var r = Q.r;
   return r.mix.map(function(m) {
     var f = m.fund;
-    var fmc  = Q.product === 'prsa' ? f.charge : f.extFund;
+    var fmc  = Q.product === 'prsa' ? f.chargeQuoted : f.extFund;
     var gtee = m.gmab ? (Q.product === 'prsa' ? f.gmab : f.gteeCharge) : 0;
     return { fund: f, weight: m.weight, admin: r.cc.admin, fmc: fmc, gtee: gtee, total: r.cc.admin + fmc + gtee,
              cat: FUND_CATEGORY_OF[f.id] || 'multi', gmab: m.gmab };

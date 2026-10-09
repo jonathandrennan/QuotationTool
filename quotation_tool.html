@@ -2188,7 +2188,7 @@ function diyContext() {
     var type = S.prsa.prsaType, ids = prsaFundIds(type);
     return { o: S.prsa, funds: prsaFundIds('nonstandard').map(function(id) { return FUNDS_MAP[id]; }),
              avail: function(f) { return ids.indexOf(f.id) >= 0 && !(type === 'standard' && (QT_CONTENT.funds[f.id] || {}).availability === 'nonstandard'); },
-             charge: function(f) { return f.charge; }, gteeOk: function(f) { return type === 'nonstandard' && f.gmab > 0; },
+             charge: function(f) { return f.chargeQuoted; }, gteeOk: function(f) { return type === 'nonstandard' && f.gmab > 0; },
              gteeCharge: function(f) { return f.gmab; } };
   }
   return { o: S.product === 'arf' ? S.arf : S.ib, funds: ARF_FUNDS, avail: function() { return true; },
@@ -2388,7 +2388,7 @@ function portfolioState() {
   var fmc = 0, gch = 0, wsum = total / 100 || 1;
   mix.forEach(function(m) {
     var f = m.fund;
-    fmc += m.weight / wsum * (isPrsa ? f.charge : f.extFund);
+    fmc += m.weight / wsum * (isPrsa ? f.chargeQuoted : f.extFund);
     if (m.gmab) gch += m.weight / wsum * (isPrsa ? f.gmab : f.gteeCharge);
   });
   var chg = admin + fmc + gch;

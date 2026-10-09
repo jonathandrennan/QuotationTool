@@ -86,24 +86,25 @@ var QT_CONTENT = {
 
   // ─── Fund info popovers (brochure pp.31–38) ──────────────────────────────────
   // availability: 'all' (every PRSA) or 'nonstandard' (greyed out on a Standard PRSA — brochure p.31).
-  // sfdr: 6 or 8 (SFDR article). volatility: target range, where the fund has one.
+  // sfdr: 6 or 8 (SFDR article). volatility: pre-set volatility range — DMAS funds only (brochure pp.32–33);
+// the brochure gives no target range for Strategy Select, so none is shown.
   // opportunities / risks: brochure wording; the three HSBC ETFs have none in the brochure.
   // note: sub-line in the fund builder where a fund has no volatility range.
   funds: {
     ss75: {
-      category: 'Protected Growth — Actively Managed', volatility: '10–16%', sfdr: 8, availability: 'all',
+      category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
       desc: 'Invests to a variable extent in international equity markets and euro bonds. Applies a quantitative approach — lowering stock investment in phases of high market volatility and raising it in phases of low volatility. Targets a return comparable to 75% international stocks and 25% medium-term EUR bonds.',
       opportunities: ['High return potential of stocks in the long run', 'Steady interest income on bonds, capital gains opportunities on declining interest rates', 'Broad diversification across numerous securities'],
       risks: ['High volatility of stocks, losses possible. The fund unit price may be subject to increased volatility', 'Interest rates vary, bonds suffer price declines on rising interest rates', 'Limited participation in the yield potential of single securities']
     },
     ss50: {
-      category: 'Protected Growth — Actively Managed', volatility: '6–12%', sfdr: 8, availability: 'all',
+      category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
       desc: 'Targets a return comparable to 50% international stocks and 50% medium-term EUR bonds. Same quantitative approach adjusting equity exposure based on volatility.',
       opportunities: ['Steady interest income on bonds, capital gains opportunities on declining interest rates', 'High return potential of stocks in the long run', 'Broad diversification across numerous securities'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates. The fund unit price may be subject to increased volatility', 'High volatility of stocks, losses possible', 'Limited participation in the yield potential of single securities']
     },
     ss30: {
-      category: 'Protected Growth — Actively Managed', volatility: '3–8%', sfdr: 8, availability: 'all',
+      category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
       desc: 'Targets a return comparable to 30% international stocks and 70% medium-term EUR bonds. Same quantitative approach adjusting equity exposure based on volatility.',
       opportunities: ['Steady interest income on bonds, capital gains opportunities on declining interest rates', 'High return potential of stocks in the long run', 'Broad diversification across numerous securities'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates. The fund unit price may be subject to increased volatility', 'High volatility of stocks, losses possible', 'Limited participation in the yield potential of single securities']
