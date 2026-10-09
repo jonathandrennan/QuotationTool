@@ -2,7 +2,8 @@
 
 Walks the wizard for a PRSA and an ARF quotation, checks validation blocks progress,
 goes through the pack sub-flow (contents, cover letter, Statement of Suitability, review),
-fills the SoS prompts, opens the pack preview, waits for the paginator and saves the pack
+writes the SoS passages, checks the Edit/Preview tabs, opens the pack preview, waits for the
+paginator and saves the pack
 as PDF (tests/out/*.pdf) plus a screenshot of each step.
 Fails on any JS console error, unfilled {token}, 'undefined' or 'NaN' in the pack.
 
@@ -155,33 +156,54 @@ def pack_flow(d, tag):
     nxt(d)
     # 7.3 Statement of Suitability
     check(js(d, 'return S.packStage') == 'sos', 'SoS stage')
-    chips = d.find_elements(By.CSS_SELECTOR, '#ed-sos .pr')
-    check(len(chips) >= 4, 'SoS prompt chips shown (%d)' % len(chips))
+    marks = d.find_elements(By.CSS_SELECTOR, '#ed-sos .sug')
+    check(len(marks) >= 4, 'SoS passages highlighted (%d)' % len(marks))
+    check(not any(m.get_attribute('contenteditable') == 'false' for m in marks), 'highlights are editable text, not locked chips')
     before = js(d, "return docIssues('sos')")
-    check(('%d prompts left' % before) in msg(d), 'footer counts prompts left: %r' % msg(d))
-    click(d, chips[0])
+    check(('%d passages still to write' % before) in msg(d), 'footer counts passages to write: %r' % msg(d))
+    click(d, marks[0])
     sel = js(d, "var s=getSelection(); return s.rangeCount ? s.getRangeAt(0).cloneContents().textContent : ''")
-    check(sel == chips[0].text, 'clicking a chip selects it')
+    check(sel == marks[0].text, 'first click selects the whole suggestion')
     css(d, '#ed-sos').send_keys('The client wants to retire with an income of 60% of salary.')
-    check(js(d, "return docIssues('sos')") == before - 1 and 'retire with an income of 60%' in js(d, 'return S.text.sos'), 'typing over a selected chip replaces the prompt')
-    click(d, css(d, '#next-sos'))
-    sel2 = js(d, "var s=getSelection(); var n=s.rangeCount && s.getRangeAt(0).cloneContents().firstChild; return n && n.classList ? n.classList.contains('pr') : false")
-    check(sel2, 'Next prompt selects a prompt chip')
+    check(js(d, "return docIssues('sos')") == before - 1 and 'retire with an income of 60%' in js(d, 'return S.text.sos'), 'typing over a selected highlight replaces it')
+    # Editing inside a highlight (rather than replacing it wholesale) also clears the marker
+    n2 = js(d, "return docIssues('sos')")
+    js(d, "var p=document.querySelector('#ed-sos .sug:not(.done)'); p.textContent = p.textContent + ' — discussed on 2 October.'; document.getElementById('ed-sos').dispatchEvent(new Event('input'));")
+    check(js(d, "return docIssues('sos')") == n2 - 1, 'a part-edited highlight is no longer counted as unwritten')
+    check(js(d, "return document.querySelectorAll('#ed-sos .sug.done').length") >= 1, 'edited highlight loses its amber tint')
     rows = d.find_elements(By.CSS_SELECTOR, '#ed-ol-sos .ol-row')
-    check(len(rows) >= 8 and any('left' in r.text for r in rows) and any('Auto' in r.text for r in rows), 'outline shows prompts left and auto sections')
-    check(re.match(r'Prompts completed\s*1 of \d+', css(d, '#ed-prog-sos').text), 'progress card counts completed prompts: %r' % css(d, '#ed-prog-sos').text)
+    check(len(rows) >= 8 and any('to write' in r.text for r in rows) and any('Auto' in r.text for r in rows), 'outline shows passages to write and auto sections')
+    check(re.match(r'Passages written\s*2 of \d+', css(d, '#ed-prog-sos').text), 'progress card counts written passages: %r' % css(d, '#ed-prog-sos').text)
     sos = js(d, 'return stripMarks(S.text.sos)')
     check('Your sustainability preferences' in sos and 'Voyant risk questionnaire' in sos, 'SoS has sustainability preferences and the risk profiler')
     d.save_screenshot(str(OUT / ('%s_step7_sos.png' % tag)))
+    # Preview tab: the real pack renderer, this document only
+    unwritten = js(d, "return promptsIn(stripMarks(S.text.sos)).map(function(p){ return p.text.slice(2, -2); })")
+    click(d, css(d, '#stage-sos .dv-tabs button:nth-child(2)'))
+    check(js(d, 'return S.docView.sos') == 'preview' and css(d, '#pv-sos iframe') is not None, 'preview tab shows an A4 render')
+    for _ in range(80):
+        if 'page' in css(d, '#pv-meta-sos').text: break
+        time.sleep(0.1)
+    check(re.search(r'A4 . \d+ page', css(d, '#pv-meta-sos').text), 'preview paginates: %r' % css(d, '#pv-meta-sos').text)
+    pv = js(d, "var f=document.querySelector('#pv-sos iframe'); return f.contentWindow.document.getElementById('pages').textContent")
+    check('Statement of Suitability' in pv and 'retire with an income of 60%' in pv, 'preview shows the typed text')
+    check('[[' not in pv, 'preview has no [[prompt]] markers')
+    leaked = [g for g in unwritten if g[:40] in pv]
+    check(not leaked, 'preview leaks unwritten guidance text: %s' % leaked[:2])
+    check(js(d, 'return S.broker.firm') in pv, 'preview uses the adviser letterhead')
+    d.save_screenshot(str(OUT / ('%s_step7_sos_preview.png' % tag)))
+    click(d, css(d, '#stage-sos .dv-tabs button:nth-child(1)'))
+    check(js(d, 'return S.docView.sos') == 'edit' and css(d, '#ed-sos') is not None, 'back to the editor')
     nxt(d)
-    # 7.4 Review & generate — prompts left block generation
+    # 7.4 Review & generate — unwritten passages warn but do not block
     check(js(d, 'return S.packStage') == 'review', 'review stage')
-    check(d.find_element(By.ID, 'btn-generate').get_attribute('disabled') is not None, 'generate disabled while prompts remain')
-    check(len(d.find_elements(By.CSS_SELECTOR, '#checklist .no')) == 1, 'checklist flags the SoS')
+    check(d.find_element(By.ID, 'btn-generate').get_attribute('disabled') is None, 'generate allowed with passages unwritten')
+    check(len(d.find_elements(By.CSS_SELECTOR, '#checklist .warn')) == 1 and not d.find_elements(By.CSS_SELECTOR, '#checklist .no'), 'checklist warns about the SoS without blocking')
+    check('left out of the PDF' in css(d, '#gen-errs').text, 'review explains unwritten passages are omitted: %r' % css(d, '#gen-errs').text)
     click(d, css(d, '#pack-subs button.ss:nth-of-type(3)'))
     check(js(d, 'return S.packStage') == 'sos', 'sub-step indicator goes back to a done stage')
     js(d, "S.text.sos = S.text.sos.replace(/\\[\\[[^\\]]*\\]\\]/g, 'The client confirmed this in our meeting.'); renderReport();")
-    check('All prompts complete' in msg(d), 'all prompts complete: %r' % msg(d))
+    check('All passages written' in msg(d), 'all passages written: %r' % msg(d))
     nxt(d)
     for _ in range(60):
         if 'pages' in css(d, '#fname').text: break
@@ -190,7 +212,8 @@ def pack_flow(d, tag):
     check(re.match(r'Quotation_Q-\d{6}-\w{4}_Murphy\.pdf', fn) and re.search(r'\d+ pages', fn), 'file name and page count: %r' % fn)
     labels = [e.text for e in d.find_elements(By.CSS_SELECTOR, '#thumbs .lbl')]
     check(len(labels) == 9 and labels[0] == 'p. 1' and all(re.match(r'pp?\. \d', l) for l in labels), 'thumbnails with page numbers: %s' % labels)
-    check(d.find_element(By.ID, 'btn-generate').get_attribute('disabled') is None, 'generate enabled after prompts filled')
+    check(d.find_element(By.ID, 'btn-generate').get_attribute('disabled') is None, 'generate enabled after passages written')
+    check(not d.find_elements(By.CSS_SELECTOR, '#checklist .warn, #checklist .no') and css(d, '#gen-errs').text == '', 'checklist all green once written')
     d.save_screenshot(str(OUT / ('%s_step7_review.png' % tag)))
     main = d.current_window_handle
     click(d, d.find_element(By.ID, 'btn-preview'))

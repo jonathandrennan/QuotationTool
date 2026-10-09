@@ -258,7 +258,8 @@ function qtCategorySplit(rows) {
 
 // ─── Pack builder ─────────────────────────────────────────────────────────────
 // Q = { product, r, broker{}, client{}, risk{sri,reason}, quoteRef, dateStr,
-//       productName, strategyName, sections{}, coverText, sosText }
+//       productName, strategyName, sections{}, coverText, sosText, embed }
+// Q.embed renders the pages for display inside the tool (no print toolbar, transparent backdrop).
 function qtBuildPack(Q) {
   var T = QT_TEXT, r = Q.r, isPrsa = Q.product === 'prsa', isArf = Q.product === 'arf', isIb = Q.product === 'ib';
   var clientName = [Q.client.first, Q.client.last].join(' ');
@@ -609,8 +610,8 @@ function qtBuildPack(Q) {
   }).join('');
 
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.docTitle || (Q.productName + ' – Quotation – ' + clientName + ' – ' + Q.quoteRef)) + '</title>' +
-    '<style>' + qtPackCss() + '</style></head><body>' +
-    '<div class="topbar"><span>' + escHtml(Q.productName) + ' &ndash; Quotation &ndash; ' + escHtml(clientName) + '</span><button onclick="window.print()">Print / Save as PDF</button></div>' +
+    '<style>' + qtPackCss() + (Q.embed ? qtEmbedCss() : '') + '</style></head><body>' +
+    (Q.embed ? '' : '<div class="topbar"><span>' + escHtml(Q.productName) + ' &ndash; Quotation &ndash; ' + escHtml(clientName) + '</span><button onclick="window.print()">Print / Save as PDF</button></div>') +
     '<template id="hdr-agl">' + hdrAgl + '</template><template id="hdr-broker">' + hdrBroker + '</template>' +
     '<template id="foot-agl">' + footAgl + '</template><template id="foot-broker">' + footBroker + '</template>' +
     '<div id="src">' + src + '</div><div id="pages"></div>' +
@@ -673,6 +674,14 @@ var QT_PACK_FONTS = [['normal', 'Regular'], ['600', 'SemiBold'], ['bold', 'Bold'
   var u = 'https://fonts.cdn.allianz.com/allianz-neo/AllianzNeoW04-' + w[1];
   return '@font-face { font-family: "Allianz Neo"; font-style: normal; font-weight: ' + w[0] + '; font-display: block; src: url("' + u + '.woff2") format("woff2"), url("' + u + '.woff") format("woff"); }';
 }).join('\n');
+// Trims the standalone-window chrome so the pages sit cleanly in the tool's preview panel
+function qtEmbedCss() {
+  return [
+    'body { background: transparent; }',
+    '.page { margin: 0 0 6mm; box-shadow: 0 2px 10px rgba(14,30,51,.10); }',
+    '.page:last-child { margin-bottom: 0; }'
+  ].join('\n');
+}
 function qtPackCss() {
   return [
     QT_PACK_FONTS,

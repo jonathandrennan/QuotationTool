@@ -590,9 +590,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .tb { padding:5px 9px; border:none; border-radius:6px; background:none; color:var(--body); font:inherit; font-size:13px; cursor:pointer; }
 .tb:hover { background:var(--hdr); }
 .tb.b { font-weight:700; }
-.tb.next { margin-left:auto; padding:6px 12px; background:var(--amb-bg); color:var(--amb-ink); font-weight:700; }
-.tb.next:hover { background:#FBE9CF; }
-.ed-tb .lnk { padding:6px 10px; font-size:13px; }
+.ed-tb .lnk { margin-left:auto; padding:6px 10px; font-size:13px; }
 .ed-body { min-height:420px; max-width:760px; padding:40px 56px 48px; color:#1E2B3B; font-size:15px; line-height:1.65; outline:none; }
 .ed-body > * { margin:0 0 14px; }
 .ed-body h1, .ed-body h2, .ed-body h3, .ed-body h4 { margin:26px 0 10px; font-size:18px; line-height:1.3; color:var(--navy); }
@@ -600,9 +598,17 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .ed-body ul { padding-left:20px; }
 .ed-body li + li { margin-top:8px; }
 .ed-body .auto { padding:1px 5px; border-radius:4px; background:#EEF2F6; box-decoration-break:clone; -webkit-box-decoration-break:clone; }
-.ed-body .pr { padding:2px 8px; border-radius:5px; background:var(--amb-bg); box-shadow:inset 0 0 0 1.5px var(--amb-ring); color:var(--amb-ink); font-weight:600; cursor:pointer; box-decoration-break:clone; -webkit-box-decoration-break:clone; }
-.ed-body .pr:hover { background:#FBE9CF; }
+.ed-body .sug { border-radius:3px; background:var(--amb-bg); box-shadow:0 1.5px 0 var(--amb-ring); color:var(--amb-ink); box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+.ed-body .sug.done { border-radius:0; background:none; box-shadow:none; color:inherit; }
 .ed-foot { margin-top:-6px; font-size:12px; color:var(--muted); }
+.dv-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; }
+.dv-tabs { display:inline-flex; gap:3px; padding:3px; border:1px solid var(--inp); border-radius:8px; background:#fff; }
+.dv-tabs button { padding:7px 16px; border:none; border-radius:6px; background:none; color:var(--body); font:inherit; font-size:13px; font-weight:500; cursor:pointer; }
+.dv-tabs button:hover:not(.on) { background:var(--hdr); }
+.dv-tabs button.on { background:var(--navy); color:#fff; font-weight:600; }
+.pv-meta { font-size:12px; color:var(--muted); }
+.pv-host { overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--bg); }
+.pv-host iframe { display:block; border:0; transform-origin:top left; }
 .own-ta { min-height:560px; padding:32px 40px; border-radius:12px; font-size:15px; line-height:1.65; }
 .thumbs { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:14px; }
 .thumb { display:flex; flex-direction:column; gap:8px; }
@@ -618,6 +624,8 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .cl-list div { display:flex; align-items:flex-start; gap:10px; }
 .cl-list i { flex:none; display:flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--grn-bg); color:var(--grn); font-size:11px; font-style:normal; font-weight:700; }
 .cl-list .no i { background:var(--amb-bg); color:var(--amb-ink); }
+.cl-list .warn i { background:var(--amb-bg); color:var(--amb-ink); }
+.cl-list .warn span { color:var(--muted); }
 .fname { display:flex; flex-direction:column; gap:4px; padding:14px 16px; border-radius:10px; background:var(--bg); color:var(--body); font-size:13px; word-break:break-all; }
 .fname b { color:var(--ink); }
 
@@ -1081,7 +1089,7 @@ var S = {
   result: null, resTab: 'proj', resSeen: {}, resAllYears: false, remTable: false,
   sections: {}, packStage: 'contents', coverMode: 'template', sosMode: 'template',
   text: { cover: null, sos: null }, basis: { cover: null, sos: null }, stale: { cover: false, sos: false },
-  own: { cover: '', sos: '' }
+  own: { cover: '', sos: '' }, docView: { cover: 'edit', sos: 'edit' }
 };
 SECTION_KEYS.forEach(function(k) { S.sections[k] = COMING_SOON.indexOf(k) < 0; });
 
@@ -2819,7 +2827,7 @@ function packFoot() {
   else if (S.packStage === 'cover' || S.packStage === 'sos') {
     var left = docIssues(S.packStage);
     status = modeOf(S.packStage) === 'own' ? (left ? 'Write the ' + (S.packStage === 'cover' ? 'letter' : 'statement') + ' to continue' : 'Ready')
-      : left ? left + (left === 1 ? ' prompt left' : ' prompts left') : 'All prompts complete';
+      : left ? left + (left === 1 ? ' passage still to write' : ' passages still to write') : 'All passages written';
   }
   return { label: next ? STAGE_NEXT[next] : '', status: status };
 }
@@ -2834,7 +2842,26 @@ function docIssues(k) {
   if (modeOf(k) === 'own') return S.own[k].trim() ? 0 : 1;
   return promptsIn(stripMarks(S.text[k] || '')).length;
 }
-function docText(k) { return modeOf(k) === 'own' ? S.own[k] : stripMarks(S.text[k] || ''); }
+// [[guidance]] is editor scaffolding, so anything left unwritten is removed from the pack rather
+// than printed -- the guidance text must never reach the client. Lines and headings left empty go too.
+function dropPlaceholders(text) {
+  var lines = String(text || '').replace(/\r/g, '').split('\n').map(function(l) {
+    if (!/\[\[/.test(l)) return l;
+    var now = l.replace(/\[\[[^\]]*\]\]/g, '').replace(/ {2,}/g, ' ').replace(/\s+$/, '');
+    return now.replace(/^##\s*/, '').replace(/^-\s*/, '').trim() ? now : null;
+  }).filter(function(l) { return l !== null; });
+  var out = [];
+  lines.forEach(function(l, i) {
+    if (/^##\s+/.test(l)) {
+      var has = false;
+      for (var j = i + 1; j < lines.length && !/^##\s+/.test(lines[j]); j++) if (lines[j].trim()) { has = true; break; }
+      if (!has) return;   // heading whose whole section was unwritten
+    }
+    out.push(l);
+  });
+  return out.join('\n').replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
+}
+function docText(k) { return modeOf(k) === 'own' ? S.own[k] : dropPlaceholders(stripMarks(S.text[k] || '')); }
 
 function textContext() {
   var r = S.result, T = QT_TEXT, isPrsa = S.product === 'prsa';
@@ -2982,13 +3009,14 @@ function promptsIn(text) {
   return out;
 }
 
-// ── Guided editor (Use the Allianz template) ──
+// ── Document editor (Use the Allianz template) ──
 // The text is stored as before: "## " heading, "- " bullet, blank line = new paragraph, [[prompts]].
-// It is shown as a document: auto-filled values in grey boxes, prompts as amber chips that are
-// replaced as a whole when selected and typed over.
+// It is shown as a document the adviser can type anywhere in: auto-filled values in grey boxes, and
+// [[guidance]] as ordinary editable text under a soft amber highlight. The highlight is a marker, not
+// a control -- it clears itself as soon as the text differs from the guidance it started as.
 function edInline(s) {
   return escHtml(s)
-    .replace(/\[\[([^\]]*)\]\]/g, '<span class="pr" contenteditable="false">$1</span>')
+    .replace(/\[\[([^\]]*)\]\]/g, '<span class="sug" data-sug="$1">$1</span>')
     .replace(/\uE000([^\uE000\uE001]*)\uE001/g, '<span class="auto">$1</span>')
     .replace(/[\uE000\uE001]/g, '')
     .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
@@ -3014,7 +3042,10 @@ function edSerialize(root) {
     if (c.nodeType === 3) return c.nodeValue.replace(/\u00a0/g, ' ');
     if (c.nodeType !== 1) return '';
     if (c.tagName === 'BR') return '\n';
-    if (c.classList.contains('pr')) return '[[' + c.textContent + ']]';
+    if (c.classList.contains('sug')) {
+      var t = c.textContent;
+      return t === c.getAttribute('data-sug') ? '[[' + t + ']]' : t;
+    }
     var x = inl(c);
     if (c.classList.contains('auto')) return x ? AO + x + AC : '';
     if (c.tagName === 'B' || c.tagName === 'STRONG') return x.trim() ? '**' + x + '**' : x;
@@ -3053,39 +3084,61 @@ function sectionsOf(text, preLabel) {
   secs.push(cur);
   return secs.filter(function(s) { return s.heading || s.body.trim(); });
 }
+function setDocView(k, v) { S.docView[k] = v; renderReport(); }
 function renderEditorStage(k) {
-  var host = $('stage-' + k), mode = modeOf(k), name = k === 'cover' ? 'cover letter' : 'Statement of Suitability';
+  var host = $('stage-' + k), mode = modeOf(k), view = S.docView[k] || 'edit';
+  var name = k === 'cover' ? 'cover letter' : 'Statement of Suitability';
+  var label = k === 'cover' ? 'Cover letter' : 'Statement of Suitability';
   var h = '<div class="mode-row"><div class="seg" role="radiogroup" aria-label="How to write the ' + name + '">' +
     '<button type="button" role="radio" aria-checked="' + (mode === 'template') + '" class="' + (mode === 'template' ? 'on' : '') + '" onclick="setMode(\'' + k + '\', \'template\')">Use the Allianz template</button>' +
     '<button type="button" role="radio" aria-checked="' + (mode === 'own') + '" class="' + (mode === 'own' ? 'on' : '') + '" onclick="setMode(\'' + k + '\', \'own\')">Write your own</button></div>' +
-    '<span class="hint">' + (mode === 'template' ? 'Grey text is filled from the quotation. Amber prompts need your own words.' : 'Plain text: ## starts a heading, - starts a bullet, a blank line starts a new paragraph.') + '</span></div>';
-  if (mode === 'template') {
+    '<span class="hint">' + (mode === 'template' ? 'Type anywhere. Grey text is filled from the quotation; highlighted text shows what to cover.' : 'Plain text: ## starts a heading, - starts a bullet, a blank line starts a new paragraph.') + '</span></div>';
+  h += '<div class="dv-row"><div class="dv-tabs" role="tablist" aria-label="' + label + ' view">' +
+    '<button type="button" role="tab" aria-selected="' + (view === 'edit') + '" class="' + (view === 'edit' ? 'on' : '') + '" onclick="setDocView(\'' + k + '\', \'edit\')">Edit</button>' +
+    '<button type="button" role="tab" aria-selected="' + (view === 'preview') + '" class="' + (view === 'preview' ? 'on' : '') + '" onclick="setDocView(\'' + k + '\', \'preview\')">Preview</button></div>' +
+    '<span class="pv-meta" id="pv-meta-' + k + '">' + (view === 'preview' ? 'Building preview…' : 'See it as the client will, on your letterhead') + '</span></div>';
+  if (view === 'preview') {
+    var leftP = docIssues(k);
+    h += '<div class="ed-grid"><aside class="ed-side"><div class="card ed-prog" id="ed-prog-' + k + '"></div><nav class="ed-ol" id="ed-ol-' + k + '" aria-label="Sections"></nav>' +
+      '<p class="ed-help">This is the finished ' + name + ', paginated exactly as it will print.</p></aside>' +
+      '<div class="stack" style="gap:12px"><div class="pv-host" id="pv-' + k + '"></div>' +
+      '<div class="ed-foot">' + (mode === 'template' && leftP
+        ? escHtml(leftP + (leftP === 1 ? ' highlighted passage is' : ' highlighted passages are') + ' still to be written. Unwritten passages are left out of the pack, not printed.')
+        : 'Shown with your letterhead and signature lines, as it will appear in the pack.') + '</div></div></div>';
+  } else if (mode === 'template') {
     if (S.stale[k]) h += '<div class="alert warn">The quotation has changed since this text was edited, so some figures in it may be out of date. <button type="button" class="lnk" onclick="resetText(\'' + k + '\')">Reset to template</button> to refresh it (your edits will be lost).</div>';
     h += '<div class="ed-grid"><aside class="ed-side"><div class="card ed-prog" id="ed-prog-' + k + '"></div><nav class="ed-ol" id="ed-ol-' + k + '" aria-label="Sections"></nav>' +
-      '<p class="ed-help">Text in grey boxes is filled from your answers. Amber prompts need your own words before the pack can be generated.</p></aside>' +
+      '<p class="ed-help">Every word here is yours to change — click anywhere and type. Grey boxes are filled from your answers. Highlighted text suggests what to cover; replace or delete it. Anything still highlighted is left out of the pack.</p></aside>' +
       '<div class="stack" style="gap:12px"><article class="doc"><div class="ed-tb" role="toolbar" aria-label="Formatting">' +
       '<button type="button" class="tb b" title="Bold" onmousedown="event.preventDefault()" onclick="edCmd(\'' + k + '\', \'bold\')">B</button>' +
       '<button type="button" class="tb" onmousedown="event.preventDefault()" onclick="edCmd(\'' + k + '\', \'heading\')">Heading</button>' +
       '<button type="button" class="tb" onmousedown="event.preventDefault()" onclick="edCmd(\'' + k + '\', \'list\')">• List</button>' +
-      '<button type="button" class="tb next" id="next-' + k + '" onmousedown="event.preventDefault()" onclick="nextPrompt(\'' + k + '\')">Next prompt ↓</button>' +
       '<button type="button" class="lnk" onclick="resetText(\'' + k + '\')">Reset to template</button></div>' +
-      '<div class="ed-body" id="ed-' + k + '" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' + (k === 'cover' ? 'Cover letter' : 'Statement of Suitability') + '" spellcheck="true"></div></article>' +
+      '<div class="ed-body" id="ed-' + k + '" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' + label + '" spellcheck="true"></div></article>' +
       '<div class="ed-foot">' + (k === 'cover' ? 'The "Enclosed" list follows the sections in the pack. Your signature block is added automatically.' : 'Signature lines for you and the client are added automatically.') + '</div></div></div>';
   } else {
     h += '<textarea class="own-ta" id="own-' + k + '" aria-label="Your ' + name + '" placeholder="' + (k === 'cover' ? 'Dear …' : '## Your needs and objectives\n…') + '"></textarea>' +
       '<div class="hint" style="margin:0">' + (k === 'cover' ? 'Your signature block is added automatically.' : 'Signature lines for you and the client are added automatically.') + ' Your text is kept if you switch back to the template.</div>';
   }
   host.innerHTML = h;
-  if (mode === 'template') {
+  if (view === 'preview') {
+    if (mode === 'template') edSide(k);
+    else { $('ed-prog-' + k).remove(); $('ed-ol-' + k).remove(); }
+    renderDocPreview(k);
+  } else if (mode === 'template') {
     var ed = $('ed-' + k);
     ed.innerHTML = edRender(S.text[k]);
     ed.addEventListener('input', function() { edChanged(k); });
-    ed.addEventListener('beforeinput', function(e) { edBeforeInput(e, k); });
-    ed.addEventListener('mousedown', function(e) {
-      var chip = e.target.closest && e.target.closest('.pr');
-      if (!chip) return;
-      e.preventDefault();
-      selectChip(chip);
+    // First click in an untouched highlight selects the whole suggestion, so typing replaces it.
+    // Click again to put the caret where you want: the text is never locked.
+    ed.addEventListener('click', function(e) {
+      var sp = e.target.closest && e.target.closest('.sug');
+      if (!sp || sp.getAttribute('data-seen') || sp.textContent !== sp.getAttribute('data-sug')) return;
+      var sel = window.getSelection();
+      if (sel.rangeCount && !sel.getRangeAt(0).collapsed) return;
+      sp.setAttribute('data-seen', '1');
+      var r = document.createRange(); r.selectNodeContents(sp);
+      sel.removeAllRanges(); sel.addRange(r);
     });
     ed.addEventListener('focus', function() { try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (x) {} });
     edSide(k);
@@ -3095,8 +3148,55 @@ function renderEditorStage(k) {
     ta.addEventListener('input', function() { S.own[k] = ta.value; renderFoot(); });
   }
 }
+// A true-to-print render of just this one document, using the real pack renderer
+function renderDocPreview(k) {
+  var host = $('pv-' + k);
+  if (!host) return;
+  var Q = packData(true), only = {};
+  SECTION_KEYS.forEach(function(x) { only[x] = false; });
+  only[k] = true;
+  Q.sections = only; Q.embed = true;
+  var f = document.createElement('iframe');
+  f.title = (k === 'cover' ? 'Cover letter' : 'Statement of Suitability') + ' preview';
+  host.innerHTML = '';
+  host.appendChild(f);
+  fitDocPreview(k);
+  try { f.srcdoc = qtBuildPack(Q); } catch (e) { host.innerHTML = '<div class="alert err" style="margin:14px">Preview unavailable.</div>'; return; }
+  var tries = 0;
+  (function poll() {
+    if (!f.parentNode) return;
+    var n = null;
+    try { n = f.contentWindow && f.contentWindow.__paginated; } catch (e) { return; }
+    if (n) {
+      var m = $('pv-meta-' + k);
+      if (m) m.textContent = 'A4 · ' + n + (n === 1 ? ' page' : ' pages');
+      fitDocPreview(k);
+      return;
+    }
+    if (++tries < 150) setTimeout(poll, 100);
+  })();
+}
+// A4 is rendered at its true width and scaled down to the column
+function fitDocPreview(k) {
+  var host = $('pv-' + k);
+  if (!host) return;
+  var f = host.querySelector('iframe');
+  if (!f) return;
+  var W = 794, sc = Math.min(1, (host.clientWidth || W) / W), h = 1140;
+  try { h = Math.max(300, f.contentWindow.document.body.scrollHeight); } catch (e) {}
+  f.style.width = W + 'px'; f.style.height = h + 'px'; f.style.transform = 'scale(' + sc + ')';
+  host.style.height = Math.round(h * sc) + 'px';
+}
+window.addEventListener('resize', function() {
+  if (S.step === 7) ['cover', 'sos'].forEach(fitDocPreview);
+});
 function edChanged(k) {
-  S.text[k] = edSerialize($('ed-' + k));
+  var ed = $('ed-' + k);
+  // A highlight stops being a placeholder the moment its text differs from the guidance
+  [].forEach.call(ed.querySelectorAll('.sug'), function(sp) {
+    sp.classList.toggle('done', sp.textContent !== sp.getAttribute('data-sug'));
+  });
+  S.text[k] = edSerialize(ed);
   edSide(k);
   renderFoot();
 }
@@ -3106,16 +3206,15 @@ function edSide(k) {
   sectionsOf(base, pre).forEach(function(s) { tplPrompts[s.title] = (tplPrompts[s.title] || 0) + s.prompts; });
   var total = promptsIn(base).length, left = promptsIn(cur).length, done = Math.max(0, total - left);
   $('ed-prog-' + k).innerHTML = total
-    ? '<div class="ep-top"><span>Prompts completed</span><b class="' + (left ? '' : 'ok') + '">' + done + ' of ' + total + '</b></div><div class="ep-bar' + (left ? '' : ' ok') + '"><div style="width:' + (done / total * 100) + '%"></div></div>'
-    : '<div class="ep-top"><span>' + (left ? 'Prompts to complete' : 'No prompts to complete') + '</span><b class="' + (left ? '' : 'ok') + '">' + (left ? left : '✓') + '</b></div>';
+    ? '<div class="ep-top"><span>Passages written</span><b class="' + (left ? '' : 'ok') + '">' + done + ' of ' + total + '</b></div><div class="ep-bar' + (left ? '' : ' ok') + '"><div style="width:' + (done / total * 100) + '%"></div></div>'
+    : '<div class="ep-top"><span>' + (left ? 'Passages to write' : 'Nothing left to write') + '</span><b class="' + (left ? '' : 'ok') + '">' + (left ? left : '✓') + '</b></div>';
   $('ed-ol-' + k).innerHTML = sectionsOf(cur, pre).map(function(s, i) {
-    var st = s.prompts ? '<span class="st left">' + s.prompts + ' left</span>' : tplPrompts[s.title] > 0 ? '<span class="st ok" aria-label="done">✓</span>' : '<span class="st">Auto</span>';
+    var st = s.prompts ? '<span class="st left">' + s.prompts + ' to write</span>' : tplPrompts[s.title] > 0 ? '<span class="st ok" aria-label="written">✓</span>' : '<span class="st">Auto</span>';
     return '<button type="button" class="ol-row' + (s.prompts ? ' has-left' : '') + '" onclick="edJump(\'' + k + '\', ' + i + ')"><span>' + escHtml(s.title) + '</span>' + st + '</button>';
   }).join('');
-  var nx = $('next-' + k);
-  if (nx) nx.hidden = !left;
 }
 function edJump(k, i) {
+  if ((S.docView[k] || 'edit') !== 'edit') { S.docView[k] = 'edit'; renderReport(); }
   var ed = $('ed-' + k), secs = sectionsOf(stripMarks(S.text[k] || ''), ''), hasPre = secs.length && !secs[0].heading;
   var target = hasPre && i === 0 ? ed.firstElementChild : ed.querySelectorAll('h1, h2, h3, h4, h5, h6')[i - (hasPre ? 1 : 0)];
   if (!target) return;
@@ -3123,46 +3222,6 @@ function edJump(k, i) {
   ed.focus({ preventScroll: true });
   var r = document.createRange(); r.selectNodeContents(target); r.collapse(false);
   var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-}
-function selectChip(chip) {
-  var ed = chip.closest('.ed-body');
-  ed.focus({ preventScroll: true });
-  var r = document.createRange(); r.selectNode(chip);
-  var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-  chip.scrollIntoView({ block: 'center', behavior: 'smooth' });
-}
-// Selects the next prompt after the cursor, wrapping round to the first.
-function nextPrompt(k) {
-  var ed = $('ed-' + k), chips = ed.querySelectorAll('.pr');
-  if (!chips.length) return;
-  var sel = window.getSelection(), cur = sel.rangeCount && ed.contains(sel.anchorNode) ? sel.getRangeAt(0) : null, next = chips[0];
-  if (cur) for (var i = 0; i < chips.length; i++) {
-    var cr = document.createRange(); cr.selectNode(chips[i]);
-    if (cr.comparePoint(cur.endContainer, cur.endOffset) < 0) { next = chips[i]; break; }
-  }
-  selectChip(next);
-}
-// A selected prompt chip is replaced as a whole by whatever is typed, pasted or deleted
-function edBeforeInput(e, k) {
-  var sel = window.getSelection();
-  if (!sel.rangeCount) return;
-  var r = sel.getRangeAt(0), chip = null;
-  if (r.startContainer === r.endContainer && r.endOffset - r.startOffset === 1) {
-    var n = r.startContainer.childNodes[r.startOffset];
-    if (n && n.nodeType === 1 && n.classList.contains('pr')) chip = n;
-  }
-  if (!chip) return;
-  var t = e.inputType, txt;
-  if (t === 'insertText' || t === 'insertReplacementText') txt = e.data != null ? e.data : (e.dataTransfer ? e.dataTransfer.getData('text/plain') : '');
-  else if (t === 'insertFromPaste' || t === 'insertFromDrop') txt = e.dataTransfer ? e.dataTransfer.getData('text/plain') : '';
-  else if (/^delete/.test(t)) txt = '';
-  else return;
-  e.preventDefault();
-  var tn = document.createTextNode(String(txt || '').replace(/\r?\n/g, ' '));
-  chip.parentNode.replaceChild(tn, chip);
-  var nr = document.createRange(); nr.setStart(tn, tn.length); nr.collapse(true);
-  sel.removeAllRanges(); sel.addRange(nr);
-  edChanged(k);
 }
 function edCmd(k, cmd) {
   var ed = $('ed-' + k);
@@ -3189,20 +3248,26 @@ function reviewChecks() {
     if (!S.sections[k]) return;
     var nm = k === 'cover' ? 'Cover letter' : 'Statement of Suitability', n = docIssues(k);
     if (modeOf(k) === 'own') out.push({ ok: !n, text: n ? nm + ': still to write' : nm + ' written' });
-    else if (k === 'cover') out.push({ ok: !n, text: n ? 'Cover letter: ' + n + (n === 1 ? ' prompt' : ' prompts') + ' left' : 'Cover letter complete' });
-    else { var tot = promptsIn(stripMarks(S.basis.sos || '')).length; out.push({ ok: !n, text: 'Statement of Suitability: ' + Math.max(0, tot - n) + ' of ' + tot + ' prompts' }); }
+    else if (!n) out.push({ ok: true, text: nm + ' complete' });
+    else out.push({ ok: false, warn: true, text: nm + ': ' + n + (n === 1 ? ' passage' : ' passages') + ' not written — left out of the pack' });
   });
   out.push({ ok: allTabsSeen(), text: allTabsSeen() ? 'Results reviewed' : 'Results: review all three tabs' });
   out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk differs from the client\'s rating, reason recorded' : 'Risk aligned, no override needed' });
   return out;
 }
+// Warnings are the adviser's call to make; only hard failures hold the pack back.
+function packReady(checks) {
+  return (checks || reviewChecks()).every(function(c) { return c.ok || c.warn; });
+}
 var measureSeq = 0;
 function renderReview() {
-  var checks = reviewChecks(), ready = checks.every(function(c) { return c.ok; });
-  $('checklist').innerHTML = checks.map(function(c) { return '<div class="' + (c.ok ? '' : 'no') + '"><i aria-hidden="true">' + (c.ok ? '✓' : '!') + '</i><span>' + escHtml(c.text) + '</span></div>'; }).join('');
+  var checks = reviewChecks(), ready = packReady(checks);
+  var warns = checks.filter(function(c) { return !c.ok && c.warn; }).length;
+  $('checklist').innerHTML = checks.map(function(c) { return '<div class="' + (c.ok ? '' : c.warn ? 'warn' : 'no') + '"><i aria-hidden="true">' + (c.ok ? '✓' : '!') + '</i><span>' + escHtml(c.text) + '</span></div>'; }).join('');
   $('btn-generate').disabled = !ready;
   $('btn-preview').disabled = !ready;
-  $('gen-errs').innerHTML = ready ? '' : '<div class="alert warn">Complete the items marked ! before generating the pack.</div>';
+  $('gen-errs').innerHTML = !ready ? '<div class="alert warn">Complete the items marked ! before generating the pack.</div>'
+    : warns ? '<div class="alert warn">You can generate the pack now. Passages you have not written are left out of the PDF rather than printed.</div>' : '';
   $('fname').innerHTML = '<b>' + escHtml(packFileName()) + '</b><span id="fname-pages">Counting pages…</span>';
   var inc = SECTION_KEYS.filter(function(k) { return S.sections[k]; });
   renderThumbs(inc, null);
@@ -3266,7 +3331,7 @@ function packData(noAutoPrint) {
 function generatePack(preview) {
   compute();
   if (S.result.errors) { $('gen-errs').innerHTML = '<div class="alert err">' + S.result.errors.map(escHtml).join('<br>') + '</div>'; return; }
-  if (!reviewChecks().every(function(c) { return c.ok; })) { renderReview(); return; }
+  if (!packReady()) { renderReview(); return; }
   qtOpenPack(packData(preview));
 }
 
