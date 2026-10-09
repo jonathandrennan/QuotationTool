@@ -1006,6 +1006,8 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
         <span class="card-t">Ready to generate</span>
         <div class="cl-list" id="checklist"></div>
         <div class="fname" id="fname"></div>
+        <div id="attach"></div>
+        <div id="attach-msg"></div>
         <div id="gen-errs"></div>
         <button type="button" class="btn pri lg block" id="btn-generate" onclick="generatePack(false)">Generate PDF</button>
         <button type="button" class="btn block" id="btn-preview" onclick="generatePack(true)">Preview full pack</button>
@@ -1035,6 +1037,8 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 <script src="js/quote_content.js"></script>
 <script src="js/quote_assets.js"></script>
 <script src="js/quote_pdf.js"></script>
+<script src="js/vendor/pdf-lib.min.js"></script>
+<script src="js/quote_docs.js"></script>
 <script>
 // ─── State ────────────────────────────────────────────────────────────────────
 var BROKER_KEY = 'agl_qt_broker';
@@ -1048,8 +1052,12 @@ var SECTION_KEYS = ['cover', 'sos', 'summary', 'projection', 'charges', 'funds',
 // Sections always included in the pack. Compliance to confirm.
 var REQUIRED_SECTIONS = ['projection', 'charges', 'important', 'glossary'];
 // Listed in Step 7 but not available yet: shown, never selectable, never in the pack.
-var COMING_SOON = ['product', 'tax', 'factsheets', 'kids', 'appform'];
+var COMING_SOON = ['product', 'tax', 'appform'];
 var NEW_SECTIONS = ['factsheets', 'kids', 'appform'];
+// Attached PDFs (js/quote_docs.js): merged into a companion file, not printed as pages of the pack.
+// KIDs are only held for the Investment Bond.
+var ATTACH_SECTIONS = ['factsheets', 'kids'];
+function sectionNA(k) { return k === 'kids' && S.product !== 'ib'; }
 var SECTION_GROUPS = [
   { title: 'Your documents', note: 'on your letterhead', keys: ['cover', 'sos'] },
   { title: 'Quotation', note: 'Allianz Global Life', keys: ['summary', 'projection', 'charges', 'funds', 'remun'] },
@@ -1060,8 +1068,8 @@ var SECTION_SUBS = {
   sos: 'Use the template or write your own in a later step',
   summary: 'One-page summary',
   funds: 'Funds, risk and category split',
-  factsheets: 'Factsheets for the selected funds',
-  kids: 'KIDs for the selected funds',
+  factsheets: 'Factsheets for the selected funds, attached as a separate PDF',
+  kids: 'KIDs for the selected funds, attached as a separate PDF',
   appform: 'Pre-filled with client and plan details'
 };
 // Auto-filled values in the cover letter / SoS text are wrapped in these (private-use) characters
@@ -2979,13 +2987,72 @@ function renderReport() {
   else renderEditorStage(S.packStage);
   renderFoot();
 }
+// ── Attached documents (factsheets, KIDs) ──
+// Sections printed as pages of the pack (everything except the attached PDFs)
+function packSections() { return SECTION_KEYS.filter(function(k) { return S.sections[k] && ATTACH_SECTIONS.indexOf(k) < 0; }); }
+// Documents that apply to the current quotation: { kids: [...], factsheets: [...] }
+function attachDocs() {
+  var r = S.result;
+  if (!r || r.errors) return { kids: [], factsheets: [] };
+  var ids = (r.mix || []).map(function(m) { return m.fund.id; });
+  if (S.product === 'prsa' && r.isGlidepath && r.stratObj && r.stratObj.gpKey) ids = ids.concat(qtGlidepathFunds(r.stratObj.gpKey, r.termMonths));
+  var ct = S.ib.ctype || '';
+  return qtSupportingDocs({ product: S.product, fundIds: ids, single: ctHas(ct, 'sp'), regular: ctHas(ct, 'rp') });
+}
+// What the adviser has switched on: { kids: bool, factsheets: bool }
+function attachInclude() { return { kids: !!S.sections.kids && !sectionNA('kids'), factsheets: !!S.sections.factsheets }; }
+function attachedList() {
+  var d = attachDocs(), inc = attachInclude();
+  return [].concat(inc.kids ? d.kids : [], inc.factsheets ? d.factsheets : []);
+}
+function attachSub(k) {
+  if (ATTACH_SECTIONS.indexOf(k) < 0 || sectionNA(k) || !S.result || S.result.errors) return '';
+  var list = attachDocs()[k];
+  if (!list.length) return k === 'kids' ? 'No KID held for the selected funds' : 'No factsheet held for the selected funds';
+  var what = k === 'kids' ? 'KID' : 'factsheet';
+  return list.length + ' ' + what + (list.length === 1 ? '' : 's') + ' for the selected funds, attached as a separate PDF';
+}
+function setAttachMsg(html, kind) {
+  var el = $('attach-msg');
+  if (el) el.innerHTML = html ? '<div class="alert ' + (kind || 'warn') + '" style="margin-top:8px">' + html + '</div>' : '';
+}
+function renderAttach() {
+  var host = $('attach');
+  if (!host) return;
+  var list = attachedList();
+  if (!list.length) { host.innerHTML = ''; return; }
+  host.innerHTML = '<span class="card-t" style="margin-top:14px;display:block">Attached documents</span>' +
+    '<div class="hint" style="margin:4px 0 6px">Saved as a separate PDF with the pack: KIDs first, then factsheets.</div>' +
+    '<ul style="margin:0 0 8px;padding-left:18px;font-size:12.5px">' + list.map(function(d) {
+      return '<li>' + escHtml(d.title) + (d.asOf ? ' <small>(' + escHtml(d.asOf) + ')</small>' : '') + '</li>';
+    }).join('') + '</ul>' +
+    '<button type="button" class="btn block" id="btn-attach" onclick="downloadAttachments()">Download supporting documents</button>';
+}
+function downloadAttachments() {
+  var d = attachDocs(), inc = attachInclude(), list = attachedList();
+  if (!list.length) return;
+  var btn = $('btn-attach');
+  if (btn) btn.disabled = true;
+  setAttachMsg('Preparing ' + list.length + (list.length === 1 ? ' document' : ' documents') + '…', 'info');
+  qtBuildSupportingPdf(d, inc).then(function(res) {
+    var blob = new Blob([res.bytes], { type: 'application/pdf' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = packFileName().replace(/\.pdf$/, '') + '_Supporting-documents.pdf';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(a.href); }, 5000);
+    setAttachMsg(res.missing.length ? 'Saved, but these could not be included: ' + res.missing.map(escHtml).join(', ') + '.' : 'Supporting documents saved (' + res.count + ' ' + (res.count === 1 ? 'document' : 'documents') + ').', res.missing.length ? 'warn' : 'info');
+  }).catch(function(e) {
+    setAttachMsg(escHtml(e.message || 'The documents could not be prepared.') + '<br>Open them one by one: ' +
+      list.map(function(x) { return '<a href="' + escHtml(x.path) + '" target="_blank" rel="noopener">' + escHtml(x.title) + '</a>'; }).join(' · '), 'warn');
+  }).then(function() { if (btn) btn.disabled = false; });
+}
 function renderContents() {
   var L = QT_TEXT.sections, h = '';
   SECTION_GROUPS.forEach(function(g) {
     h += '<section class="pgrp"><div class="pgrp-h"><span class="t">' + escHtml(g.title) + '</span>' + (g.note ? '<span class="n">' + escHtml(g.note) + '</span>' : '') + '</div>';
     g.keys.forEach(function(k) {
-      var req = REQUIRED_SECTIONS.indexOf(k) >= 0, soon = COMING_SOON.indexOf(k) >= 0, sub = SECTION_SUBS[k];
-      var ctl = soon ? '<span class="pill soon">Coming soon</span>' : req ? '<span class="pill req">Required</span>'
+      var req = REQUIRED_SECTIONS.indexOf(k) >= 0, na = sectionNA(k), soon = COMING_SOON.indexOf(k) >= 0 || na, sub = attachSub(k) || SECTION_SUBS[k];
+      var ctl = na ? '<span class="pill soon">Investment Bond only</span>' : soon ? '<span class="pill soon">Coming soon</span>' : req ? '<span class="pill req">Required</span>'
         : '<label class="tgl"><input type="checkbox" role="switch" data-sec="' + k + '"' + (S.sections[k] ? ' checked' : '') + ' aria-label="Include ' + escHtml(L[k]) + '"></label>';
       h += '<div class="prow' + (soon ? ' soon' : '') + '"><div><div class="pn">' + escHtml(L[k]) + (NEW_SECTIONS.indexOf(k) >= 0 ? ' <span class="tag-new">New</span>' : '') + '</div>' +
         (sub ? '<div class="ps">' + escHtml(sub) + '</div>' : '') + '</div>' + ctl + '</div>';
@@ -2993,9 +3060,12 @@ function renderContents() {
     h += '</section>';
   });
   $('secs').innerHTML = h;
-  var inc = SECTION_KEYS.filter(function(k) { return S.sections[k]; });
+  var inc = packSections();
+  var att = attachedList();
   $('pack-order').innerHTML = '<div class="po-h"><span>Pack order</span><span class="n">' + inc.length + ' sections</span></div><ol class="po-list">' +
-    inc.map(function(k, i) { return '<li><span class="i">' + (i + 1) + '</span><span>' + escHtml(L[k]) + '</span><span class="tg">' + (k === 'cover' || k === 'sos' ? 'Letterhead' : '') + '</span></li>'; }).join('') + '</ol>';
+    inc.map(function(k, i) { return '<li><span class="i">' + (i + 1) + '</span><span>' + escHtml(L[k]) + '</span><span class="tg">' + (k === 'cover' || k === 'sos' ? 'Letterhead' : '') + '</span></li>'; }).join('') + '</ol>' +
+    (att.length ? '<div class="po-h" style="margin-top:14px"><span>Attached PDF</span><span class="n">' + att.length + (att.length === 1 ? ' document' : ' documents') + '</span></div><ol class="po-list">' +
+      att.map(function(d, i) { return '<li><span class="i">' + (i + 1) + '</span><span>' + escHtml(d.title) + '</span><span class="tg"></span></li>'; }).join('') + '</ol>' : '');
   document.querySelectorAll('#secs [data-sec]').forEach(function(el) {
     el.addEventListener('change', function() { S.sections[el.getAttribute('data-sec')] = el.checked; renderReport(); });
   });
@@ -3270,7 +3340,8 @@ function renderReview() {
   $('gen-errs').innerHTML = !ready ? '<div class="alert warn">Complete the items marked ! before generating the pack.</div>'
     : warns ? '<div class="alert warn">You can generate the pack now. Passages you have not written are left out of the PDF rather than printed.</div>' : '';
   $('fname').innerHTML = '<b>' + escHtml(packFileName()) + '</b><span id="fname-pages">Counting pages…</span>';
-  var inc = SECTION_KEYS.filter(function(k) { return S.sections[k]; });
+  var inc = packSections();
+  renderAttach();
   renderThumbs(inc, null);
   var seq = ++measureSeq;
   measurePack(function(m) {
@@ -3334,6 +3405,8 @@ function generatePack(preview) {
   if (S.result.errors) { $('gen-errs').innerHTML = '<div class="alert err">' + S.result.errors.map(escHtml).join('<br>') + '</div>'; return; }
   if (!packReady()) { renderReview(); return; }
   qtOpenPack(packData(preview));
+  // The factsheets / KIDs are a separate PDF, saved alongside the pack
+  if (!preview && attachedList().length) downloadAttachments();
 }
 
 init();

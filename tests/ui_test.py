@@ -128,12 +128,16 @@ def pack_flow(d, tag):
     check(js(d, 'return S.packStage') == 'contents' and css(d, '#pack-h').text == 'What goes in the pack', 'step 7 opens on Contents')
     for k in ['projection', 'charges', 'important', 'glossary']:
         check(js(d, "return S.sections[arguments[0]] && !document.querySelector('[data-sec=' + arguments[0] + ']')", k), 'section %s required (no toggle)' % k)
-    for k in ['product', 'tax', 'factsheets', 'kids', 'appform']:
+    for k in ['product', 'tax', 'appform']:
         check(js(d, "return !S.sections[arguments[0]] && !document.querySelector('[data-sec=' + arguments[0] + ']')", k), 'section %s coming soon and excluded' % k)
-    check(len(d.find_elements(By.CSS_SELECTOR, '#secs .pill.soon')) == 5 and len(d.find_elements(By.CSS_SELECTOR, '#secs .tag-new')) == 3, 'coming-soon and new tags')
+    # Factsheets are attached as a separate PDF and can be switched off; KIDs only exist for the Investment Bond
+    check(js(d, "return S.sections.factsheets && !!document.querySelector('[data-sec=factsheets]')"), 'factsheets on by default with a toggle')
+    kids_na = js(d, "return S.product !== 'ib'")
+    check(js(d, "return !!document.querySelector('[data-sec=kids]')") == (not kids_na), 'KIDs toggle only for the Investment Bond')
+    check(len(d.find_elements(By.CSS_SELECTOR, '#secs .pill.soon')) == (4 if kids_na else 3) and len(d.find_elements(By.CSS_SELECTOR, '#secs .tag-new')) == 3, 'coming-soon and new tags')
     check(len(d.find_elements(By.CSS_SELECTOR, '#preset-seg')) == 0, 'no preset selector')
     check(js(d, "return !!document.querySelector('[data-sec=remun]')"), 'remuneration statement is optional')
-    n_order = lambda: len(d.find_elements(By.CSS_SELECTOR, '#pack-order li'))
+    n_order = lambda: len(d.find_elements(By.CSS_SELECTOR, '#pack-order ol:first-of-type li'))   # printed sections only, not attached PDFs
     check(n_order() == 9, 'pack order lists 9 sections (%d)' % n_order())
     sw = css(d, '[data-sec=cover]')
     click(d, sw)
