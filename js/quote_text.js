@@ -328,6 +328,7 @@ var QT_TEXT = {
   packKeyYearsNote: 'Key years shown.',
   prsaInflationShort: 'Inflation of {inflation} a year.',
   packChargesAllowed: 'All the charges shown in this quotation are allowed for.',
+  resultsLead: 'Check the details below, then review the projection, charges and remuneration.',
 
   // ─── Cover letter template (adviser-editable in Step 7) — DRAFT ──────────────
   // {enclosedList} is built from the sections ticked in Step 7, one "- " bullet per line.

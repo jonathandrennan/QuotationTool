@@ -205,8 +205,9 @@ def pack_flow(d, tag):
     js(d, "S.text.sos = S.text.sos.replace(/\\[\\[[^\\]]*\\]\\]/g, 'The client confirmed this in our meeting.'); renderReport();")
     check('All passages written' in msg(d), 'all passages written: %r' % msg(d))
     nxt(d)
-    for _ in range(60):
-        if 'pages' in css(d, '#fname').text: break
+    # "Counting pages…" also contains "pages", so wait for a real count
+    for _ in range(100):
+        if re.search(r'\d+ page', css(d, '#fname').text): break
         time.sleep(0.1)
     fn = css(d, '#fname').text
     check(re.match(r'Quotation_Q-\d{6}-\w{4}_Murphy\.pdf', fn) and re.search(r'\d+ pages', fn), 'file name and page count: %r' % fn)
@@ -526,12 +527,24 @@ def prsa_flow(d):
     nxt(d)
     check(step(d) == 6, 'step 5 -> 6 (%s)' % msg(d))
     d.save_screenshot(str(OUT / 'prsa_step6.png'))
+    # Quote summary card replaces the KPI band and carries the fund list
+    cols = js(d, "return [].map.call(document.querySelectorAll('#res-band .qs-h span'), function(e){ return e.textContent; })")
+    check(cols == ['Client', 'Product', 'Investment', 'Funds'], 'quote summary card columns: %s' % cols)
     band = d.find_element(By.ID, 'res-band').text
-    check('Projected value at 65' in band and "In today's money" in band and 'Estimated income' in band and 'Total annual charge' in band, 'KPI band: %r' % band[:120])
-    check(js(d, "return document.querySelectorAll('#res-body .fc-row').length") >= 1, 'projection shows the chosen funds')
-    check(js(d, "return document.querySelectorAll('#res-body table.tbl tbody tr').length") == 8, 'projection table: years 1–5, 10, 15 and retirement')
-    click(d, css(d, '#res-body .tcard-h .lnk'))
-    check(js(d, "return document.querySelectorAll('#res-body table.tbl tbody tr').length") > 15, 'Show every year')
+    check('Mr Alex Murphy' in band and 'Allianz Vantage PRSA' in band and 'Attitude to risk' in band,
+          'summary card shows the quotation inputs: %r' % band[:120])
+    check(js(d, "return document.querySelectorAll('#res-band .qs-rows .g').length") >= 1, 'guarantee marked green in the summary card')
+    check(js(d, "return document.querySelectorAll('#res-band .qs-h .lnk').length") == 4, 'each summary column has an Edit link')
+    # Projection: figures panel, chart and a collapsed year-by-year table
+    check(js(d, "return !!document.querySelector('#res-body .pj-hero b')") and
+          js(d, "return !!document.querySelector('#res-body .pj-assume')"), 'projection panel with assumptions')
+    check(js(d, "return document.querySelectorAll('#res-body table.tbl tbody tr').length") == 0, 'year-by-year table collapsed by default')
+    click(d, css(d, '#res-body .tcard-h .btn'))
+    check(js(d, "return document.querySelectorAll('#res-body table.tbl tbody tr').length") > 15, 'Show table reveals every year')
+    cols2 = js(d, "return [].map.call(document.querySelectorAll('#res-body table.tbl thead th'), function(e){ return e.textContent; })")
+    check(cols2 == ['Year', 'Age', 'Total paid in', 'Projected value'], 'table drops growth and effect-of-charges columns: %s' % cols2)
+    warns = js(d, "return document.querySelectorAll('.warnpanel div span').length")
+    check(warns == 6, 'important warnings panel under the tab (%d)' % warns)
     see_all_tabs(d)
     nxt(d)
     check(step(d) == 7, 'step 6 -> 7')
@@ -580,8 +593,8 @@ def arf_flow(d):
     check(ov and ov['key'] == 'arf:diy' and ov['direction'] == 'lower', 'reason + Next records the override: %s' % ov)
     setv(d, 'rate1', '5')
     check(abs(js(d, 'return S.arf.rate1Override') - 0.05) < 1e-9, 'ARF rate 1 editable')
-    check('At 5.00% growth' in d.find_element(By.ID, 'res-band').text, 'KPI band follows the edited rate')
-    check(js(d, "return [].filter.call(document.querySelectorAll('#res-body .fc-row'), function(r){ return r.textContent.indexOf('Guarantee') >= 0; }).length") == 1, 'guarantee marked on the guaranteed fund')
+    check('At 5.00% growth' in d.find_element(By.ID, 'res-body').text, 'projection follows the edited rate')
+    check(js(d, "return [].filter.call(document.querySelectorAll('#res-band .qs-rows div'), function(r){ return r.textContent.indexOf('Guarantee') >= 0; }).length") == 1, 'guarantee marked on the guaranteed fund')
     d.save_screenshot(str(OUT / 'arf_step6.png'))
     see_all_tabs(d)
     nxt(d)
@@ -618,11 +631,43 @@ def standard_prsa_funds(d):
     check('Dynamic Lifecycle Strategy' in d.find_element(By.ID, 'qt-pop').text, 'Standard DIS popover copy')
     check(not console_errors(d), 'Standard PRSA console errors')
 
+def responsive_check(d):
+    """The content column is viewport - 272px rail - 128px padding, so a 1280px laptop only has
+    ~1000px to work with. Fields must reflow onto new lines, never shrink below a usable width."""
+    print('Responsive (1024px and up)')
+    js(d, "localStorage.clear()")
+    d.get(URL)
+    fill_broker(d)
+    fill_client(d, 'prsa', '1980-04-12', 65)
+    pick_sri(d, 4)
+    set_ct(d, 'prsa', 'ofv_sp_rp')
+    setv(d, 'p-ofv', '20000'); setv(d, 'p-sp', '50000'); setv(d, 'p-rp', '500')
+    for w in (1440, 1280, 1152, 1024):
+        d.set_window_rect(width=w, height=1000)
+        time.sleep(0.25)
+        for n in (1, 2, 3, 4):
+            js(d, 'goStep(arguments[0])', n)
+            time.sleep(0.1)
+            over = js(d, "return Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth)")
+            check(over == 0, 'no sideways scroll at %dpx on step %d (overflow %dpx)' % (w, n, over))
+            narrow = js(d, "return [].filter.call(document.querySelectorAll('input[type=text],input[type=number],input[type=date],select'),"
+                           "function(e){ var r = e.getBoundingClientRect(); return r.width > 0 && r.width < 100; })"
+                           ".map(function(e){ return e.id + ':' + Math.round(e.getBoundingClientRect().width); })")
+            check(not narrow, 'no crushed inputs at %dpx on step %d: %s' % (w, n, narrow))
+    # containment on .wrap must not re-anchor the overlays inside it
+    js(d, 'goStep(5)')
+    m = js(d, "var bg = document.getElementById('confirm-bg'); bg.removeAttribute('hidden');"
+              "var r = bg.getBoundingClientRect(); bg.setAttribute('hidden', '');"
+              "return [Math.round(r.left), Math.round(r.width), window.innerWidth];")
+    check(m[0] == 0 and m[1] == m[2], 'modal overlay still covers the viewport under containment: %s' % m)
+    d.set_window_rect(width=1440, height=1400)
+
 d = driver()
 try:
     prsa_flow(d)
     arf_flow(d)
     standard_prsa_funds(d)
+    responsive_check(d)
 finally:
     d.quit()
 print('\n%d failure(s)' % len(fails))

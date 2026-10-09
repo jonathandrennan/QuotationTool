@@ -52,7 +52,7 @@ h1, h2, h3, h4 { margin:0; }
 /* ─── Main column ───────────────────────────────────────────────────────────── */
 .main { flex:1; min-width:0; display:flex; flex-direction:column; }
 .content { flex:1; padding:48px 64px 56px; }
-.wrap { max-width:1180px; }
+.wrap { max-width:1180px; container-type:inline-size; container-name:app; }
 .step { display:none; }
 .step.active { display:flex; flex-direction:column; gap:32px; }
 .ph { display:flex; flex-direction:column; gap:8px; }
@@ -419,7 +419,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .abar { display:flex; gap:2px; height:10px; border-radius:5px; background:var(--div); overflow:hidden; }
 .abar > div { height:100%; transition:width .3s ease; }
 .alloc-err { margin-top:8px; font-size:12px; font-weight:700; color:var(--red); }
-.arow { display:grid; grid-template-columns:12px minmax(0, 1fr) 54px 120px; gap:14px 16px; align-items:center; padding:20px 22px; border-top:1px solid var(--div); }
+.arow { display:grid; grid-template-columns:12px minmax(140px, 1fr) 54px 120px; gap:14px 16px; align-items:center; padding:20px 22px; border-top:1px solid var(--div); }
 .arow.first { border-top:none; }
 .arow .sw { width:12px; height:12px; border-radius:3px; }
 .arow .nm { font-size:15px; font-weight:700; color:var(--navy); }
@@ -620,6 +620,80 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .thumb .bx { height:28px; border-radius:3px; background:linear-gradient(180deg, #E4ECF6, #D6E2F0); }
 .thumb .lbl { font-size:12px; color:var(--muted); }
 .ready { display:flex; flex-direction:column; gap:18px; padding:24px; }
+/* Results: quote summary card, projection panel and warnings (handoff §6, 9 Oct 2026) */
+.qsum { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); border:1px solid var(--line); border-radius:14px; background:#fff; }
+.qs-col { display:flex; flex-direction:column; gap:14px; padding:22px 24px; min-width:0; }
+.qs-col + .qs-col { border-left:1px solid var(--div); }
+.qs-h { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.qs-h span { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.qs-h .lnk { padding:0; font-size:13px; font-weight:600; }
+.qs-t { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.qs-t b { font-size:17px; font-weight:700; color:var(--navy); overflow:hidden; text-overflow:ellipsis; }
+.qs-t span { font-size:13px; color:var(--muted); }
+.qs-rows { display:flex; flex-direction:column; gap:7px; font-size:13px; font-variant-numeric:tabular-nums; }
+.qs-rows div { display:flex; justify-content:space-between; gap:8px; }
+.qs-rows span { color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.qs-rows b { font-weight:600; white-space:nowrap; text-align:right; }
+.qs-rows .g { color:var(--grn); font-weight:700; }
+.pj { display:grid; grid-template-columns:300px minmax(0,1fr); border:1px solid var(--line); border-radius:14px; background:#fff; overflow:hidden; }
+.pj-side { display:flex; flex-direction:column; gap:20px; padding:26px; border-right:1px solid var(--div); background:#FAFCFD; }
+.pj-hero { display:flex; flex-direction:column; gap:4px; }
+.pj-hero span { font-size:13px; color:var(--muted); }
+.pj-hero b { font-size:36px; font-weight:700; color:var(--navy); letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1.1; }
+.pj-rows { display:flex; flex-direction:column; font-size:14px; font-variant-numeric:tabular-nums; }
+.pj-rows div { display:flex; justify-content:space-between; gap:8px; padding:10px 0; border-top:1px solid var(--line); }
+.pj-rows span { color:var(--body); }
+.pj-assume { display:flex; flex-direction:column; gap:8px; padding:14px; border-radius:10px; background:var(--tint); font-size:12px; line-height:1.45; color:var(--body); }
+.pj-assume b { color:var(--navy); }
+.pj-main { display:flex; flex-direction:column; gap:14px; padding:24px 26px 20px; min-width:0; }
+.pj-ch { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+.wbox { padding:10px 14px; border:1.5px solid var(--ink); font-size:13px; font-weight:700; line-height:1.45; }
+.tcard-s { margin:2px 0 0; font-size:13px; color:var(--muted); }
+.tcard-h .btn.sm { font-weight:600; color:var(--teal); }
+.warnpanel { margin-top:20px; padding:18px 22px; border:1.5px solid var(--ink); background:#fff; }
+.warnpanel h3 { margin:0 0 12px; font-size:15px; font-weight:700; }
+.warnpanel div { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px 32px; font-size:13px; font-weight:700; line-height:1.45; }
+/* ─── Responsive: the content column is the container, so the rail width stops mattering ───
+   Targets laptop and tablet (1024px viewport and up ≈ 620px of content). Components reflow by
+   dropping columns; inputs never shrink below a usable size, they wrap onto the next line. */
+@container app (max-width:1000px) {
+  .qsum { grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .qs-col:nth-child(3) { border-left:none; }
+  .qs-col:nth-child(-n+2) { border-bottom:1px solid var(--div); }
+}
+@container app (max-width:940px) {
+  /* side panels move below the main content rather than squeezing it */
+  .cols, .cols.c300, .cols.c340, .cols.c360 { grid-template-columns:minmax(0, 1fr); }
+  .cols .side, .cols .card.side { max-width:none; }
+}
+@container app (max-width:880px) {
+  /* field rows wrap at a usable width instead of dividing the row ever more finely */
+  .fields { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+  .rowstart { grid-column-start:auto; }
+  .pj { grid-template-columns:1fr; }
+  .pj-side { border-right:none; border-bottom:1px solid var(--div); }
+}
+@container app (max-width:820px) {
+  /* wide data tables scroll inside their card rather than crushing their columns */
+  .card.flush { overflow-x:auto; }
+  .card.flush table.tbl { min-width:620px; }
+  .seg { height:auto; flex-wrap:wrap; }
+  .seg button { flex:1 1 auto; padding:10px 14px; }
+}
+@container app (max-width:900px) {
+  /* question and its yes/no control stack rather than competing for the same line */
+  .esg-row { flex-direction:column; gap:12px; }
+  .esg-row .seg { width:100%; }
+}
+@container app (max-width:760px) {
+  .warnpanel div { grid-template-columns:1fr; }
+  .qsum { grid-template-columns:minmax(0,1fr); }
+  .qs-col { border-left:none !important; }
+  .qs-col + .qs-col { border-top:1px solid var(--div); }
+}
+/* Inputs keep a usable minimum whatever the grid does */
+input[type=text], input[type=number], input[type=date], select, textarea { min-width:0; }
+.f-row, .fields > * { min-width:0; }
 .cl-list { display:flex; flex-direction:column; gap:10px; font-size:14px; }
 .cl-list div { display:flex; align-items:flex-start; gap:10px; }
 .cl-list i { flex:none; display:flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--grn-bg); color:var(--grn); font-size:11px; font-style:normal; font-weight:700; }
@@ -2568,8 +2642,8 @@ function renderResults() {
   $('res-tabrow').hidden = !!r.errors;
   $('res-band').hidden = !!r.errors;
   if (r.errors) { $('res-body').innerHTML = '<div class="alert err"><ul>' + r.errors.map(function(e){ return '<li>' + escHtml(e) + '</li>'; }).join('') + '</ul></div>'; return; }
-  $('res-lead').textContent = productName() + ' · ' + strategyName() + ' · ' + [S.client.first, S.client.last].join(' ');
-  $('res-band').innerHTML = resBand(r);
+  $('res-lead').textContent = QT_TEXT.resultsLead;
+  $('res-band').innerHTML = resSummary(r);
   var nSeen = RES_TABS.filter(function(t) { return S.resSeen[t[0]]; }).length;
   $('res-tabs').innerHTML = RES_TABS.map(function(t, i) {
     var on = S.resTab === t[0], seen = !!S.resSeen[t[0]] && !on;
@@ -2581,51 +2655,94 @@ function renderResults() {
   if (S.resTab === 'proj') h = S.product === 'prsa' ? resPrsaProjection(r) : S.product === 'arf' ? resArfProjection(r) : resIbProjection(r);
   else if (S.resTab === 'chg') h = resCharges(r);
   else h = resRemuneration(r);
-  $('res-body').innerHTML = h;
+  $('res-body').innerHTML = h + resWarnings();
+}
+// The CPC warnings, shown under every tab.
+function resWarnings() {
+  var w = QT_TEXT.packWarnings, list = [w.value, w.lose, w.estimates, w.past, w.currency];
+  if (S.product === 'prsa') list.push(w.access); else list.push(w.income);
+  return '<section class="warnpanel"><h3>Important warnings</h3><div>' +
+    list.map(function(x) { return '<span>' + escHtml(x) + '</span>'; }).join('') + '</div></section>';
 }
 function kc(k, v, s, hero) { return '<div class="kc' + (hero ? ' hero' : '') + '"><div class="k">' + k + '</div><div class="v">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>'; }
-function lastsV(pp) { return pp.fundZeroYear ? 'to age ' + pp.depletionAge : '40+ years'; }
 // The Investment Bond headline row: year 10, or the last projected year if sooner
 function ibHeadlineRow(r) { var rows = r.p.rows; return rows.filter(function(x) { return x.year === 10; })[0] || rows[rows.length - 1]; }
-// KPI band: outcomes first, visible on every tab
-function resBand(r) {
-  var h;
-  if (S.product === 'prsa') {
-    h = kc('Projected value at ' + r.nra, fEUR(r.fundWC), 'after charges, at ' + (r.isGlidepath ? 'up to ' : '') + pct(r.blendedGross) + ' growth before charges', true) +
-      kc('In today\'s money', fEUR(r.realMat), 'allowing for ' + pct(INFLATION) + ' inflation') +
-      kc('Estimated income', fEUR(r.annualIncomeReal) + '<small> a year</small>', 'in today\'s money') +
-      kc('Total annual charge', pct(r.totalAnnualCharge), 'reduces growth by ' + pct(Math.max(0, r.grossRate - r.netRate)) + ' a year' + (r.isGlidepath ? ' · initial mix' : ''));
-  } else if (S.product === 'arf') {
-    h = kc('At ' + pct(r.rate1) + ' growth, the fund lasts', lastsV(r.p1), 'net growth ' + pct(r.p1.netRate) + ' a year after charges', true) +
-      kc('At ' + pct(r.rate2) + ' growth', lastsV(r.p2), 'net growth ' + pct(r.p2.netRate) + ' a year after charges') +
-      kc('First year\'s income', fEUR(r.p1.firstIncome), r.p1.firstIncomeYear ? 'policy year ' + r.p1.firstIncomeYear : 'no income taken') +
-      kc('Total annual charge', pct(r.p1.chargeRate), 'reduces growth by ' + pct(Math.max(0, r.rate1 - r.p1.netRate)) + ' a year');
+// One column of the quote summary card. rows are [label, value] and may be falsy.
+function sumCol(label, step, head, sub, rows) {
+  return '<div class="qs-col"><div class="qs-h"><span>' + escHtml(label) + '</span>' +
+    '<button type="button" class="lnk" onclick="goStep(' + step + ')">Edit</button></div>' +
+    '<div class="qs-t"><b>' + head + '</b><span>' + sub + '</span></div>' +
+    '<div class="qs-rows">' + rows.filter(Boolean).map(function(x) {
+      return '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>';
+    }).join('') + '</div></div>';
+}
+// Quote summary card: replaces the old KPI band and stays visible on all three tabs.
+function resSummary(r) {
+  var isPrsa = S.product === 'prsa', isArf = S.product === 'arf';
+  var cName = [S.client.salutation, S.client.first, S.client.last].join(' ');
+  var ageStart = r.ageAtStart != null ? r.ageAtStart : r.startAge;
+  var gender = S.client.gender === 'F' ? 'female' : 'male';
+  var risk = S.risk.sri ? S.risk.sri + ' · ' + ESMA_LABELS[S.risk.sri] : '—';
+  var esg = S.risk.esg === true ? 'ESG preference' : S.risk.esg === false ? 'No preference' : 'Not answered';
+  var client = sumCol('Client', 2, escHtml(cName),
+    'Born ' + escHtml(fmtDate(S.client.dobStr)) + ' · age ' + Math.floor(ageStart) + ' · ' + gender, [
+      ['Start date', escHtml(fmtDate(r.inputs.startStr))],
+      isPrsa ? ['Retirement age', r.nra + ' · ' + (r.termMonths / 12).toFixed(1) + ' years']
+             : isArf ? ['Income from age', escHtml(String(r.inputs.incomeStartAge || Math.floor(ageStart)))]
+             : ['Policyholder', escHtml(r.policyholderType)],
+      ['Attitude to risk', escHtml(risk)],
+      ['Sustainability', esg]
+    ]);
+
+  var initComm = r.totalInitialComm != null ? r.totalInitialComm : r.initialComm;
+  var ctype = isPrsa ? (r.prsaType === 'standard' ? 'Standard PRSA' : 'Non-Standard PRSA') + ' · version ' + r.code
+                     : 'version ' + r.code;
+  var product = sumCol('Product', 2, escHtml(QT_TEXT.productBrands[S.product] || productName()), escHtml(ctype), [
+      ['Management charge', pct(r.cc.admin)],
+      ['Contribution charge', (r.spContribCharge > 0 || r.rpContribCharge > 0) ? 'Applies' : 'None'],
+      initComm != null ? ['Initial commission', fEUR(initComm)] : null,
+      ['Trail commission', pct(r.cc.ongoing) + ' a year']
+    ]);
+
+  var y1, paid, invRows;
+  if (isPrsa) {
+    y1 = fEUR(r.ofvRaw + r.spRaw + (r.annualRp || 0)) + ' in year 1';
+    paid = fEUR(r.totalContrib) + ' paid in by age ' + r.nra;
+    invRows = [
+      r.ofvRaw > 0 ? ['Transfer value', fEUR(r.ofvRaw)] : null,
+      r.spRaw > 0 ? ['Single contribution', fEUR(r.spRaw)] : null,
+      r.rpRaw > 0 ? ['Regular contribution', fEUR(r.rpRaw) + ' a ' + String(r.freq).replace('monthly', 'month').replace('quarterly', 'quarter').replace('annual', 'year')] : null,
+      ['Paid by', 'Client']
+    ];
+  } else if (isArf) {
+    y1 = fEUR(r.contribution);
+    paid = 'transferred into your ARF';
+    invRows = [['Income', escHtml(qtArfIncomeShort(r))], ['Age at start', String(Math.floor(ageStart))]];
   } else {
-    var p = r.p, inc = r.inputs.incomeType !== 'none', row = ibHeadlineRow(r);
-    h = (inc ? kc('At ' + pct(r.rate) + ' growth, the fund lasts', lastsV(p), 'net growth ' + pct(p.netRate) + ' a year after charges', true)
-             : kc('Projected value after ' + row.year + (row.year === 1 ? ' year' : ' years'), fEUR(row.F), 'after charges and exit tax, at ' + pct(r.rate) + ' growth a year', true)) +
-      (inc ? kc('First year\'s income', fEUR(p.firstIncome), p.firstIncomeYear ? 'policy year ' + p.firstIncomeYear : '')
-           : kc('Contributions paid', fEUR(row.A), 'to year ' + row.year)) +
-      kc('Exit tax', pct(r.taxRate), escHtml(r.policyholderType) + ' policyholder') +
-      kc('Total annual charge', pct(p.chargeRate), 'reduces growth by ' + pct(Math.max(0, r.rate - p.netRate)) + ' a year');
+    y1 = fEUR(r.contribution + (r.rp || 0) * (r.inputs.freq === 'monthly' ? 12 : r.inputs.freq === 'quarterly' ? 4 : 1)) + ' in year 1';
+    paid = r.totalContrib != null ? fEUR(r.totalContrib) + ' paid in' : '';
+    invRows = [
+      r.contribution > 0 ? ['Single contribution', fEUR(r.contribution)] : null,
+      r.rp > 0 ? ['Regular contribution', fEUR(r.rp) + ' ' + escHtml(r.inputs.freq)] : null,
+      ['Exit tax', pct(r.taxRate)]
+    ];
   }
-  return '<div class="kband">' + h + '</div>';
+  var investment = sumCol('Investment', 4, y1, paid, invRows);
+
+  var rows = qtFundRows({ product: S.product, r: r });
+  var pf = portfolioState(), pr = Math.round(r.portfolioSri);
+  var fitTxt = r.isGlidepath ? escHtml(strategyProfile(r.stratObj) || 'Medium risk') + ' profile'
+    : 'Portfolio risk ' + pr + ' · ' + (pr === S.risk.sri ? 'matches client' : 'differs from client');
+  var funds = sumCol('Funds', 5, escHtml(strategyName()), fitTxt,
+    rows.slice(0, 4).map(function(fr) {
+      return [escHtml(fr.fund.name.replace(/^Allianz /, '')) + (fr.gmab ? ' <span class="g">· Guarantee</span>' : ''),
+              (+(fr.weight * 100).toFixed(1)) + '%'];
+    }).concat(rows.length > 4 ? [['+ ' + (rows.length - 4) + ' more', '']] : []));
+
+  return '<section class="qsum">' + client + product + investment + funds + '</section>';
 }
 function legendHtml(items) {
   return '<div class="legend">' + items.map(function(it) { return '<span><i class="' + it[0] + '"' + (it[2] ? ' style="' + it[2] + '"' : '') + '></i>' + escHtml(it[1]) + '</span>'; }).join('') + '</div>';
-}
-// The chosen strategy / funds, beside the projection chart
-function resPortfolio(r) {
-  var rows = qtFundRows({ product: S.product, r: r }), isStrat = S.product === 'prsa' && r.strat !== 'diy';
-  var h = '<div class="card side"><div class="fchoice-h"><h3 class="card-t">' + (isStrat ? escHtml(r.stratLabel) : 'Fund choice') + '</h3><button type="button" class="lnk" onclick="goStep(5)">Edit</button></div>';
-  if (isStrat) h += '<div class="fchoice-sub">' + escHtml(r.stratSub) + (r.isGlidepath ? ' · starting mix' : '') + '</div>';
-  h += rows.map(function(fr) {
-    return '<div class="fc-row"><span>' + escHtml(shortFundName(fr.fund)) + (fr.gmab ? ' · <b class="g">Guarantee</b>' : '') + '</span><b>' + pctW(fr.weight) + '</b></div>';
-  }).join('');
-  var pv, ok;
-  if (r.isGlidepath) { var path = glidepathSriPath(r.stratObj, r.termMonths); pv = path ? fmtRisk(path.start) : '–'; ok = strategyRiskFit(r.stratObj, S.risk.sri).aligned; }
-  else { pv = Math.round(r.portfolioSri); ok = pv === S.risk.sri; }
-  return h + '<div class="riskrow"><span>Risk · client / portfolio</span><b>' + S.risk.sri + ' / ' + pv + (ok ? ' ✓' : '') + '</b></div></div>';
 }
 function projTable(head, rows, totIdx) {
   return '<table class="tbl"><thead><tr>' + head.map(function(x, i) { return '<th class="' + (i === 0 ? 'l' : '') + (i === head.length - 1 ? ' em' : '') + '">' + x + '</th>'; }).join('') + '</tr></thead><tbody>' +
@@ -2634,18 +2751,43 @@ function projTable(head, rows, totIdx) {
       return '<tr' + (tot ? ' class="tot"' : '') + '>' + rw.c.map(function(x, i) { return '<td class="' + (i === 0 ? 'l' : '') + (i === rw.c.length - 1 ? ' em' : '') + '">' + x + '</td>'; }).join('') + '</tr>';
     }).join('') + '</tbody></table>';
 }
+// ── Projection tab (design handoff §6, 9 Oct 2026) ──
+// Figures panel beside the chart; the fund list now lives in the quote summary card above.
+function projPanel(head, rows, assume) {
+  return '<div class="pj-side"><div class="pj-hero"><span>' + head[0] + '</span><b>' + head[1] + '</b><span>' + head[2] + '</span></div>' +
+    '<div class="pj-rows">' + rows.filter(Boolean).map(function(x) {
+      return '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>';
+    }).join('') + '</div>' +
+    '<div class="pj-assume"><b>Assumptions</b><span>' + escHtml(assume) + '</span></div></div>';
+}
+function projChart(svg, legend) {
+  return '<div class="pj-main"><div class="pj-ch"><h3 class="card-t">How the fund could grow</h3>' + legendHtml(legend) + '</div>' +
+    svg + '<div class="wbox">' + escHtml(QT_TEXT.packWarnings.estimates) + '</div></div>';
+}
+// Year-by-year table, collapsed until asked for.
+function projTableCard(title, sub, cols, rows) {
+  return '<section class="card flush"><div class="tcard-h"><div><h3 class="card-t">' + escHtml(title) + '</h3>' +
+    '<p class="tcard-s">' + escHtml(sub) + '</p></div>' +
+    '<button type="button" class="btn sm" aria-expanded="' + !!S.resAllYears + '" onclick="toggleAllYears()">' +
+    (S.resAllYears ? 'Hide table' : 'Show table') + ' <span aria-hidden="true">' + (S.resAllYears ? '⌃' : '⌄') + '</span></button></div>' +
+    (S.resAllYears ? projTable(cols, rows) : '') + '</section>';
+}
 function resPrsaProjection(r) {
   var gp = r.isGlidepath;
-  var chart = '<div class="card"><div class="cc-h"><h3 class="card-t">How the fund could grow</h3>' + legendHtml([['', 'Value after charges'], ['fill', 'Contributions paid']]) + '</div>' +
-    qtPrsaChart(r, 660, 300, { legend: false }) +
-    '<p class="foot-note">Assumed growth ' + (gp ? 'up to ' : '') + pct(r.blendedGross) + ' a year before charges' + (gp ? ', reducing as the glidepath moves into lower-risk funds' : ', the portfolio\'s blended rate') + '. Figures are not guaranteed.</p></div>';
-  var snaps = S.resAllYears ? r.snapshots : qtPrsaRows(r);
-  var rows = snaps.map(function(s) {
-    return { tot: s.isMat, c: [s.isMat ? 'Retirement' : s.year, s.isMat ? r.nra : s.age, fEUR(s.contribNC), fEUR(Math.max(0, s.growthNC)), fEUR(s.fundNC - s.fundWC), fEUR(s.fundWC)] };
+  var panel = projPanel(
+    ['Projected fund value at ' + r.nra, fEUR(r.fundWC), 'projected, not guaranteed'],
+    [['In today\'s money', fEUR(r.realMat)],
+     ['Estimated income', fEUR(r.annualIncomeReal) + ' a year'],
+     ['Total paid in', fEUR(r.totalContrib)]],
+    'Growth ' + (gp ? 'up to ' : '') + pct(r.blendedGross) + ' a year. Inflation ' + pct(INFLATION) +
+      ' a year. Income in today\'s money, from an annuity at ' + r.nra + '.');
+  var chart = projChart(qtPrsaChart(r, 660, 300, { legend: false }), [['', 'Projected value'], ['fill', 'Paid in']]);
+  var rows = r.snapshots.map(function(s) {
+    return { tot: s.isMat, c: [s.isMat ? 'Retirement' : s.year, s.isMat ? r.nra : s.age, fEUR(s.contribNC), fEUR(s.fundWC)] };
   });
-  return '<div class="cols">' + chart + resPortfolio(r) + '</div>' +
-    '<div class="card flush"><div class="tcard-h"><h3 class="card-t">Projected benefits</h3><button type="button" class="lnk" onclick="toggleAllYears()">' + (S.resAllYears ? 'Show key years' : 'Show every year') + '</button></div>' +
-    projTable(['Year', 'Age', 'A. Contributions', 'B. Growth', 'C. Effect of charges', 'D. Value after charges'], rows) + '</div>';
+  return '<section class="pj">' + panel + chart + '</section>' +
+    projTableCard('Projected benefits by year', 'Total paid in and projected value for each year to retirement',
+      ['Year', 'Age', 'Total paid in', 'Projected value'], rows);
 }
 function rateInput(id, label, val, def, over, max, onchange) {
   return '<div class="f-row"><label class="f" for="' + id + '">' + label + '</label>' +
@@ -2669,8 +2811,9 @@ function resArfProjection(r) {
     rateInput('rate2', 'Growth rate 2 (a year)', r.rate2, arfDefaultRate2(), r.rate2Overridden, ARF_MAX_RATE, "setArfRate('rate2', this.value)") +
     '<p class="hint" style="margin:0">Rate 1 defaults to the portfolio\'s blended growth rate; rate 2 to the Euro Cash rate. Maximum ' + pct(ARF_MAX_RATE) + '.</p></div>';
   var chart = '<div class="card"><div class="cc-h"><h3 class="card-t">How the fund could last</h3>' + legendHtml([['', 'At ' + pct(r.rate1) + ' growth'], ['dash', 'At ' + pct(r.rate2) + ' growth']]) + '</div>' +
-    qtArfChart(r, 660, 300, { legend: false }) + '<p class="foot-note">Fund value after income and charges. Figures are not guaranteed.</p></div>';
-  var h = '<div class="cols">' + chart + '<div class="stack">' + resPortfolio(r) + rates + '</div></div>';
+    qtArfChart(r, 660, 300, { legend: false }) + '<p class="foot-note">Fund value after income and charges.</p>' +
+    '<div class="wbox">' + escHtml(QT_TEXT.packWarnings.estimates) + '</div></div>';
+  var h = '<div class="cols">' + chart + '<div class="stack">' + rates + '</div></div>';
   [[r.p1, r.rate1], [r.p2, r.rate2]].forEach(function(x) {
     var pp = x[0];
     h += '<div class="card flush"><div class="tcard-h"><h3 class="card-t">At ' + pct(x[1]) + ' growth a year</h3></div>' +
@@ -2694,8 +2837,9 @@ function resIbProjection(r) {
     rateInput('i-rate', 'Growth rate (a year)', r.rate, ibDefaultRate(inp), r.rateOverridden, IB_MAX_RATE, 'setIbRate(this.value)') +
     '<p class="hint" style="margin:0">Defaults to the portfolio\'s blended growth rate, capped at ' + pct(IB_MAX_RATE) + '.</p></div>';
   var chart = '<div class="card"><div class="cc-h"><h3 class="card-t">How the fund could grow</h3>' + legendHtml([['', 'At ' + pct(r.rate) + ' growth']]) + '</div>' +
-    qtIbChart(r, 660, 300, { legend: false }) + '<p class="foot-note">Fund value after charges, income and exit tax. Figures are not guaranteed.</p></div>';
-  return '<div class="cols">' + chart + '<div class="stack">' + resPortfolio(r) + rates + '</div></div>' +
+    qtIbChart(r, 660, 300, { legend: false }) + '<p class="foot-note">Fund value after charges, income and exit tax.</p>' +
+    '<div class="wbox">' + escHtml(QT_TEXT.packWarnings.estimates) + '</div></div>';
+  return '<div class="cols">' + chart + '<div class="stack">' + rates + '</div></div>' +
     '<div class="card flush"><div class="tcard-h"><h3 class="card-t">Projected values</h3></div>' +
     projTable(['Year', 'Age', 'A. Contributions', 'B. Growth to date', 'C. Charges to date', 'D. Tax to date', 'E. Income to date', 'F. Projected value'],
       p.rows.map(function(rw) { return { tot: p.fundZeroYear === rw.year, c: [rw.year, rw.age, fEUR(rw.A), fEUR(rw.B), fEUR(rw.C), fEUR(rw.D), fEUR(rw.E), fEUR(rw.F)] }; })) + '</div>';
