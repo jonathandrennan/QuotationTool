@@ -147,8 +147,8 @@ function qtPrsaChart(r, width, height, o) {
   return qtSvgLineChart({
     width: width, height: height, xs: xs, xTicks: qtRetirementTicks(start, retDate, tRet), yFormat: qtEuroAxis, legend: !o || o.legend !== false,
     series: [
-      { label: 'Contributions paid', fill: '#E3EAF2', values: contrib },
-      { label: 'Value after charges', color: '#003781', values: wc, area: true, width: 2.5, endDot: true }
+      { label: 'Total paid in', fill: '#E3EAF2', values: contrib },
+      { label: 'Projected value', color: '#003781', values: wc, area: true, width: 2.5, endDot: true }
     ]
   });
 }
@@ -211,10 +211,12 @@ function qtPortfolioRisk(Q) {
     var gp = glidepathSriPath(r.stratObj, r.termMonths);
     if (!gp) return { line: '', scaleValue: null, label: '', footnote: '' };
     return { line: escHtml(qtFill(T.glidepathRiskPath, { start: fmtRisk(gp.start), end: fmtRisk(gp.end) })), scaleValue: gp.start, label: 'Plan at start',
+             short: 'strategy risk profile <b>' + escHtml(strategyProfile(r.stratObj) || 'Medium risk') + '</b>', glide: true,
              footnote: qtFill(T.riskFootnoteGlidepath, { start: fmtRisk(gp.start, 1), end: fmtRisk(gp.end, 1) }) };
   }
   var pr = Math.round(r.portfolioSri);
   return { line: 'Indicative portfolio risk: <b>' + pr + ' &ndash; ' + ESMA_LABELS[pr] + '</b>*', scaleValue: r.portfolioSri, label: 'Portfolio',
+           short: 'indicative portfolio risk <b>' + pr + '</b>', mark: '*',
            footnote: qtFill(T.riskFootnote, { exact: fmtRisk(r.portfolioSri, 1) }) };
 }
 
@@ -239,6 +241,8 @@ function qtMarkupBlocks(text) {
 }
 
 // ─── Shared derived figures ───────────────────────────────────────────────────
+// Largest holding first, so the fund, charge and description lists all lead with what matters most.
+// Equal weights keep the engine's order (ascending risk), since Array#sort is stable.
 function qtFundRows(Q) {
   var r = Q.r;
   return r.mix.map(function(m) {
@@ -247,13 +251,78 @@ function qtFundRows(Q) {
     var gtee = m.gmab ? (Q.product === 'prsa' ? f.gmab : f.gteeCharge) : 0;
     return { fund: f, weight: m.weight, admin: r.cc.admin, fmc: fmc, gtee: gtee, total: r.cc.admin + fmc + gtee,
              cat: FUND_CATEGORY_OF[f.id] || 'multi', gmab: m.gmab };
-  });
+  }).sort(function(a, b) { return b.weight - a.weight; });
+}
+// The protected level is a product feature keyed by fund, shared by the PRSA, ARF and Bond ranges.
+function qtGteeLevel(fundId) {
+  var l = QT_CONTENT.guarantee.levels[fundId];
+  return l ? Math.round(l.protected * 100) + '%' : null;
+}
+function qtNameList(a) {
+  return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+}
+// Names the guaranteed funds and their level. Falls back to the general wording if any fund in the
+// quotation has no published level, so an unknown fund can never produce a wrong percentage.
+function qtGuaranteeNote(rows) {
+  var T = QT_TEXT, g = rows.filter(function(fr) { return fr.gmab; });
+  if (!g.length) return '';
+  var lv = g.map(function(fr) { return qtGteeLevel(fr.fund.id); });
+  if (lv.some(function(x) { return !x; })) return T.guaranteeFundNoteGeneric;
+  var uniq = lv.filter(function(x, i) { return lv.indexOf(x) === i; });
+  return uniq.length === 1
+    ? qtFill(T.guaranteeFundNote, { level: uniq[0] })
+    : qtFill(T.guaranteeFundNoteMixed, { levels: qtNameList(uniq) });
 }
 function qtCategorySplit(rows) {
   var out = {};
   FUND_CATEGORIES.forEach(function(c) { out[c.key] = 0; });
   rows.forEach(function(r) { out[r.cat] += r.weight; });
   return out;
+}
+
+// The redesigned Charges page drops the effect-of-charges / reduction-in-yield disclosure
+// (handoff §8, 9 Oct 2026). The handoff lists that as still open for Compliance, so it sits behind
+// this flag: set it to true to put the disclosure back without reworking the page.
+var QT_SHOW_EFFECT_OF_CHARGES = false;
+
+// ─── Quotation-pack page furniture (design handoff, 9 Oct 2026) ───────────────
+// A titled block of label/value rows, as used on "Your quotation at a glance".
+// Rows are [label, value, isTotal]; a falsy row is dropped, so each product can pass
+// only the rows that apply to it.
+function qtFactBlock(title, rows) {
+  return '<div class="fblk"><div class="fbh">' + escHtml(title) + '</div>' +
+    rows.filter(Boolean).map(function(r) {
+      return '<div class="fbr' + (r[2] ? ' tot' : '') + '"><span>' + escHtml(r[0]) + '</span><b>' + r[1] + '</b></div>';
+    }).join('') + '</div>';
+}
+// Three headline figures under a 2px navy rule. Items are [label, value, sub].
+function qtStat3(items) {
+  return '<div class="stat3">' + items.filter(Boolean).map(function(i) {
+    return '<div><span>' + escHtml(i[0]) + '</span><b>' + i[1] + '</b>' +
+      (i[2] ? '<span class="sub">' + escHtml(i[2]) + '</span>' : '') + '</div>';
+  }).join('') + '</div>';
+}
+// CPC warnings, boxed next to the figures they relate to.
+function qtWarnBox(lines) {
+  return '<div class="wbox">' + lines.filter(Boolean).map(function(l) { return '<span>' + escHtml(l) + '</span>'; }).join('') + '</div>';
+}
+// Attitude-to-risk strip: seven cells, the client's own rating filled navy.
+function qtRiskStrip(sri) {
+  var h = '';
+  for (var i = 1; i <= 7; i++) h += '<div' + (i === sri ? ' class="on"' : '') + '>' + i + '</div>';
+  return '<div class="rstrip">' + h + '<span class="lo">Lower risk</span><span class="hi">Higher risk</span></div>';
+}
+// Key years for the projection and remuneration tables: the first five, then 10 and 15, then
+// retirement/maturity. Short terms simply yield fewer rows.
+function qtKeyYears(rows) {
+  return rows.filter(function(x) { return x.isMat || [1, 2, 3, 4, 5, 10, 15].indexOf(x.year) >= 0; });
+}
+// Weighted charge components across the portfolio, used on both the glance and charges pages.
+function qtChargeMix(fundRows) {
+  var m = { admin: 0, fmc: 0, gtee: 0 };
+  fundRows.forEach(function(fr) { m.admin += fr.weight * fr.admin; m.fmc += fr.weight * fr.fmc; m.gtee += fr.weight * fr.gtee; });
+  m.total = m.admin + m.fmc + m.gtee;
+  return m;
 }
 
 // ─── Pack builder ─────────────────────────────────────────────────────────────
@@ -269,7 +338,13 @@ function qtBuildPack(Q) {
     opts = opts || {};
     var cls = opts.cls || '', m = /^<h\d class="([^"]+)"/.exec(html);
     if (m) cls = (cls + ' ' + m[1]).trim();
-    B.push({ html: html, hdr: opts.hdr || 'agl', cls: cls, sec: sec });
+    var hdr = opts.hdr || 'agl';
+    B.push({ html: html, hdr: hdr, cls: cls, sec: sec, grp: hdr === 'broker' ? 'adv' : 'agl', full: !!opts.full });
+  }
+  // Page title and lead, as it appears on every Allianz page.
+  function pageTitle(title, lead) {
+    add('<div class="ptitle"><h2>' + escHtml(title) + '</h2>' +
+        (lead ? '<span>' + escHtml(lead) + '</span>' : '') + '</div>', { cls: 'newpage kwn' });
   }
   function h2(title, newpage, hdr) { add('<h2>' + escHtml(title) + '</h2>', { cls: 'kwn' + (newpage ? ' newpage' : ''), hdr: hdr }); }
   function p(txt, cls) { add('<p' + (cls ? ' class="' + cls + '"' : '') + '>' + escHtml(txt) + '</p>'); }
@@ -277,6 +352,8 @@ function qtBuildPack(Q) {
   var fundRows = qtFundRows(Q);
   var cs = T.company;
   var dateLong = fmtDateLong(new Date());
+  // Short product name for the quotation cover and the footer brand line.
+  var brand = T.productBrands[Q.product] || Q.productName;
 
   // ── 1. Cover letter (adviser letterhead) ──
   if (Q.sections.cover) {
@@ -305,70 +382,130 @@ function qtBuildPack(Q) {
         '<div class="sigline short"></div>Date</div></div>', { hdr: 'broker' });
   }
 
-  // ── 3. At a glance ──
-  if (Q.sections.summary) {
+  // ── Allianz quotation: cover / divider ──
+  // Separates the adviser's documents from the Allianz pages, which are numbered from 1 again.
+  // Products without a cover image fall back to the plain navy cover.
+  var aglSections = ['summary', 'projection', 'charges', 'funds', 'remun', 'important', 'glossary'];
+  var hasAgl = aglSections.some(function(k) { return Q.sections[k]; });
+  if (hasAgl) {
     sec = 'summary';
-    var pfRisk = qtPortfolioRisk(Q), hero, facts = [['Start date', fmtDate(r.inputs.startStr)]];
-    add('<div class="eyebrow">' + escHtml(T.sections.summary) + '</div><h1 class="prep">' + escHtml(qtFill(T.summaryTitle, { clientName: clientName })) + '</h1>' +
-        '<div class="byline">' + escHtml(qtFill(T.summaryByline, { brokerName: Q.broker.name, brokerFirm: Q.broker.firm, date: dateLong })) + '</div>', { cls: 'newpage kwn' });
-    function lasts(pp) { return pp.fundZeroYear ? 'to age ' + pp.depletionAge : '40+ years'; }
-    if (isPrsa) {
-      hero = ['Projected value at age ' + r.nra + ', after charges', fEUR(r.fundWC), fEUR(r.realMat) + ' in today\'s money &middot; income approx. ' + fEUR(r.annualIncomeReal) + ' a year'];
-      facts.push(['Retirement', 'Age ' + r.nra + ' &middot; ' + (r.termMonths / 12).toFixed(1) + ' years']);
-      if (r.ofvRaw > 0) facts.push(['Transfer', fEUR(r.ofvRaw)]);
-      if (r.spRaw > 0) facts.push(['Single', fEUR(r.spRaw)]);
-      if (r.rpRaw > 0) facts.push(['Regular', fEUR(r.rpRaw) + ' ' + r.freq + (r.esc > 0 ? ', +' + r.esc + '% a year' : '')]);
-    } else if (isArf) {
-      var ai = qtArfIncomeShort(r).replace(/^Income /, '');
-      hero = ['At ' + pct(r.rate1) + ' growth, your fund is projected to last', lasts(r.p1), 'At ' + pct(r.rate2) + ' growth: ' + lasts(r.p2)];
-      facts.push(['Contribution', fEUR(r.contribution)], ['Income', escHtml(ai.charAt(0).toUpperCase() + ai.slice(1))], ['Income from age', r.inputs.incomeStartAge]);
-    } else {
-      var inc = r.inputs.incomeType !== 'none', rows = r.p.rows, row = rows.filter(function(x) { return x.year === 10; })[0] || rows[rows.length - 1];
-      hero = inc ? ['At ' + pct(r.rate) + ' growth, your fund is projected to last', lasts(r.p), 'net growth ' + pct(r.p.netRate) + ' a year after charges']
-                 : ['Projected value after ' + row.year + ' years', fEUR(row.F), 'after charges and exit tax, at ' + pct(r.rate) + ' growth a year'];
-      facts.push(['Policyholder', r.policyholderType.charAt(0).toUpperCase() + r.policyholderType.slice(1)]);
-      if (r.contribution > 0) facts.push(['Single', fEUR(r.contribution)]);
-      if (r.rp > 0) facts.push(['Regular', fEUR(r.rp) + ' ' + r.inputs.freq]);
-      if (inc) facts.push(['Income', escHtml(qtIbIncomeShort(r).replace(/^Income /, ''))]);
-    }
-    add('<div class="hero"><div class="hl"><div class="k">' + hero[0] + '</div><div class="v">' + hero[1] + '</div><div class="s">' + hero[2] + '</div></div>' +
-        '<div class="hr"><table class="facts">' + facts.map(function(f) { return '<tr><td>' + f[0] + '</td><td>' + f[1] + '</td></tr>'; }).join('') + '</table></div></div>');
-    add('<div class="chart">' + (isPrsa ? qtPrsaChart(r, 640, 150) : isArf ? qtArfChart(r, 640, 150) : qtIbChart(r, 640, 150)) + '</div>');
-    var cRows;
-    if (isPrsa) cRows = [['Total annual charge', pct(r.totalAnnualCharge) + (r.isGlidepath ? ' (initial mix)' : '')], ['Effect of charges', pct(Math.max(0, r.grossRate - r.netRate)) + ' a year'],
-                         ['Initial remuneration', fEUR(r.totalInitialComm)], ['Trail', pct(r.cc.ongoing) + ' a year']];
-    else if (isArf) cRows = [['Total annual charge', pct(r.p1.chargeRate)], ['Growth after charges', pct(r.rate1) + ' &rarr; ' + pct(r.p1.netRate)],
-                             ['Initial remuneration', fEUR(r.initialComm)], ['Trail', pct(r.cc.ongoing) + ' a year']];
-    else cRows = [['Total annual charge', pct(r.p.chargeRate)], ['Growth after charges', pct(r.rate) + ' &rarr; ' + pct(r.p.netRate)], ['Exit tax', pct(r.taxRate)],
-                  ['Initial remuneration', fEUR(r.initialComm)], ['Trail', pct(r.cc.ongoing) + ' a year']];
-    add('<div class="cards2"><div class="pcard"><div class="pt">' + escHtml(T.sections.funds) + '</div><p>' + escHtml(Q.strategyName) + '. Your risk rating <b>' + Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri] + '</b>' +
-        (isPrsa && r.isGlidepath ? '; strategy risk profile <b>' + escHtml(strategyProfile(r.stratObj) || 'Medium risk') + '</b>.' : '.') + '</p><p>' + pfRisk.line + '</p>' + qtSriScale(Q.risk.sri, pfRisk.scaleValue, pfRisk.label, 'sm') + '</div>' +
-        '<div class="pcard"><div class="pt">Charges and remuneration</div><table class="kv2">' + cRows.map(function(c) { return '<tr><td>' + c[0] + '</td><td>' + c[1] + '</td></tr>'; }).join('') + '</table></div></div>');
-    add('<div class="warnbox">' + T.warnings.map(function(w) { return escHtml(w).replace(/^Warning:/, '<b>Warning:</b>'); }).join(' ') + '</div>');
-    p((pfRisk.footnote ? pfRisk.footnote + ' ' : '') + T.disclaimerShort, 'small');
+    var coverImg = (typeof QT_COVERS !== 'undefined' && QT_COVERS) ? QT_COVERS[Q.product] : null;
+    add('<div class="cover' + (coverImg ? '' : ' plain') + '"' + (coverImg ? ' style="background-image:url(' + coverImg + ')"' : '') + '>' +
+        '<div class="clogo">' + qtLogoSvg(30) + '</div>' +
+        '<div class="ctitle"><span class="ck">' + escHtml(T.packCoverKicker) + '</span>' +
+        '<span class="cn">' + escHtml(brand) + '</span>' +
+        '<span class="cs">' + escHtml(T.packCoverSub) + '</span></div></div>', { full: true });
   }
 
-  // ── 4. Projection ──
+  // ── Allianz 2. Your quotation at a glance ──
+  // Factual only: the details the quotation is based on. Projections live on their own page.
+  if (Q.sections.summary) {
+    sec = 'summary';
+    pageTitle(T.sections.summary, T.packLeads.summary);
+    var mix = qtChargeMix(fundRows);
+    var ageStart = r.ageAtStart != null ? r.ageAtStart : r.startAge;
+    var startYear = new Date(r.inputs.startStr).getFullYear();
+    var cAddr = (Q.client.address || '').split('\n').filter(function(x) { return x.trim(); }).join(', ');
+    var youRows = [
+      ['Name', escHtml(Q.client.salutation + ' ' + clientName)],
+      ['Date of birth', escHtml(fmtDate(r.inputs.dobStr)) + ' &middot; age ' + Math.floor(ageStart)],
+      cAddr ? ['Address', escHtml(cAddr)] : null,
+      ['Adviser', escHtml(Q.broker.name + ', ' + Q.broker.firm)]
+    ];
+    var planRows, contribRows;
+    if (isPrsa) {
+      planRows = [
+        ['Product', escHtml(brand)],
+        ['Type and version', escHtml((r.prsaType === 'standard' ? 'Standard PRSA' : 'Non-Standard PRSA') + ' · ' + r.code)],
+        ['Start date', escHtml(fmtDate(r.inputs.startStr))],
+        ['Retirement age', r.nra + ' &middot; ' + (startYear + Math.round(r.termMonths / 12))]
+      ];
+      contribRows = [
+        r.ofvRaw > 0 ? ['Transfer value', fEUR(r.ofvRaw)] : null,
+        r.spRaw > 0 ? ['Single contribution', fEUR(r.spRaw)] : null,
+        r.rpRaw > 0 ? ['Regular contribution', fEUR(r.rpRaw) + ' a ' + String(r.freq).replace(/ly$/, '').replace('month', 'month').replace('quarter', 'quarter').replace('annual', 'year') + (r.esc > 0 ? ', +' + r.esc + '% a year' : '')] : null,
+        ['Total paid in by age ' + r.nra, fEUR(r.totalContrib)]
+      ];
+    } else if (isArf) {
+      planRows = [
+        ['Product', escHtml(brand)],
+        ['Version', escHtml(r.code)],
+        ['Start date', escHtml(fmtDate(r.inputs.startStr))],
+        ['Income from age', escHtml(String(r.inputs.incomeStartAge || Math.floor(ageStart)))]
+      ];
+      contribRows = [
+        ['Single contribution', fEUR(r.contribution)],
+        ['Income', escHtml(qtArfIncomeShort(r))],
+        ['Age at start', String(Math.floor(ageStart))]
+      ];
+    } else {
+      planRows = [
+        ['Product', escHtml(brand)],
+        ['Version', escHtml(r.code)],
+        ['Start date', escHtml(fmtDate(r.inputs.startStr))],
+        ['Policyholder', escHtml(r.policyholderType)]
+      ];
+      contribRows = [
+        r.contribution > 0 ? ['Single contribution', fEUR(r.contribution)] : null,
+        r.rp > 0 ? ['Regular contribution', fEUR(r.rp) + ' ' + escHtml(r.inputs.freq)] : null,
+        ['Exit tax', pct(r.taxRate)],
+        r.totalContrib != null ? ['Total paid in', fEUR(r.totalContrib)] : null
+      ];
+    }
+    var chargeRows = [
+      [isPrsa ? 'Annual management charge' : 'Policy charge', pct(mix.admin) + ' a year'],
+      ['Fund charges, weighted', pct(mix.fmc) + ' a year'],
+      mix.gtee > 0 ? ['Guarantee charge, weighted', pct(mix.gtee) + ' a year'] : null,
+      ['Contribution charge', (r.spContribCharge > 0 || r.rpContribCharge > 0) ? 'Applies, see Charges' : 'None'],
+      ['Total annual charge', pct(mix.total) + ' a year', true]
+    ];
+    add('<div class="fgrid">' + qtFactBlock('YOU', youRows) + qtFactBlock('YOUR PLAN', planRows) +
+        qtFactBlock('CONTRIBUTIONS', contribRows) + qtFactBlock('CHARGES', chargeRows) + '</div>');
+
+    var ivRows = fundRows.map(function(fr) {
+      return '<tr><td class="l">' + escHtml(fr.fund.name) +
+        (fr.gmab ? ' <span class="g">&middot; with Annual Guarantee</span>' : '') + '</td>' +
+        '<td>' + Math.round(fr.fund.esma) + '</td><td><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
+    }).join('');
+    add('<div class="fblk"><div class="fbh">YOUR INVESTMENT</div>' +
+        '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Risk</th><th class="em">Allocation</th></tr></thead>' +
+        '<tbody>' + ivRows + '</tbody></table></div>', { cls: 'split' });
+
+    var gRisk = qtPortfolioRisk(Q);
+    add('<div class="riskrow"><div class="rl"><span>Your attitude to risk</span><b>' + Q.risk.sri + ' &ndash; ' +
+        ESMA_LABELS[Q.risk.sri] + '</b>' +
+        (gRisk.short ? '<span>' + gRisk.short.replace(/^indicative /, '').replace(/^portfolio risk/, 'Portfolio risk') + (gRisk.mark || '') + '</span>' : '') + '</div>' +
+        qtRiskStrip(Q.risk.sri) + '</div>');
+    if (gRisk.footnote) p(gRisk.glide ? T.packRiskFootnoteGlide : qtFill(T.packRiskFootnote, { exact: fmtRisk(r.portfolioSri, 1) }), 'tiny');
+  }
+
+  // ── Allianz 3. Projected benefits ──
   if (Q.sections.projection) {
     sec = 'projection';
-    h2(T.sections.projection, true);
+    pageTitle(T.sections.projection, qtFill(T.packProjectionLead[Q.product] || '', { nra: r.nra }));
     if (isPrsa) {
       var rate = pct(r.blendedGross);
-      p(qtFill(T.prsaProjectionIntro, { nra: r.nra }));
-      p(qtFill(r.isGlidepath ? T.prsaRateGlidepath : T.prsaRateFlat, { rate: rate }));
-      if (!Q.sections.summary) add('<div class="chart">' + qtPrsaChart(r, 640, 220) + '</div>');
-      var th = '<table class="num split"><thead><tr class="ltr"><th></th><th></th><th>A</th><th>B</th><th>C</th><th>D = A + B &minus; C</th></tr>' +
-        '<tr><th>Year</th><th>Age</th><th>Contributions paid to date</th><th>Investment growth to date (before charges)</th><th>Effect of charges to date</th><th>Projected value with charges</th></tr></thead><tbody>';
-      qtPrsaRows(r).forEach(function(s) {
-        th += '<tr' + (s.isMat ? ' class="mat"' : '') + '><td>' + (s.isMat ? 'Retirement' : s.year) + '</td><td>' + (s.isMat ? r.nra : s.age) + '</td><td>' + fEUR(s.contribNC) + '</td><td>' + fEUR(Math.max(0, s.growthNC)) + '</td><td>' + fEUR(s.fundNC - s.fundWC) + '</td><td><b>' + fEUR(s.fundWC) + '</b></td></tr>';
+      add(qtStat3([
+        ['Projected value at ' + r.nra, fEUR(r.fundWC)],
+        ['In today\'s money', fEUR(r.realMat)],
+        ['Estimated income', fEUR(r.annualIncomeReal), 'a year']
+      ]));
+      add('<div class="chart">' + qtPrsaChart(r, 640, 210) + '</div>');
+      // Key years only: the full year-by-year run is in the adviser's on-screen results.
+      var th = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Age</th><th>Total paid in</th>' +
+        '<th class="em">Projected value</th><th>In today\'s money</th></tr></thead><tbody>';
+      qtKeyYears(r.snapshots).forEach(function(x) {
+        var real = x.isMat ? r.realMat : x.fundWC / Math.pow(1 + INFLATION, x.year);
+        th += '<tr' + (x.isMat ? ' class="mat"' : '') + '><td class="l">' + (x.isMat ? 'At ' + r.nra : x.year) + '</td><td>' + (x.isMat ? r.nra : x.age) +
+          '</td><td>' + fEUR(x.contribNC) + '</td><td class="em"><b>' + fEUR(x.fundWC) + '</b></td><td>' + fEUR(real) + '</td></tr>';
       });
       add(th + '</tbody></table>', { cls: 'split' });
-      imp([qtFill(r.isGlidepath ? T.prsaImportantGlidepath : T.prsaImportantFlat, { rate: rate, inflation: pct(INFLATION) }), T.prsaImportant2]);
-      p(qtFill(T.prsaInflation, { fundValue: fEUR(r.fundWC), realValue: fEUR(r.realMat), monthlyIncome: fEUR(r.monthlyAnn),
-        annualIncome: fEUR(r.annualIncomeReal), guarantee: ANN_GUARANTEE, annEsc: pct(ANN_ESC) }));
-      p(T.prsaAverageNote);
-      p(T.prsaAnnuityNote);
-      if (r.strat === 'dis') p(T.prsaDisNote);
+      p(T.packKeyYearsNote, 'tiny');
+      add('<p class="assume"><b>Assumptions.</b> ' + escHtml(qtFill(r.isGlidepath ? T.prsaRateGlidepath : T.prsaRateFlat, { rate: rate })) +
+          ' ' + escHtml(qtFill(T.prsaInflationShort, { inflation: pct(INFLATION) })) +
+          ' ' + escHtml(T.packChargesAllowed) + '</p>');
+      add(qtWarnBox([T.packWarnings.estimates, T.packWarnings.value]));
+      if (r.strat === 'dis') p(T.prsaDisNote, 'tiny');
     } else if (isArf) {
       p(T.arfProjectionIntro);
       if (!Q.sections.summary) add('<div class="chart">' + qtArfChart(r, 640, 220) + '</div>');
@@ -412,16 +549,14 @@ function qtBuildPack(Q) {
   // ── 5. Charges ──
   if (Q.sections.charges) {
     sec = 'charges';
-    h2(T.sections.charges, true);
-    p(T.chargesIntro);
-    p(qtFill(isPrsa ? T.prsaFundCharges : isArf ? T.arfFundCharges : T.ibFundCharges, { admin: pct(r.cc.admin) }));
-    var ct = '<table class="num split"><thead><tr><th class="l">Fund</th><th>Allocation</th><th>' + (isPrsa ? 'AMC' : 'Policy charge') + '</th><th>Fund charge</th><th>Guarantee charge</th><th>Total annual charge</th></tr></thead><tbody>';
+    pageTitle(T.sections.charges, T.packLeads.charges);
+    var ct = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Allocation</th><th>' + (isPrsa ? 'AMC' : 'Policy charge') + '</th><th>Fund charge</th><th>Guarantee charge</th><th>Total annual charge</th></tr></thead><tbody>';
     var bAdmin = 0, bFmc = 0, bG = 0;
     fundRows.forEach(function(fr) {
       ct += '<tr><td class="l">' + escHtml(fr.fund.name) + '</td><td>' + (fr.weight * 100).toFixed(1) + '%</td><td>' + pct(fr.admin) + '</td><td>' + pct(fr.fmc) + '</td><td>' + (fr.gtee > 0 ? pct(fr.gtee) : '&ndash;') + '</td><td>' + pct(fr.total) + '</td></tr>';
       bAdmin += fr.weight * fr.admin; bFmc += fr.weight * fr.fmc; bG += fr.weight * fr.gtee;
     });
-    ct += '<tr class="mat"><td class="l">Your portfolio' + (isPrsa && r.isGlidepath ? ' (initial mix)' : '') + '</td><td>100%</td><td>' + pct(bAdmin) + '</td><td>' + pct(bFmc) + '</td><td>' + (bG > 0 ? pct(bG) : '&ndash;') + '</td><td>' + pct(bAdmin + bFmc + bG) + '</td></tr>';
+    ct += '<tr class="tot"><td class="l">Your portfolio' + (isPrsa && r.isGlidepath ? ' (initial mix)' : '') + '</td><td>100%</td><td>' + pct(bAdmin) + '</td><td>' + pct(bFmc) + '</td><td>' + (bG > 0 ? pct(bG) : '&ndash;') + '</td><td>' + pct(bAdmin + bFmc + bG) + '</td></tr>';
     add(ct + '</tbody></table>', { cls: 'split' });
     if (isPrsa) {
       if (r.isGlidepath) p(T.glidepathNote);
@@ -431,8 +566,8 @@ function qtBuildPack(Q) {
       if (r.rpRaw > 0) ccLines.push('Regular contribution of ' + fEUR(r.rpRaw) + ': ' + (r.rpContribCharge > 0 ? pct(r.rpContribCharge) + ' contribution charge applies' : 'no contribution charge'));
       if (r.ofvRaw > 0) ccLines.push('Transfer value of ' + fEUR(r.ofvRaw) + ': no contribution charge');
       add('<ul>' + ccLines.map(function(l){ return '<li>' + escHtml(l) + '</li>'; }).join('') + '</ul>');
-      add('<h3 class="kwn">Effect of charges</h3>');
-      p(qtFill(T.prsaRiy, { riy: pct(Math.max(0, r.grossRate - r.netRate)), gross: pct(r.grossRate), net: pct(r.netRate) }) + ' ' + qtRiyWhy('prsa', r));
+      if (QT_SHOW_EFFECT_OF_CHARGES) add('<h3 class="kwn">Effect of charges</h3>');
+      if (QT_SHOW_EFFECT_OF_CHARGES) p(qtFill(T.prsaRiy, { riy: pct(Math.max(0, r.grossRate - r.netRate)), gross: pct(r.grossRate), net: pct(r.netRate) }) + ' ' + qtRiyWhy('prsa', r));
     } else if (isArf) {
       add('<h3 class="kwn">Exit charges</h3>');
       if (r.hasSurrender) {
@@ -444,8 +579,8 @@ function qtBuildPack(Q) {
         for (var yj = 0; yj <= last + 1 && yj < sv.length; yj++) et += '<td>' + pct(sv[yj]) + '</td>';
         add(et + '</tr></tbody></table>');
       } else p(T.arfNoExitCharges);
-      add('<h3 class="kwn">Effect of charges</h3>');
-      p(qtFill(T.arfRiyCharges, { rate: pct(r.rate1), netRate: pct(r.p1.netRate) }) + ' ' + qtFill(T.arfRiyCharges, { rate: pct(r.rate2), netRate: pct(r.p2.netRate) }) + ' ' + qtRiyWhy('arf', r));
+      if (QT_SHOW_EFFECT_OF_CHARGES) add('<h3 class="kwn">Effect of charges</h3>');
+      if (QT_SHOW_EFFECT_OF_CHARGES) p(qtFill(T.arfRiyCharges, { rate: pct(r.rate1), netRate: pct(r.p1.netRate) }) + ' ' + qtFill(T.arfRiyCharges, { rate: pct(r.rate2), netRate: pct(r.p2.netRate) }) + ' ' + qtRiyWhy('arf', r));
     } else {
       add('<h3 class="kwn">Government levy</h3>');
       p(qtFill(T.ibGovtLevyNote, { levy: pct(IB_GOVT_LEVY) }));
@@ -461,22 +596,29 @@ function qtBuildPack(Q) {
       } else p(T.ibNoExitCharges);
       add('<h3 class="kwn">Exit tax</h3>');
       p(qtFill(T.ibExitTaxNote, { rate: pct(r.taxRate), ptype: r.policyholderType }));
-      add('<h3 class="kwn">Effect of charges</h3>');
-      p(qtFill(T.ibRiyCharges, { rate: pct(r.rate), netRate: pct(r.p.netRate) }) + ' ' + qtRiyWhy('ib', r));
+      if (QT_SHOW_EFFECT_OF_CHARGES) add('<h3 class="kwn">Effect of charges</h3>');
+      if (QT_SHOW_EFFECT_OF_CHARGES) p(qtFill(T.ibRiyCharges, { rate: pct(r.rate), netRate: pct(r.p.netRate) }) + ' ' + qtRiyWhy('ib', r));
     }
-    if (fundRows.some(function(fr){ return fr.gmab; })) p(T.guaranteeOnNote);
-    p(T.chargesFundNote, 'small');
+    // Contribution and transfer charges, then plain-English definitions of each charge.
+    add('<div class="pair">' +
+        '<div class="fbr"><span>Contribution charge</span><b>' + (r.spContribCharge > 0 || r.rpContribCharge > 0 ? 'Applies, see above' : 'None') + '</b></div>' +
+        '<div class="fbr"><span>Transfer charge</span><b>' + (isPrsa ? 'None' : 'Not applicable') + '</b></div></div>');
+    add('<div class="defs">' + T.chargeDefs.map(function(d) {
+      return '<div><b>' + escHtml(d[0]) + '</b><span>' + escHtml(d[1]) + '</span></div>';
+    }).join('') + '</div>');
+    if (fundRows.some(function(fr){ return fr.gmab; })) p(T.guaranteeOnNote, 'tiny');
+    p(T.chargesFundNote, 'tiny');
+    add(qtWarnBox([T.packWarnings.lose]));
   }
 
   // ── 6. Investment and risk ──
   if (Q.sections.funds) {
     sec = 'funds';
-    h2(T.sections.funds, true);
+    pageTitle(T.sections.funds, T.packLeads.funds);
     var fRisk = qtPortfolioRisk(Q), gp = isPrsa && r.isGlidepath, sfs = qtSfdrSplit(r.mix), pr6 = Math.round(r.portfolioSri);
     var t2 = gp ? ['Strategy risk profile', escHtml(strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
     var sus = sfs.unknown > 0.0001 ? '&ndash;' : sfs.art8 > 0.9999 ? '100% Article 8' : Math.round(sfs.art8 * 100) + '% Article 8';
-    add('<div class="tiles3"><div><span>Your risk rating</span><b>' + Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri] + '</b></div><div><span>' + t2[0] + '</span><b>' + t2[1] + '</b></div>' +
-        '<div><span>Sustainability</span><b>' + sus + '</b></div></div>');
+    add(qtStat3([['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], [t2[0], t2[1]], ['Sustainability', sus]]));
     p(T.fundsIntro);
     if (gp) {
       var profile = strategyProfile(r.stratObj) || 'Medium risk', fit = strategyRiskFit(r.stratObj, Q.risk.sri);
@@ -487,12 +629,12 @@ function qtBuildPack(Q) {
       if (pr6 === Q.risk.sri) p(T.riskMatch);
       else p(qtFill(pr6 > Q.risk.sri ? T.riskHigher : T.riskLower, { portfolioSri: pr6, clientSri: Q.risk.sri, reason: Q.risk.reason }));
     }
-    var CATS = { fic: 'Fixed income', multi: 'Multi-asset', eq: 'Equity' }, CATC = { fic: '#7fb2d9', multi: '#003781', eq: '#0082be' };
-    var ft = '<table class="num split"><thead><tr><th class="l">Fund</th><th class="l">Category</th><th>Risk</th><th>SFDR</th><th>Fund charge</th><th class="em">Allocation</th></tr></thead><tbody>';
+    var CATS = { fic: 'Fixed income', multi: 'Multi-asset', eq: 'Equity' }, CATC = { fic: '#9DC4E3', multi: '#003781', eq: '#0377A8' };
+    var ft = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th class="l">Category</th><th>Risk</th><th>SFDR</th><th class="em">Allocation</th></tr></thead><tbody>';
     fundRows.forEach(function(fr) {
-      var lv = isPrsa && QT_CONTENT.guarantee.levels[fr.fund.id], sf = (qtFundInfo(fr.fund.id) || {}).sfdr;
-      ft += '<tr><td class="l">' + escHtml(fr.fund.name) + (fr.gmab ? ' &middot; <span class="g">Guarantee' + (lv ? ' ' + Math.round(lv.protected * 100) + '%' : '') + '</span>' : '') + '</td>' +
-            '<td class="l">' + CATS[fr.cat] + '</td><td>' + Math.round(fr.fund.esma) + '</td><td>' + (sf ? 'Art. ' + sf : '&ndash;') + '</td><td>' + pct(fr.fmc) + '</td><td><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
+      var lv = qtGteeLevel(fr.fund.id), sf = (qtFundInfo(fr.fund.id) || {}).sfdr;
+      ft += '<tr><td class="l">' + escHtml(fr.fund.name) + (fr.gmab ? ' &middot; <span class="g">Guarantee' + (lv ? ' ' + lv : '') + '</span>' : '') + '</td>' +
+            '<td class="l">' + CATS[fr.cat] + '</td><td>' + Math.round(fr.fund.esma) + '</td><td>' + (sf ? 'Art. ' + sf : '&ndash;') + '</td><td class="em"><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
     });
     add(ft + '</tbody></table>', { cls: 'split' });
     var split = qtCategorySplit(fundRows), sb = '<div class="catbar">', lg = '<div class="catleg">';
@@ -501,23 +643,31 @@ function qtBuildPack(Q) {
       if (split[c.key] > 0) lg += '<span><i style="background:' + CATC[c.key] + '"></i>' + CATS[c.key] + ' ' + Math.round(split[c.key] * 100) + '%</span>';
     });
     var anyG = fundRows.some(function(fr) { return fr.gmab; });
-    add('<div class="splitrow' + (anyG ? '' : ' one') + '"><div><div class="bt">Fund category split</div>' + sb + '</div>' + lg + '</div></div>' +
-        (anyG ? '<div class="gnote"><b>' + escHtml(QT_CONTENT.guarantee.label) + '</b>' + escHtml(T.guaranteeFundNote) + '</div>' : '') + '</div>');
-    if (fRisk.footnote) p(fRisk.footnote, 'small');
-    add('<h3 class="kwn">' + escHtml(Q.strategyName) + '</h3>');
-    p(qtStrategyDescription(Q));
-    if (gp) p(T.glidepathNote);
-    fundRows.forEach(function(fr) {
-      add('<p class="fdesc"><b>' + escHtml(fr.fund.name) + '.</b> ' + escHtml(fr.fund.desc) + '</p>');
-    });
+    // sb and lg are each left open by the loop above, so close them here
+    add('<div class="catsplit"><div class="bt">How your money is split</div>' + sb + '</div>' + lg + '</div></div>');
+    if (anyG) {
+      var gFunds = qtNameList(fundRows.filter(function(fr) { return fr.gmab; }).map(function(fr) { return fr.fund.name; }));
+      add('<div class="gnote"><b>' + escHtml(qtFill(T.packGuaranteeHead, { funds: gFunds })) + '</b>' +
+          '<span>' + escHtml(qtGuaranteeNote(fundRows)) + '</span></div>');
+    }
+    if (fRisk.footnote) p(fRisk.footnote, 'tiny');
+    add(qtWarnBox([T.packWarnings.past, T.packWarnings.currency]));
   }
 
   // ── 7. Remuneration ──
   if (Q.sections.remun) {
     sec = 'remun';
-    h2(T.sections.remun, true);
-    p(qtFill(T.remunIntro, { brokerFirm: Q.broker.firm }));
-    var rt2 = '<table class="num"><thead><tr><th class="l">Type</th><th class="l">Basis</th><th>Amount</th></tr></thead><tbody>';
+    pageTitle(T.sections.remun, qtFill(T.packLeads.remun, { company: cs.name, brokerFirm: Q.broker.firm }));
+    var initComm = r.totalInitialComm != null ? r.totalInitialComm : r.initialComm;
+    var trailComm = r.totalOngoingComm != null ? r.totalOngoingComm
+      : (r.p1 || r.p) ? ((r.p1 || r.p).yearly.reduce(function(a, y) { return a + y.comm; }, 0) - (r.initialComm || 0)) : null;
+    var toWhen = isPrsa ? 'to age ' + r.nra : 'over the life of your plan';
+    add(qtStat3([
+      ['Initial commission', fEUR(initComm), 'paid in year 1'],
+      ['Trail commission', pct(r.cc.ongoing) + ' a year', trailComm != null ? 'of fund value, est. ' + fEUR(trailComm) + ' ' + toWhen : 'of fund value'],
+      trailComm != null ? ['Total estimated', fEUR(initComm + trailComm), toWhen] : null
+    ]));
+    var rt2 = '<table class="dt num"><thead><tr><th class="l">Type</th><th class="l">Basis</th><th>Amount</th></tr></thead><tbody>';
     if (isPrsa) {
       if (r.spRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; single contribution</td><td class="l">' + pct(r.spUpRate) + ' of single contribution' + (r.spContribCharge > 0 ? ' (after contribution charge)' : '') + '</td><td>' + fEUR(r.spUpfrontComm) + '</td></tr>';
       if (r.rpRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; regular contributions</td><td class="l">' + pct(r.rpUpfrontPct) + ' of first year\'s regular contributions</td><td>' + fEUR(r.rpUpfrontComm) + '</td></tr>';
@@ -539,13 +689,14 @@ function qtBuildPack(Q) {
     add('<h3 class="kwn">Projected remuneration by year</h3>');
     var yt;
     if (isPrsa) {
-      yt = '<table class="num split"><thead><tr><th>Year</th><th>Contributions payable in that year</th><th>Projected remuneration payable in that year</th></tr></thead><tbody>';
-      qtPrsaRows(r).forEach(function(s) {
-        var c = s.rpInYear + (s.year === 1 ? r.spRaw : 0);
-        yt += '<tr' + (s.isMat ? ' class="mat"' : '') + '><td>' + (s.isMat ? 'Retirement' : s.year) + '</td><td>' + (c > 0 ? fEUR(c) : '&ndash;') + '</td><td>' + fEUR(s.commInYear) + '</td></tr>';
+      yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Age</th><th>Initial</th><th>Trail</th><th class="em">Total</th></tr></thead><tbody>';
+      qtKeyYears(r.snapshots).forEach(function(s) {
+        var trailY = s.ongoingInYear || 0, initY = Math.max(0, (s.commInYear || 0) - trailY);
+        yt += '<tr' + (s.isMat ? ' class="mat"' : '') + '><td class="l">' + (s.isMat ? 'At ' + r.nra : s.year) + '</td><td>' + (s.isMat ? r.nra : s.age) +
+          '</td><td>' + (initY > 0 ? fEUR(initY) : '&ndash;') + '</td><td>' + fEUR(trailY) + '</td><td class="em"><b>' + fEUR(initY + trailY) + '</b></td></tr>';
       });
     } else if (isArf) {
-      yt = '<table class="num split"><thead><tr><th>Year</th><th>Contributions payable in that year</th><th>Projected remuneration at ' + pct(r.rate1) + '</th><th>Projected remuneration at ' + pct(r.rate2) + '</th></tr></thead><tbody>';
+      yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Contributions payable in that year</th><th>Projected remuneration at ' + pct(r.rate1) + '</th><th>Projected remuneration at ' + pct(r.rate2) + '</th></tr></thead><tbody>';
       // stop after the first row where remuneration has fallen to zero at both rates
       var seenZero = false;
       r.p1.commRows.forEach(function(c1, i) {
@@ -555,7 +706,7 @@ function qtBuildPack(Q) {
         yt += '<tr><td>' + c1.year + '</td><td>' + (c1.contrib > 0 ? fEUR(c1.contrib) : '&ndash;') + '</td><td>' + fEUR(c1.comm) + '</td><td>' + fEUR(c2.comm) + '</td></tr>';
       });
     } else {
-      yt = '<table class="num split"><thead><tr><th>Year</th><th>Contributions payable in that year</th><th>Projected remuneration at ' + pct(r.rate) + '</th></tr></thead><tbody>';
+      yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Contributions payable in that year</th><th>Projected remuneration at ' + pct(r.rate) + '</th></tr></thead><tbody>';
       r.p.commRows.forEach(function(c1) {
         yt += '<tr><td>' + c1.year + '</td><td>' + (c1.contrib > 0 ? fEUR(c1.contrib) : '&ndash;') + '</td><td>' + fEUR(c1.comm) + '</td></tr>';
       });
@@ -581,32 +732,66 @@ function qtBuildPack(Q) {
   }
   if (Q.sections.important) {
     sec = 'important';
-    h2(T.sections.important, !Q.sections.product && !Q.sections.tax);
-    add('<div class="warn">' + T.warnings.map(function(w){ return '<p>' + escHtml(w) + '</p>'; }).join('') + '</div>');
-    T.importantInfo.forEach(function(l) { p(qtFill(l, { regDoc: isPrsa ? T.regDocPrsa : isArf ? T.regDocArf : T.regDocIb })); });
-    add('<h3 class="kwn">Cooling-off period</h3>');
-    p(T.coolingOff);
-    p(qtFill(T.quoteValidity, { date: dateLong }), 'small');
-    add('<p class="small">' + escHtml(cs.regulatory) + '<br>' + escHtml(cs.directors) + '</p>');
+    pageTitle(T.sections.important, T.packLeads.important);
+    // Every CPC warning together, as well as beside the figures each one relates to.
+    var wAll = [T.packWarnings.value, T.packWarnings.currency, T.packWarnings.lose, T.packWarnings.past, T.packWarnings.income];
+    if (isPrsa) wAll.push(T.packWarnings.access);
+    wAll.push(T.packWarnings.estimates);
+    add(qtWarnBox(wAll));
+    add('<div class="defs two">' + T.packImportant.map(function(d) {
+      return '<div><b>' + escHtml(d[0]) + '</b><span>' + escHtml(qtFill(d[1], { productBrand: brand })) + '</span></div>';
+    }).join('') + '</div>');
+    T.importantInfo.forEach(function(l) { p(qtFill(l, { regDoc: isPrsa ? T.regDocPrsa : isArf ? T.regDocArf : T.regDocIb }), 'tiny'); });
+    // Standing projection disclosures: they belong with the other standing notes, not beside the figures.
+    if (isPrsa) {
+      p(qtFill(r.isGlidepath ? T.prsaImportantGlidepath : T.prsaImportantFlat, { rate: pct(r.blendedGross), inflation: pct(INFLATION) }), 'tiny');
+      p(T.prsaImportant2, 'tiny');
+      p(T.prsaAverageNote, 'tiny');
+      p(T.prsaAnnuityNote, 'tiny');
+    }
+    p(T.coolingOff, 'tiny');
   }
   if (Q.sections.glossary) {
     sec = 'glossary';
-    h2(T.sections.glossary, false);
-    var gt = '<table class="gloss split"><tbody>';
-    T.glossary.forEach(function(g) { gt += '<tr><td><b>' + escHtml(g[0]) + '</b></td><td>' + escHtml(g[1]) + '</td></tr>'; });
+    pageTitle(T.sections.glossary, T.packLeads.glossary);
+    var gl = T.glossary.filter(function(g) {
+      var only = T.glossaryOnly[g[0]];
+      return !only || only === Q.product;
+    });
+    var gt = '<table class="gloss two split"><tbody>';
+    for (var gi = 0; gi < gl.length; gi += 2) {
+      gt += '<tr>' + [gl[gi], gl[gi + 1]].map(function(g) {
+        return '<td>' + (g ? '<b>' + escHtml(g[0]) + '</b><span>' + escHtml(g[1]) + '</span>' : '') + '</td>';
+      }).join('') + '</tr>';
+    }
     add(gt + '</tbody></table>', { cls: 'split' });
   }
 
+  // ── Allianz 9. Back page ──
+  if (hasAgl) {
+    sec = 'glossary';
+    add('<div class="backp"><div class="clogo">' + qtLogoSvg(30) + '</div>' +
+        '<div class="bpfoot"><div class="bpa"><b>' + escHtml(cs.name) + '</b><span>' + cs.addressLines.map(escHtml).join('<br>') + '</span></div>' +
+        '<div class="bpc"><span>Tel</span><span>' + escHtml(cs.phone) + '</span><span>Email</span><span>' + escHtml(cs.email) + '</span></div>' +
+        '<div class="bpr"><span>' + escHtml(cs.regulatory) + '</span>' +
+        '<span>' + escHtml(qtFill(T.packValidity, { quoteRef: Q.quoteRef, date: dateLong })) + '</span></div></div></div>', { full: true });
+  }
+
   // ── Assemble ──
-  var hdrAgl = '<div class="hl">' + qtLogoSvg(20) + '</div><div class="hr">' + escHtml(Q.productName) + '<br>Quotation &middot; ' + escHtml(Q.quoteRef) + '</div>';
+  // Allianz pages: logo left, quotation reference and who it is for on the right.
+  var hdrAgl = '<div class="hl">' + qtLogoSvg(20) + '</div><div class="hr">Quotation ' + escHtml(Q.quoteRef) +
+    '<br>Prepared for ' + escHtml(clientName) + ' &middot; ' + escHtml(dateLong) + '</div>';
   var bAddr = (Q.broker.address || '').split('\n').filter(function(x){ return x.trim(); }).map(escHtml);
   var hdrBroker = '<div class="hl"><div class="firm">' + escHtml(Q.broker.firm) + '</div></div>' +
     '<div class="hr">' + bAddr.concat(Q.broker.phone ? [escHtml(Q.broker.phone)] : []).join('<br>') + '</div>';
-  var footAgl = escHtml(Q.quoteRef) + ' &middot; ' + escHtml(clientName) + ' &middot; ' + escHtml(fmtDate(new Date())) + ' &middot; ' + escHtml(cs.name) + ' is regulated by the Central Bank of Ireland.';
-  var footBroker = escHtml(Q.quoteRef) + ' &middot; ' + escHtml(Q.broker.regStatement);
+  // Footers carry their own spans: the paginator appends only the page number.
+  var footAgl = '<span class="fbrand">' + escHtml(brand.toUpperCase()) + '</span>' +
+    '<span>' + escHtml(cs.name) + ' is regulated by the Central Bank of Ireland.</span>';
+  var footBroker = '<span>' + escHtml(Q.broker.regStatement || (Q.broker.firm + ' is regulated by the Central Bank of Ireland.')) + '</span>';
 
   var src = B.map(function(b) {
-    return '<div class="blk ' + b.cls + '" data-hdr="' + b.hdr + '" data-sec="' + b.sec + '">' + b.html + '</div>';
+    return '<div class="blk ' + b.cls + '" data-hdr="' + b.hdr + '" data-grp="' + b.grp + '"' +
+      (b.full ? ' data-full="1"' : '') + ' data-sec="' + b.sec + '">' + b.html + '</div>';
   }).join('');
 
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.docTitle || (Q.productName + ' – Quotation – ' + clientName + ' – ' + Q.quoteRef)) + '</title>' +
@@ -705,6 +890,7 @@ function qtPackCss() {
     'h1 { font-size: 19pt; color: #003781; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2mm; }',
     'h2 { font-size: 17pt; color: #003781; font-weight: 700; letter-spacing: -0.01em; padding-bottom: 1mm; }',
     'h3 { font-size: 10.5pt; color: #003781; font-weight: 700; margin-top: 1.5mm; }',
+    '.blk .ptitle + * { margin-top: 1mm; }',
     'p, li { font-size: 9pt; line-height: 1.5; color: #1E2B3B; }',
     'p + p { margin-top: 2mm; }',
     'ul { padding-left: 5mm; } li { margin-bottom: 1.2mm; }',
@@ -780,6 +966,87 @@ function qtPackCss() {
     '.sigline.short { width: 35mm; height: 9mm; }',
     '.sigs { display: flex; gap: 10mm; margin-top: 4mm; font-size: 8.6pt; }',
     '.sigs > div { flex: 1; } .sigs p { font-size: 8.6pt; }',
+    // ── Redesigned quotation pack (handoff §8, 9 Oct 2026) ──
+    // Full-bleed pages: the block is the page, with no header, footer or page number.
+    '.page.full { padding: 0; }',
+    '.page.full .blk { margin: 0; height: 100%; }',
+    '.cover { position: relative; height: 100%; padding: 17mm 17mm 15mm; background-size: cover; background-position: center; display: flex; flex-direction: column; }',
+    '.cover.plain { background: #003781; }',
+    '.cover.plain .ck, .cover.plain .cn, .cover.plain .cs { color: #fff; }',
+    '.cover .clogo { align-self: flex-start; }',
+    '.cover .ctitle { margin-top: 37mm; display: flex; flex-direction: column; gap: 3.5mm; max-width: 120mm; }',
+    '.cover .ck { font-size: 10.5pt; font-weight: 700; letter-spacing: 0.14em; color: #003781; }',
+    '.cover .cn { font-size: 45pt; line-height: 1.02; font-weight: 700; color: #003781; letter-spacing: -0.02em; }',
+    '.cover .cs { font-size: 16.5pt; color: #003781; }',
+    '.backp { height: 100%; padding: 17mm; display: flex; flex-direction: column; }',
+    '.backp .bpfoot { margin-top: auto; display: flex; flex-direction: column; gap: 6mm; font-size: 9.5pt; line-height: 1.6; }',
+    '.backp .bpa b { display: block; font-size: 13.5pt; color: #003781; margin-bottom: 1mm; }',
+    '.backp .bpc { display: grid; grid-template-columns: 20mm auto; gap: 1mm 3mm; }',
+    '.backp .bpc span:nth-child(odd) { color: #5E6B78; }',
+    '.backp .bpr { padding-top: 5mm; border-top: 0.5pt solid #E2E8EF; font-size: 8pt; color: #5E6B78; display: flex; flex-direction: column; gap: 1.5mm; }',
+    // Page title and lead
+    '.ptitle { margin-bottom: 1mm; }',
+    '.ptitle h2 { font-size: 21pt; font-weight: 700; color: #003781; letter-spacing: -0.01em; padding: 0; }',
+    '.ptitle span { display: block; margin-top: 1.5mm; font-size: 10.5pt; color: #3A4756; }',
+    // Label/value blocks on "At a glance"
+    '.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 9mm; }',
+    '.fblk { display: flex; flex-direction: column; }',
+    '.fbh { font-size: 9pt; font-weight: 700; letter-spacing: 0.08em; color: #003781; padding-bottom: 2mm; border-bottom: 1.5pt solid #003781; }',
+    '.fbr { display: flex; justify-content: space-between; gap: 4mm; padding: 1.9mm 0; border-bottom: 0.5pt solid #EEF2F6; font-size: 9pt; }',
+    '.fbr span { color: #5E6B78; }',
+    '.fbr b { text-align: right; }',
+    '.fbr.tot { padding-top: 2.4mm; border-bottom: none; font-size: 10pt; color: #003781; }',
+    '.fbr.tot span { color: #003781; font-weight: 700; }',
+    '.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 9mm; }',
+    // Three headline figures under a navy rule
+    '.stat3 { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1.5pt solid #003781; border-bottom: 0.5pt solid #E2E8EF; }',
+    '.stat3 > div { padding: 3mm 4mm 3mm 0; display: flex; flex-direction: column; gap: 0.8mm; }',
+    '.stat3 > div + div { padding-left: 4mm; border-left: 0.5pt solid #E2E8EF; }',
+    '.stat3 span { font-size: 9pt; color: #5E6B78; }',
+    '.stat3 b { font-size: 16pt; color: #003781; line-height: 1.15; }',
+    '.stat3 .sub { font-size: 8pt; }',
+    // Boxed CPC warnings
+    '.wbox { padding: 3mm 4mm; border: 1.2pt solid #0E1E33; display: flex; flex-direction: column; gap: 1mm; font-size: 8.8pt; font-weight: 700; line-height: 1.45; }',
+    // Attitude-to-risk strip
+    '.riskrow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6mm; align-items: center; padding: 4mm 4.5mm; background: #F4F7FA; }',
+    '.riskrow .rl { display: flex; flex-direction: column; gap: 0.5mm; font-size: 9pt; }',
+    '.riskrow .rl span { color: #5E6B78; }',
+    '.riskrow .rl b { font-size: 12pt; color: #003781; }',
+    '.rstrip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.8mm; }',
+    '.rstrip > div { height: 5.5mm; background: #E3EAF2; color: #5E6B78; font-size: 8pt; font-weight: 700; display: flex; align-items: center; justify-content: center; }',
+    '.rstrip > div.on { background: #003781; color: #fff; }',
+    '.rstrip .lo { grid-column: 1 / 4; font-size: 7.5pt; color: #5E6B78; }',
+    '.rstrip .hi { grid-column: 5 / 8; font-size: 7.5pt; color: #5E6B78; text-align: right; }',
+    // Data tables
+    'table.dt { width: 100%; border-collapse: collapse; }',
+    'table.dt thead th { padding: 2mm 1.5mm; border-bottom: 1.5pt solid #003781; font-size: 8.2pt; font-weight: 700; color: #5E6B78; text-align: right; }',
+    'table.dt thead th.l { text-align: left; padding-left: 0; }',
+    'table.dt thead th.em { color: #003781; }',
+    'table.dt tbody td { padding: 2.4mm 1.5mm; border-bottom: 0.5pt solid #EEF2F6; font-size: 9pt; text-align: right; }',
+    'table.dt tbody td.l { text-align: left; padding-left: 0; }',
+    'table.dt tbody td.em { color: #003781; }',
+    'table.dt tbody tr.tot td, table.dt tbody tr.mat td { background: #F4F7FA; font-weight: 700; color: #003781; border-bottom: none; }',
+    'table.dt .g { color: #0B7A3E; font-weight: 700; }',
+    // Definition lists (charge definitions, important information)
+    '.defs { display: flex; flex-direction: column; gap: 3mm; }',
+    '.defs.two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; }',
+    '.defs b { display: block; color: #003781; font-size: 9.2pt; }',
+    '.defs span { display: block; font-size: 9pt; line-height: 1.55; color: #1E2B3B; }',
+    // Fund category split
+    '.catsplit .bt { font-size: 9.5pt; font-weight: 700; color: #003781; margin-bottom: 2mm; }',
+    // Guarantee note
+    '.gnote { padding: 4mm 4.5mm; background: #F4F7FA; display: flex; flex-direction: column; gap: 1mm; line-height: 1.6; }',
+    '.gnote b { color: #003781; font-size: 9.2pt; }',
+    '.gnote span { font-size: 9pt; }',
+    // Two-column glossary
+    'table.gloss.two { width: 100%; border-collapse: collapse; }',
+    'table.gloss.two td { width: 50%; vertical-align: top; padding: 0 5mm 3.5mm 0; border: none; }',
+    'table.gloss.two td b { display: block; color: #003781; font-size: 9pt; }',
+    'table.gloss.two td span { display: block; font-size: 8.6pt; line-height: 1.5; }',
+    '.tiny { font-size: 7.6pt; line-height: 1.55; color: #5E6B78; }',
+    '.assume { font-size: 8.6pt; line-height: 1.55; color: #3A4756; }',
+    // Footer brand line
+    '.pfoot .fbrand { font-weight: 700; letter-spacing: 0.08em; color: #003781; white-space: nowrap; }',
     '@media print { body { background: #fff; } .topbar { display: none; } .page { margin: 0; } }'
   ].join('\n');
 }
@@ -795,15 +1062,25 @@ function qtPaginatorSrc() {
     started = true;
     var src = document.getElementById('src'), out = document.getElementById('pages');
     var blocks = [].slice.call(src.children);
-    var body = null, cur = null, pages = [];
+    var body = null, cur = null, grpCur = null, pages = [];
     function tpl(id) { return document.getElementById(id).innerHTML; }
-    function newPage(hdr) {
+    function newPage(hdr, grp) {
       var pg = document.createElement('div');
       pg.className = 'page';
+      pg.setAttribute('data-grp', grp || 'agl');
       pg.innerHTML = '<div class="phdr ' + hdr + '">' + tpl('hdr-' + hdr) + '</div><div class="pbody"></div>' +
-        '<div class="pfoot"><span>' + tpl('foot-' + hdr) + '</span><span class="pn"></span></div>';
+        '<div class="pfoot">' + tpl('foot-' + hdr) + '<span class="pn"></span></div>';
       out.appendChild(pg); pages.push(pg);
-      body = pg.querySelector('.pbody'); cur = hdr;
+      body = pg.querySelector('.pbody'); cur = hdr; grpCur = grp || 'agl';
+    }
+    // Cover and back page: the block IS the page, with no header, footer or page number.
+    function fullPage(b, grp) {
+      var pg = document.createElement('div');
+      pg.className = 'page full';
+      pg.setAttribute('data-grp', grp || 'agl');
+      pg.appendChild(b);
+      out.appendChild(pg); pages.push(pg);
+      body = null; cur = null; grpCur = null;
     }
     function over() { return body.scrollHeight > body.clientHeight + 1; }
     function moveToNewPage(b, hdr) {
@@ -811,7 +1088,7 @@ function qtPaginatorSrc() {
       while (prev && prev.classList.contains('kwn') && carry.length < 3 && prev.previousElementSibling) { carry.unshift(prev); prev = prev.previousElementSibling; }
       body.removeChild(b);
       carry.forEach(function(c) { body.removeChild(c); });
-      newPage(hdr);
+      newPage(hdr, grpCur);
       carry.forEach(function(c) { body.appendChild(c); });
       body.appendChild(b);
     }
@@ -834,7 +1111,7 @@ function qtPaginatorSrc() {
           var cont = b.cloneNode(true);
           var ctb = cont.querySelector('tbody');
           while (ctb.firstChild) ctb.removeChild(ctb.firstChild);
-          newPage(hdr);
+          newPage(hdr, grpCur);
           body.appendChild(cont);
           b = cont; tbody = ctb;
           tbody.appendChild(rows[i]); placed = 1;
@@ -842,14 +1119,29 @@ function qtPaginatorSrc() {
       }
     }
     blocks.forEach(function(b) {
-      var hdr = b.getAttribute('data-hdr') || 'agl';
-      if (!body || hdr !== cur || (b.classList.contains('newpage') && body.children.length)) newPage(hdr);
+      var hdr = b.getAttribute('data-hdr') || 'agl', grp = b.getAttribute('data-grp') || 'agl';
+      if (b.getAttribute('data-full')) { fullPage(b, grp); return; }
+      if (!body || hdr !== cur || grp !== grpCur || (b.classList.contains('newpage') && body.children.length)) newPage(hdr, grp);
       body.appendChild(b);
       if (!over()) return;
       if (b.classList.contains('split')) { splitTable(b, hdr); return; }
       if (body.children.length > 1) moveToNewPage(b, hdr);
     });
-    pages.forEach(function(pg, i) { pg.querySelector('.pn').textContent = 'Page ' + (i + 1) + ' of ' + pages.length; });
+    // The adviser's documents and the Allianz quotation are numbered separately, each from 1.
+    // The count is whatever the quotation actually runs to, so extra funds or a longer
+    // Statement of Suitability stay correctly numbered.
+    var byGrp = {};
+    pages.forEach(function(pg) {
+      var g = pg.getAttribute('data-grp') || 'agl';
+      (byGrp[g] = byGrp[g] || []).push(pg);
+    });
+    Object.keys(byGrp).forEach(function(g) {
+      var list = byGrp[g];
+      list.forEach(function(pg, i) {
+        var el = pg.querySelector('.pn');
+        if (el) el.textContent = (i + 1) + ' / ' + list.length;
+      });
+    });
     src.parentNode.removeChild(src);
     window.__paginated = pages.length;
     if (!window.__noAutoPrint) setTimeout(function() { window.print(); }, 300);

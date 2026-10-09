@@ -135,7 +135,11 @@ var QT_TEXT = {
   riskHigherProfile: 'This strategy\'s risk profile ({profile}) is higher than the profile suited to your assessed attitude to risk ({clientSriLabel}). Your adviser has recorded the reason for this recommendation: {reason}',
   riskLowerProfile: 'This strategy\'s risk profile ({profile}) is lower than the profile suited to your assessed attitude to risk ({clientSriLabel}). Your adviser has recorded the reason for this recommendation: {reason}',
   glidepathNote: 'Your investment strategy is a glidepath: the fund mix shown is the allocation at the start of your plan, and it gradually moves into lower-risk funds as you approach your retirement age.',
-  guaranteeFundNote: 'The optional rolling guarantee protects a percentage of your fund value against falls in the guaranteed fund, in return for an additional charge. Full terms are set out in the product terms and conditions.',
+  // Funds-page guarantee note. {funds} and {level} are built from the guaranteed funds actually in
+  // the quotation, so the note reads correctly for one fund or several, at any protected percentage.
+  guaranteeFundNote: 'If the value of this fund on a policy anniversary is below {level} of its value at the previous anniversary, we add units to bring it back to {level}. The guarantee applies to this fund only.',
+  guaranteeFundNoteMixed: 'If the value of a guaranteed fund on a policy anniversary is below its protected percentage ({levels}) of its value at the previous anniversary, we add units to bring it back up. The guarantee applies only to the funds named above.',
+  guaranteeFundNoteGeneric: 'The optional rolling guarantee protects a percentage of your fund value against falls in the guaranteed fund, in return for an additional charge. Full terms are set out in the product terms and conditions.',
 
   strategyProfiles: {
     Balanced: 'A more cautious blend weighted towards lower-volatility assets and bonds, with a smaller equity allocation. Prioritises capital preservation with modest growth potential.',
@@ -259,6 +263,71 @@ var QT_TEXT = {
     ['Trail remuneration', 'An ongoing payment to your adviser, calculated as a percentage of your fund value each year.'],
     ['Transfer value', 'The value of benefits moved into your policy from another pension arrangement.']
   ],
+
+  // ─── Quotation pack pages (design handoff, 9 Oct 2026) ───────────────────────
+  // Short product name: cover title and the letter-spaced brand line in the page footer.
+  productBrands: {
+    prsa: 'Allianz Vantage PRSA',
+    arf:  'Allianz Vantage ARF',
+    ib:   'Allianz Vantage Investment Bond'
+  },
+  packCoverKicker: 'ALLIANZ GLOBAL LIFE',
+  packCoverSub: 'Your quotation',
+  // Lead line under each page title. Projection and remuneration vary by product.
+  packLeads: {
+    summary:    'A summary of the details this quotation is based on.',
+    charges:    'The charges that apply to your plan. All are yearly and taken from the value of your fund.',
+    funds:      'The funds you have chosen and how they compare with your attitude to risk.',
+    remun:      'What {company} pays {brokerFirm} for arranging this plan. These payments are included in the charges.',
+    important:  'Please read this page carefully before you decide.',
+    glossary:   'The terms used in this quotation.'
+  },
+  packProjectionLead: {
+    prsa: 'How your pension fund could grow to age {nra}, based on the assumptions below.',
+    arf:  'How your fund could change while you draw an income, based on the assumptions below.',
+    ib:   'How your investment could grow, based on the assumptions below.'
+  },
+  // CPC warnings. Shown boxed beside the figures they relate to, and in full on Important information.
+  // DRAFT: wording needs Compliance sign-off against the brochure.
+  packWarnings: {
+    value:     'Warning: The value of your investment may go down as well as up.',
+    lose:      'Warning: If you invest in this product, you may lose some or all of the money you invest.',
+    estimates: 'Warning: These figures are estimates only. They are not a reliable guide to the future performance of your investment.',
+    past:      'Warning: Past performance is not a reliable guide to future performance.',
+    currency:  'Warning: This product may be affected by changes in currency exchange rates.',
+    income:    'Warning: The income you get from this investment may go down as well as up.',
+    access:    'Warning: If you invest in this product, you will not have access to your money until you retire.'
+  },
+  // Plain-English charge definitions on the Charges page. DRAFT, based on the brochure.
+  chargeDefs: [
+    ['Annual management charge (AMC)', 'A yearly charge for setting up, managing and servicing your plan. It depends on the product version and the value of your plan. It includes the trail commission paid to your adviser.'],
+    ['Fund management charge', 'The yearly cost of each fund, set by the investment manager and shown on the fund\'s factsheet. It varies by fund.'],
+    ['Guarantee charge', 'Applies only to funds where you have chosen the Annual Guarantee. It is a percentage of the value of that fund and varies by fund.']
+  ],
+  // Important information page. DRAFT: wording, cooling-off and validity periods need Compliance sign-off.
+  packImportant: [
+    ['This is a quotation, not an offer', 'Figures are based on the details shown in this quotation and current Revenue rules. Your plan starts only when we accept your application.'],
+    ['Cooling-off period', 'You can cancel within 30 days of receiving your policy documents. Single contributions may be returned adjusted for any fall in value.'],
+    ['Tax', 'Revenue limits, terms and conditions apply. Tax treatment depends on your individual circumstances and is not guaranteed to continue.'],
+    ['Policy conditions', 'This quotation is a summary. If there is any conflict, the policy conditions will prevail.'],
+    ['Complaints', 'Contact us first. If you are not satisfied, you can refer your complaint to the Financial Services and Pensions Ombudsman.'],
+    ['Not risk free', '{productBrand} is not a risk-free product. Only the Annual Guarantee, where chosen, provides any protection.']
+  ],
+  packValidity: 'Quotation {quoteRef} · produced {date} · valid for 30 days',
+  // Glossary terms that only make sense for one product. Everything else appears in every pack.
+  glossaryOnly: {
+    'Approved Retirement Fund (ARF)': 'arf', 'Deemed distribution': 'arf',
+    'Investment Bond': 'ib', 'Deemed disposal': 'ib', 'Exit tax': 'ib', 'Government levy': 'ib',
+    'PRSA': 'prsa', 'Glidepath': 'prsa', 'Retirement lump sum': 'prsa'
+  },
+  // Footnote under the attitude-to-risk strip and the portfolio-risk figure.
+  packRiskFootnote: '* Allocation-weighted average of the funds\' published risk indicators ({exact}), rounded to the nearest whole number. A guide only, not an official Summary Risk Indicator.',
+  packRiskFootnoteGlide: '* This strategy moves between funds as you approach retirement, so it has no single published risk indicator. The figure shown is its risk profile.',
+  packGuaranteeHead: 'Annual Guarantee on {funds}',
+  packTrailNote: 'Key years shown. Trail figures are estimates based on the projected values in this quotation and will change with the value of your fund.',
+  packKeyYearsNote: 'Key years shown.',
+  prsaInflationShort: 'Inflation of {inflation} a year.',
+  packChargesAllowed: 'All the charges shown in this quotation are allowed for.',
 
   // ─── Cover letter template (adviser-editable in Step 7) — DRAFT ──────────────
   // {enclosedList} is built from the sections ticked in Step 7, one "- " bullet per line.

@@ -226,7 +226,7 @@ def pack_flow(d, tag):
         if js(d, 'return window.__paginated'): break
         time.sleep(0.1)
     pages = js(d, 'return window.__paginated')
-    check(pages and pages >= 8, '%s pack paginated (%s pages)' % (tag, pages))
+    check(pages and pages >= 11, '%s pack paginated (%s pages)' % (tag, pages))
     check(d.title == fn.split('.pdf')[0], 'pack title gives the PDF file name: %r' % d.title)
     txt = d.find_element(By.ID, 'pages').text
     toks = re.findall(r'\{[a-zA-Z]+\}', txt)
@@ -235,14 +235,53 @@ def pack_flow(d, tag):
     check('[[' not in txt and '' not in txt and '' not in txt, '%s pack contains [[prompt]] or editor markers' % tag)
     check('retire with an income of 60%' in txt, 'typed SoS text reaches the pack')
     check('About the product' not in txt and 'Tax information' not in txt, 'coming-soon sections left out of the pack')
+    # Fund table leads with the largest holding, and the guarantee note names the funds it applies to
+    # the funds table is the one whose LAST column is Allocation (the charges table has one too)
+    allocs = js(d, "var t=[].slice.call(document.querySelectorAll('#pages table.num')).filter(function(x){"
+                   "var h=x.querySelectorAll('thead th'); return h.length && /Allocation/.test(h[h.length-1].textContent); })[0];"
+                   "return t ? [].slice.call(t.querySelectorAll('tbody tr')).map(function(r){"
+                   "var c=r.querySelector('td:last-child'); return c ? parseFloat(c.textContent) : 0; }) : []")
+    check(allocs and allocs == sorted(allocs, reverse=True), '%s funds listed largest holding first: %s' % (tag, allocs))
+    gnote = js(d, "var g=document.querySelector('#pages .gnote'); return g ? g.textContent : ''")
+    if gnote:
+        check(re.search(r'\d{2}%', gnote) and 'Allianz' in gnote and 'policy anniversary' in gnote,
+              '%s guarantee note names the fund and its level: %r' % (tag, gnote))
+        check('protects a percentage of your fund value' not in gnote, '%s guarantee note is not the generic wording' % tag)
+    # "At a glance" is factual only: four label/value blocks, a fund table and the risk strip
+    blocks = js(d, "return [].map.call(document.querySelectorAll('#pages .fbh'), function(e){ return e.textContent; })")
+    check([b for b in blocks if b in ('YOU', 'YOUR PLAN', 'CONTRIBUTIONS', 'CHARGES', 'YOUR INVESTMENT')] and
+          'YOU' in blocks and 'CHARGES' in blocks, '%s glance has the labelled blocks: %s' % (tag, blocks))
+    glance = js(d, "var p=[].slice.call(document.querySelectorAll('#pages .page')).filter(function(p){return /Your quotation at a glance/.test(p.textContent)})[0]; return p ? p.textContent : ''")
+    check('Total annual charge' in glance and 'Your attitude to risk' in glance, '%s glance shows charges and the risk strip' % tag)
+    check(not re.search(r'Projected value|today\'s money', glance), '%s glance carries no projections: %r' % (tag, glance[:100]))
+    check(js(d, "return document.querySelectorAll('#pages .rstrip > div.on').length") == 1, '%s risk strip marks one cell' % tag)
     dec = re.findall(r'(?:SRI|Risk|risk)\s*:?\s*\d\.\d', txt)
     check(not dec, '%s pack shows a decimal risk figure outside the footnote: %s' % (tag, dec[:3]))
-    summ = js(d, "var p=[].slice.call(document.querySelectorAll('#pages .page')).filter(function(p){return p.textContent.indexOf('Prepared for')>=0})[0]; return p ? p.textContent : ''")
-    check('not guaranteed' in summ.lower() and 'Warning' in summ, '%s summary fits on one page with warnings and disclaimer' % tag)
+    wboxes = js(d, "return [].map.call(document.querySelectorAll('#pages .wbox'), function(e){ return e.textContent; })")
+    check(len(wboxes) >= 3 and all('Warning:' in w for w in wboxes), '%s boxed warnings beside the figures (%d)' % (tag, len(wboxes)))
+    # match on the page title, not the text: the cover letter's "Enclosed" list names this page too
+    imp = js(d, "var p=[].slice.call(document.querySelectorAll('#pages .page')).filter(function(p){"
+                "var h=p.querySelector('.ptitle h2'); return h && h.textContent === 'Important information'; })[0];"
+                "return p ? p.textContent : ''")
+    for w in ['may go down as well as up', 'lose some or all', 'Past performance', 'estimates only']:
+        check(w in imp, '%s Important information repeats the warning %r' % (tag, w))
     over = js(d, "return [].slice.call(document.querySelectorAll('.pbody')).filter(function(b){return b.scrollHeight > b.clientHeight + 1;}).length")
     check(over == 0, '%s pages with overflowing content: %s' % (tag, over))
     pn = js(d, "return [].slice.call(document.querySelectorAll('.pn')).map(function(e){return e.textContent})")
-    check(pn[-1] == 'Page %d of %d' % (pages, pages), 'page numbering')
+    grps = js(d, "return [].map.call(document.querySelectorAll('#pages .page'), function(p){ return p.getAttribute('data-grp') + '|' + ((p.querySelector('.pn')||{}).textContent || ''); })")
+    adv = [g.split('|')[1] for g in grps if g.startswith('adv|')]
+    agl = [g.split('|')[1] for g in grps if g.startswith('agl|')]
+    check(adv and adv[0] == '1 / %d' % len(adv) and adv[-1] == '%d / %d' % (len(adv), len(adv)),
+          '%s adviser documents numbered separately: %s' % (tag, adv))
+    check(len(agl) >= 9 and agl[0] == '' and agl[-1] == '',
+          '%s Allianz cover and back page carry no page number: %s' % (tag, agl[:2] + agl[-1:]))
+    check(all(n.endswith('/ %d' % len(agl)) for n in agl if n),
+          '%s Allianz pages numbered n / %d: %s' % (tag, len(agl), agl))
+    check(js(d, "return document.querySelectorAll('#pages .cover').length") == 1 and
+          js(d, "return document.querySelectorAll('#pages .backp').length") == 1,
+          '%s pack has the Allianz cover and back page' % tag)
+    brands = js(d, "return [].map.call(document.querySelectorAll('#pages .pfoot .fbrand'), function(e){ return e.textContent; })")
+    check(brands and len(set(brands)) == 1, '%s one brand line in the Allianz footer: %s' % (tag, list(set(brands))))
     svgs = len(d.find_elements(By.CSS_SELECTOR, '#pages svg polyline'))
     check(svgs >= 1, '%s vector chart lines present (%d)' % (tag, svgs))
     check(len(d.find_elements(By.CSS_SELECTOR, '#pages canvas')) == 0, 'no canvas bitmaps in pack')
