@@ -411,6 +411,12 @@ var QT_TEXT = {
   sosEsgPartArt8: 'You told us that you have sustainability preferences. {art8} of your portfolio is invested in funds classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which promote environmental or social characteristics. The rest is invested in funds classified under Article 6, which do not. [[How the recommendation takes account of the client\'s sustainability preferences]]',
   sosEsgPrompt: '[[Whether the client has sustainability preferences and, if so, how the recommended funds take account of them]]',
 
+  // Footnotes for fund asset splits, volatility and fund charges. DRAFT: wording follows the PDC / Point of Sale
+  // disclosures ("may be more or less than illustrated", "may vary in the future"); needs Compliance sign-off.
+  assetSplitNote: 'The asset split shown is approximate. It is the typical split for each fund. Actual holdings will vary with market conditions and the fund manager\'s decisions, and may be more or less than shown.',
+  volatilityNote: 'Volatility ranges are targets set by the fund manager for the medium to long term. They are not guaranteed, and actual volatility may be higher or lower.',
+  fmcNote: 'Fund management charges shown are the current charges quoted by the fund manager, which may vary in the future. Projections use the maximum charge for each fund.',
+
   sosRiskMatch: 'This is in line with your attitude to risk.',
   sosRiskHigher: 'This is higher than your assessed attitude to risk. We have recommended it because: {reason}',
   sosRiskLower: 'This is lower than your assessed attitude to risk. We have recommended it because: {reason}',
