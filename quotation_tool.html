@@ -643,6 +643,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .ed-body .auto { padding:1px 5px; border-radius:4px; background:#EEF2F6; box-decoration-break:clone; -webkit-box-decoration-break:clone; }
 .ed-body .sug { border-radius:3px; background:var(--amb-bg); box-shadow:0 1.5px 0 var(--amb-ring); color:var(--amb-ink); box-decoration-break:clone; -webkit-box-decoration-break:clone; }
 .ed-body .sug.done { border-radius:0; background:none; box-shadow:none; color:inherit; }
+.sos-note { padding:12px 16px; border-radius:10px; background:#EEEBF8; box-shadow:inset 0 0 0 1px #D3CCEC; color:#2E2A57; font-size:13px; line-height:1.5; }
 .ed-foot { margin-top:-6px; font-size:12px; color:var(--muted); }
 .dv-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; }
 .dv-tabs { display:inline-flex; gap:3px; padding:3px; border:1px solid var(--inp); border-radius:8px; background:#fff; }
@@ -1115,16 +1116,6 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
       <button type="button" class="lnk" id="mm-edit-btn" onclick="editMismatch()">Edit reason</button>
     </div>
   </div>
-  <div class="modal-bg" id="confirm-bg" hidden>
-    <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-t" aria-describedby="confirm-d">
-      <h3 id="confirm-t">Replace custom allocation?</h3>
-      <p id="confirm-d"></p>
-      <div class="acts">
-        <button type="button" class="btn sm" id="confirm-no">Cancel</button>
-        <button type="button" class="btn pri sm" id="confirm-yes">Yes, replace</button>
-      </div>
-    </div>
-  </div>
   <!-- Shared info popover: strategies, funds and the guarantee -->
   <div class="qt-pop" id="qt-pop" role="dialog" aria-modal="false" aria-labelledby="qt-pop-title" tabindex="-1"></div>
 </section>
@@ -1176,6 +1167,17 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
     </div>
   </div>
 </section>
+<!-- Confirmation dialog: shared by every step -->
+<div class="modal-bg" id="confirm-bg" hidden>
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-t" aria-describedby="confirm-d">
+    <h3 id="confirm-t">Replace custom allocation?</h3>
+    <p id="confirm-d"></p>
+    <div class="acts">
+      <button type="button" class="btn sm" id="confirm-no">Cancel</button>
+      <button type="button" class="btn pri sm" id="confirm-yes">Yes, replace</button>
+    </div>
+  </div>
+</div>
 
 </div></main>
 
@@ -1505,7 +1507,16 @@ function onNext() {
     if (pfView === 'strat' && S.product === 'prsa' && S.prsa.strat === 'diy' && !portfolioState().ready) { setPfView('pick', true); return; }
     if (pfView === 'pick') { pfToAlloc(); return; }
   }
-  if (S.step === 7) { packNext(); return; }
+  if (S.step === 7) {
+    // The Statement of Suitability is never forced, but leaving the example text untouched needs a second look
+    if (S.packStage === 'sos' && !sosEdited()) {
+      var w = QT_TEXT.sosUneditedConfirm;
+      qtConfirm(w.body, packNext, $('btn-next'), w);
+      return;
+    }
+    packNext();
+    return;
+  }
   goStep(S.step + 1);
 }
 function onBack() {
@@ -2280,7 +2291,11 @@ function pickStrat(id, btn) {
 function hasCustomAlloc() { return Object.keys(S.prsa.diySel).length > 0; }
 // Small confirm dialog: focus starts on Cancel, Tab stays inside, Escape cancels.
 var confirmState = null;
-function qtConfirm(message, onYes, returnFocus) {
+function qtConfirm(message, onYes, returnFocus, words) {
+  words = words || {};
+  $('confirm-t').textContent = words.title || 'Replace custom allocation?';
+  $('confirm-yes').textContent = words.yes || 'Yes, replace';
+  $('confirm-no').textContent = words.no || 'Cancel';
   $('confirm-d').textContent = message;
   $('confirm-bg').hidden = false;
   confirmState = { onYes: onYes, returnFocus: returnFocus };
@@ -3241,6 +3256,7 @@ function packFoot() {
   else if (S.packStage === 'cover' || S.packStage === 'sos') {
     var left = docIssues(S.packStage);
     status = modeOf(S.packStage) === 'own' ? (left ? 'Write the ' + (S.packStage === 'cover' ? 'letter' : 'statement') + ' to continue' : 'Ready')
+      : S.packStage === 'sos' ? (sosEdited() ? 'Edited' : 'Example text: tailor it to your client')
       : left ? left + (left === 1 ? ' passage still to write' : ' passages still to write') : 'All passages written';
   }
   return { label: next ? STAGE_NEXT[next] : '', status: status };
@@ -3249,6 +3265,11 @@ function modeOf(k) { return k === 'cover' ? S.coverMode : S.sosMode; }
 function setMode(k, m) {
   if (k === 'cover') S.coverMode = m; else S.sosMode = m;
   renderReport();
+}
+// True once the adviser has changed the Statement of Suitability from the template (or written their own)
+function sosEdited() {
+  if (modeOf('sos') === 'own') return !!S.own.sos.trim();
+  return S.text.sos != null && S.text.sos !== S.basis.sos;
 }
 // Outstanding items in a document: prompts left (template) or 1 if "write your own" is still empty
 function docIssues(k) {
@@ -3306,7 +3327,7 @@ function textContext() {
   // Sustainability preferences, from Step 3 and the SFDR classification of the funds. DRAFT wording.
   var sp = qtSfdrSplit(r.mix), esg;
   if (S.risk.esg === false) esg = T.sosEsgNo;
-  else if (S.risk.esg !== true || sp.unknown > 0.0001) esg = T.sosEsgPrompt;
+  else if (S.risk.esg !== true || sp.unknown > 0.0001) esg = '';
   else if (sp.art8 > 0.9999) esg = T.sosEsgAllArt8;
   else esg = qtFill(T.sosEsgPartArt8, { art8: Math.round(sp.art8 * 100) + '%' });
   // Risk profiler answers (Step 3) fill the circumstances and attitude-to-risk passages
@@ -3321,7 +3342,6 @@ function textContext() {
       : S.risk.profiler.trim() ? qtFill(T.sosProfilerPhrase, { profiler: S.risk.profiler.trim() }) : '',
     profilerSentence: narr ? [narr.risk, narr.experience, narr.override].filter(Boolean).join(' ') : '',
     circumstancesSentence: narr ? narr.circumstances : '',
-    circumstancesPrompt: T.sosCircumstancesPrompt[S.product][prof ? 'profiled' : 'plain'],
     esgSentence: esg,
     strategyName: strategyPhrase(), portfolioRiskSentence: portfolioRiskSentence,
     riskSentence: riskSentence, remunSentence: remun
@@ -3535,9 +3555,14 @@ function edRender(text) {
   var lines = String(text || '').replace(/\r/g, '').split('\n'), out = [], para = [], list = [];
   function flushPara() { if (para.length) { out.push('<p>' + para.map(edInline).join('<br>') + '</p>'); para = []; } }
   function flushList() { if (list.length) { out.push('<ul>' + list.map(function(l) { return '<li>' + edInline(l) + '</li>'; }).join('') + '</ul>'); list = []; } }
-  lines.forEach(function(l) {
+  lines.forEach(function(l, i) {
     var t = l.replace(/\s+$/, '');
-    if (/^##\s+/.test(t)) { flushPara(); flushList(); out.push('<h3>' + edInline(t.replace(/^##\s+/, '')) + '</h3>'); }
+    if (/^##\s+/.test(t)) {
+      flushPara(); flushList(); out.push('<h3>' + edInline(t.replace(/^##\s+/, '')) + '</h3>');
+      // A section with nothing under it still gets a line to type on
+      var nx = lines.slice(i + 1).filter(function(x) { return x.trim(); })[0];
+      if (nx === undefined || /^##\s+/.test(nx)) out.push('<p><br></p>');
+    }
     else if (/^-\s+/.test(t)) { flushPara(); list.push(t.replace(/^-\s+/, '')); }
     else if (t === '') { flushPara(); flushList(); }
     else { flushList(); para.push(t); }
@@ -3602,7 +3627,7 @@ function renderEditorStage(k) {
   var h = '<div class="mode-row"><div class="seg" role="radiogroup" aria-label="How to write the ' + name + '">' +
     '<button type="button" role="radio" aria-checked="' + (mode === 'template') + '" class="' + (mode === 'template' ? 'on' : '') + '" onclick="setMode(\'' + k + '\', \'template\')">Use the Allianz template</button>' +
     '<button type="button" role="radio" aria-checked="' + (mode === 'own') + '" class="' + (mode === 'own' ? 'on' : '') + '" onclick="setMode(\'' + k + '\', \'own\')">Write your own</button></div>' +
-    '<span class="hint">' + (mode === 'template' ? 'Type anywhere. Grey text is filled from the quotation; highlighted text shows what to cover.' : 'Write it yourself. Use the toolbar for headings, bold and bullet points.') + '</span></div>';
+    '<span class="hint">' + (mode === 'template' ? 'Type anywhere. Grey text is filled from the quotation' + (k === 'cover' ? '; highlighted text shows what to cover.' : '.') : 'Write it yourself. Use the toolbar for headings, bold and bullet points.') + '</span></div>';
   h += '<div class="dv-row"><div class="dv-tabs" role="tablist" aria-label="' + label + ' view">' +
     '<button type="button" role="tab" aria-selected="' + (view === 'edit') + '" class="' + (view === 'edit' ? 'on' : '') + '" onclick="setDocView(\'' + k + '\', \'edit\')">Edit</button>' +
     '<button type="button" role="tab" aria-selected="' + (view === 'preview') + '" class="' + (view === 'preview' ? 'on' : '') + '" onclick="setDocView(\'' + k + '\', \'preview\')">Preview</button></div>' +
@@ -3616,15 +3641,16 @@ function renderEditorStage(k) {
         ? escHtml(leftP + (leftP === 1 ? ' highlighted passage is' : ' highlighted passages are') + ' still to be written. Unwritten passages are left out of the pack, not printed.')
         : 'Shown with your letterhead and signature lines, as it will appear in the pack.') + '</div></div></div>';
   } else if (mode === 'template') {
+    if (k === 'sos') h += '<div class="sos-note" role="note">' + escHtml(QT_TEXT.sosNote) + '</div>';
     if (S.stale[k]) h += '<div class="alert warn">The quotation has changed since this text was edited, so some figures in it may be out of date. <button type="button" class="lnk" onclick="resetText(\'' + k + '\')">Reset to template</button> to refresh it (your edits will be lost).</div>';
     h += '<div class="ed-grid"><aside class="ed-side"><div class="card ed-prog" id="ed-prog-' + k + '"></div><nav class="ed-ol" id="ed-ol-' + k + '" aria-label="Sections"></nav>' +
-      '<p class="ed-help">Every word here is yours to change — click anywhere and type. Grey boxes are filled from your answers. Highlighted text suggests what to cover; replace or delete it. Anything still highlighted is left out of the pack.</p></aside>' +
+      '<p class="ed-help">Every word here is yours to change — click anywhere and type. Grey boxes are filled from your answers.' + (k === 'cover' ? ' Highlighted text suggests what to cover; replace or delete it. Anything still highlighted is left out of the pack.' : '') + '</p></aside>' +
       '<div class="stack" style="gap:12px"><article class="doc">' + edToolbar(k, true) +
       '<div class="ed-body" id="ed-' + k + '" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' + label + '" spellcheck="true"></div></article>' +
       '<div class="ed-foot">' + (k === 'cover' ? 'The "Enclosed" list follows the sections in the pack. Your signature block is added automatically.' : 'Signature lines for you and the client are added automatically.') + '</div></div></div>';
   } else {
     // Write your own: the same editor and formatting as the template, starting from a blank page
-    h += '<div class="stack" style="gap:12px"><article class="doc">' + edToolbar(k, false) +
+    h += '<div class="stack" style="gap:12px">' + (k === 'sos' ? '<div class="sos-note" role="note">' + escHtml(QT_TEXT.sosNote) + '</div>' : '') + '<article class="doc">' + edToolbar(k, false) +
       '<div class="ed-body own" id="ed-' + k + '" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Your ' + name + '" spellcheck="true" data-ph="' + (k === 'cover' ? 'Dear …' : 'Start with a heading, e.g. Your needs and objectives') + '"></div></article>' +
       '<div class="ed-foot">' + (k === 'cover' ? 'Your signature block is added automatically.' : 'Signature lines for you and the client are added automatically.') + ' Your text is kept if you switch back to the template.</div></div>';
   }
@@ -3727,6 +3753,14 @@ function edChanged(k) {
 }
 function edSide(k) {
   var cur = stripMarks(S.text[k] || ''), base = stripMarks(S.basis[k] || ''), pre = k === 'cover' ? 'Letter' : 'Introduction';
+  if (k === 'sos') {
+    // No prompts to count: just the section list
+    $('ed-prog-sos').hidden = true;
+    $('ed-ol-sos').innerHTML = sectionsOf(cur, pre).map(function(s, i) {
+      return '<button type="button" class="ol-row" onclick="edJump(\'sos\', ' + i + ')"><span>' + escHtml(s.title) + '</span></button>';
+    }).join('');
+    return;
+  }
   var tplPrompts = {};
   sectionsOf(base, pre).forEach(function(s) { tplPrompts[s.title] = (tplPrompts[s.title] || 0) + s.prompts; });
   var total = promptsIn(base).length, left = promptsIn(cur).length, done = Math.max(0, total - left);

@@ -260,10 +260,9 @@ def pack(d):
     check('hold the investment and wait, because you want a positive long-term return' in sos, 'SoS quotes the reaction to a fall')
     check('experience and knowledge of investment products was assessed as high' in sos, 'SoS gives the experience level')
     check('The risk profiler indicated a risk rating of' not in sos, 'no override in the SoS: the profiler\'s rating is used')
-    check('Existing pensions, other assets and liabilities, and anything else to add' in sos, 'circumstances prompt is shortened once the profiler is used')
     check(len(d.find_elements(By.CSS_SELECTOR, '#ed-sos .auto')) >= 6, 'profiler sentences appear as auto-filled grey boxes')
     d.save_screenshot(str(OUT / 'rp_tool_sos.png'))
-    js(d, "S.text.sos = S.text.sos.replace(/\\[\\[[^\\]]*\\]\\]/g, 'Discussed in our meeting.'); renderReport();")
+    js(d, "S.text.sos = S.text.sos + '\\n\\nDiscussed in our meeting.'; renderReport();")
     nxt(d)                                  # review
     for _ in range(100):
         if re.search(r'\d+ page', css(d, '#fname').text): break

@@ -5,9 +5,10 @@
 //   • Text is plain; keep the quote marks and commas that separate entries.
 //   • {tokens} in curly braces are filled in automatically from the quotation
 //     (e.g. {clientName}, {rate}). Do not rename them; you may move or delete them.
-//   • [[double square brackets]] in the Statement of Suitability and cover letter are
-//     prompts the adviser MUST replace — the tool will not generate the pack while any
-//     remain.
+//   • The Statement of Suitability has no prompts: the adviser is told to tailor the text
+//     (see sosNote) and asked to confirm if it is left unedited (see sosUneditedConfirm).
+//     The editor still supports [[double square brackets]] as a prompt the adviser replaces;
+//     any left unwritten are removed from the pack.
 //   • In the cover letter / Statement of Suitability templates, a line starting with
 //     "## " is a heading, a line starting with "- " is a bullet point, and a blank line
 //     starts a new paragraph.
@@ -383,13 +384,13 @@ var QT_TEXT = {
   // ─── Statement of Suitability templates (adviser-editable in Step 7) — DRAFT ─
   sosPrsa: [
     '## Your needs and objectives',
-    'You have told us that you wish to save for your retirement and plan to retire at age {nra}. [[Retirement objectives, e.g. target income or lump sum]]',
+    'You have told us that you wish to save for your retirement and plan to retire at age {nra}.',
     '',
     '## Your personal and financial circumstances',
-    '{circumstancesSentence} {circumstancesPrompt}',
+    '{circumstancesSentence}',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence} [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence}',
     '',
     '## Your sustainability preferences',
     '{esgSentence}',
@@ -399,35 +400,32 @@ var QT_TEXT = {
     '',
     '## Why we believe this is suitable for you',
     '- A PRSA allows you to save for retirement in a tax-efficient way, with tax relief on contributions within Revenue limits.',
-    '- [[Why this product and contribution level meet the client\'s needs]]',
-    '- [[Why the strategy or funds suit the client\'s attitude to risk and term to retirement]]',
     '',
     '{transferSection}',
     '## Charges and remuneration',
     'The total effect of the charges on your plan is equivalent to reducing the assumed growth rate by {riy} per annum. {remunSentence} Full details are set out in the Charges section and the Remuneration Statement in this pack.',
     '',
     '## Risks you should be aware of',
-    'The value of your PRSA may go down as well as up and is not guaranteed. The benefits you receive will depend on the contributions paid, investment performance, charges and annuity rates at retirement. [[Client-specific risks or disadvantages discussed]]',
+    'The value of your PRSA may go down as well as up and is not guaranteed. The benefits you receive will depend on the contributions paid, investment performance, charges and annuity rates at retirement.',
     '',
     '## Alternatives considered',
-    '[[Other products or options considered and why they were not recommended]]'
   ].join('\n'),
   // Added to the PRSA Statement of Suitability only when a transfer value is entered.
   sosPrsaTransfer: [
     '## Transfer of your existing pension',
-    'You are transferring {transferValue} from your existing pension arrangement into this PRSA. [[Compare charges, benefits, guarantees and options of the existing arrangement with this PRSA, and why the transfer is in the client\'s interest]]',
+    'You are transferring {transferValue} from your existing pension arrangement into this PRSA.',
     ''
   ].join('\n'),
 
   sosArf: [
     '## Your needs and objectives',
-    'You have told us that you wish to invest your retirement savings in an Approved Retirement Fund and draw an income from it, starting from age {incomeAge}. [[Income needs and objectives]]',
+    'You have told us that you wish to invest your retirement savings in an Approved Retirement Fund and draw an income from it, starting from age {incomeAge}.',
     '',
     '## Your personal and financial circumstances',
-    '{circumstancesSentence} {circumstancesPrompt}',
+    '{circumstancesSentence}',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence} [[Capacity for loss: how a fall in value would affect the client\'s income, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence}',
     '',
     '## Your sustainability preferences',
     '{esgSentence}',
@@ -437,8 +435,6 @@ var QT_TEXT = {
     '',
     '## Why we believe this is suitable for you',
     '- An ARF allows you to keep your retirement savings invested while drawing a flexible income, and to pass any remaining value to your estate.',
-    '- [[Why an ARF suits the client better than an annuity or other options]]',
-    '- [[Why the income level and funds suit the client\'s needs and attitude to risk]]',
     '',
     '## Sustainability of your income',
     '{depletionSentence}',
@@ -447,21 +443,20 @@ var QT_TEXT = {
     'Allowing for all charges, the assumed growth rate of {rate} is reduced to {netRate} per annum. {remunSentence} Full details are set out in the Charges section and the Remuneration Statement in this pack.',
     '',
     '## Risks you should be aware of',
-    'The value of your ARF may go down as well as up and is not guaranteed. Depending on the income you take and investment returns, your fund could run out during your lifetime. [[Client-specific risks or disadvantages discussed]]',
+    'The value of your ARF may go down as well as up and is not guaranteed. Depending on the income you take and investment returns, your fund could run out during your lifetime.',
     '',
     '## Alternatives considered',
-    '[[Other options considered, e.g. annuity, and why they were not recommended]]'
   ].join('\n'),
 
   sosIb: [
     '## Your needs and objectives',
-    'You have told us that you wish to invest {contributionSummary} over the medium to long term. [[Investment objectives, including any need for income or access to capital]]',
+    'You have told us that you wish to invest {contributionSummary} over the medium to long term.',
     '',
     '## Your personal and financial circumstances',
-    '{circumstancesSentence} {circumstancesPrompt}',
+    '{circumstancesSentence}',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence} [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence}',
     '',
     '## Your sustainability preferences',
     '{esgSentence}',
@@ -471,8 +466,6 @@ var QT_TEXT = {
     '',
     '## Why we believe this is suitable for you',
     '- An Investment Bond allows you to invest a lump sum (and, where available, regular contributions) across a range of funds within a single policy.',
-    '- [[Why this product and contribution level meet the client\'s needs]]',
-    '- [[Why the funds suit the client\'s attitude to risk and investment horizon]]',
     '',
     '## Sustainability of your fund',
     '{depletionSentence}',
@@ -481,31 +474,21 @@ var QT_TEXT = {
     'Allowing for all charges, the assumed growth rate of {rate} is reduced to {netRate} per annum. Exit tax of {exitTaxRate} applies, based on a {policyholderType} policyholder. {remunSentence} Full details are set out in the Charges section and the Remuneration Statement in this pack.',
     '',
     '## Risks you should be aware of',
-    'The value of your Investment Bond may go down as well as up and is not guaranteed. Depending on any income or withdrawals you take and investment returns, your fund could run out. [[Client-specific risks or disadvantages discussed]]',
+    'The value of your Investment Bond may go down as well as up and is not guaranteed. Depending on any income or withdrawals you take and investment returns, your fund could run out.',
     '',
     '## Alternatives considered',
-    '[[Other products or options considered and why they were not recommended]]'
   ].join('\n'),
 
   // Risk profiler named in "Your attitude to risk" (from Step 3, optional). DRAFT.
   sosProfilerPhrase: ' ({profiler})',
-  // "Your personal and financial circumstances": the client's profiler answers come first, then what is left
-  // for the adviser to cover. {circumstancesSentence} is empty unless the risk profiler has been completed.
-  // The wording of the profiler sentences themselves is in risk_profiler_data.js. DRAFT.
-  sosCircumstancesPrompt: {
-    prsa: { plain: '[[Employment, income, existing pensions, other assets and liabilities]]',
-            profiled: '[[Existing pensions, other assets and liabilities, and anything else to add]]' },
-    arf:  { plain: '[[Other retirement income (e.g. State Pension), assets, liabilities and dependants]]',
-            profiled: '[[Other retirement income (e.g. State Pension), other assets and liabilities, and anything else to add]]' },
-    ib:   { plain: '[[Income, savings and investments, other assets and liabilities, tax position]]',
-            profiled: '[[Tax position, other assets and liabilities, and anything else to add]]' }
-  },
+  // "Your personal and financial circumstances": {circumstancesSentence} is the client's profiler answers and is
+  // empty unless the risk profiler has been completed. The wording of the profiler sentences themselves is in
+  // risk_profiler_data.js. DRAFT.
   // "Your sustainability preferences" — from the Step 3 answer and the SFDR classification of the
   // recommended funds. DRAFT: new wording, needs Compliance sign-off.
   sosEsgNo: 'You told us that you do not have sustainability preferences for this investment, so they were not a factor in our recommendation.',
   sosEsgAllArt8: 'You told us that you have sustainability preferences. All of the recommended funds are classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which means they promote environmental or social characteristics.',
-  sosEsgPartArt8: 'You told us that you have sustainability preferences. {art8} of your portfolio is invested in funds classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which promote environmental or social characteristics. The rest is invested in funds classified under Article 6, which do not. [[How the recommendation takes account of the client\'s sustainability preferences]]',
-  sosEsgPrompt: '[[Whether the client has sustainability preferences and, if so, how the recommended funds take account of them]]',
+  sosEsgPartArt8: 'You told us that you have sustainability preferences. {art8} of your portfolio is invested in funds classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which promote environmental or social characteristics. The rest is invested in funds classified under Article 6, which do not.',
 
   // Footnotes for fund asset splits, volatility and fund charges. DRAFT: wording follows the PDC / Point of Sale
   // disclosures ("may be more or less than illustrated", "may vary in the future"); needs Compliance sign-off.
@@ -516,6 +499,13 @@ var QT_TEXT = {
   sosRiskMatch: 'This is in line with your attitude to risk.',
   sosRiskHigher: 'This is higher than your assessed attitude to risk. We have recommended it because: {reason}',
   sosRiskLower: 'This is lower than your assessed attitude to risk. We have recommended it because: {reason}',
+  // Note above the Statement of Suitability editor, and the confirmation when it is left unedited. DRAFT.
+  sosNote: 'The Statement of Suitability text below is an example only. It must be tailored to suit your clients\' needs. It must include the reasons that the recommended product is considered suitable to your clients\' circumstances, and it should also explain why you are recommending the particular product from the range of products analysed.',
+  sosUneditedConfirm: {
+    title: 'Continue without editing?',
+    body: 'You have not made any changes to the Statement of Suitability. The text is an example only and must be tailored to your client\'s circumstances before it is given to them. Are you sure you want to continue?',
+    yes: 'Yes, continue', no: 'Go back and edit'
+  },
   sosDeclaration: 'I confirm that this Statement of Suitability reflects the advice given to the client.',
   sosClientAck: 'I confirm that I have read and understood this Statement of Suitability.'
 };
