@@ -202,7 +202,7 @@ function qtSriScale(clientSri, portfolioSri, portfolioLabel, cls) {
 // Published fund SRI (PRIIPs): always a whole number.
 function qtSriBadge(sri) {
   var r = Math.round(sri);
-  return '<span class="badge" style="background:' + ESMA_COLORS[r] + ';color:' + (r === 4 ? '#222' : '#fff') + '">SRI ' + r + '</span>';
+  return '<span class="badge" style="background:' + ESMA_COLORS[r] + ';color:' + (r === 4 ? '#222' : '#fff') + '">ESMA ' + r + '</span>';
 }
 // Indicative risk lines and footnote for the client-facing pack (rounded figures).
 function qtPortfolioRisk(Q) {
@@ -250,7 +250,7 @@ function qtFundRows(Q) {
     var fmc  = Q.product === 'prsa' ? f.chargeQuoted : f.extFund;
     var gtee = m.gmab ? (Q.product === 'prsa' ? f.gmab : f.gteeCharge) : 0;
     return { fund: f, weight: m.weight, admin: r.cc.admin, fmc: fmc, gtee: gtee, total: r.cc.admin + fmc + gtee,
-             cat: FUND_CATEGORY_OF[f.id] || 'multi', gmab: m.gmab };
+             cat: FUND_CATEGORY_OF[f.id] || '', gmab: m.gmab };
   }).sort(function(a, b) { return b.weight - a.weight; });
 }
 // The protected level is a product feature keyed by fund, shared by the PRSA, ARF and Bond ranges.
@@ -272,12 +272,6 @@ function qtGuaranteeNote(rows) {
   return uniq.length === 1
     ? qtFill(T.guaranteeFundNote, { level: uniq[0] })
     : qtFill(T.guaranteeFundNoteMixed, { levels: qtNameList(uniq) });
-}
-function qtCategorySplit(rows) {
-  var out = {};
-  FUND_CATEGORIES.forEach(function(c) { out[c.key] = 0; });
-  rows.forEach(function(r) { out[r.cat] += r.weight; });
-  return out;
 }
 
 // The redesigned Charges page drops the effect-of-charges / reduction-in-yield disclosure
@@ -382,6 +376,42 @@ function qtBuildPack(Q) {
         '<div class="sigline short"></div>Date</div></div>', { hdr: 'broker' });
   }
 
+  // ── 2b. Risk profile: the client's questionnaire answers and the result (adviser letterhead) ──
+  // Q.profile comes from the risk profiler module (js/risk_profiler*.js); it is null until the profiler is complete.
+  if (Q.sections.riskprofile && Q.profile) {
+    sec = 'riskprofile';
+    var pf = Q.profile, pr = pf.result, pcfg = pf.config, pnarr = pf.narrative;
+    add('<h1>' + escHtml(T.sections.riskprofile) + '</h1>', { hdr: 'broker', cls: 'kwn newpage' });
+    add('<table class="kv"><tr><td>Client</td><td>' + escHtml(clientName) + '</td><td>Adviser</td><td>' + escHtml(Q.broker.name) + '</td></tr>' +
+        '<tr><td>Completed</td><td>' + escHtml(fmtDateLong(pf.date)) + '</td><td>Questionnaire</td><td>' + escHtml(pf.name) + '</td></tr></table>', { hdr: 'broker' });
+    add(qtStat3([
+      ['Your risk profile', pr.sri + ' &ndash; ' + escHtml(pr.sriLabel)],
+      ['Your risk rating', Q.risk.sri + ' &ndash; ' + escHtml(ESMA_LABELS[Q.risk.sri])],
+      ['Experience and knowledge', escHtml(pr.experience.label)]
+    ]), { hdr: 'broker' });
+    add(qtRiskStrip(Q.risk.sri), { hdr: 'broker' });
+    if (pnarr.risk) add('<p>' + escHtml(pnarr.risk) + '</p>', { hdr: 'broker' });
+    if (pnarr.override) add('<p>' + escHtml(pnarr.override) + '</p>', { hdr: 'broker' });
+    add('<h3 class="kwn">Your answers</h3>', { hdr: 'broker' });
+    pf.summary.forEach(function(s) {
+      var t = '<table class="dt split"><thead><tr><th class="l" colspan="2">' + escHtml(s.title) + '</th></tr></thead><tbody>';
+      s.rows.forEach(function(rw) {
+        t += '<tr><td class="l" style="width:52%">' + escHtml(rw.q) + '</td><td class="l"><b>' + rw.a.map(escHtml).join('<br>') + '</b></td></tr>';
+      });
+      add(t + '</tbody></table>', { hdr: 'broker', cls: 'split' });
+    });
+    add('<h3 class="kwn">How the result was worked out</h3>', { hdr: 'broker' });
+    add(qtFactBlock('YOUR RESULT', [
+      ['Earning capacity, after your regular commitments', escHtml(pcfg.levels.capacity[pr.steps.adjustedEarningCapacity])],
+      ['Wealth (your savings and the time horizon)', escHtml(pcfg.levels.capacity[pr.steps.totalAssets])],
+      ['Financial capacity to take on risk', escHtml(pcfg.levels.capacity[pr.steps.financialCapacity])],
+      ['Reaction to a fall in value', pr.tolerance + ' of 7'],
+      ['Risk profile (1 to 7 scale)', pr.sri + ' &ndash; ' + escHtml(pr.sriLabel) + (pr.ageCapped ? ' (limited by age from ' + pr.profileRaw + ')' : '')]
+    ]), { hdr: 'broker' });
+    add('<p>' + escHtml(pcfg.text.howCalculated) + '</p>', { hdr: 'broker' });
+    add('<p class="tiny">' + escHtml(pcfg.text.disclaimer) + '</p>', { hdr: 'broker' });
+  }
+
   // ── Allianz quotation: cover / divider ──
   // Separates the adviser's documents from the Allianz pages, which are numbered from 1 again.
   // Products without a cover image fall back to the plain navy cover.
@@ -479,7 +509,75 @@ function qtBuildPack(Q) {
     if (gRisk.footnote) p(gRisk.glide ? T.packRiskFootnoteGlide : qtFill(T.packRiskFootnote, { exact: fmtRisk(r.portfolioSri, 1) }), 'tiny');
   }
 
-  // ── Allianz 3. Projected benefits ──
+  // ── Allianz 3. Your investment and risk: fund split → asset split → portfolio risk → the funds ──
+  if (Q.sections.funds) {
+    sec = 'funds';
+    pageTitle(T.sections.funds, T.packLeads.funds);
+    var FH = T.packFundsHeads, gp = isPrsa && r.isGlidepath, pr6 = Math.round(r.portfolioSri);
+    // Fund split
+    add('<h3 class="kwn">' + escHtml(FH.split) + '</h3>');
+    var ft = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th class="l">Category</th><th>Risk</th><th class="em">Allocation</th></tr></thead><tbody>';
+    fundRows.forEach(function(fr) {
+      var lv = qtGteeLevel(fr.fund.id), cat = FUND_CATEGORY_MAP[fr.cat];
+      ft += '<tr><td class="l">' + escHtml(fr.fund.name) + (fr.gmab ? ' &middot; <span class="g">Guarantee' + (lv ? ' ' + lv : '') + '</span>' : '') + '</td>' +
+            '<td class="l">' + (cat ? escHtml(cat.short) : '&ndash;') + '</td><td>' + Math.round(fr.fund.esma) + '</td><td class="em"><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
+    });
+    add(ft + '</tbody></table>', { cls: 'split' });
+    if (gp) p(T.glidepathNote, 'small');
+    // Asset split: indicative (DMAS from rescaled factsheet exposure, Strategy Select at its target mix)
+    var ASC = { eq: '#003781', fi: '#0377A8', cash: '#9DC4E3', com: '#B58A2E', alt: '#7A8794' }, as = assetSplit(fundRows), sb = '', lg = '';
+    ASSET_CLASSES.forEach(function(c) {
+      if (!(as[c.key] > 0.0005)) return;
+      sb += '<div style="width:' + (as[c.key] * 100).toFixed(2) + '%;background:' + ASC[c.key] + '"></div>';
+      lg += '<span><i style="background:' + ASC[c.key] + '"></i>' + c.label + ' ' + Math.round(as[c.key] * 100) + '%</span>';
+    });
+    add('<div class="catsplit kwn"><div class="bt">' + escHtml(FH.assets) + (gp ? ' at the start of your plan' : '') + '</div>' +
+        '<div class="catbar">' + sb + '</div><div class="catleg">' + lg + '</div></div>');
+    p(qtAssetNote(fundRows), 'tiny');
+    // Portfolio risk
+    add('<h3 class="kwn">' + escHtml(FH.risk) + '</h3>');
+    var fRisk = qtPortfolioRisk(Q), sfs = qtSfdrSplit(r.mix);
+    var t2 = gp ? ['Strategy risk profile', escHtml(strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
+    var sus = sfs.unknown > 0.0001 ? '&ndash;' : sfs.art8 > 0.9999 ? '100% Article 8' : Math.round(sfs.art8 * 100) + '% Article 8';
+    add(qtStat3([['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], [t2[0], t2[1]], ['Sustainability', sus]]));
+    p(T.fundsIntro);
+    if (gp) {
+      var profile = strategyProfile(r.stratObj) || 'Medium risk', fit = strategyRiskFit(r.stratObj, Q.risk.sri);
+      if (fRisk.line) add('<p>' + fRisk.line + '</p>');
+      if (fit.aligned) p(T.riskMatch);
+      else p(qtFill(fit.direction === 'higher' ? T.riskHigherProfile : T.riskLowerProfile, { profile: profile, clientSriLabel: ESMA_LABELS[Q.risk.sri], reason: Q.risk.reason }));
+    } else {
+      if (pr6 === Q.risk.sri) p(T.riskMatch);
+      else p(qtFill(pr6 > Q.risk.sri ? T.riskHigher : T.riskLower, { portfolioSri: pr6, clientSri: Q.risk.sri, reason: Q.risk.reason }));
+    }
+    if (fundRows.some(function(fr) { return fr.gmab; })) {
+      var gFunds = qtNameList(fundRows.filter(function(fr) { return fr.gmab; }).map(function(fr) { return fr.fund.name; }));
+      add('<div class="gnote"><b>' + escHtml(qtFill(T.packGuaranteeHead, { funds: gFunds })) + '</b>' +
+          '<span>' + escHtml(qtGuaranteeNote(fundRows)) + '</span></div>');
+    }
+    if (fRisk.footnote) p(fRisk.footnote, 'tiny');
+    // The funds: brochure objective, key facts, opportunities and risks (largest holding first)
+    add('<h3 class="kwn">' + escHtml(FH.funds) + '</h3>');
+    fundRows.forEach(function(fr) {
+      var f = fr.fund, info = qtFundInfo(f.id) || {}, cat = FUND_CATEGORY_MAP[fr.cat], lv = qtGteeLevel(f.id);
+      var facts = [f.isin ? 'ISIN ' + escHtml(f.isin) : '', 'Risk ' + Math.round(f.esma) + ' of 7', 'Fund charge ' + pct(fr.fmc),
+                   info.sfdr ? 'SFDR Article ' + info.sfdr : '', fr.gmab ? '<span class="g">Annual Guarantee' + (lv ? ' ' + lv : '') + '</span>' : ''].filter(Boolean);
+      function list(title, items) {
+        return items && items.length ? '<div><div class="bt">' + title + '</div><ul>' + items.map(function(x) { return '<li>' + escHtml(x) + '</li>'; }).join('') + '</ul></div>' : '';
+      }
+      var or = list('Opportunities', info.opportunities) + list('Risks', info.risks);
+      add('<div class="fcard"><div class="fch"><b>' + escHtml(f.name) + '</b><span>' + escHtml(info.category || (cat ? cat.label : '')) +
+          ' &middot; ' + (+(fr.weight * 100).toFixed(1)) + '% of your plan</span></div>' +
+          '<div class="fcm">' + facts.join(' &middot; ') + '</div>' +
+          '<p>' + escHtml(info.desc || f.desc || '') + '</p>' +
+          (or ? '<div class="fcor">' + or + '</div>' : '') + '</div>');
+    });
+    // fmcNote says projections use the maximum FMC, which holds for the PRSA only (ARF / Bond illustrate at the quoted FMC)
+    p(T.packFundsSourceNote + (isPrsa ? ' ' + T.fmcNote : ''), 'tiny');
+    add(qtWarnBox([T.packWarnings.past, T.packWarnings.currency]));
+  }
+
+  // ── Allianz 4. Projected benefits ──
   if (Q.sections.projection) {
     sec = 'projection';
     pageTitle(T.sections.projection, qtFill(T.packProjectionLead[Q.product] || '', { nra: r.nra }));
@@ -508,7 +606,7 @@ function qtBuildPack(Q) {
       if (r.strat === 'dis') p(T.prsaDisNote, 'tiny');
     } else if (isArf) {
       p(T.arfProjectionIntro);
-      if (!Q.sections.summary) add('<div class="chart">' + qtArfChart(r, 640, 220) + '</div>');
+      add('<div class="chart">' + qtArfChart(r, 640, 220) + '</div>');
       [[r.p1, r.rate1], [r.p2, r.rate2]].forEach(function(pr, idx) {
         var pp = pr[0], rt = pct(pr[1]);
         add('<h3 class="kwn' + (idx === 1 ? ' newpage' : '') + '">At ' + rt + ' growth a year</h3>');
@@ -528,7 +626,7 @@ function qtBuildPack(Q) {
       if (r.hasSurrender) p(T.arfSurrenderNote);
     } else {
       p(T.ibProjectionIntro);
-      if (!Q.sections.summary) add('<div class="chart">' + qtIbChart(r, 640, 220) + '</div>');
+      add('<div class="chart">' + qtIbChart(r, 640, 220) + '</div>');
       var ibRt = pct(r.rate);
       var ti = '<table class="num split"><thead><tr class="ltr"><th></th><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F = A + B &minus; C &minus; D &minus; E</th></tr>' +
         '<tr><th>Year</th><th>Age</th><th>Contributions paid</th><th>Investment growth to date</th><th>Charges to date</th><th>Tax to date</th><th>Income taken to date</th><th>Projected value</th></tr></thead><tbody>';
@@ -611,50 +709,7 @@ function qtBuildPack(Q) {
     add(qtWarnBox([T.packWarnings.lose]));
   }
 
-  // ── 6. Investment and risk ──
-  if (Q.sections.funds) {
-    sec = 'funds';
-    pageTitle(T.sections.funds, T.packLeads.funds);
-    var fRisk = qtPortfolioRisk(Q), gp = isPrsa && r.isGlidepath, sfs = qtSfdrSplit(r.mix), pr6 = Math.round(r.portfolioSri);
-    var t2 = gp ? ['Strategy risk profile', escHtml(strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
-    var sus = sfs.unknown > 0.0001 ? '&ndash;' : sfs.art8 > 0.9999 ? '100% Article 8' : Math.round(sfs.art8 * 100) + '% Article 8';
-    add(qtStat3([['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], [t2[0], t2[1]], ['Sustainability', sus]]));
-    p(T.fundsIntro);
-    if (gp) {
-      var profile = strategyProfile(r.stratObj) || 'Medium risk', fit = strategyRiskFit(r.stratObj, Q.risk.sri);
-      if (fRisk.line) add('<p>' + fRisk.line + '</p>');
-      if (fit.aligned) p(T.riskMatch);
-      else p(qtFill(fit.direction === 'higher' ? T.riskHigherProfile : T.riskLowerProfile, { profile: profile, clientSriLabel: ESMA_LABELS[Q.risk.sri], reason: Q.risk.reason }));
-    } else {
-      if (pr6 === Q.risk.sri) p(T.riskMatch);
-      else p(qtFill(pr6 > Q.risk.sri ? T.riskHigher : T.riskLower, { portfolioSri: pr6, clientSri: Q.risk.sri, reason: Q.risk.reason }));
-    }
-    var CATS = { fic: 'Fixed income', multi: 'Multi-asset', eq: 'Equity' }, CATC = { fic: '#9DC4E3', multi: '#003781', eq: '#0377A8' };
-    var ft = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th class="l">Category</th><th>Risk</th><th>SFDR</th><th class="em">Allocation</th></tr></thead><tbody>';
-    fundRows.forEach(function(fr) {
-      var lv = qtGteeLevel(fr.fund.id), sf = (qtFundInfo(fr.fund.id) || {}).sfdr;
-      ft += '<tr><td class="l">' + escHtml(fr.fund.name) + (fr.gmab ? ' &middot; <span class="g">Guarantee' + (lv ? ' ' + lv : '') + '</span>' : '') + '</td>' +
-            '<td class="l">' + CATS[fr.cat] + '</td><td>' + Math.round(fr.fund.esma) + '</td><td>' + (sf ? 'Art. ' + sf : '&ndash;') + '</td><td class="em"><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
-    });
-    add(ft + '</tbody></table>', { cls: 'split' });
-    var split = qtCategorySplit(fundRows), sb = '<div class="catbar">', lg = '<div class="catleg">';
-    FUND_CATEGORIES.forEach(function(c) {
-      if (split[c.key] > 0) sb += '<div style="width:' + (split[c.key] * 100).toFixed(2) + '%;background:' + CATC[c.key] + '"></div>';
-      if (split[c.key] > 0) lg += '<span><i style="background:' + CATC[c.key] + '"></i>' + CATS[c.key] + ' ' + Math.round(split[c.key] * 100) + '%</span>';
-    });
-    var anyG = fundRows.some(function(fr) { return fr.gmab; });
-    // sb and lg are each left open by the loop above, so close them here
-    add('<div class="catsplit"><div class="bt">How your money is split</div>' + sb + '</div>' + lg + '</div></div>');
-    if (anyG) {
-      var gFunds = qtNameList(fundRows.filter(function(fr) { return fr.gmab; }).map(function(fr) { return fr.fund.name; }));
-      add('<div class="gnote"><b>' + escHtml(qtFill(T.packGuaranteeHead, { funds: gFunds })) + '</b>' +
-          '<span>' + escHtml(qtGuaranteeNote(fundRows)) + '</span></div>');
-    }
-    if (fRisk.footnote) p(fRisk.footnote, 'tiny');
-    add(qtWarnBox([T.packWarnings.past, T.packWarnings.currency]));
-  }
-
-  // ── 7. Remuneration ──
+  // ── 6. Remuneration ──
   if (Q.sections.remun) {
     sec = 'remun';
     pageTitle(T.sections.remun, qtFill(T.packLeads.remun, { company: cs.name, brokerFirm: Q.broker.firm }));
@@ -796,11 +851,14 @@ function qtBuildPack(Q) {
 
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.docTitle || (Q.productName + ' – Quotation – ' + clientName + ' – ' + Q.quoteRef)) + '</title>' +
     '<style>' + qtPackCss() + (Q.embed ? qtEmbedCss() : '') + '</style></head><body>' +
-    (Q.embed ? '' : '<div class="topbar"><span>' + escHtml(Q.productName) + ' &ndash; Quotation &ndash; ' + escHtml(clientName) + '</span><button onclick="window.print()">Print / Save as PDF</button></div>') +
+    (Q.embed ? '' : '<div class="topbar"><span>' + escHtml(Q.productName) + ' &ndash; Quotation &ndash; ' + escHtml(clientName) + '</span><button onclick="window.print()">Print / Save as PDF</button>' +
+      (Q.libBase ? '<button onclick="this.disabled=true;window.opener&&window.opener.savePackPdf&&window.opener.savePackPdf(window)">Save PDF with factsheets</button>' : '') + '</div>') +
     '<template id="hdr-agl">' + hdrAgl + '</template><template id="hdr-broker">' + hdrBroker + '</template>' +
     '<template id="foot-agl">' + footAgl + '</template><template id="foot-broker">' + footBroker + '</template>' +
     '<div id="src">' + src + '</div><div id="pages"></div>' +
-    '<script>' + (Q.noAutoPrint ? 'window.__noAutoPrint = true;' : '') + qtPaginatorSrc() + '<\/script></body></html>';
+    // Pages are rasterised here (html2canvas) so the opener can merge the factsheets / KIDs into one PDF
+    (Q.libBase ? '<script src="' + Q.libBase + 'js/vendor/html2canvas.min.js"><\/script><script>' + qtRasterSrc() + '<\/script>' : '') +
+    '<script>' + (Q.noAutoPrint || Q.libBase ? 'window.__noAutoPrint = true;' : '') + qtPaginatorSrc() + '<\/script></body></html>';
 }
 
 // Rows shown in PRSA tables: years 1–5, every 5th year, and retirement.
@@ -1032,8 +1090,19 @@ function qtPackCss() {
     '.defs.two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; }',
     '.defs b { display: block; color: #003781; font-size: 9.2pt; }',
     '.defs span { display: block; font-size: 9pt; line-height: 1.55; color: #1E2B3B; }',
-    // Fund category split
+    // Asset split (Investment page)
     '.catsplit .bt { font-size: 9.5pt; font-weight: 700; color: #003781; margin-bottom: 2mm; }',
+    // Fund details cards (Investment page)
+    '.fcard { border-top: 0.5pt solid #E2E8EF; padding: 3.5mm 0 1mm; }',
+    '.fch { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; }',
+    '.fch b { font-size: 10pt; color: #003781; }',
+    '.fch span { font-size: 8pt; color: #5E6B78; text-align: right; }',
+    '.fcm { font-size: 8pt; color: #5E6B78; margin: 1mm 0 2mm; }',
+    '.fcm .g { color: #0B7A3E; font-weight: 700; }',
+    '.fcard p { margin: 0 0 2mm; }',
+    '.fcor { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }',
+    '.fcor .bt { font-size: 8.4pt; font-weight: 700; color: #003781; margin-bottom: 1mm; }',
+    '.fcor ul { margin: 0; } .fcor li { font-size: 8pt; line-height: 1.4; margin-bottom: 0.8mm; }',
     // Guarantee note
     '.gnote { padding: 4mm 4.5mm; background: #F4F7FA; display: flex; flex-direction: column; gap: 1mm; line-height: 1.6; }',
     '.gnote b { color: #003781; font-size: 9.2pt; }',
@@ -1049,6 +1118,24 @@ function qtPackCss() {
     '.pfoot .fbrand { font-weight: 700; letter-spacing: 0.08em; color: #003781; white-space: nowrap; }',
     '@media print { body { background: #fff; } .topbar { display: none; } .page { margin: 0; } }'
   ].join('\n');
+}
+
+// Runs inside the pack window: window.qtRasterPages() renders each A4 page to a JPEG (Uint8Array).
+function qtRasterSrc() {
+  return '(' + function() {
+    window.qtRasterPages = function() {
+      var pages = [].slice.call(document.querySelectorAll('.page')), out = [];
+      return pages.reduce(function(chain, pg) {
+        return chain.then(function() {
+          return html2canvas(pg, { scale: 2, backgroundColor: '#fff', useCORS: true, logging: false }).then(function(c) {
+            var bin = atob(c.toDataURL('image/jpeg', 0.92).split(',')[1]), u = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+            out.push(u);
+          });
+        });
+      }, Promise.resolve()).then(function() { return out; });
+    };
+  }.toString() + ')();';
 }
 
 // Runs inside the pack window: flows blocks into fixed A4 pages, splits long tables

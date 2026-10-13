@@ -1,7 +1,7 @@
 // quote_docs.js — fund factsheets and KIDs attached to the quotation pack.
 //
-// The pack itself is printed from HTML by the browser, so these PDFs cannot be merged into it. Instead they
-// are merged into one companion PDF ("Supporting documents") that the adviser downloads with the pack.
+// The pack is HTML, so to append these PDFs its pages are rendered to images (see qtRasterSrc in quote_pdf.js)
+// and built into one PDF with the factsheets / KIDs after them.
 //
 // Files live under docs/, named by PRSA fund id (see QT_FUND_ALIAS in quote_content.js for the ARF / IB ids):
 //   docs/factsheets/<fund>.pdf        AllianzGI / HSBC monthly factsheets
@@ -26,6 +26,12 @@ function qtDocFundId(id) { return (typeof QT_FUND_ALIAS !== 'undefined' && QT_FU
 function qtDocFundName(id) {
   var f = (typeof FUNDS_MAP !== 'undefined' && FUNDS_MAP[id]) || null;
   return f ? f.name : id;
+}
+
+// The factsheet for a fund (PRSA, ARF or IB id) as { path, asOf, title }, or null if none is held
+function qtFactsheetFor(id) {
+  var fid = qtDocFundId(id), asOf = QT_DOCS.factsheetAsOf[fid];
+  return asOf ? { path: QT_DOCS.dir + 'factsheets/' + fid + '.pdf', asOf: asOf, title: qtDocFundName(fid) + ' factsheet' } : null;
 }
 
 // Funds a PRSA glidepath strategy can invest in over the given term (months to retirement)
@@ -68,11 +74,13 @@ function qtSupportingDocs(o) {
   return { kids: kids, factsheets: factsheets };
 }
 
-// Fetches the chosen documents and merges them (KIDs first, then factsheets) into one PDF.
-// `include` is { kids: bool, factsheets: bool }. Resolves to { bytes, count, missing: [title] }.
-function qtBuildSupportingPdf(docs, include) {
+// Fetches the chosen documents and merges them (KIDs first, then factsheets) into one PDF, after `pageJpegs`
+// (the pack's pages as A4 JPEGs, optional). `include` is { kids: bool, factsheets: bool }.
+// Resolves to { bytes, count, missing: [title] } where count is the number of documents attached.
+function qtBuildSupportingPdf(docs, include, pageJpegs) {
   var list = [].concat(include.kids ? docs.kids : [], include.factsheets ? docs.factsheets : []);
-  if (!list.length) return Promise.reject(new Error('No documents selected.'));
+  pageJpegs = pageJpegs || [];
+  if (!list.length && !pageJpegs.length) return Promise.reject(new Error('No documents selected.'));
   if (typeof PDFLib === 'undefined') return Promise.reject(new Error('The PDF library could not be loaded.'));
   var missing = [];
   return Promise.all(list.map(function(d) {
@@ -81,19 +89,23 @@ function qtBuildSupportingPdf(docs, include) {
       .catch(function() { missing.push(d.title); return null; });
   })).then(function(res) {
     var got = res.filter(Boolean);
-    if (!got.length) {
+    if (!got.length && list.length && !pageJpegs.length) {
       var e = new Error('The documents could not be loaded. The tool needs to be opened from the web server (not as a local file).');
       e.missing = missing; throw e;
     }
     return PDFLib.PDFDocument.create().then(function(out) {
-      return got.reduce(function(chain, g) {
+      return pageJpegs.reduce(function(chain, jpg) {
+        return chain.then(function() { return out.embedJpg(new Uint8Array(jpg)); }).then(function(img) {
+          out.addPage([595.28, 841.89]).drawImage(img, { x: 0, y: 0, width: 595.28, height: 841.89 });
+        });
+      }, Promise.resolve()).then(function() { return got.reduce(function(chain, g) {
         return chain.then(function() {
           return PDFLib.PDFDocument.load(g.buf, { ignoreEncryption: true })
             .then(function(src) { return out.copyPages(src, src.getPageIndices()); })
             .then(function(pages) { pages.forEach(function(p) { out.addPage(p); }); })
             .catch(function() { missing.push(g.doc.title); });
         });
-      }, Promise.resolve()).then(function() {
+      }, Promise.resolve()); }).then(function() {
         return out.save().then(function(bytes) { return { bytes: bytes, count: list.length - missing.length, missing: missing }; });
       });
     });

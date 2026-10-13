@@ -22,6 +22,7 @@ OUT.mkdir(exist_ok=True)
 URL = (QT / 'quotation_tool.html').resolve().as_uri()
 
 fails = []
+FS_DATE = '31/08/2026'   # DMAS factsheet date in FUND_FACTSHEET
 def check(cond, msg):
     if not cond:
         fails.append(msg); print('  FAIL', msg)
@@ -97,9 +98,27 @@ def fill_client(d, product, dob, nra=None):
 
 def pick_sri(d, sri, esg=True):
     nxt(d)
+    check(step(d) == 3 and 'assessed' in msg(d), 'step 3 asks how risk was assessed (%s)' % msg(d))
+    check(not css(d, '#sri-card').is_displayed(), 'no rating picker until the method is chosen')
+    click(d, css(d, '#rp-method [data-m=own]'))
+    check(css(d, '#sri-card').is_displayed() and css(d, '#r-profiler-wrap').is_displayed() and css(d, '#rpm').get_attribute('hidden') is not None, 'own profiling shows the rating picker, no dialog')
+    nxt(d)
     check(step(d) == 3, 'step 3 should require SRI')
     click(d, d.find_elements(By.CSS_SELECTOR, '.sri-t')[sri - 1])
     check('on' in d.find_elements(By.CSS_SELECTOR, '.sri-t')[sri - 1].get_attribute('class'), 'SRI tile selected')
+    check(not d.find_elements(By.ID, 'sri-panel') and 'Risk profiling' not in css(d, '#step-3').text, 'no "suited to" panel or method caption')
+    # What the ratings mean: the PRIIPs wording for each class
+    click(d, css(d, '#sri-info-btn'))
+    for _ in range(20):
+        if js(d, "return document.activeElement.id") == 'sri-info-x': break
+        time.sleep(0.1)
+    info = css(d, '#sri-info').text
+    check(css(d, '#sri-info').is_displayed() and len(d.find_elements(By.CSS_SELECTOR, '#sri-info .rs-tbl tbody tr')) == 7 and
+          'medium-low level' in info and '2017/653' in info and js(d, 'return document.activeElement.id') == 'sri-info-x', 'ratings dialog with the 7 PRIIPs classes')
+    check('cl' in d.find_elements(By.CSS_SELECTOR, '#sri-info .rs-tbl tbody tr')[sri - 1].get_attribute('class'), "client's rating highlighted in the dialog")
+    d.save_screenshot(str(OUT / 'sri_info.png'))
+    js(d, "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape'}))")
+    check(not css(d, '#sri-info').is_displayed() and js(d, 'return document.activeElement.id') == 'sri-info-btn', 'Escape closes the dialog and returns focus')
     nxt(d)
     check(step(d) == 3 and 'sustainability' in msg(d), 'step 3 requires the sustainability question (%s)' % msg(d))
     click(d, css(d, '#esg-seg [data-v=%s]' % ('yes' if esg else 'no')))
@@ -111,13 +130,14 @@ def pick_sri(d, sri, esg=True):
     check(step(d) == 4, 'step 3 -> 4')
 
 def see_all_tabs(d):
-    check(d.find_element(By.ID, 'btn-next').get_attribute('disabled') is not None, 'pack button disabled until all three tabs are seen')
-    check('Charges' in msg(d) and 'Remuneration' in msg(d), 'footer says which tabs are left: %r' % msg(d))
-    click(d, css(d, '#res-tabs button[data-t="chg"]'))
+    check(next_label(d).startswith('Next: Charges'), 'Next walks to the Charges tab: %r' % next_label(d))
+    nxt(d)
+    check(js(d, 'return S.resTab') == 'chg' and next_label(d).startswith('Next: Remuneration'), 'Next opened Charges, then offers Remuneration: %r' % next_label(d))
     check(js(d, "return !!document.querySelector('#res-body table.tbl') && !!document.querySelector('#res-body .chg-notes') && !document.querySelector('#res-body .vbar, #res-body .mk-bar')"), 'charges table with quiet notes and no side panel')
     check('reduce the assumed growth rate' in css(d, '#res-body .chg-notes').text or 'equivalent to reducing' in css(d, '#res-body .chg-notes').text, 'reduction in yield quoted')
     d.save_screenshot(str(OUT / ('%s_step6_chg.png' % js(d, 'return S.product'))))
-    click(d, css(d, '#res-tabs button[data-t="rem"]'))
+    nxt(d)
+    check(js(d, 'return S.resTab') == 'rem' and next_label(d).startswith('Build the quotation pack'), 'Next opened Remuneration, then offers the pack: %r' % next_label(d))
     check(js(d, "return document.querySelectorAll('#res-body .kcard').length") == 3 and js(d, "return !!document.querySelector('#res-body svg rect')"), 'remuneration cards and bar chart')
     click(d, css(d, '#res-body .rc-foot .lnk'))
     check(js(d, "return !!document.querySelector('#res-body table.tbl')"), 'Show table shows the remuneration table')
@@ -126,22 +146,27 @@ def see_all_tabs(d):
 def pack_flow(d, tag):
     # 7.1 Contents
     check(js(d, 'return S.packStage') == 'contents' and css(d, '#pack-h').text == 'What goes in the pack', 'step 7 opens on Contents')
-    for k in ['projection', 'charges', 'important', 'glossary']:
+    for k in ['summary', 'funds', 'projection', 'charges', 'remun', 'important', 'glossary']:
         check(js(d, "return S.sections[arguments[0]] && !document.querySelector('[data-sec=' + arguments[0] + ']')", k), 'section %s required (no toggle)' % k)
+    quo = [r.text for r in d.find_elements(By.CSS_SELECTOR, '#secs .prow') if 'Your Allianz quotation' in r.text]
+    check(len(quo) == 1 and 'Required' in quo[0] and 'Glossary' in quo[0], 'the Allianz quotation is one required item: %s' % quo)
     for k in ['product', 'tax', 'appform']:
         check(js(d, "return !S.sections[arguments[0]] && !document.querySelector('[data-sec=' + arguments[0] + ']')", k), 'section %s coming soon and excluded' % k)
-    # Factsheets are attached as a separate PDF and can be switched off; KIDs only exist for the Investment Bond
+    # Factsheets are appended to the pack PDF and can be switched off; KIDs only exist for the Investment Bond
     check(js(d, "return S.sections.factsheets && !!document.querySelector('[data-sec=factsheets]')"), 'factsheets on by default with a toggle')
     kids_na = js(d, "return S.product !== 'ib'")
     check(js(d, "return !!document.querySelector('[data-sec=kids]')") == (not kids_na), 'KIDs toggle only for the Investment Bond')
-    check(len(d.find_elements(By.CSS_SELECTOR, '#secs .pill.soon')) == (4 if kids_na else 3) and len(d.find_elements(By.CSS_SELECTOR, '#secs .tag-new')) == 3, 'coming-soon and new tags')
+    check(kids_na <= (len(d.find_elements(By.XPATH, "//*[@id='secs']//*[contains(@class,'pn')][normalize-space()='Key Information Documents']")) == 0), 'no KIDs row for PRSA / ARF')
+    check(len(d.find_elements(By.CSS_SELECTOR, '#secs .pill.soon')) == 4 and len(d.find_elements(By.CSS_SELECTOR, '#secs .tag-new')) == 0, 'coming-soon tags and no New tags (the risk profile record shows "Complete the risk profiler" until Step 3 is done)')
     check(len(d.find_elements(By.CSS_SELECTOR, '#preset-seg')) == 0, 'no preset selector')
-    check(js(d, "return !!document.querySelector('[data-sec=remun]')"), 'remuneration statement is optional')
     n_order = lambda: len(d.find_elements(By.CSS_SELECTOR, '#pack-order ol:first-of-type li'))   # printed sections only, not attached PDFs
-    check(n_order() == 9, 'pack order lists 9 sections (%d)' % n_order())
+    order = [e.text for e in d.find_elements(By.CSS_SELECTOR, '#pack-order ol:first-of-type li')]
+    check(n_order() == 3 and 'Your Allianz quotation' in order[2], 'pack order: cover letter, SoS, the quotation: %s' % order)
+    att = [e.text for e in d.find_elements(By.CSS_SELECTOR, '#pack-order ol:nth-of-type(2) li')]
+    check(len(att) == 1 and re.search(r'Fund factsheets \(\d+\)', att[0]), 'attached factsheets on one line: %s' % att)
     sw = css(d, '[data-sec=cover]')
     click(d, sw)
-    check(not js(d, 'return S.sections.cover') and n_order() == 8 and 'Cover letter' not in css(d, '#pack-subs').text, 'cover letter toggled off drops its stage')
+    check(not js(d, 'return S.sections.cover') and n_order() == 2 and 'Cover letter' not in css(d, '#pack-subs').text, 'cover letter toggled off drops its stage')
     click(d, css(d, '[data-sec=cover]'))
     check(js(d, 'return packStages()') == ['contents', 'cover', 'sos', 'review'], 'four stages with both documents on')
     d.save_screenshot(str(OUT / ('%s_step7.png' % tag)))
@@ -151,10 +176,16 @@ def pack_flow(d, tag):
     check(js(d, 'return S.packStage') == 'cover' and css(d, '#pack-h').text == 'Cover letter', 'cover letter stage')
     cover = js(d, "return stripMarks(S.text.cover)")
     check('[[' not in cover and 'Enclosed:' in cover, 'cover letter has no prompts and lists enclosures')
-    check('Important information and a glossary of terms' in cover, 'enclosed list names the important information')
+    check('Your Allianz quotation:' in cover and cover.count('\n- ') == 2, 'enclosed list: the SoS and the quotation as one item')
     check(len(d.find_elements(By.CSS_SELECTOR, '#ed-cover .auto')) >= 2, 'auto-filled values shown in grey boxes')
     click(d, css(d, '#stage-cover .mode-row button:nth-child(2)'))
-    check(js(d, 'return S.coverMode') == 'own' and css(d, '#own-cover').is_displayed() and js(d, "return docIssues('cover')") == 1, 'Write your own: empty letter counts as unfinished')
+    check(js(d, 'return S.coverMode') == 'own' and css(d, '#ed-cover.own').is_displayed() and js(d, "return docIssues('cover')") == 1, 'Write your own: empty letter counts as unfinished')
+    tb = [b.text for b in d.find_elements(By.CSS_SELECTOR, '#stage-cover .ed-tb .tb')]
+    check(tb == ['B', 'Heading', '• List'] and not d.find_elements(By.CSS_SELECTOR, '#stage-cover .ed-tb .lnk'), 'Write your own has the formatting toolbar: %s' % tb)
+    click(d, css(d, '#ed-cover')); css(d, '#ed-cover').send_keys('Dear Alex')
+    click(d, d.find_elements(By.CSS_SELECTOR, '#stage-cover .ed-tb .tb')[1])
+    check(js(d, 'return S.own.cover') == '## Dear Alex' and js(d, "return docIssues('cover')") == 0, 'Heading button formats own text: %r' % js(d, 'return S.own.cover'))
+    js(d, "S.own.cover = ''")
     click(d, css(d, '#stage-cover .mode-row button:nth-child(1)'))
     check(js(d, 'return S.coverMode') == 'template' and js(d, "return docIssues('cover')") == 0, 'back to the template')
     nxt(d)
@@ -216,7 +247,7 @@ def pack_flow(d, tag):
     fn = css(d, '#fname').text
     check(re.match(r'Quotation_Q-\d{6}-\w{4}_Murphy\.pdf', fn) and re.search(r'\d+ pages', fn), 'file name and page count: %r' % fn)
     labels = [e.text for e in d.find_elements(By.CSS_SELECTOR, '#thumbs .lbl')]
-    check(len(labels) == 9 and labels[0] == 'p. 1' and all(re.match(r'pp?\. \d', l) for l in labels), 'thumbnails with page numbers: %s' % labels)
+    check(len(labels) == 3 and labels[0] == 'p. 1' and all(re.match(r'pp?\. \d', l) for l in labels), 'thumbnails (cover, SoS, the Allianz quotation) with page numbers: %s' % labels)
     check(d.find_element(By.ID, 'btn-generate').get_attribute('disabled') is None, 'generate enabled after passages written')
     check(not d.find_elements(By.CSS_SELECTOR, '#checklist .warn, #checklist .no') and css(d, '#gen-errs').text == '', 'checklist all green once written')
     d.save_screenshot(str(OUT / ('%s_step7_review.png' % tag)))
@@ -247,6 +278,12 @@ def pack_flow(d, tag):
                    "return t ? [].slice.call(t.querySelectorAll('tbody tr')).map(function(r){"
                    "var c=r.querySelector('td:last-child'); return c ? parseFloat(c.textContent) : 0; }) : []")
     check(allocs and allocs == sorted(allocs, reverse=True), '%s funds listed largest holding first: %s' % (tag, allocs))
+    titles = js(d, "return [].map.call(document.querySelectorAll('#pages .ptitle h2'), function(e){ return e.textContent; })")
+    check('Your investment and risk' in titles and 'Projected benefits' in titles and titles.index('Your investment and risk') < titles.index('Projected benefits'),
+          '%s investment section comes before the projection: %s' % (tag, titles))
+    cards = js(d, "return document.querySelectorAll('#pages .fcard').length")
+    check(cards == len(allocs), '%s one fund card per fund (%d cards, %d funds)' % (tag, cards, len(allocs)))
+    check(('Indicative only' in txt or 'approximate' in txt) and 'How your money is split' in txt, '%s asset split shown and flagged as indicative' % tag)
     gnote = js(d, "var g=document.querySelector('#pages .gnote'); return g ? g.textContent : ''")
     if gnote:
         check(re.search(r'\d{2}%', gnote) and 'Allianz' in gnote and 'policy anniversary' in gnote,
@@ -354,32 +391,37 @@ def prsa_flow(d):
     check('Non-Standard A5 · €70k + €500/m' in js(d, "return document.querySelectorAll('#stepnav .rs')[3].textContent"), 'rail caption for plan details')
     ra = lambda: js(d, "var pf=portfolioState(); return !pf.ready ? 'Not ready' : !pf.mismatch ? 'Aligned ✓' : overrideValid() ? 'Override recorded' : 'Review required ⚠';")
     shown = lambda sel: js(d, "var e=document.querySelector(arguments[0]); return !!e && e.getBoundingClientRect().height > 1 && !e.closest('[inert]')", sel)
-    views = lambda: js(d, "return ['strat','pick','alloc'].filter(function(v){ return !document.getElementById('pf-view-' + v).hidden; })")
-    # Strategy view: Build Your Own on top, then DIS / Autopilot / Life Cycle with their options listed
-    check(shown('#strats .strat-hero[data-strat=diy]'), 'Build Your Own card shown first')
-    check(css(d, '#strats .strat-hero .cnt b').text == '13', 'funds available count on the hero card')
-    top = js(d, "return [].map.call(document.querySelectorAll('#strats > .strat-row > .strat'), function(e){ return e.getAttribute('data-strat') || e.getAttribute('data-fam'); })")
-    check(top == ['dis', 'ap', 'lc'], 'three managed cards below the divider: %s' % top)
+    views = lambda: js(d, "return ['strat','managed','pick','alloc'].filter(function(v){ return !document.getElementById('pf-view-' + v).hidden; })")
+    # Landing: two equal boxes, Build Your Own and Managed strategies, each opening its own selector
+    boxes = js(d, "return [].map.call(document.querySelectorAll('#strats > .strat'), function(e){ var r=e.getBoundingClientRect(); return [e.getAttribute('data-strat') || e.getAttribute('data-way'), Math.round(r.width), Math.round(r.height)]; })")
+    check([x[0] for x in boxes] == ['diy', 'managed'] and boxes[0][1:] == boxes[1][1:], 'two equal boxes: %s' % boxes)
+    check('funds available' not in css(d, '#strats').text, 'no fund count on Build Your Own')
+    check(not d.find_element(By.ID, 'pf-side').is_displayed(), 'no Portfolio at a glance until something is chosen')
+    check(css(d, '#strat-h').text == 'How would you like to invest?', 'heading')
+    check(views() == ['strat'], 'landing view only')
+    check(not d.find_element(By.ID, 'btn-next').is_displayed() and 'Choose how to invest' in msg(d), 'footer waits for a choice (%r)' % msg(d))
+    d.save_screenshot(str(OUT / 'prsa_step5_initial.png'))
+    # Managed strategies: DIS / Autopilot / Life Cycle with their options, in their own view
+    click(d, css(d, '[data-way=managed] .strat-main')); time.sleep(0.5)
+    check(views() == ['managed'] and js(d, 'return document.activeElement.id') == 'managed-h', 'Managed strategies view opens (%s)' % views())
+    top = js(d, "return [].map.call(document.querySelectorAll('#strat-opts > .strat'), function(e){ return e.getAttribute('data-strat') || e.getAttribute('data-fam'); })")
+    check(top == ['dis', 'ap', 'lc'], 'three managed cards: %s' % top)
     check(len(d.find_elements(By.CSS_SELECTOR, '[data-fam=ap] .sopt')) == 3 and shown('[data-strat=ap_op]'), 'Autopilot options listed on the card')
     check(len(d.find_elements(By.CSS_SELECTOR, '[data-fam=ap] .sopt .radio-dot')) == 3 and 'Choose an option' in css(d, '[data-fam=ap]').text, 'options shown as radio choices')
     check('ok' in css(d, '[data-strat=ap_dy] .rg').get_attribute('class') and 'ok' not in css(d, '[data-strat=lc_op] .rg').get_attribute('class'), 'ranges that suit the client are marked')
     check('Suits ratings 3–4' in css(d, '[data-strat=dis] .suit').text, 'DIS suitable range pill')
-    check(not re.search(r'SRI', js(d, "return document.getElementById('strats').textContent")), 'no SRI values on strategy cards')
-    check(ra() == 'Not ready', 'nothing selected yet (%s)' % ra())
-    check(shown('#ps-empty') and 'Client risk rating' in css(d, '#ps-empty').text and 'Yes' in css(d, '#ps-empty').text, 'glance panel empty state with rating and sustainability preference')
-    check(css(d, '#strat-h').text == 'How would you like to invest?', 'heading')
-    check(js(d, "return document.querySelectorAll('#strats [data-fam] > .info-btn').length") == 2, 'family cards have info buttons')
-    check(views() == ['strat'], 'fund builder hidden on strategy selection')
-    d.save_screenshot(str(OUT / 'prsa_step5_initial.png'))
-    nxt(d)
-    check(step(d) == 5 and 'strategy' in msg(d), 'step 5 requires a strategy')
-    # Build Your Own is selected first, then opened from the footer
-    click(d, css(d, '[data-strat=diy] .strat-main'))
-    check(js(d, 'return S.prsa.strat') == 'diy' and views() == ['strat'] and next_label(d).startswith('Choose funds'), 'Build Your Own selected, footer offers Choose funds')
-    nxt(d); time.sleep(0.5)
+    check(not re.search(r'SRI', js(d, "return document.getElementById('strat-opts').textContent")), 'no SRI values on strategy cards')
+    check(js(d, "return document.querySelectorAll('#strat-opts [data-fam] > .info-btn').length") == 2, 'family cards have info buttons')
+    check(ra() == 'Not ready' and not d.find_element(By.ID, 'pf-side').is_displayed(), 'nothing selected yet, no glance panel (%s)' % ra())
+    d.save_screenshot(str(OUT / 'prsa_step5_managed.png'))
+    click(d, css(d, '#pf-view-managed .back-link')); time.sleep(0.5)
+    check(views() == ['strat'], 'back to the two boxes')
+    # Build Your Own opens the fund picker straight away
+    click(d, css(d, '[data-strat=diy] .strat-main')); time.sleep(0.5)
+    check(js(d, 'return S.prsa.strat') == 'diy', 'Build Your Own chosen')
     check(views() == ['pick'], 'Choose funds view (%s)' % views())
     check(js(d, 'return document.activeElement.id') == 'pick-h', 'focus moves to the builder heading')
-    check(js(d, "return document.querySelectorAll('#pick-funds .fcat-h[aria-expanded=true]').length") == 3, 'three fund categories, expanded')
+    check(js(d, "return document.querySelectorAll('#pick-funds .fcat-h[aria-expanded=true]').length") == 4, 'four brochure fund categories, expanded')
     check(js(d, "return document.querySelectorAll('#pick-funds [data-fund], #pick-funds [data-gtee]').length") == 0, 'no % boxes or guarantee switches on Choose funds')
     nxt(d)
     check(views() == ['pick'] and 'choose at least one fund' in msg(d), 'Next needs at least one ticked fund (%s)' % msg(d))
@@ -389,12 +431,19 @@ def prsa_flow(d):
     check(msg(d) == '2 funds selected' and len(d.find_elements(By.CSS_SELECTOR, '#pick-list .sf')) == 2, 'selected count and list: %r' % msg(d))
     check(css(d, '#pick-next').text.startswith('Allocate 2 funds'), 'side button names the count')
     check('on' in css(d, '[data-pick=%s]' % g).get_attribute('class'), 'ticked row highlighted')
-    multi = js(d, "return [].map.call(document.querySelectorAll('#pick-funds [data-cat=multi] [data-pick]'), function(e){ return e.getAttribute('data-pick'); })")
-    check(all(x in multi for x in ['ss30', 'ss50', 'ss75']), 'guarantee funds listed under Multi-asset: %s' % multi)
-    check('Optional Annual Guarantee' in css(d, '[data-cat=multi] .fcat-note').text and 'Guarantee available' in css(d, '[data-pick=ss50]').text, 'guarantee note and sub-line')
-    check(css(d, '[data-pick=ss50] .fn small').text.startswith('Volatility 6–12%'), 'volatility sub-line')
-    # Sustainability preference: Article 6 rows muted
-    check(css(d, '#esg-pill').is_displayed() and 'dim' in css(d, '[data-pick=etfw]').get_attribute('class') and 'dim' not in css(d, '[data-pick=ss50]').get_attribute('class'), 'Article 6 funds muted when the client has sustainability preferences')
+    multi = js(d, "return [].map.call(document.querySelectorAll('#pick-funds [data-cat=pg] [data-pick]'), function(e){ return e.getAttribute('data-pick'); })")
+    check(sorted(multi) == ['ss30', 'ss50', 'ss75'], 'Strategy Select listed under Protected Growth: %s' % multi)
+    ma = js(d, "return [].map.call(document.querySelectorAll('#pick-funds [data-cat=ma] [data-pick]'), function(e){ return e.getAttribute('data-pick'); })")
+    check(sorted(ma) == ['dm15', 'dm50', 'dm75'], 'DMAS listed under Multi-Asset Solutions: %s' % ma)
+    dm = js(d, "var s=assetSplit([{fund:FUNDS_MAP.dm75,weight:1}]); return [Math.round(s.eq*1000)/10, Math.round((s.eq+s.fi+s.cash+s.com+s.alt)*1000)/10, qtAssetNote([{fund:FUNDS_MAP.dm75,weight:1}])]")
+    check(dm[0] == 82.1 and dm[1] == 100 and 'rescaled to 100%' in dm[2] and FS_DATE in dm[2], 'DMAS split from rescaled factsheet exposure: %s' % dm)
+    ss = js(d, "var s=assetSplit([{fund:FUNDS_MAP.ss75,weight:1}]); return [s.eq, s.fi]")
+    check(ss == [0.75, 0.25], 'Strategy Select stays at its target mix: %s' % ss)
+    check('Optional Annual Guarantee' in css(d, '[data-cat=pg] .fcat-note').text and 'Guarantee available' in css(d, '[data-pick=ss50]').text, 'guarantee note and sub-line')
+    check(css(d, '[data-pick=dm50] .fn small').text.startswith('Volatility 6–12%'), 'volatility sub-line')
+    check('Volatility' not in css(d, '[data-pick=ss50] .fn small').text, 'no volatility range on Strategy Select')
+    # Sustainability preference: noted, but no fund is greyed out (it is judged on the blended portfolio)
+    check(css(d, '#esg-pill').is_displayed() and not d.find_elements(By.CSS_SELECTOR, '#pick-funds .dim'), 'no funds greyed out when the client has sustainability preferences')
     check(css(d, '[data-pick=etfw] .sfdr').text == 'Art. 6', 'ETF shows SFDR Article 6')
     setv(d, 'fund-search', 'strategy')
     vis_rows = js(d, "return [].filter.call(document.querySelectorAll('#pick-funds [data-pick]'), function(r){ return r.getBoundingClientRect().height > 0; }).length")
@@ -410,9 +459,9 @@ def prsa_flow(d):
     js(d, "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape'}))")
     time.sleep(0.25)
     check(not pop.is_displayed() and js(d, "return document.activeElement.getAttribute('data-finfo')") == 'ss75', 'Escape closes the fund popover and returns focus')
-    click(d, css(d, '[data-cat=eq] .fcat-h'))
-    check(js(d, "return document.querySelector('[data-cat=eq] .fcat-h').getAttribute('aria-expanded')") == 'false' and js(d, "return document.getElementById('fundcat-eq').classList.contains('closed')"), 'category collapses')
-    click(d, css(d, '[data-cat=eq] .fcat-h'))
+    click(d, css(d, '[data-cat=idx] .fcat-h'))
+    check(js(d, "return document.querySelector('[data-cat=idx] .fcat-h').getAttribute('aria-expanded')") == 'false' and js(d, "return document.getElementById('fundcat-idx').classList.contains('closed')"), 'category collapses')
+    click(d, css(d, '[data-cat=idx] .fcat-h'))
     d.save_screenshot(str(OUT / 'prsa_step5_pick.png'))
     nxt(d)
     time.sleep(0.5)
@@ -477,7 +526,9 @@ def prsa_flow(d):
     badge = css(d, '[data-strat=diy] .prog').text
     check(badge == '2 funds selected · 100%', 'work-in-progress badge: %r' % badge)
     check(next_label(d).startswith('See results'), 'complete custom portfolio: footer goes to results')
+    check('on' in css(d, '[data-strat=diy]').get_attribute('class') and d.find_element(By.ID, 'pf-side').is_displayed(), 'Build Your Own box marked, glance panel shown')
     # Choosing a managed strategy over a custom allocation asks first
+    click(d, css(d, '[data-way=managed] .strat-main')); time.sleep(0.5)
     click(d, css(d, '[data-strat=dis] .strat-main'))
     check(d.find_element(By.ID, 'confirm-bg').is_displayed() and js(d, 'return document.activeElement.id') == 'confirm-no', 'replace confirmation shown, focus on Cancel')
     click(d, d.find_element(By.ID, 'confirm-no'))
@@ -485,7 +536,7 @@ def prsa_flow(d):
     click(d, css(d, '[data-strat=dis] .strat-main'))
     click(d, d.find_element(By.ID, 'confirm-yes'))
     check(js(d, 'return S.prsa.strat') == 'dis' and js(d, 'return Object.keys(S.prsa.diyAllocs).length + Object.keys(S.prsa.diySel).length') == 0 and ra() == 'Aligned ✓', 'DIS replaces the allocation and is aligned for SRI 3 (%s)' % ra())
-    check(views() == ['strat'] and not css(d, '[data-strat=diy] .prog').is_displayed(), 'managed strategy stays on strategy selection; badge cleared')
+    check(views() == ['managed'] and not js(d, "return document.querySelector('[data-strat=diy] .prog').hidden === false"), 'managed strategy stays on its view; Build Your Own badge cleared')
     check(shown('#ps-full') and css(d, '#ps-risk-k').text == 'Strategy' and '→' in css(d, '#ps-risk').text, 'glance panel shows the strategy risk path')
     check('Aligned' in css(d, '#ps-align').text, 'alignment pill')
     check(not d.find_element(By.ID, 'mismatch-card').is_displayed(), 'no mismatch banner when aligned')
@@ -533,12 +584,13 @@ def prsa_flow(d):
     d.save_screenshot(str(OUT / 'prsa_step6.png'))
     # Quote summary card replaces the KPI band and carries the fund list
     cols = js(d, "return [].map.call(document.querySelectorAll('#res-band .qs-h span'), function(e){ return e.textContent; })")
-    check(cols == ['Client', 'Product', 'Investment', 'Funds'], 'quote summary card columns: %s' % cols)
+    check(cols == ['Client', 'Plan', 'Funds'], 'quote summary card columns: %s' % cols)
     band = d.find_element(By.ID, 'res-band').text
     check('Mr Alex Murphy' in band and 'Allianz Vantage PRSA' in band and 'Attitude to risk' in band,
           'summary card shows the quotation inputs: %r' % band[:120])
-    check(js(d, "return document.querySelectorAll('#res-band .qs-rows .g').length") >= 1, 'guarantee marked green in the summary card')
-    check(js(d, "return document.querySelectorAll('#res-band .qs-h .lnk').length") == 4, 'each summary column has an Edit link')
+    check(js(d, "return document.querySelectorAll('#res-band .qs-h .lnk').length") == 3, 'each summary column has an Edit link')
+    check(not any(t in band for t in ['Paid by', 'Management charge', 'Trail commission', 'Single contribution', 'Transfer value']), 'summary card leaves out charges, commission and the contribution breakdown')
+    check("Income in today's money" in d.find_element(By.ID, 'res-body').text, 'income labelled as today\'s money')
     # Projection: figures panel, chart and a collapsed year-by-year table
     check(js(d, "return !!document.querySelector('#res-body .pj-hero b')") and
           js(d, "return !!document.querySelector('#res-body .pj-assume')"), 'projection panel with assumptions')
@@ -574,16 +626,16 @@ def arf_flow(d):
     nxt(d)
     check(step(d) == 5, 'ARF step 4 -> 5 (%s)' % msg(d))
     check(js(d, "return document.getElementById('pf-view-strat').hidden && !document.getElementById('pf-view-pick').hidden && document.getElementById('pf-back').hidden"), 'ARF opens on Choose funds, no back link')
-    check(not css(d, '#esg-pill').is_displayed() and 'dim' not in css(d, '[data-pick=hmw]').get_attribute('class'), 'no Article 8 highlighting without sustainability preferences')
+    check(not css(d, '#esg-pill').is_displayed() and not d.find_elements(By.CSS_SELECTOR, '#pick-funds .dim'), 'no sustainability note without sustainability preferences')
     setv(d, 'mismatch-reason', '')
     click(d, css(d, '#pick-funds [data-sel=ss50]'))
-    click(d, css(d, '#pick-funds [data-sel=afie]'))
+    click(d, css(d, '#pick-funds [data-sel=afsd]'))
     nxt(d); time.sleep(0.5)
     check(js(d, "return !document.getElementById('pf-view-alloc').hidden"), 'ARF Next goes to Allocate')
     js(d, "var e=document.querySelector('[data-fund=ss50]'); e.value=60; e.dispatchEvent(new Event('input'));")
     nxt(d)
     check(step(d) == 5 and '100%' in msg(d), 'ARF allocations must total 100')
-    js(d, "var e=document.querySelector('[data-fund=afie]'); e.value=40; e.dispatchEvent(new Event('input'));")
+    js(d, "var e=document.querySelector('[data-fund=afsd]'); e.value=40; e.dispatchEvent(new Event('input'));")
     js(d, "var e=document.querySelector('[data-gtee=ss50]'); e.click();")
     # 60% SRI 4 + 40% SRI 2 = 3.2 -> rounds to 3, lower than the client's 4
     check(js(d, "return portfolioState().mismatch && portfolioState().direction") == 'lower', 'lower-risk mismatch detected')
@@ -599,6 +651,7 @@ def arf_flow(d):
     check(abs(js(d, 'return S.arf.rate1Override') - 0.05) < 1e-9, 'ARF rate 1 editable')
     check('At 5.00% growth' in d.find_element(By.ID, 'res-body').text, 'projection follows the edited rate')
     check(js(d, "return [].filter.call(document.querySelectorAll('#res-band .qs-rows div'), function(r){ return r.textContent.indexOf('Guarantee') >= 0; }).length") == 1, 'guarantee marked on the guaranteed fund')
+    check(js(d, "return document.querySelectorAll('#res-band .qs-rows .g').length") >= 1, 'guarantee marked green in the summary card')
     d.save_screenshot(str(OUT / 'arf_step6.png'))
     see_all_tabs(d)
     nxt(d)
@@ -621,14 +674,14 @@ def standard_prsa_funds(d):
     for fid in ['cash', 'afisd', 'ss30', 'ss50', 'ss75', 'etfe', 'etfw', 'etfs']:
         check(st.get(fid) == [False, False], 'Standard: %s available (%s)' % (fid, st.get(fid)))
     check('Non-Standard PRSA only' in css(d, '[data-pick=dm75]').text, 'unavailable fund is labelled')
-    check(not d.find_elements(By.CSS_SELECTOR, '[data-cat=multi] .fcat-note'), 'no guarantee note on a Standard PRSA')
+    check(not d.find_elements(By.CSS_SELECTOR, '[data-cat=pg] .fcat-note'), 'no guarantee note on a Standard PRSA')
     # A single ticked fund starts at 100%
     click(d, css(d, '#pick-funds [data-sel=ss50]'))
     js(d, 'pfToAlloc()'); time.sleep(0.5)
     check(js(d, 'return S.prsa.diyAllocs.ss50') == 100 and 'full' in js(d, "return document.getElementById('alloc-prog').className"), 'one fund ticked -> 100% allocated')
     check(js(d, "return document.querySelectorAll('#diy-funds [data-gtee]').length") == 0, 'no guarantee toggles on a Standard PRSA')
-    js(d, "setPfView('strat', false)")
-    fams = js(d, "return [].map.call(document.querySelectorAll('#strats [data-fam]'), function(e){ return e.getAttribute('data-fam'); })")
+    js(d, "setPfView('managed', false)")
+    fams = js(d, "return [].map.call(document.querySelectorAll('#strat-opts [data-fam]'), function(e){ return e.getAttribute('data-fam'); })")
     check(fams == ['lc'], 'Standard PRSA: DIS and Life Cycle only (%s)' % fams)
     click(d, css(d, '[data-strat=dis] .info-btn'))
     time.sleep(0.25)
@@ -662,7 +715,7 @@ def responsive_check(d):
     js(d, 'goStep(5)')
     m = js(d, "var bg = document.getElementById('confirm-bg'); bg.removeAttribute('hidden');"
               "var r = bg.getBoundingClientRect(); bg.setAttribute('hidden', '');"
-              "return [Math.round(r.left), Math.round(r.width), window.innerWidth];")
+              "return [Math.round(r.left), Math.round(r.width), document.documentElement.clientWidth];")
     check(m[0] == 0 and m[1] == m[2], 'modal overlay still covers the viewport under containment: %s' % m)
     d.set_window_rect(width=1440, height=1400)
 

@@ -45,6 +45,7 @@ var QT_TEXT = {
   sections: {
     cover:     'Cover letter',
     sos:       'Statement of Suitability',
+    riskprofile:'Risk profile',
     summary:   'Your quotation at a glance',
     projection:'Projected benefits',
     charges:   'Charges',
@@ -124,13 +125,13 @@ var QT_TEXT = {
   chargesFundNote: 'The illustration uses the current level of fund management charges, which may vary in the future. Further details are available in the Schedule of Fees and Charges.',
 
   // ─── Funds and risk — DRAFT ──────────────────────────────────────────────────
-  fundsIntro: 'Each fund has a published Summary Risk Indicator (SRI) from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Your own risk rating comes from the risk profiling your adviser carried out with you. To compare the two, we show an indicative risk figure for your portfolio, worked out as the weighted average of its funds\' SRIs. Glidepath strategies change their fund mix as you approach retirement, so they are matched to you on their risk profile instead.',
+  fundsIntro: 'Each fund has a published ESMA risk rating from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Your own risk rating comes from the risk profiling your adviser carried out with you. To compare the two, we show an indicative risk figure for your portfolio, worked out as the weighted average of its funds\' ESMA ratings. Glidepath strategies change their fund mix as you approach retirement, so they are matched to you on their risk profile instead.',
   riskMatch: 'The risk of your portfolio is in line with your assessed attitude to risk.',
   riskHigher: 'The indicative risk of your portfolio ({portfolioSri}) is higher than your assessed attitude to risk ({clientSri}). Your adviser has recorded the reason for this recommendation: {reason}',
   riskLower: 'The indicative risk of your portfolio ({portfolioSri}) is lower than your assessed attitude to risk ({clientSri}). Your adviser has recorded the reason for this recommendation: {reason}',
   // Footnote wherever an indicative (weighted) portfolio risk figure is printed. DRAFT.
-  riskFootnote: '* Indicative portfolio risk is the allocation-weighted average of the published SRIs of the funds ({exact}), rounded to the nearest whole number. It is a guide only. It is not an official Summary Risk Indicator, and it does not allow for the effect of diversification between funds.',
-  riskFootnoteGlidepath: '* Indicative risk is the allocation-weighted average of the published SRIs of the funds in the strategy ({start} at the start of your plan and {end} at retirement), rounded to the nearest whole number. It is a guide only and is not an official Summary Risk Indicator.',
+  riskFootnote: '* Indicative portfolio risk is the allocation-weighted average of the published ESMA ratings of the funds ({exact}), rounded to the nearest whole number. It is a guide only. It is not an official ESMA risk rating, and it does not allow for the effect of diversification between funds.',
+  riskFootnoteGlidepath: '* Indicative risk is the allocation-weighted average of the published ESMA ratings of the funds in the strategy ({start} at the start of your plan and {end} at retirement), rounded to the nearest whole number. It is a guide only and is not an official ESMA risk rating.',
   glidepathRiskPath: 'Indicative risk about {start} at the start of your plan, reducing to about {end} by your retirement age.*',
   riskHigherProfile: 'This strategy\'s risk profile ({profile}) is higher than the profile suited to your assessed attitude to risk ({clientSriLabel}). Your adviser has recorded the reason for this recommendation: {reason}',
   riskLowerProfile: 'This strategy\'s risk profile ({profile}) is lower than the profile suited to your assessed attitude to risk ({clientSriLabel}). Your adviser has recorded the reason for this recommendation: {reason}',
@@ -146,8 +147,8 @@ var QT_TEXT = {
     Dynamic: 'A medium-risk mix balancing equities and bonds in roughly equal measure. Targets solid long-term growth while maintaining meaningful downside protection.',
     Opportunity: 'A higher equity weighting aiming for maximum long-term capital growth. Accepts greater short-term volatility in exchange for stronger return potential over a longer investment period.'
   },
-  sosPortfolioRiskNumeric: 'Based on the weighted average of its funds\' published SRIs, this portfolio has an indicative risk rating of about {portfolioSri} ({portfolioSriLabel}).',
-  sosPortfolioRiskGlidepath: 'This strategy\'s target risk profile is {profile}. As a glidepath, its fund mix changes gradually as you approach retirement, so no single SRI is published for it. Based on the weighted average of its funds\' SRIs, its indicative risk is about {sriStart} at the start of your plan, reducing to about {sriEnd} by your retirement age.',
+  sosPortfolioRiskNumeric: 'Based on the weighted average of its funds\' published ESMA ratings, this portfolio has an indicative risk rating of about {portfolioSri} ({portfolioSriLabel}).',
+  sosPortfolioRiskGlidepath: 'This strategy\'s target risk profile is {profile}. As a glidepath, its fund mix changes gradually as you approach retirement, so no single ESMA rating is published for it. Based on the weighted average of its funds\' ESMA ratings, its indicative risk is about {sriStart} at the start of your plan, reducing to about {sriEnd} by your retirement age.',
   disDescription: 'The Default Investment Strategy is a medium-risk glidepath that automatically reduces investment risk as you approach retirement.',
   diyDescription: 'You have chosen your own selection of funds.',
   lowSriNote: 'For clients with a risk rating of 1 or 2, a DIY portfolio of cash and fixed income funds may be closer to their attitude to risk than any of the glidepath strategies.',
@@ -156,7 +157,7 @@ var QT_TEXT = {
   // Mismatch warning (shown when the adviser tries to proceed)
   mismatchPrompt: 'The risk profile of your selection may not align with the client\'s assessed risk rating of {sri}. To proceed, please provide a reason.',
   mismatchDetailManaged: '{name} is suitable for risk ratings {range}.',
-  mismatchDetailCustom: 'Indicative portfolio risk: {risk} (weighted average of the funds\' SRIs).',
+  mismatchDetailCustom: 'Indicative portfolio risk: {risk} (weighted average of the funds\' ESMA ratings).',
   replaceCustomConfirm: 'You have an existing custom fund allocation. Selecting a managed strategy will replace it. Continue?',
 
   // ─── Remuneration — from SRP/POI, initial vs trail split DRAFT ───────────────
@@ -259,7 +260,7 @@ var QT_TEXT = {
     ['Reduction in yield', 'A single figure showing the total effect of all charges on your projected investment return.'],
     ['Retirement lump sum', 'The part of your pension fund you can take as a lump sum at retirement, up to Revenue limits.'],
     ['Rolling guarantee', 'An optional feature on certain funds that protects a percentage of your fund value, for an additional charge.'],
-    ['Summary Risk Indicator (SRI)', 'A rating from 1 (lower risk) to 7 (higher risk) showing the level of risk of a fund.'],
+    ['ESMA risk rating', 'A rating from 1 (lower risk) to 7 (higher risk) showing the level of risk of a fund.'],
     ['Trail remuneration', 'An ongoing payment to your adviser, calculated as a percentage of your fund value each year.'],
     ['Transfer value', 'The value of benefits moved into your policy from another pension arrangement.']
   ],
@@ -277,7 +278,7 @@ var QT_TEXT = {
   packLeads: {
     summary:    'A summary of the details this quotation is based on.',
     charges:    'The charges that apply to your plan. All are yearly and taken from the value of your fund.',
-    funds:      'The funds you have chosen and how they compare with your attitude to risk.',
+    funds:      'The funds you have chosen, how your money is split, how its risk compares with your attitude to risk, and what each fund does.',
     remun:      'What {company} pays {brokerFirm} for arranging this plan. These payments are included in the charges.',
     important:  'Please read this page carefully before you decide.',
     glossary:   'The terms used in this quotation.'
@@ -321,9 +322,26 @@ var QT_TEXT = {
     'PRSA': 'prsa', 'Glidepath': 'prsa', 'Retirement lump sum': 'prsa'
   },
   // Footnote under the attitude-to-risk strip and the portfolio-risk figure.
-  packRiskFootnote: '* Allocation-weighted average of the funds\' published risk indicators ({exact}), rounded to the nearest whole number. A guide only, not an official Summary Risk Indicator.',
-  packRiskFootnoteGlide: '* This strategy moves between funds as you approach retirement, so it has no single published risk indicator. The figure shown is its risk profile.',
+  packRiskFootnote: '* Allocation-weighted average of the funds\' published ESMA ratings ({exact}), rounded to the nearest whole number. A guide only, not an official ESMA risk rating.',
+  packRiskFootnoteGlide: '* This strategy moves between funds as you approach retirement, so it has no single published ESMA rating. The figure shown is its risk profile.',
   packGuaranteeHead: 'Annual Guarantee on {funds}',
+  // Investment page sub-headings, in page order.
+  packFundsHeads: { split: 'How your money is invested', assets: 'How your money is split', risk: 'Risk', funds: 'About your funds' },
+  // Under the asset split when it includes a DMAS or Strategy Select fund (otherwise assetSplitNote): lead, then
+  // the sentence for each basis used, then tail. {asOf} is the factsheet date. DRAFT: needs Compliance sign-off.
+  packAssetNote: {
+    lead:      'Indicative only.',
+    factsheet: 'Dynamic Multi Asset Strategy funds are shown using their asset exposure from the fund factsheets ({asOf}). The published figures include derivatives and add up to more than 100%, so they have been rescaled to 100%.',
+    target:    'Strategy Select funds are counted at the mix of shares and bonds whose return they aim to match, not at what they hold.',
+    tail:      'Actual holdings change over time, for example as the fund manager responds to market volatility.'
+  },
+  // Short version under the split in the tool's "Portfolio at a glance" panel.
+  assetNoteShort: {
+    factsheet: 'DMAS: factsheet exposure ({asOf}), rescaled to 100%.',
+    target:    'Strategy Select: the stock/bond mix it aims to match.',
+    tail:      'Actual holdings vary.'
+  },
+  packFundsSourceNote: 'Fund descriptions, opportunities and risks are summarised from the Allianz Global Life fund guide. Risk ratings are as at 30/06/2026. For full details, see each fund\'s factsheet at www.allianzgloballife.ie.',
   packTrailNote: 'Key years shown. Trail figures are estimates based on the projected values in this quotation and will change with the value of your fund.',
   packKeyYearsNote: 'Key years shown.',
   prsaInflationShort: 'Inflation of {inflation} a year.',
@@ -353,16 +371,13 @@ var QT_TEXT = {
     ib:   'Thank you for the opportunity to discuss your investment plans.'
   },
   coverSosSentence: 'Our Statement of Suitability explains why we believe this recommendation is suitable for you.',
-  // How each pack section is described in the cover letter's "Enclosed" list.
+  // How each pack item is described in the cover letter's "Enclosed" list. The Allianz quotation's
+  // sections (summary to glossary) are one item.
   coverEnclosed: {
     sos:       'Statement of Suitability, setting out our recommendation and the reasons for it',
-    summary:   'A one-page summary of your quotation',
-    projection:'Projected benefits, showing how your policy could perform',
-    charges:   'Details of the charges that apply',
-    funds:     'Details of your investment and its risk',
-    remun:     'A statement of the remuneration we receive',
-    product:   'Information about the product, tax and other important points',
-    important: 'Important information and a glossary of terms'
+    riskprofile:'A record of your risk profile questionnaire and the result',
+    quotation: 'Your Allianz quotation: a summary, your investment and its risk, projected benefits, charges, the remuneration we receive, and important information',
+    product:   'Information about the product, tax and other important points'
   },
 
   // ─── Statement of Suitability templates (adviser-editable in Step 7) — DRAFT ─
@@ -371,10 +386,10 @@ var QT_TEXT = {
     'You have told us that you wish to save for your retirement and plan to retire at age {nra}. [[Retirement objectives, e.g. target income or lump sum]]',
     '',
     '## Your personal and financial circumstances',
-    '[[Employment, income, existing pensions, other assets and liabilities]]',
+    '{circumstancesSentence} {circumstancesPrompt}',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence} [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
     '',
     '## Your sustainability preferences',
     '{esgSentence}',
@@ -409,10 +424,10 @@ var QT_TEXT = {
     'You have told us that you wish to invest your retirement savings in an Approved Retirement Fund and draw an income from it, starting from age {incomeAge}. [[Income needs and objectives]]',
     '',
     '## Your personal and financial circumstances',
-    '[[Other retirement income (e.g. State Pension), assets, liabilities and dependants]]',
+    '{circumstancesSentence} {circumstancesPrompt}',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client\'s income, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence} [[Capacity for loss: how a fall in value would affect the client\'s income, and their investment horizon]]',
     '',
     '## Your sustainability preferences',
     '{esgSentence}',
@@ -443,10 +458,10 @@ var QT_TEXT = {
     'You have told us that you wish to invest {contributionSummary} over the medium to long term. [[Investment objectives, including any need for income or access to capital]]',
     '',
     '## Your personal and financial circumstances',
-    '[[Income, savings and investments, other assets and liabilities, tax position]]',
+    '{circumstancesSentence} {circumstancesPrompt}',
     '',
     '## Your attitude to risk',
-    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 Summary Risk Indicator scale. [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
+    'Based on the risk profiling we carried out with you{profilerPhrase}, your attitude to investment risk corresponds to a risk rating of {clientSri} ({clientSriLabel}) on the 1 to 7 ESMA risk scale. {profilerSentence} [[Capacity for loss: how a fall in value would affect the client, and their investment horizon]]',
     '',
     '## Your sustainability preferences',
     '{esgSentence}',
@@ -474,6 +489,17 @@ var QT_TEXT = {
 
   // Risk profiler named in "Your attitude to risk" (from Step 3, optional). DRAFT.
   sosProfilerPhrase: ' ({profiler})',
+  // "Your personal and financial circumstances": the client's profiler answers come first, then what is left
+  // for the adviser to cover. {circumstancesSentence} is empty unless the risk profiler has been completed.
+  // The wording of the profiler sentences themselves is in risk_profiler_data.js. DRAFT.
+  sosCircumstancesPrompt: {
+    prsa: { plain: '[[Employment, income, existing pensions, other assets and liabilities]]',
+            profiled: '[[Existing pensions, other assets and liabilities, and anything else to add]]' },
+    arf:  { plain: '[[Other retirement income (e.g. State Pension), assets, liabilities and dependants]]',
+            profiled: '[[Other retirement income (e.g. State Pension), other assets and liabilities, and anything else to add]]' },
+    ib:   { plain: '[[Income, savings and investments, other assets and liabilities, tax position]]',
+            profiled: '[[Tax position, other assets and liabilities, and anything else to add]]' }
+  },
   // "Your sustainability preferences" — from the Step 3 answer and the SFDR classification of the
   // recommended funds. DRAFT: new wording, needs Compliance sign-off.
   sosEsgNo: 'You told us that you do not have sustainability preferences for this investment, so they were not a factor in our recommendation.',
@@ -500,6 +526,16 @@ function qtFill(str, ctx) {
   return String(str).replace(/\{(\w+)\}/g, function(m, k) {
     return (ctx && ctx[k] != null) ? String(ctx[k]) : m;
   });
+}
+
+// Note under an asset split: the sentence for each basis the mix uses (see assetSplitBasis), or the
+// general note when every fund is at its nominal split. short = the tool's panel version.
+function qtAssetNote(mix, short) {
+  var T = QT_TEXT, b = assetSplitBasis(mix), N = short ? T.assetNoteShort : T.packAssetNote;
+  var asOf = typeof FUND_FACTSHEET !== 'undefined' ? FUND_FACTSHEET.asOf : '';
+  if (!b.factsheet && !b.target) return short ? '' : T.assetSplitNote;
+  return [N.lead, b.factsheet ? qtFill(N.factsheet, { asOf: asOf }) : '', b.target ? N.target : '', N.tail]
+    .filter(Boolean).join(' ');
 }
 
 // Explains why the Reduction in Yield (effect of charges) differs from the total annual charge.

@@ -29,7 +29,9 @@ var FUNDS = [
 
 // ─── FUND LOOK-THROUGH (AllianzGI monthly factsheets, 31/08/2026) ─────────────
 // Gross exposure INCLUDING derivatives, as a % of fund NAV — it sums to well over 100% for the
-// volatility-managed funds, so it is not a pie-chart split. `assets` above is the nominal
+// volatility-managed funds, so it is not a pie-chart split as published. The DMAS rows drive the asset split,
+// rescaled to 100% (fundAssets, quote_common.js); the Strategy Select rows are NOT used — their factsheet
+// exposures are not reliable at the moment. `assets` above is the nominal
 // (brochure / PDC "typical equity content") split. vol3y/vol5y are realised annualised volatility.
 // Strategy Select and DMAS factsheets give no regional breakdown of the whole fund.
 var FUND_FACTSHEET = {

@@ -13,6 +13,7 @@ var QT_CONTENT = {
   // dis: one line per PRSA type. diy.subGuarantee is added on a Non-Standard PRSA only.
   strategyCards: {
     diy:          { name: 'Build Your Own Portfolio', sub: 'Select individual funds tailored to your client\'s needs and risk profile.', subGuarantee: 'Optional annual guarantee on eligible funds.' },
+    managed:      { name: 'Managed strategies', sub: 'The Default Investment Strategy, Autopilot or Life Cycle: glidepaths that move into lower-risk funds as retirement approaches.' },
     dis:          { name: 'Default Investment Strategy',
                     nonstandard: 'Two-phase glidepath: Lifecycle, then Autopilot for the final 8 years.',
                     standard: 'Dynamic Lifecycle glidepath, moving from Strategy Select 75 towards Strategy Select 30 as retirement nears.' },
@@ -26,7 +27,7 @@ var QT_CONTENT = {
   strategies: {
     diy: {
       name: 'Build Your Own Portfolio',
-      desc: 'Select from the full Allianz Vantage fund range to build a portfolio tailored to your client\'s specific needs and risk profile. Choose from fixed income, multi-asset, and equity funds with optional annual guarantee protection on eligible funds.'
+      desc: 'Select from the full Allianz Vantage fund range to build a portfolio tailored to your client\'s specific needs and risk profile. Choose from multi-asset, protected growth, building block and index-tracking funds, with the optional annual guarantee on eligible funds.'
     },
     dis: {
       name: 'Default Investment Strategy',
@@ -84,84 +85,107 @@ var QT_CONTENT = {
     ]
   },
 
+  // ─── What the 1–7 ratings mean (Step 3 info dialog) ─────────────────────────
+  // Regulatory wording is quoted from Commission Delegated Regulation (EU) 2017/653 (the PRIIPs KID RTS):
+  // `explain` is Annex III point 7 Element A; riskClass / losses / market fill Element B and its example
+  // explanation; vev is the Annex II Part 1 point 2 market-risk band. Annex III gives no "poor market
+  // conditions" wording for class 7, so none is shown for it. The rest is our own explanatory copy (DRAFT).
+  riskScale: {
+    explain: 'The ESMA risk rating is a guide to the level of risk of this product compared to other products. It shows how likely it is that the product will lose money because of movements in the markets or because we are not able to pay you.',
+    howUsed: 'Every fund in the Allianz Vantage range has a published ESMA risk rating on this 1 to 7 scale, shown in its Key Information Document. The client\'s risk rating is recorded on the same scale, so it can be compared directly with the funds and with the indicative risk of the portfolio you build.',
+    howSet: 'The ESMA risk rating combines a market risk class, set by the fund\'s volatility over the recommended holding period, with a credit risk class. The market risk class bands are shown below. Even the lowest class, 1, does not mean a risk-free investment.',
+    levels: [
+      null,
+      { riskClass: 'the lowest',         losses: 'very low',    market: 'are very unlikely to', vev: 'Below 0.5%' },
+      { riskClass: 'a low',              losses: 'low',         market: 'are very unlikely to', vev: '0.5% to 5%' },
+      { riskClass: 'a medium-low',       losses: 'medium-low',  market: 'are unlikely to',      vev: '5% to 12%' },
+      { riskClass: 'a medium',           losses: 'medium',      market: 'could',                vev: '12% to 20%' },
+      { riskClass: 'a medium-high',      losses: 'medium-high', market: 'will likely',          vev: '20% to 30%' },
+      { riskClass: 'the second-highest', losses: 'high',        market: 'are very likely to',   vev: '30% to 80%' },
+      { riskClass: 'the highest',        losses: 'very high',   market: null,                   vev: 'Above 80%' }
+    ],
+    source: 'Source: Commission Delegated Regulation (EU) 2017/653 (PRIIPs key information documents), Annex II Part 1 and Annex III. Volatility is the VaR-equivalent volatility used to set the market risk class.'
+  },
+
   // ─── Fund info popovers (brochure pp.31–38) ──────────────────────────────────
   // availability: 'all' (every PRSA) or 'nonstandard' (greyed out on a Standard PRSA — brochure p.31).
   // sfdr: 6 or 8 (SFDR article). volatility: pre-set volatility range — DMAS funds only (brochure pp.32–33);
-// the brochure gives no target range for Strategy Select, so none is shown.
+  // the brochure gives no target range for Strategy Select, so none is shown.
   // opportunities / risks: brochure wording; the three HSBC ETFs have none in the brochure.
   // note: sub-line in the fund builder where a fund has no volatility range.
+  // desc: plain-English summary of the brochure's fund objective, shown in the popover and the pack.
   funds: {
     ss75: {
       category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Invests to a variable extent in international equity markets and euro bonds. Applies a quantitative approach — lowering stock investment in phases of high market volatility and raising it in phases of low volatility. Targets a return comparable to 75% international stocks and 25% medium-term EUR bonds.',
+      desc: 'Invests in international equities and euro bonds, aiming for a return comparable to a mix of 75% international stocks and 25% medium-term euro bonds. A quantitative approach lowers the equity holding when markets are volatile and raises it when they are calmer.',
       opportunities: ['High return potential of stocks in the long run', 'Steady interest income on bonds, capital gains opportunities on declining interest rates', 'Broad diversification across numerous securities'],
       risks: ['High volatility of stocks, losses possible. The fund unit price may be subject to increased volatility', 'Interest rates vary, bonds suffer price declines on rising interest rates', 'Limited participation in the yield potential of single securities']
     },
     ss50: {
       category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Targets a return comparable to 50% international stocks and 50% medium-term EUR bonds. Same quantitative approach adjusting equity exposure based on volatility.',
+      desc: 'Invests in international equities and euro bonds, aiming for a return comparable to a mix of 50% international stocks and 50% medium-term euro bonds. A quantitative approach lowers the equity holding when markets are volatile and raises it when they are calmer.',
       opportunities: ['Steady interest income on bonds, capital gains opportunities on declining interest rates', 'High return potential of stocks in the long run', 'Broad diversification across numerous securities'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates. The fund unit price may be subject to increased volatility', 'High volatility of stocks, losses possible', 'Limited participation in the yield potential of single securities']
     },
     ss30: {
       category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Targets a return comparable to 30% international stocks and 70% medium-term EUR bonds. Same quantitative approach adjusting equity exposure based on volatility.',
+      desc: 'Invests in international equities and euro bonds, aiming for a return comparable to a mix of 30% international stocks and 70% medium-term euro bonds. A quantitative approach lowers the equity holding when markets are volatile and raises it when they are calmer.',
       opportunities: ['Steady interest income on bonds, capital gains opportunities on declining interest rates', 'High return potential of stocks in the long run', 'Broad diversification across numerous securities'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates. The fund unit price may be subject to increased volatility', 'High volatility of stocks, losses possible', 'Limited participation in the yield potential of single securities']
     },
     dm75: {
       category: 'Multi-Asset Solutions — Actively Managed', volatility: '10–16%', sfdr: 8, availability: 'nonstandard',
-      desc: 'Invests in a broad range of asset classes with a particular focus on global equities and bonds. Targets a return comparable to 75% global stocks and 25% global bonds hedged to Euro. Integrated risk and volatility management limits volatility to 10–16%. Pursues a Sustainable and Responsible Investment strategy.',
+      desc: 'Invests across a broad range of asset classes, mainly global equities and bonds, under a sustainable and responsible investment (SRI) strategy that takes environmental, social and governance criteria into account. Aims for a medium-term return comparable to a mix of 75% global stocks and 25% euro-hedged global bonds, with volatility managed within a pre-set range of 10–16%.',
       opportunities: ['Above-average yield potential of stocks over the long term', 'Focus on companies and institutions striving for sustainability', 'Enhanced return potential through addition of emerging markets assets and high-yield bonds', 'Comparably high stability of bonds with good credit quality', 'Risk and stability management using volatility bandwidths and the value-at-risk method', 'Currency gains against investor currency possible'],
       risks: ['The volatility of fund unit prices may be increased', 'Sustainability approach narrows the universe to eligible issuers', 'Increased risk of price fluctuations and losses with stocks, emerging markets assets, and high-yield bonds', 'Limited yield potential of bonds with good credit quality', 'Risk and volatility management do not exclude potential losses', 'Currency losses against investor currency possible']
     },
     dm50: {
       category: 'Multi-Asset Solutions — Actively Managed', volatility: '6–12%', sfdr: 8, availability: 'nonstandard',
-      desc: 'Targets a return comparable to 50% global stocks and 50% global bonds hedged to Euro. Volatility managed to 6–12%. Pursues an SRI strategy.',
+      desc: 'Invests across a broad range of asset classes, mainly global equities and bonds, under a sustainable and responsible investment (SRI) strategy that takes environmental, social and governance criteria into account. Aims for a medium-term return comparable to a mix of 50% global stocks and 50% euro-hedged global bonds, with volatility managed within a pre-set range of 6–12%.',
       opportunities: ['Above-average yield potential of stocks over the long term', 'Focus on companies and institutions striving for sustainability', 'Enhanced return potential through addition of emerging markets assets and high-yield bonds', 'Comparably high stability of bonds with good credit quality', 'Risk and stability management using volatility bandwidths and the value-at-risk method', 'Currency gains against investor currency possible'],
       risks: ['The volatility of fund unit prices may be increased', 'Sustainability approach narrows the universe to eligible issuers', 'Increased risk of price fluctuations and losses with stocks, emerging markets assets, and high-yield bonds', 'Limited yield potential of bonds with good credit quality', 'Risk and volatility management do not exclude potential losses', 'Currency losses against investor currency possible']
     },
     dm15: {
       category: 'Multi-Asset Solutions — Actively Managed', volatility: '3–7%', sfdr: 8, availability: 'nonstandard',
-      desc: 'Targets a return comparable to 15% global stocks and 85% global bonds hedged to Euro. Volatility managed to 3–7%. Pursues an SRI strategy.',
+      desc: 'Invests across a broad range of asset classes, mainly global bonds and equities, under a sustainable and responsible investment (SRI) strategy that takes environmental, social and governance criteria into account. Aims for a medium-term return comparable to a mix of 15% global stocks and 85% euro-hedged global bonds, with volatility managed within a pre-set range of 3–7%.',
       opportunities: ['Comparably high stability of bonds with good credit quality', 'Focus on companies and institutions striving for sustainability', 'Enhanced return potential through addition of stocks, emerging markets assets, and high-yield bonds', 'Risk and stability management using volatility bandwidths and the value-at-risk method', 'Currency gains against investor currency possible'],
       risks: ['Limited yield potential of bonds with good credit quality', 'Sustainability approach narrows the universe to eligible issuers', 'Increased risk of price fluctuations through addition of stocks, emerging markets assets, and high-yield bonds', 'Risk and volatility management do not exclude potential losses', 'Currency losses against investor currency possible']
     },
     bsri: {
       category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'nonstandard', note: 'Global equities, up to 30% emerging markets',
-      desc: 'Concentrates on global equity markets using an SRI strategy. Up to 30% in Emerging Markets. Objective is capital growth over the long term using differing investment styles based on market assessment.',
+      desc: 'Invests in global equities under a sustainable and responsible investment (SRI) strategy, aiming for capital growth over the long term. The manager may use different investment styles, or a combination of them, depending on market conditions. Up to 30% may be invested in emerging markets.',
       opportunities: ['High return potential of stocks in the long run', 'Investments specifically in the global equity markets and issuers with sustainable practices (SRI)', 'Particular opportunities through the "Best Styles" approach', 'Broad diversification across numerous securities', 'Possible extra returns through single security analysis and active management'],
       risks: ['High volatility of stocks, losses possible. The volatility of fund unit prices may be strongly increased', 'Underperformance of the global equity markets and from issuers with sustainable practices (SRI) possible', 'Underperformance of the "Best Styles" approach possible at times', 'Limited participation in the yield potential of single securities', 'Success of single security analysis and active management not guaranteed']
     },
     afie: {
-      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'nonstandard',
-      desc: 'Invests in interest-bearing securities targeting above-average long-term return vs. government bond market in eurozone. Up to 20% in high-yield bonds. Up to 20% ABS/MBS.',
+      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'nonstandard', note: 'Euro bonds',
+      desc: 'Invests mainly in bonds, aiming for an above-average long-term return compared with the eurozone government bond market, and promotes environmental, social and governance criteria. Up to 20% may be held in high-yield bonds and up to 20% in asset- or mortgage-backed securities; emerging market bonds may also be held. Foreign currency exposure above 20% of the fund is hedged to euro.',
       opportunities: ['Interest income on bonds, capital gains opportunities on declining interest rates', 'Additional return potential of bonds from non-governmental issuers', 'Broad diversification across numerous securities', 'Focus on sustainable investments', 'Possible extra returns through single security analysis and active management', 'Hedging of most foreign-currency exposure'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates', 'Bonds from non-governmental issuers entail higher risk of volatility and capital loss than public bonds', 'Sustainability approach narrows the investment universe', 'Limited participation in the yield potential of single securities', 'Success of single security analysis and active management not guaranteed', 'Limited currency influence possible']
     },
     afisd: {
-      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Invests in interest-bearing securities targeting above-average long-term return vs. European short duration bond market. Up to 25% in high-yield bonds. Up to 20% emerging market bonds.',
+      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'all', note: 'Short-duration European bonds',
+      desc: 'Invests mainly in bonds, aiming for an above-average long-term return compared with the European short-duration bond market, and promotes environmental, social and governance criteria. Up to 25% may be held in high-yield bonds (rated B- to BB+), up to 20% in emerging market bonds and up to 20% in investment-grade asset- or mortgage-backed securities. Foreign currency exposure above 10% of the fund is hedged to euro.',
       opportunities: ['Interest income on bonds, capital gains opportunities on declining interest rates', 'Particular price stability of short-term bonds', 'Above-average yield potential of corporate, emerging market, and collateralized bonds', 'Focus on sustainable investments', 'Broad diversification across numerous securities', 'Potential additional returns from single security analysis and active management'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates', 'Relatively low return potential of short-term bonds', 'Addition of corporate, emerging market, and collateralized bonds increases risk of volatility', 'Sustainability approach narrows the investment universe', 'Limited participation in the potential of individual securities', 'Success of single security analysis and active management not guaranteed']
     },
     cash: {
-      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Targets money market-related return with capital security, value stability and liquidity. Invests in assets with ecological or social characteristics in line with SRI strategy.',
+      category: 'Complementary Building Blocks — Actively Managed', sfdr: 8, availability: 'all', note: 'Money market',
+      desc: 'Aims for a money market return in line with the market, while protecting capital, keeping its value stable and staying easy to sell. Invests in assets with environmental or social characteristics, under the sustainable and responsible investment (SRI) strategy.',
       opportunities: ['Money market-related yields', 'Relatively high degree of price stability', 'Above-average yield potential of non-governmental bonds', 'Sustainability aspects are taken into account by the fund management', 'Broad diversification across numerous securities', 'Possible extra returns through single security analysis and active management'],
       risks: ['Money market rates vary', 'Price declines cannot be ruled out', 'Above-average price fluctuations of non-governmental bonds', 'Sustainability approach narrows the investment universe', 'Limited participation in the yield potential of single securities', 'Success of single security analysis and active management not guaranteed']
     },
     etfw: {
-      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Index tracker',
-      desc: 'Tracks MSCI World Index — large and mid-cap companies from world\'s developed countries. Passively managed using optimisation technique to minimise tracking error.'
+      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Tracks the MSCI World Index',
+      desc: 'A passively managed ETF that aims to track the MSCI World Index as closely as possible. The index is made up of large and mid-sized companies in the world\'s developed markets. The fund uses optimisation, which allows for tracking error and trading costs, to keep its return close to the index.'
     },
     etfs: {
-      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Index tracker',
-      desc: 'Tracks S&P 500 Index — large-sized US listed companies. Passively managed, invests in same proportion as the index.'
+      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Tracks the S&P 500 Index',
+      desc: 'A passively managed ETF that aims to track the S&P 500 Index as closely as possible, holding the shares of the companies in the index in broadly the same proportions. The index is made up of large listed US companies.'
     },
     etfe: {
-      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Index tracker',
-      desc: 'Tracks EURO STOXX 50 Index — 50 largest listed companies in the European Monetary Union. Passively managed.'
+      category: 'Index-Tracking — Passively Managed', sfdr: 6, availability: 'all', note: 'Tracks the EURO STOXX 50 Index',
+      desc: 'A passively managed ETF that aims to track the EURO STOXX 50 Index as closely as possible, holding the shares of the companies in the index in broadly the same proportions. The index is made up of the 50 largest listed companies in the eurozone.'
     }
   }
 };

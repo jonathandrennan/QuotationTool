@@ -176,7 +176,6 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .pill { display:inline-block; padding:3px 9px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap; }
 .pill.req { background:#EEF2F6; color:var(--muted); }
 .pill.soon { background:#fff; box-shadow:inset 0 0 0 1px var(--inp); color:var(--faint); }
-.tag-new { display:inline-block; padding:1px 7px; border-radius:4px; background:var(--amb-bg); color:var(--amb-ink); font-size:11px; font-weight:700; }
 .ovr { font-weight:600; color:var(--amb); }
 
 /* Tables */
@@ -276,12 +275,52 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .sri-t.on .blk { height:84px; font-size:34px; box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--navy); }
 .sri-t.on .lb { font-weight:700; color:var(--navy); }
 .sri-scale { display:flex; justify-content:space-between; margin-top:18px; font-size:12px; color:var(--muted); }
-.sri-panel { display:grid; grid-template-columns:1fr 1.15fr; gap:24px; margin-top:24px; padding:20px 22px; border-radius:10px; background:var(--bg); }
-.mini-h { margin-bottom:6px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
-.sri-val { font-size:20px; font-weight:700; color:var(--navy); }
-.chips { display:flex; flex-wrap:wrap; gap:6px; }
-.chip { padding:4px 10px; border-radius:999px; background:#fff; box-shadow:inset 0 0 0 1px var(--inp); color:var(--ink); font-size:13px; }
-.panel-note { font-size:13px; line-height:1.5; color:var(--body); }
+.sri-pick.locked .sri-t { cursor:default; }
+.sri-pick.locked .sri-t:not(.on) { opacity:.45; }
+.sri-pick.locked .sri-t:hover .blk { filter:none; }
+.sri-h .card-t { display:flex; align-items:center; gap:8px; }
+.rp-method { --n:2; }
+.rp-sum { display:flex; align-items:center; gap:16px; margin-top:16px; padding:16px 18px; border-radius:10px; background:var(--bg); }
+.rp-sum .badge { flex:none; display:flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; background:#fff; box-shadow:inset 0 0 0 1px var(--inp); color:var(--muted); font-size:18px; font-weight:700; }
+.rp-sum .badge.sri { box-shadow:none; color:#fff; }
+.rp-sum .badge.sri[data-n="4"] { color:#2A2100; }
+.rp-sum .txt { flex:1; min-width:0; }
+.rp-sum .st { font-size:15px; font-weight:700; color:var(--navy); }
+.rp-sum .sub { margin-top:2px; font-size:13px; color:var(--muted); }
+.rp-sum .acts { display:flex; flex:none; gap:10px; }
+.rp-own { max-width:420px; margin-top:16px; }
+.sri-h { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:18px; }
+.sri-h .card-sub { margin:0; }
+/* Risk profiler dialog */
+.rpm-bg { position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(14,30,51,.45); animation:rpm-fade .18s ease; }
+.rpm { display:flex; flex-direction:column; width:1000px; max-width:100%; height:min(880px, 100%); border-radius:14px; background:#fff; box-shadow:0 24px 64px rgba(14,30,51,.28); overflow:hidden; animation:rpm-in .22s ease; }
+.rpm-h { display:flex; align-items:center; gap:16px; padding:16px 20px 16px 28px; border-bottom:1px solid var(--line); }
+.rpm-h img { height:20px; }
+.rpm-h .t { flex:1; min-width:0; padding-left:16px; border-left:1px solid var(--line); }
+.rpm-h h2 { margin:0; font-size:16px; font-weight:700; color:var(--navy); }
+.rpm-h p { margin:1px 0 0; font-size:13px; color:var(--muted); }
+.rpm-x { display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:none; border-radius:8px; background:none; color:var(--muted); font:inherit; font-size:24px; line-height:1; cursor:pointer; }
+.rpm-x:hover { background:var(--hdr); color:var(--ink); }
+.rpm-b { flex:1; min-height:0; }
+.rpm.info { width:860px; height:auto; max-height:100%; }
+.rpm.info .rpm-b { overflow-y:auto; padding:22px 28px 26px; font-size:14px; line-height:1.55; color:var(--body); }
+.rpm.info .rpm-b p { margin:0 0 12px; }
+.rs-tbl { width:100%; margin:6px 0 16px; border-collapse:collapse; font-size:13px; }
+.rs-tbl th { padding:8px 10px 8px 0; border-bottom:1px solid var(--line); font-size:12px; font-weight:700; color:var(--muted); text-align:left; vertical-align:bottom; }
+.rs-tbl td { padding:10px 10px 10px 0; border-bottom:1px solid var(--div); vertical-align:top; }
+.rs-tbl td.n { width:44px; }
+.rs-tbl td b { color:var(--ink); }
+.rs-tbl tr.cl td { background:var(--tint); }
+.rs-src { font-size:12px; color:var(--muted); }
+.rpm-b > div, .rpm .rp, .rpm .rp-shell { height:100%; }
+.rpm .rp-shell { display:flex; flex-direction:column; border:none; border-radius:0; }
+.rpm .rp-body { flex:1; min-height:0; overflow-y:auto; }
+@keyframes rpm-fade { from { opacity:0; } }
+@keyframes rpm-in { from { opacity:0; transform:translateY(8px) scale(.99); } }
+@media (prefers-reduced-motion: reduce) { .rpm-bg, .rpm { animation:none; } }
+.rp-apply { display:flex; flex-direction:column; gap:12px; margin-bottom:22px; }
+.rp-apply .alert { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 16px; }
+.rp-apply b { color:var(--navy); }
 .esg-row { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; }
 .esg-row .q { font-size:14px; font-weight:600; }
 .esg-row .seg { flex:none; width:156px; }
@@ -319,6 +358,8 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .ctchip small { font-weight:400; }
 .ctchips.invalid { background:none !important; }
 .ctchips.invalid .ctchip { border-color:var(--red); }
+.rcards.invalid { background:none !important; }
+.rcards.invalid .rcard { box-shadow:inset 0 0 0 1px var(--red); }
 .sumcard { position:sticky; top:40px; padding:26px 24px; border-radius:12px; background:var(--navy); color:#fff; }
 .sumcard .h { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#9DB8DE; }
 .sumcard .k { margin-top:18px; font-size:13px; color:#C9D8EE; }
@@ -337,16 +378,16 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .strat .sl { font-size:16px; font-weight:700; line-height:1.3; color:var(--ink); }
 .strat.on .sl { color:var(--navy); }
 .strat .sm { font-size:13px; line-height:1.5; color:var(--body); }
-.strat-hero .strat-main { flex-direction:row; align-items:flex-start; gap:14px; padding:28px 30px; }
-.strat-hero .sb { flex:1; display:flex; flex-direction:column; gap:6px; }
-.strat-hero .sl { font-size:20px; }
-.strat-hero .cnt { flex:none; display:flex; flex-direction:column; align-items:flex-end; font-size:13px; color:var(--muted); }
-.strat-hero .cnt b { font-size:22px; color:var(--ink); }
-.strat-hero .radio-dot { margin-top:3px; }
+/* Landing: Build Your Own and Managed strategies as two equal boxes, each opening its own selector */
+.strat-pair { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; }
+.strat-pair .strat-main { flex-direction:column; gap:8px; padding:26px 28px 24px; }
+.strat-pair .sb { flex:1; display:flex; flex-direction:column; gap:8px; }
+.strat-pair .sl { font-size:20px; }
+.strat-pair .go { margin-top:auto; padding-top:10px; color:var(--teal); font-size:14px; font-weight:700; }
+.strat-pair .strat:hover { box-shadow:inset 0 0 0 1px var(--navy); }
+.strat-pair .strat.on:hover { box-shadow:inset 0 0 0 2px var(--navy), 0 6px 20px rgba(0,55,129,.10); }
 .prog { align-self:flex-start; margin-top:4px; padding:3px 10px; border-radius:999px; background:var(--amb-bg); color:var(--amb-ink); font-size:12px; font-weight:700; }
 .prog.full { background:var(--grn-bg); color:var(--grn); }
-.strat-or { display:flex; align-items:center; gap:14px; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
-.strat-or::before, .strat-or::after { content:''; flex:1; border-top:1px solid var(--line); }
 .strat-row { display:grid; grid-template-columns:repeat(var(--n, 3), minmax(0, 1fr)); gap:16px; }
 .strat-fam { padding:20px; }
 .strat-fam .strat-head { display:flex; flex-direction:column; gap:8px; padding-right:28px; }
@@ -395,9 +436,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .pickrow .fc { color:var(--body); }
 .pickrow.on { background:var(--sel); border-left-color:var(--navy); }
 .pickrow.on .nm { font-weight:700; color:var(--navy); }
-.pickrow .a6note, .pickrow .na { display:none; }
-.pickrow.dim { opacity:.6; }
-.pickrow.dim .a6note { display:inline; }
+.pickrow .na { display:none; }
 .pickrow.unavail { background:#FAFBFC; cursor:default; }
 .pickrow.unavail > :not(.fn), .pickrow.unavail .nm { opacity:.5; }
 .pickrow.unavail .na { display:block; font-weight:700; color:var(--muted); }
@@ -463,6 +502,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .cleg { display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:8px; font-size:12px; color:var(--muted); }
 .cleg i { display:inline-block; width:8px; height:8px; margin-right:5px; border-radius:2px; }
 .cleg b { color:var(--ink); }
+.cnote { margin-top:6px; font-size:11px; line-height:1.4; color:var(--muted); }
 .crow { display:flex; justify-content:space-between; gap:10px; padding:4px 0; font-size:13px; color:var(--body); }
 .crow .cl-val { color:var(--ink); }
 .crow.total { margin-top:6px; padding-top:10px; border-top:1px dashed var(--inp); color:var(--navy); font-size:15px; font-weight:700; }
@@ -494,7 +534,8 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .kc.hero .v { font-size:38px; color:#fff; }
 .kc.hero .v small { color:#DCE6F4; }
 .kc.hero .s { color:#DCE6F4; }
-.tabs { display:flex; align-items:flex-end; gap:24px; margin:-8px 0 -8px; border-bottom:1px solid var(--line); }
+.tabs { display:flex; align-items:flex-end; gap:24px; margin:44px 0 0; border-bottom:1px solid var(--line); }
+#res-band { margin-top:8px; }
 .tablist { display:flex; gap:28px; }
 .tab { display:flex; align-items:center; gap:9px; margin-bottom:-1px; padding:0 2px 12px; border:none; border-bottom:3px solid transparent; background:none; color:var(--body); font:inherit; font-size:15px; cursor:pointer; }
 .tab .td { display:flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; box-shadow:inset 0 0 0 1.5px var(--off); color:var(--muted); font-size:11px; font-weight:700; }
@@ -502,7 +543,9 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .tab.on { border-bottom-color:var(--navy); color:var(--navy); font-weight:700; }
 .tab.on .td { background:var(--navy); box-shadow:none; color:#fff; }
 .tabnote { margin-left:auto; padding-bottom:14px; font-size:13px; color:var(--muted); }
-.res-body { display:flex; flex-direction:column; gap:24px; }
+.res-body { display:flex; flex-direction:column; gap:28px; padding-top:32px; }
+.fs-link { display:inline-block; margin-top:3px; font-size:12px; font-weight:600; color:var(--navy); text-decoration:none; }
+.fs-link:hover { text-decoration:underline; }
 .cc-h { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px 20px; margin-bottom:14px; }
 .legend { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12px; color:var(--body); }
 .legend span { display:inline-flex; align-items:center; gap:6px; }
@@ -609,7 +652,8 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .pv-meta { font-size:12px; color:var(--muted); }
 .pv-host { overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--bg); }
 .pv-host iframe { display:block; border:0; transform-origin:top left; }
-.own-ta { min-height:560px; padding:32px 40px; border-radius:12px; font-size:15px; line-height:1.65; }
+.ed-body.own { position:relative; min-height:560px; }
+.ed-body.own[data-empty]::before { content:attr(data-ph); position:absolute; top:40px; left:56px; color:var(--faint); pointer-events:none; }
 .thumbs { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:14px; }
 .thumb { display:flex; flex-direction:column; gap:8px; }
 .thumb .pg { display:flex; flex-direction:column; gap:6px; aspect-ratio:210 / 297; padding:14px 12px; border-radius:6px; background:#fff; box-shadow:0 1px 2px rgba(14,30,51,.08), 0 6px 18px rgba(14,30,51,.06); }
@@ -621,7 +665,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .thumb .lbl { font-size:12px; color:var(--muted); }
 .ready { display:flex; flex-direction:column; gap:18px; padding:24px; }
 /* Results: quote summary card, projection panel and warnings (handoff §6, 9 Oct 2026) */
-.qsum { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); border:1px solid var(--line); border-radius:14px; background:#fff; }
+.qsum { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line); border-radius:14px; background:#fff; }
 .qs-col { display:flex; flex-direction:column; gap:14px; padding:22px 24px; min-width:0; }
 .qs-col + .qs-col { border-left:1px solid var(--div); }
 .qs-h { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
@@ -656,11 +700,6 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 /* ─── Responsive: the content column is the container, so the rail width stops mattering ───
    Targets laptop and tablet (1024px viewport and up ≈ 620px of content). Components reflow by
    dropping columns; inputs never shrink below a usable size, they wrap onto the next line. */
-@container app (max-width:1000px) {
-  .qsum { grid-template-columns:repeat(2, minmax(0,1fr)); }
-  .qs-col:nth-child(3) { border-left:none; }
-  .qs-col:nth-child(-n+2) { border-bottom:1px solid var(--div); }
-}
 @container app (max-width:940px) {
   /* side panels move below the main content rather than squeezing it */
   .cols, .cols.c300, .cols.c340, .cols.c360 { grid-template-columns:minmax(0, 1fr); }
@@ -669,6 +708,9 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 @container app (max-width:880px) {
   /* field rows wrap at a usable width instead of dividing the row ever more finely */
   .fields { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+  /* a wide field takes the whole row: "span 2" in a one-column grid adds a sliver of an implicit
+     column that the next field then lands in */
+  .fields > .span2 { grid-column:1 / -1; }
   .rowstart { grid-column-start:auto; }
   .pj { grid-template-columns:1fr; }
   .pj-side { border-right:none; border-bottom:1px solid var(--div); }
@@ -686,6 +728,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
   .esg-row .seg { width:100%; }
 }
 @container app (max-width:760px) {
+  .strat-pair { grid-template-columns:minmax(0, 1fr); }
   .warnpanel div { grid-template-columns:1fr; }
   .qsum { grid-template-columns:minmax(0,1fr); }
   .qs-col { border-left:none !important; }
@@ -812,23 +855,51 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
   <header class="ph">
     <div class="eyebrow">Step 3 of 7</div>
     <h1>Attitude to risk</h1>
-    <p class="lead">Select the client's risk rating from your risk profiling.</p>
+    <p class="lead">Choose how the client's attitude to risk has been assessed, then confirm their risk rating.</p>
   </header>
-  <div class="card">
-    <div class="sri-pick" id="sri-cards" role="radiogroup" aria-label="Client risk rating"></div>
-    <div class="sri-scale"><span>← Lower risk, typically lower rewards</span><span>Higher risk, typically higher rewards →</span></div>
-    <div class="sri-panel" id="sri-panel" hidden></div>
-  </div>
-  <section class="card fsec">
-    <div class="fsec-h"><h2>Profiling</h2><p>Both answers are recorded in the Statement of Suitability.</p></div>
-    <div class="fields" style="gap:22px">
-      <div class="esg-row">
-        <div><div class="q" id="esg-q">Does the client have sustainability preferences?</div><div class="hint">If yes, SFDR Article 8 funds are highlighted in the fund builder and the preference is noted in the Statement of Suitability.</div></div>
-        <div class="seg" id="esg-seg" role="radiogroup" aria-labelledby="esg-q"><button type="button" data-v="yes" onclick="setEsg(true)">Yes</button><button type="button" data-v="no" onclick="setEsg(false)">No</button></div>
+  <section class="card">
+    <div>
+      <div class="rcards rp-method" id="rp-method" role="radiogroup" aria-label="How the client's attitude to risk has been assessed">
+        <button type="button" class="rcard radio" role="radio" data-m="profiler" onclick="setRpMethod('profiler')"><span class="radio-dot" aria-hidden="true"></span><span><span class="t">Complete the Allianz Risk Profiler</span><span class="d" style="display:block">Go through the questionnaire with the client. It gives a risk rating and a record of the answers for the pack.</span></span></button>
+        <button type="button" class="rcard radio" role="radio" data-m="own" onclick="setRpMethod('own')"><span class="radio-dot" aria-hidden="true"></span><span><span class="t">Use my own risk profiling</span><span class="d" style="display:block">Select the rating from your firm's own risk profiling process.</span></span></button>
       </div>
-      <div style="max-width:420px"><label class="f" for="r-profiler">Risk profiler used <span class="opt">· optional, quoted in the SoS</span></label><input type="text" id="r-profiler" placeholder="e.g. Voyant risk questionnaire, 02/10/2026"></div>
+      <div class="rp-sum" id="rp-sum" hidden></div>
+      <div class="rp-own" id="r-profiler-wrap" hidden><label class="f" for="r-profiler">Risk profiler used <span class="opt">· optional, quoted in the SoS</span></label><input type="text" id="r-profiler" placeholder="e.g. Voyant risk questionnaire, 02/10/2026"></div>
     </div>
   </section>
+  <div class="card" id="sri-card" hidden>
+    <div class="sri-h"><h2 class="card-t">Client risk rating <button type="button" class="info-btn inl" id="sri-info-btn" aria-label="What the risk ratings mean" aria-haspopup="dialog" onclick="openSriInfo()">i</button></h2><p class="card-sub" id="sri-cap"></p></div>
+    <div class="rp-apply" id="rp-apply" hidden>
+      <div class="alert info" id="rp-apply-msg"></div>
+    </div>
+    <div class="sri-pick" id="sri-cards" role="radiogroup" aria-label="Client risk rating"></div>
+    <div class="sri-scale"><span>← Lower risk, typically lower rewards</span><span>Higher risk, typically higher rewards →</span></div>
+  </div>
+  <section class="card fsec">
+    <div class="fsec-h"><h2>Sustainability</h2><p>Recorded in the Statement of Suitability.</p></div>
+    <div class="fields">
+      <div class="esg-row">
+        <div><div class="q" id="esg-q">Does the client have sustainability preferences?</div><div class="hint">If yes, the portfolio's share in SFDR Article 8 funds is shown as you build it and the preference is noted in the Statement of Suitability.</div></div>
+        <div class="seg" id="esg-seg" role="radiogroup" aria-labelledby="esg-q"><button type="button" data-v="yes" onclick="setEsg(true)">Yes</button><button type="button" data-v="no" onclick="setEsg(false)">No</button></div>
+      </div>
+    </div>
+  </section>
+  <!-- What the 1–7 ratings mean (copy: QT_CONTENT.riskScale) -->
+  <div class="rpm-bg" id="sri-info" hidden onclick="if (event.target === this) closeSriInfo()">
+    <div class="rpm info" role="dialog" aria-modal="true" aria-labelledby="sri-info-t">
+      <div class="rpm-h"><img src="allianz-logo.svg" alt="Allianz"><div class="t"><h2 id="sri-info-t">What the risk ratings mean</h2><p>The 1 to 7 ESMA risk scale</p></div>
+        <button type="button" class="rpm-x" id="sri-info-x" aria-label="Close" onclick="closeSriInfo()">×</button></div>
+      <div class="rpm-b" id="sri-info-b"></div>
+    </div>
+  </div>
+  <!-- The risk profiler runs in this dialog. Its result is applied only when the adviser chooses "Use this result". -->
+  <div class="rpm-bg" id="rpm" hidden>
+    <div class="rpm" role="dialog" aria-modal="true" aria-labelledby="rpm-t" aria-describedby="rpm-d">
+      <div class="rpm-h"><img src="allianz-logo.svg" alt="Allianz"><div class="t"><h2 id="rpm-t">Risk Profiler</h2><p id="rpm-d"></p></div>
+        <button type="button" class="rpm-x" aria-label="Close the risk profiler" onclick="closeProfiler()">×</button></div>
+      <div class="rpm-b"><div id="rp-host"></div></div>
+    </div>
+  </div>
 </section>
 
 <!-- ═══ Step 4: Plan details ═══ -->
@@ -953,19 +1024,34 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
     </header>
     <div class="cols">
       <div class="stack">
-        <div id="low-sri-note"></div>
-        <div class="stack" id="strats"></div>
-        <p class="pf-note">Choosing a strategy outside the client's rating is allowed, with a recorded reason that appears in the Statement of Suitability.</p>
+        <div class="strat-pair" id="strats"></div>
         <div id="mm-slot-strat"></div>
       </div>
       <div class="stick-wrap" id="side-strat"></div>
     </div>
   </div>
 
+  <div class="pf-view" id="pf-view-managed" hidden>
+    <header class="ph">
+      <button type="button" class="back-link" onclick="setPfView('strat', true)"><span aria-hidden="true">← </span>How to invest</button>
+      <h1 id="managed-h" tabindex="-1">Managed strategies</h1>
+      <p class="lead" id="managed-lead"></p>
+    </header>
+    <div class="cols">
+      <div class="stack">
+        <div id="low-sri-note"></div>
+        <div class="strat-row" id="strat-opts" role="radiogroup" aria-label="Managed investment strategies"></div>
+        <p class="pf-note">Choosing a strategy outside the client's rating is allowed, with a recorded reason that appears in the Statement of Suitability.</p>
+        <div id="mm-slot-managed"></div>
+      </div>
+      <div class="stick-wrap" id="side-managed"></div>
+    </div>
+  </div>
+
   <div class="pf-view" id="pf-view-pick" hidden>
     <header class="ph">
       <div class="eyebrow" id="pick-eyebrow">Step 5 of 7</div>
-      <button type="button" class="back-link" id="pf-back" onclick="setPfView('strat', true)"><span aria-hidden="true">← </span>Strategy selection</button>
+      <button type="button" class="back-link" id="pf-back" onclick="setPfView('strat', true)"><span aria-hidden="true">← </span>How to invest</button>
       <h1 id="pick-h" tabindex="-1">Build Your Own Portfolio</h1>
       <div class="subs"><span class="ss on"><span class="sd">1</span>Choose funds</span><span class="sep"></span><span class="ss"><span class="sd">2</span>Allocate</span></div>
     </header>
@@ -973,7 +1059,7 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
       <div class="stack">
         <div class="pick-tools">
           <div class="search"><input type="search" id="fund-search" placeholder="Search funds" aria-label="Search funds"></div>
-          <span class="esg-pill" id="esg-pill" hidden>● Sustainability preference: Article 8 funds highlighted</span>
+          <span class="esg-pill" id="esg-pill" hidden>● Client has sustainability preferences</span>
         </div>
         <div class="colhead" aria-hidden="true"><span></span><span>Fund</span><span>Fund charge</span><span>Risk</span><span>SFDR</span></div>
         <div class="fcats" id="pick-funds"></div>
@@ -1104,6 +1190,9 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
 <script src="js/arf_data.js"></script>
 <script src="js/ib_data.js"></script>
 <script src="js/quote_common.js"></script>
+<script src="js/risk_profiler_data.js"></script>
+<script src="js/risk_profiler.js"></script>
+<script src="js/risk_profiler_ui.js"></script>
 <script src="js/engine_prsa.js"></script>
 <script src="js/engine_arf.js"></script>
 <script src="js/engine_ib.js"></script>
@@ -1119,31 +1208,36 @@ var BROKER_KEY = 'agl_qt_broker';
 var STEP_NAMES = ['Adviser', 'Product & client', 'Attitude to risk', 'Plan details', 'Portfolio', 'Results', 'Quotation pack'];
 var PRODUCT_LABELS = { prsa: 'PRSA', arf: 'ARF', ib: 'Investment Bond' };
 var COMM_STEP = 0.005;
-var CAT_COLORS = { fic:'#7fb2d9', multi:'#003781', eq:'#0082be' };
-var CAT_SHORT = { fic:'Fixed income', multi:'Multi-asset', eq:'Equity' };
+var ASSET_COLORS = { eq:'#003781', fi:'#0082be', cash:'#7fb2d9', com:'#c99a3a', alt:'#8a96a3' };
 var SWATCHES = ['#003781', '#3D6FB5', '#0082be', '#7fb2d9'];   // then each fund's own colour
-var SECTION_KEYS = ['cover', 'sos', 'summary', 'projection', 'charges', 'funds', 'remun', 'product', 'tax', 'important', 'glossary', 'factsheets', 'kids', 'appform'];
-// Sections always included in the pack. Compliance to confirm.
-var REQUIRED_SECTIONS = ['projection', 'charges', 'important', 'glossary'];
+var SECTION_KEYS = ['cover', 'sos', 'riskprofile', 'summary', 'funds', 'projection', 'charges', 'remun', 'product', 'tax', 'important', 'glossary', 'factsheets', 'kids', 'appform'];
+// The Allianz quotation: always included, and listed in Step 7 (contents, pack order, review) and in the
+// cover letter's "Enclosed" list as ONE item. Compliance to confirm.
+var QUOTE_KEYS = ['summary', 'funds', 'projection', 'charges', 'remun', 'important', 'glossary'];
+var QUOTE_LABEL = 'Your Allianz quotation';
+var REQUIRED_SECTIONS = QUOTE_KEYS;
 // Listed in Step 7 but not available yet: shown, never selectable, never in the pack.
 var COMING_SOON = ['product', 'tax', 'appform'];
-var NEW_SECTIONS = ['factsheets', 'kids', 'appform'];
 // Attached PDFs (js/quote_docs.js): merged into a companion file, not printed as pages of the pack.
 // KIDs are only held for the Investment Bond.
 var ATTACH_SECTIONS = ['factsheets', 'kids'];
-function sectionNA(k) { return k === 'kids' && S.product !== 'ib'; }
+// Sections that cannot be offered right now: KIDs are only held for the Investment Bond, and the risk
+// profile record needs a completed risk profiler (Step 3).
+function sectionNA(k) { return (k === 'kids' && S.product !== 'ib') || (k === 'riskprofile' && !profilerDone()); }
+function sectionNAText(k) { return k === 'riskprofile' ? 'Complete the risk profiler' : 'Investment Bond only'; }
 var SECTION_GROUPS = [
-  { title: 'Your documents', note: 'on your letterhead', keys: ['cover', 'sos'] },
-  { title: 'Quotation', note: 'Allianz Global Life', keys: ['summary', 'projection', 'charges', 'funds', 'remun'] },
-  { title: 'Supporting information', note: '', keys: ['product', 'tax', 'important', 'glossary', 'factsheets', 'kids', 'appform'] }
+  { title: 'Your documents', note: 'on your letterhead', keys: ['cover', 'sos', 'riskprofile'] },
+  { title: 'Quotation', note: 'Allianz Global Life', keys: ['quotation'] },
+  { title: 'Supporting information', note: '', keys: ['product', 'tax', 'factsheets', 'kids', 'appform'] }
 ];
 var SECTION_SUBS = {
   cover: 'Use the template or write your own in the next step',
   sos: 'Use the template or write your own in a later step',
+  riskprofile: 'The client\'s answers and the result, as a record to go with the Statement of Suitability',
   summary: 'One-page summary',
-  funds: 'Funds, risk and category split',
-  factsheets: 'Factsheets for the selected funds, attached as a separate PDF',
-  kids: 'KIDs for the selected funds, attached as a separate PDF',
+  funds: 'Fund split, asset split, portfolio risk and fund details',
+  factsheets: 'Factsheets for the selected funds, added to the end of the pack PDF',
+  kids: 'KIDs for the selected funds, added to the end of the pack PDF',
   appform: 'Pre-filled with client and plan details'
 };
 // Auto-filled values in the cover letter / SoS text are wrapped in these (private-use) characters
@@ -1159,7 +1253,11 @@ var S = {
   // override: audit record when the adviser proceeds with a portfolio that doesn't match the
   // client's rating — { key, strategy, clientSri, direction, reason, recordedAt (ISO) }
   // esg: sustainability preferences (true | false | null = not answered); profiler: risk profiler used
-  risk: { sri: null, reason: '', override: null, esg: null, profiler: '' },
+  // Risk profiler (js/risk_profiler*.js): pAnswers = the questionnaire answers; pSuggested = the rating it gave
+  // (null until complete); pReason = why the adviser chose a different rating; pDate = when it was completed
+  // (YYYY-MM-DD). method: how the attitude to risk was assessed, 'profiler' | 'own' | null (not chosen yet).
+  // pAnswers only changes when the adviser applies a finished questionnaire; work in progress stays in rpUI.
+  risk: { sri: null, reason: '', override: null, esg: null, profiler: '', method: null, pAnswers: {}, pSuggested: null, pReason: '', pDate: '' },
   // ctype: contribution type, e.g. 'sp', 'rp', 'sp_rp', 'ofv_rp' ('' = none chosen), from the Plan step chips
   // diySel: funds ticked in the fund builder; diyAllocs / diyGmab only ever hold ticked funds
   prsa: { nra: 65, prsaType: 'nonstandard', code: 'A5', ctype: '', sp: 0, ofv: 0, rp: 0, freq: 'monthly', esc: 0,
@@ -1181,7 +1279,7 @@ function todayStr() { var d = new Date(); return d.getFullYear() + '-' + ('0' + 
 function stripMarks(s) { return String(s || '').replace(/[\uE000\uE001]/g, ''); }
 function sriBadge(n) {
   var r = Math.round(n);
-  return '<span class="sri-b" style="background:' + ESMA_COLORS[r] + (r === 4 ? ';color:#2A2100' : '') + '" title="SRI ' + r + '">' + r + '</span>';
+  return '<span class="sri-b" style="background:' + ESMA_COLORS[r] + (r === 4 ? ';color:#2A2100' : '') + '" title="ESMA ' + r + '">' + r + '</span>';
 }
 function sfdrBadge(a) { return a ? '<span class="sfdr a' + a + '" title="SFDR Article ' + a + '">Art. ' + a + '</span>' : '<span class="sfdr none">–</span>'; }
 function shortFundName(f) { return f.shortName || f.name.replace(/^Allianz /, ''); }
@@ -1213,6 +1311,8 @@ function init() {
   $('q-nra').value = S.prsa.nra;
   $('q-nra').addEventListener('input', function() { S.prsa.nra = parseInt(this.value, 10); this.classList.remove('invalid'); onClientChange(); });
   $('r-profiler').addEventListener('input', function() { S.risk.profiler = this.value; });
+  rpUI = RiskProfilerUI.mount($('rp-host'), { answers: S.risk.pAnswers, context: rpContext(), sri: { labels: ESMA_LABELS, colors: ESMA_COLORS },
+    onChange: onProfilerChange, onFinish: finishProfiler, finishLabel: 'Use this result' });
 
   document.querySelectorAll('[data-p]').forEach(function(el) {
     var k = el.getAttribute('data-p');
@@ -1259,6 +1359,7 @@ function init() {
   $('fund-search').addEventListener('input', function() { filterFunds(this.value); });
   document.addEventListener('click', function(e) { if (popTrigger && !$('qt-pop').contains(e.target)) closePop(false); });
   document.addEventListener('keydown', function(e) {
+    if (!$('rpm').hidden) { profilerKey(e); return; }
     if (confirmState) {
       if (e.key === 'Escape') { e.preventDefault(); closeConfirm(false); }
       else if (e.key === 'Tab') {   // keep focus inside the dialog
@@ -1321,7 +1422,7 @@ function stepCaption(s) {
     var b = S.broker, c = S.client;
     if (s === 1) return [b.name, b.firm].filter(Boolean).join(' · ');
     if (s === 2) return PRODUCT_LABELS[S.product] + ' · ' + [c.salutation, c.first, c.last].filter(Boolean).join(' ');
-    if (s === 3) return S.risk.sri ? S.risk.sri + ' · ' + ESMA_LABELS[S.risk.sri] + (S.risk.esg ? ' · ESG preference' : '') : '';
+    if (s === 3) return S.risk.sri ? S.risk.sri + ' · ' + ESMA_LABELS[S.risk.sri] + (profilerDone() ? ' · Profiled' : '') + (S.risk.esg ? ' · ESG preference' : '') : '';
     if (s === 4) {
       if (S.product === 'prsa') {
         var p = S.prsa, lump = (ctHas(p.ctype, 'ofv') ? p.ofv : 0) + (ctHas(p.ctype, 'sp') ? p.sp : 0), parts = [];
@@ -1378,12 +1479,14 @@ function renderFoot() {
     var nSel = diySelIds().length;
     if (pfView === 'pick') { lbl = 'Allocate'; status = nSel ? nSel + (nSel === 1 ? ' fund' : ' funds') + ' selected' : 'No funds selected'; }
     else if (pfView === 'strat' && S.product === 'prsa' && S.prsa.strat === 'diy' && !portfolioState().ready) lbl = 'Choose funds';
+    else if (pfView === 'strat' && S.product === 'prsa' && !S.prsa.strat) { lbl = ''; status = 'Choose how to invest'; }
+    else if (pfView === 'managed' && (!S.prsa.strat || S.prsa.strat === 'diy')) { lbl = ''; status = 'Choose a strategy'; }
     else lbl = 'See results';
   } else if (n === 6) {
-    lbl = 'Build the quotation pack';
-    var unseen = RES_TABS.filter(function(t) { return !S.resSeen[t[0]]; }).map(function(t) { return t[1]; });
-    dis = !!(S.result && !S.result.errors) && unseen.length > 0;
-    status = S.result && S.result.errors ? '' : unseen.length ? 'Review ' + unseen.join(' and ') + ' to continue' : 'Ready for the pack';
+    // Next walks through the tabs in order; from the last one it goes on to the pack (once every tab has been seen)
+    var nt = resNextTab(), ok = !(S.result && S.result.errors);
+    lbl = nt ? 'Next: ' + nt[1] : 'Build the quotation pack';
+    status = !ok ? '' : nt ? 'Review ' + nt[1].toLowerCase() + ' to continue' : 'Ready for the pack';
   } else if (n === 7) {
     var f = packFoot(); lbl = f.label; status = f.status;
   }
@@ -1397,6 +1500,7 @@ function renderFoot() {
   m.classList.toggle('err', !!footErr);
 }
 function onNext() {
+  if (S.step === 6 && resNextTab() && !(S.result && S.result.errors)) { setResTab(resNextTab()[0]); return; }
   if (S.step === 5) {
     if (pfView === 'strat' && S.product === 'prsa' && S.prsa.strat === 'diy' && !portfolioState().ready) { setPfView('pick', true); return; }
     if (pfView === 'pick') { pfToAlloc(); return; }
@@ -1405,8 +1509,9 @@ function onNext() {
   goStep(S.step + 1);
 }
 function onBack() {
+  if (S.step === 6 && resPrevTab() && !(S.result && S.result.errors)) { setResTab(resPrevTab()[0]); return; }
   if (S.step === 5 && pfView === 'alloc') { setPfView('pick', true); return; }
-  if (S.step === 5 && pfView === 'pick' && S.product === 'prsa') { setPfView('strat', true); return; }
+  if (S.step === 5 && (pfView === 'pick' || pfView === 'managed') && S.product === 'prsa') { setPfView('strat', true); return; }
   if (S.step === 7 && S.packStage !== 'contents') { packBack(); return; }
   goStep(S.step - 1);
 }
@@ -1432,7 +1537,7 @@ function showStep(n) {
   if (n > S.maxStep) S.maxStep = n;
   document.querySelectorAll('.step').forEach(function(el) { el.classList.toggle('active', el.id === 'step-' + n); });
   if (n === 1) renderLetterhead();
-  if (n === 3) renderSriCards();
+  if (n === 3) { rpUI.setContext(rpContext()); applyProfilerResult(); renderSriCards(); }
   if (n === 4) renderPlan();
   if (n === 5) renderPortfolio();
   if (n === 6) { S.resTab = 'proj'; S.resSeen.proj = true; compute(); renderResults(); }
@@ -1473,7 +1578,10 @@ function validateStep(s) {
       } else if (age < IB_MIN_AGE || age >= IB_MAX_AGE) { bad.push('c-dob'); errs.push('For an Investment Bond the client must be aged between ' + IB_MIN_AGE + ' and ' + (IB_MAX_AGE - 1) + ' at the start date.'); }
     }
   } else if (s === 3) {
-    if (!S.risk.sri) errs.push('Please select the client\'s risk rating.');
+    var prof = profilerDone();
+    if (!S.risk.method) { errs.push('Please choose how the client\'s attitude to risk has been assessed.'); bad.push('rp-method'); }
+    else if (S.risk.method === 'profiler' && !prof) errs.push('Please complete the risk profiler, or choose to use your own risk profiling.');
+    else if (!S.risk.sri) errs.push('Please select the client\'s risk rating.');
     else if (S.risk.esg == null) { errs.push('Please record whether the client has sustainability preferences.'); bad.push('esg-seg'); }
   } else if (s === 4) {
     errs = planErrors(bad);
@@ -1564,48 +1672,183 @@ function onClientChange() {
   }
   $('age-hint').innerHTML = h;
   $('dob-age').textContent = ageTxt;
+  if (rpUI) { rpUI.setContext(rpContext()); applyProfilerResult(); }   // age can change the profile (clients over 80)
   if (S.maxStep > 2) invalidate(Math.min(S.maxStep, 4));
 }
 
 // ─── Step 3 ───────────────────────────────────────────────────────────────────
+// ── Risk profiler (reusable module: js/risk_profiler*.js) ──
+var rpUI = null;
+// The questionnaire's purpose answer (pQ_14) follows the product being quoted. Age is worked out at today's
+// date, as the Allianz Global Life questionnaire does.
+var RP_PURPOSE = { prsa: 'A', ib: 'B', arf: 'C' };
+function rpContext() { return { dob: S.client.dobStr || null, purpose: RP_PURPOSE[S.product] || null, atDate: todayStr() }; }
+function profilerResult() { return RiskProfiler.evaluate(S.risk.pAnswers, rpContext()); }
+// The applied result, or null if the profiler is not being used or has not been finished
+function profilerDone() {
+  if (S.risk.method !== 'profiler') return null;
+  var r = profilerResult(); return r.complete ? r : null;
+}
+// The profiler's result IS the client's rating: it can't be changed while the profiler is the method.
+// An adviser whose assessment differs uses their own risk profiling instead.
+function applyProfilerResult() {
+  var r = profilerDone();
+  if (r && S.risk.sri !== r.sri) { invalidate(3); S.risk.sri = r.sri; }
+  S.risk.pSuggested = r ? r.sri : null;
+  S.risk.pReason = '';
+}
+function setRpMethod(m) {
+  if (S.risk.method === m) return;
+  S.risk.method = m;
+  $('rp-method').classList.remove('invalid');
+  invalidate(3); applyProfilerResult();
+  renderSriCards(); renderStepNav(); setFootMsg('');
+  if (m === 'profiler' && !profilerDone() && !rpUI.getState().result.answered) openProfiler();
+}
+// ── The questionnaire dialog ──
+// Nothing on the page changes while it is open: the result is applied by "Use this result" (finishProfiler).
+var rpReturnFocus = null;
+function onProfilerChange() { renderProfilerDialogNote(); }
+function renderProfilerDialogNote() {
+  var r = rpUI.getState().result;
+  $('rpm-d').textContent = (S.client.first ? 'For ' + [S.client.first, S.client.last].filter(Boolean).join(' ') + ' · ' : '') +
+    (r.complete ? 'All questions answered' : r.answered + ' of ' + r.total + ' questions answered');
+}
+function openProfiler(part) {
+  rpReturnFocus = document.activeElement;
+  rpUI.setContext(rpContext());
+  if (profilerDone()) {   // reviewing an applied result: start from its answers, at the first part
+    rpUI.setAnswers(S.risk.pAnswers);
+    rpUI.goTo(part || RP_CONFIG.sections[0].id);
+  }
+  renderProfilerDialogNote();
+  $('rpm').hidden = false;
+  document.body.style.overflow = 'hidden';
+  var h = $('rp-host').querySelector('.rp-panel:not([hidden]) h2'); if (h) h.focus({ preventScroll: true });
+}
+// Closing without applying keeps unfinished answers for later, but undoes edits to an applied result
+function closeProfiler() {
+  if ($('rpm').hidden) return;
+  if (profilerDone() && JSON.stringify(rpUI.getState().answers) !== JSON.stringify(S.risk.pAnswers)) rpUI.setAnswers(S.risk.pAnswers);
+  hideProfiler();
+  renderProfilerSummary();
+}
+function hideProfiler() {
+  $('rpm').hidden = true;
+  document.body.style.overflow = '';
+  var f = document.contains(rpReturnFocus) && rpReturnFocus.offsetParent ? rpReturnFocus : $('rp-sum').querySelector('button');
+  if (f) f.focus({ preventScroll: true });
+}
+function finishProfiler(state) {
+  if (JSON.stringify(state.answers) !== JSON.stringify(S.risk.pAnswers)) { S.risk.pAnswers = state.answers; S.risk.pDate = todayStr(); }
+  if (!S.risk.pDate) S.risk.pDate = todayStr();
+  applyProfilerResult();
+  hideProfiler();
+  renderSriCards(); renderStepNav(); setFootMsg('');
+}
+// Escape closes; Tab stays inside the dialog
+function profilerKey(e) {
+  if (e.key === 'Escape') { e.preventDefault(); closeProfiler(); return; }
+  if (e.key !== 'Tab') return;
+  var list = [].filter.call($('rpm').querySelectorAll('button, input, textarea, select, [tabindex]:not([tabindex="-1"])'), function(el) { return !el.disabled && el.offsetParent; });
+  if (!list.length) return;
+  var first = list[0], last = list[list.length - 1], cur = document.activeElement;
+  if (e.shiftKey && (cur === first || !$('rpm').contains(cur))) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && (cur === last || !$('rpm').contains(cur))) { e.preventDefault(); first.focus(); }
+}
+// Under the method choice: the profiler's status and how to open it, or the adviser's own profiler
+function renderProfilerSummary() {
+  var m = S.risk.method, el = $('rp-sum');
+  document.querySelectorAll('#rp-method [data-m]').forEach(function(b) {
+    var on = b.getAttribute('data-m') === m;
+    b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+  $('r-profiler-wrap').hidden = m !== 'own';
+  el.hidden = m !== 'profiler';
+  if (m !== 'profiler') return;
+  var r = profilerDone(), draft = rpUI.getState().result, badge, st, sub, acts;
+  if (r) {
+    badge = '<span class="badge sri" data-n="' + r.sri + '" style="background:' + ESMA_COLORS[r.sri] + '">' + r.sri + '</span>';
+    st = 'Risk profile ' + r.sri + ' · ' + escHtml(ESMA_LABELS[r.sri]);
+    sub = 'Completed ' + escHtml(fmtDate(S.risk.pDate || todayStr())) + ' · Experience and knowledge ' + escHtml(r.experience.label.toLowerCase());
+    acts = '<button type="button" class="btn sm" onclick="openProfiler()">Review answers</button>';
+  } else if (draft.answered) {
+    badge = '<span class="badge" aria-hidden="true">…</span>';
+    st = 'In progress';
+    sub = draft.answered + ' of ' + draft.total + ' questions answered';
+    acts = '<button type="button" class="btn pri sm" onclick="openProfiler()">Continue</button>';
+  } else {
+    badge = '<span class="badge" aria-hidden="true">?</span>';
+    st = 'Not started';
+    sub = 'About 5 minutes. Go through the questions with the client.';
+    acts = '<button type="button" class="btn pri sm" onclick="openProfiler()">Start the risk profiler</button>';
+  }
+  el.innerHTML = badge + '<div class="txt"><div class="st">' + st + '</div><div class="sub">' + sub + '</div></div><div class="acts">' + acts + '</div>';
+}
+// Above the rating picker: the rating comes from the profiler and is locked
+function renderSriApply() {
+  var r = profilerDone(), el = $('rp-apply');
+  el.hidden = !r;
+  if (!r) return;
+  $('rp-apply-msg').innerHTML = '<span>Set by the Allianz Risk Profiler: <b>' + r.sri + ' · ' + escHtml(ESMA_LABELS[r.sri]) + '</b>. ' +
+    'It can\'t be changed here. To use a different rating, choose "Use my own risk profiling".</span>';
+}
 function renderSriCards() {
-  var h = '';
+  var h = '', locked = !!profilerDone();
   for (var i = 1; i <= 7; i++) {
     var on = S.risk.sri === i;
-    h += '<button type="button" class="sri-t' + (on ? ' on' : '') + '" data-n="' + i + '" role="radio" aria-checked="' + on + '" onclick="setSri(' + i + ')">' +
+    h += '<button type="button" class="sri-t' + (on ? ' on' : '') + '" data-n="' + i + '" role="radio" aria-checked="' + on + '"' + (locked ? ' disabled' : '') + ' onclick="setSri(' + i + ')">' +
          '<span class="blk" style="background:' + ESMA_COLORS[i] + '">' + i + '</span><span class="lb">' + ESMA_LABELS[i] + '</span></button>';
   }
   $('sri-cards').innerHTML = h;
+  $('sri-cards').classList.toggle('locked', locked);
   document.querySelectorAll('#esg-seg button').forEach(function(b) {
     var on = (b.getAttribute('data-v') === 'yes') === S.risk.esg && S.risk.esg != null;
     b.classList.toggle('on', on); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', on ? 'true' : 'false');
   });
   $('r-profiler').value = S.risk.profiler;
-  renderSriPanel();
-}
-// Under the picker: the rating, and the managed strategies whose suitable range includes it
-function renderSriPanel() {
-  var sri = S.risk.sri, el = $('sri-panel');
-  el.hidden = !sri;
-  if (!sri) return;
-  var right;
-  if (S.product === 'prsa') {
-    var suited = prsaStrategies(S.prsa.prsaType).filter(function(s) {
-      return strategySuitableRange(s) && strategyRiskFit(s, sri).aligned;
-    });
-    right = '<div class="mini-h">Managed strategies suited to a ' + sri + '</div>' + (suited.length
-      ? '<div class="chips">' + suited.map(function(s) { return '<span class="chip">' + escHtml(stratName(s.id)) + '</span>'; }).join('') + '</div>'
-      : '<div class="panel-note">None of the managed strategies suit a rating of ' + sri + '. You can build a portfolio fund by fund to match it.</div>');
-  } else {
-    right = '<div class="mini-h">Portfolio</div><div class="panel-note">You build the ' + (S.product === 'arf' ? 'ARF' : 'Investment Bond') + ' portfolio fund by fund in step 5. Its indicative risk is compared with this rating.</div>';
-  }
-  el.innerHTML = '<div><div class="mini-h">Client rating</div><div class="sri-val">' + sri + ' — ' + ESMA_LABELS[sri] + '</div></div><div>' + right + '</div>';
+  $('sri-card').hidden = !(S.risk.method === 'own' || profilerDone());
+  $('sri-cap').textContent = S.risk.method === 'own' ? 'Select the rating from your risk profiling.' : '';
+  renderProfilerSummary(); renderSriApply();
 }
 function setSri(i) {
+  if (profilerDone()) return;   // locked to the risk profiler's result
   if (S.risk.sri !== i) invalidate(3);
-  S.risk.sri = i; renderSriCards();
+  S.risk.sri = i;
+  renderSriCards();
   setFootMsg('');
 }
+// ── What the 1–7 ratings mean (copy and regulatory wording: QT_CONTENT.riskScale) ──
+var sriInfoReturn = null;
+function openSriInfo() {
+  var R = QT_CONTENT.riskScale, rows = '';
+  for (var i = 1; i <= 7; i++) {
+    var L = R.levels[i];
+    rows += '<tr' + (S.risk.sri === i ? ' class="cl"' : '') + '><td class="n">' + sriBadge(i) + '</td>' +
+      '<td><b>' + escHtml(ESMA_LABELS[i]) + '</b><br>' + escHtml(L.riskClass.replace(/^(a|the) /, '').replace(/^./, function(c) { return c.toUpperCase(); })) + ' risk class</td>' +
+      '<td>Potential losses from future performance at a ' + escHtml(L.losses) + ' level' +
+      (L.market ? ', and poor market conditions ' + escHtml(L.market) + ' impact the capacity to pay you.' : '.') + '</td>' +
+      '<td>' + escHtml(L.vev) + '</td></tr>';
+  }
+  $('sri-info-b').innerHTML = '<p>' + escHtml(R.explain) + '</p><p>' + escHtml(R.howUsed) + '</p><p>' + escHtml(R.howSet) + '</p>' +
+    '<table class="rs-tbl"><thead><tr><th>Rating</th><th></th><th>What it means</th><th>Market risk: annual volatility</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<p class="rs-src">' + escHtml(R.source) + '</p>';
+  sriInfoReturn = document.activeElement;
+  $('sri-info').hidden = false;
+  document.body.style.overflow = 'hidden';
+  $('sri-info-x').focus();
+}
+function closeSriInfo() {
+  if ($('sri-info').hidden) return;
+  $('sri-info').hidden = true;
+  document.body.style.overflow = '';
+  if (sriInfoReturn && document.contains(sriInfoReturn)) sriInfoReturn.focus({ preventScroll: true });
+}
+document.addEventListener('keydown', function(e) {
+  if ($('sri-info').hidden) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeSriInfo(); }
+  else if (e.key === 'Tab') { e.preventDefault(); $('sri-info-x').focus(); }   // one control in the dialog
+});
 function setEsg(v) {
   S.risk.esg = v;
   $('esg-seg').classList.remove('invalid');
@@ -1938,7 +2181,8 @@ function prsaTermMonths() { return prsaTerm(S.client.dobStr, S.startStr, S.prsa.
 // strategies, so they open straight on the fund builder.
 function renderPortfolio() {
   var isPrsa = S.product === 'prsa';
-  $('pf-lead').textContent = 'Build a portfolio fund by fund, or choose a managed strategy. Strategies suited to the client\'s rating of ' + S.risk.sri + ' are marked.';
+  $('pf-lead').textContent = 'Build a portfolio fund by fund, or choose one of the managed strategies.';
+  $('managed-lead').textContent = 'Glidepaths that move into lower-risk funds as retirement approaches. Strategies suited to the client\'s rating of ' + S.risk.sri + ' are marked.';
   $('mismatch-reason').value = S.risk.reason;
   mmPromptKey = null;   // the mismatch warning reappears when the adviser next tries to proceed
   if (isPrsa) {
@@ -1953,11 +2197,11 @@ function renderPortfolio() {
   $('esg-pill').hidden = S.risk.esg !== true;
   buildDiyFunds();
   syncDiyFunds();
-  setPfView(isPrsa ? 'strat' : diySelIds().length ? 'alloc' : 'pick', false);
+  setPfView(isPrsa ? (pfView === 'managed' && S.prsa.strat && S.prsa.strat !== 'diy' ? 'managed' : 'strat') : diySelIds().length ? 'alloc' : 'pick', false);
 }
 
 // ── Views in the same area: strategy selection → choose funds → allocate ──
-var PF_VIEWS = ['strat', 'pick', 'alloc'];
+var PF_VIEWS = ['strat', 'managed', 'pick', 'alloc'];
 var pfView = 'strat', pfViewTimer = null;
 function pfViewEl(v) { return $('pf-view-' + v); }
 // The summary panel and the mismatch banner are shared: move them into the view being shown
@@ -1965,6 +2209,12 @@ function placeShared(view) {
   if (view === 'pick') return;
   $('side-' + view).appendChild($('pf-side'));
   $('mm-slot-' + view).appendChild($('mismatch-card'));
+}
+// Hidden until a strategy has been chosen (or, for a fund-by-fund portfolio, while allocating)
+function glanceVisible() {
+  if (S.product !== 'prsa') return pfView === 'alloc';
+  if (pfView === 'alloc') return true;
+  return !!S.prsa.strat && (S.prsa.strat !== 'diy' || diySelIds().length > 0);
 }
 function setPfView(view, animate) {
   var show = pfViewEl(view), prev = pfView;
@@ -1997,7 +2247,7 @@ function setPfView(view, animate) {
 }
 function pfViewFocus(view) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  var el = view === 'pick' ? $('pick-h') : view === 'alloc' ? $('alloc-h') : document.querySelector('#strats [data-strat="diy"] .strat-main');
+  var el = view === 'pick' ? $('pick-h') : view === 'alloc' ? $('alloc-h') : view === 'managed' ? $('managed-h') : document.querySelector('#strats [data-strat="diy"] .strat-main');
   if (el) el.focus({ preventScroll: true });
 }
 function openBuilder() {
@@ -2011,10 +2261,11 @@ function pfToAlloc() {
   if (ids.length === 1 && !(c.o.diyAllocs[ids[0]] > 0)) { c.o.diyAllocs[ids[0]] = 100; invalidate(5); syncDiyFunds(); }
   setPfView('alloc', true);
 }
-// Strategy click. Build Your Own is selected here and opened from the footer (or a second click);
-// choosing a managed strategy over a custom allocation asks first.
+// Strategy click. Build Your Own opens the fund picker; a managed strategy is chosen in its own view.
+// Choosing a managed strategy over a custom allocation asks first.
+function openManaged() { setPfView('managed', true); }
 function pickStrat(id, btn) {
-  if (id === 'diy') { if (S.prsa.strat === 'diy') openBuilder(); else setStrat('diy'); return; }
+  if (id === 'diy') { openBuilder(); return; }
   if (id === S.prsa.strat) return;
   if (hasCustomAlloc()) {
     qtConfirm(QT_TEXT.replaceCustomConfirm, function() {
@@ -2062,16 +2313,18 @@ function infoBtnHtml(kind, id, label) {
 }
 function stratName(id) { return (QT_CONTENT.strategies[id] || {}).name || id; }
 function buildStrategyCards() {
-  var host = $('strats'), type = S.prsa.prsaType, key = type + ':' + S.risk.sri;
-  if (host.getAttribute('data-built') === key) return;   // the "suits" marks depend on the client's rating
-  var C = QT_CONTENT.strategyCards, fams = stratFamilies(), c = diyContext();
-  var nFunds = c.funds.filter(c.avail).length;
-  var h = '<div class="strat strat-hero" data-strat="diy"><button type="button" class="strat-main" role="radio" aria-checked="false" onclick="pickStrat(\'diy\', this)">' +
-    '<span class="radio-dot" aria-hidden="true"></span><span class="sb"><span class="sl">' + escHtml(C.diy.name) + '</span>' +
-    '<span class="sm">' + escHtml(C.diy.sub + (type === 'nonstandard' ? ' ' + C.diy.subGuarantee : '')) + '</span><span class="prog" hidden></span></span>' +
-    '<span class="cnt"><b>' + nFunds + '</b>funds available</span></button></div>' +
-    '<div class="strat-or"><span>or a managed strategy</span></div>' +
-    '<div class="strat-row" role="radiogroup" aria-label="Managed investment strategies" style="--n:' + (1 + fams.length) + '">';
+  var type = S.prsa.prsaType, key = type + ':' + S.risk.sri;
+  if ($('strat-opts').getAttribute('data-built') === key) return;   // the "suits" marks depend on the client's rating
+  var C = QT_CONTENT.strategyCards, fams = stratFamilies();
+  $('strats').innerHTML =
+    '<div class="strat" data-strat="diy"><button type="button" class="strat-main" onclick="pickStrat(\'diy\', this)">' +
+      '<span class="sb"><span class="sl">' + escHtml(C.diy.name) + '</span>' +
+      '<span class="sm">' + escHtml(C.diy.sub + (type === 'nonstandard' ? ' ' + C.diy.subGuarantee : '')) + '</span><span class="prog" hidden></span></span>' +
+      '<span class="go">Choose funds <span aria-hidden="true">→</span></span></button></div>' +
+    '<div class="strat" data-way="managed"><button type="button" class="strat-main" onclick="openManaged()">' +
+      '<span class="sb"><span class="sl">' + escHtml(C.managed.name) + '</span><span class="sm">' + escHtml(C.managed.sub) + '</span><span class="prog" hidden></span></span>' +
+      '<span class="go">Choose a strategy <span aria-hidden="true">→</span></span></button></div>';
+  var h = '';
   var dis = stratById('dis'), rg = strategySuitableRange(dis), fit = strategyRiskFit(dis, S.risk.sri);
   h += '<div class="strat" data-strat="dis"><button type="button" class="strat-main" role="radio" aria-checked="false" onclick="pickStrat(\'dis\', this)">' +
     '<span class="sl">' + escHtml(C.dis.name) + '</span><span class="sm">' + escHtml(C.dis[type] || C.dis.nonstandard) + '</span>' +
@@ -2088,18 +2341,28 @@ function buildStrategyCards() {
     });
     h += '</div></div>';
   });
-  host.innerHTML = h + '</div>';
-  host.setAttribute('data-built', key);
+  $('strat-opts').style.setProperty('--n', 1 + fams.length);
+  $('strat-opts').innerHTML = h;
+  $('strat-opts').setAttribute('data-built', key);
 }
 function syncStrategyCards() {
   var sel = S.prsa.strat, selFam = stratFamKey(sel ? stratById(sel) : null);
-  document.querySelectorAll('#strats [data-strat]').forEach(function(el) {
+  document.querySelectorAll('#strat-opts [data-strat]').forEach(function(el) {
     var on = el.getAttribute('data-strat') === sel;
     el.classList.toggle('on', on);
     var b = el.tagName === 'BUTTON' ? el : el.querySelector('.strat-main');
     if (b) b.setAttribute('aria-checked', on ? 'true' : 'false');
   });
-  document.querySelectorAll('#strats [data-fam]').forEach(function(el) { el.classList.toggle('on', el.getAttribute('data-fam') === selFam); });
+  document.querySelectorAll('#strat-opts [data-fam]').forEach(function(el) { el.classList.toggle('on', el.getAttribute('data-fam') === selFam); });
+  // Landing boxes: the one holding the current choice is marked, with what was chosen
+  var byo = document.querySelector('#strats [data-strat="diy"]'), mg = document.querySelector('#strats [data-way="managed"]');
+  if (byo) byo.classList.toggle('on', sel === 'diy');
+  if (mg) {
+    var isM = !!sel && sel !== 'diy', mp = mg.querySelector('.prog');
+    mg.classList.toggle('on', isM);
+    mp.hidden = !isM;
+    if (isM) { mp.textContent = stratName(sel); mp.classList.add('full'); }
+  }
   // Work-in-progress badge on Build Your Own, e.g. "3 funds selected · 100%"
   var prog = document.querySelector('#strats [data-strat="diy"] .prog');
   if (prog) {
@@ -2284,6 +2547,11 @@ function diySelIds(c) {
   c = c || diyContext();
   return c.funds.filter(function(f) { return c.o.diySel[f.id] && c.avail(f); }).map(function(f) { return f.id; });
 }
+// "Factsheet" link for a fund, opening the PDF in a new tab (empty if none is held)
+function fsLink(id) {
+  var d = typeof qtFactsheetFor === 'function' ? qtFactsheetFor(id) : null;
+  return d ? '<a class="fs-link" href="' + escHtml(d.path) + '" target="_blank" rel="noopener" title="' + escHtml(d.title + ' (' + d.asOf + ')') + '" onclick="event.stopPropagation()">Factsheet ↗</a>' : '';
+}
 function buildDiyFunds() {
   var key = S.product + ':' + (S.product === 'prsa' ? S.prsa.prsaType : '');
   if (diyBuiltKey === key) return;
@@ -2309,13 +2577,13 @@ function buildDiyFunds() {
       var nm = info && info.desc ? '<button type="button" class="fn-name" data-finfo="' + f.id + '" aria-haspopup="dialog" aria-expanded="false" aria-controls="qt-pop" onclick="togglePop(event, \'fund\', \'' + f.id + '\')">' + escHtml(f.name) + '</button>' : escHtml(f.name);
       pick += '<label class="pickrow' + (ok ? '' : ' unavail') + '" data-pick="' + f.id + '" data-sfdr="' + (sf || '') + '" data-name="' + escHtml(f.name.toLowerCase()) + '">' +
         '<input type="checkbox" data-sel="' + f.id + '"' + (ok ? '' : ' disabled') + ' aria-label="Use ' + escHtml(f.name) + (ok ? '' : ' (Non-Standard PRSA only)') + '">' +
-        '<span class="fn"><span class="nm">' + nm + '</span><small>' + escHtml(sub.join(' · ')) + '<span class="a6note">' + (sub.length ? ' · ' : '') + 'Article 6, outside sustainability preference</span></small>' +
+        '<span class="fn"><span class="nm">' + nm + '</span><small>' + escHtml(sub.join(' · ')) + '</small>' + fsLink(f.id) +
         '<span class="na">Non-Standard PRSA only</span></span>' +
         '<span class="fc">' + pct(c.charge(f)) + '</span><span class="bd">' + sriBadge(f.esma) + '</span><span class="bd">' + sfdrBadge(sf) + '</span></label>';
       if (!ok) return;
       // Step 2 row: allocation and guarantee (shown only while the fund is ticked)
       rows += '<div class="arow" data-row="' + f.id + '" hidden><span class="sw" aria-hidden="true"></span>' +
-        '<div class="fn"><span class="nm">' + escHtml(f.name) + '</span><small>' + CAT_SHORT[cat.key] + ' · fund charge ' + pct(c.charge(f)) + '</small></div>' +
+        '<div class="fn"><span class="nm">' + escHtml(f.name) + '</span><small>' + escHtml(cat.short) + ' · fund charge ' + pct(c.charge(f)) + '</small>' + fsLink(f.id) + '</div>' +
         '<span class="bd">' + sriBadge(f.esma) + '</span>' +
         '<div class="pin"><input type="text" inputmode="decimal" maxlength="5" data-fund="' + f.id + '" placeholder="0" aria-label="Allocation % to ' + escHtml(f.name) + '"><span aria-hidden="true">%</span></div>';
       if (gOk) {
@@ -2380,14 +2648,13 @@ function swatchColor(i, f) { return i < SWATCHES.length ? SWATCHES[i] : f.color;
 // Tick boxes and category counts (step 1); row visibility, swatches, guarantee switches
 // and the allocation bar (step 2).
 function syncDiyFunds() {
-  var c = diyContext(), o = c.o, catN = {}, catT = {}, total = 0, sel = [], esg = S.risk.esg === true;
+  var c = diyContext(), o = c.o, catN = {}, catT = {}, total = 0, sel = [];
   c.funds.forEach(function(f) {
     var on = !!(c.avail(f) && o.diySel[f.id]), k = FUND_CATEGORY_OF[f.id];
     if (c.avail(f)) catT[k] = (catT[k] || 0) + 1;
     var pr = document.querySelector('#pick-funds [data-pick="' + f.id + '"]');
     if (pr) {
       pr.classList.toggle('on', on); pr.querySelector('[data-sel]').checked = on;
-      pr.classList.toggle('dim', esg && pr.getAttribute('data-sfdr') === '6');
     }
     if (on) { catN[k] = (catN[k] || 0) + 1; sel.push(f); }
     var row = document.querySelector('#diy-funds [data-row="' + f.id + '"]');
@@ -2403,7 +2670,7 @@ function syncDiyFunds() {
   });
   FUND_CATEGORIES.forEach(function(cat) {
     var el = $('fundcat-sub-' + cat.key);
-    if (el) el.textContent = (catN[cat.key] || 0) + ' of ' + (catT[cat.key] || 0) + ' selected';
+    if (el) el.textContent = catT[cat.key] ? (catN[cat.key] || 0) + ' of ' + catT[cat.key] + ' selected' : 'Non-Standard PRSA only';
   });
   // Swatches follow the order the funds are listed in; the first visible row has no top border
   var bar = '', first = true;
@@ -2492,10 +2759,10 @@ function portfolioState() {
 function buildPfSummary() {
   if ($('pf-summary').getAttribute('data-built')) return;
   var cells = '', cat = '', leg = '';
-  for (var i = 1; i <= 7; i++) cells += '<div style="background:' + ESMA_COLORS[i] + '" data-sri="' + i + '" title="SRI ' + i + '"></div>';
-  FUND_CATEGORIES.forEach(function(c) {
-    cat += '<div data-cat="' + c.key + '" style="background:' + CAT_COLORS[c.key] + '"></div>';
-    leg += '<span><i style="background:' + CAT_COLORS[c.key] + '"></i>' + escHtml(CAT_SHORT[c.key]) + ' <b data-catp="' + c.key + '">0%</b></span>';
+  for (var i = 1; i <= 7; i++) cells += '<div style="background:' + ESMA_COLORS[i] + '" data-sri="' + i + '" title="ESMA ' + i + '"></div>';
+  ASSET_CLASSES.forEach(function(c) {
+    cat += '<div data-asset="' + c.key + '" style="background:' + ASSET_COLORS[c.key] + '"></div>';
+    leg += '<span data-assetl="' + c.key + '"><i style="background:' + ASSET_COLORS[c.key] + '"></i>' + escHtml(c.label) + ' <b data-assetp="' + c.key + '">0%</b></span>';
   });
   function line(id, label, cls) { return '<div class="crow' + (cls ? ' ' + cls : '') + '" id="' + id + '"><span class="cl-label">' + label + '</span><span class="cl-val"></span></div>'; }
   $('pf-summary').innerHTML =
@@ -2506,7 +2773,8 @@ function buildPfSummary() {
         '<div class="tile"><span class="k" id="ps-risk-k">Portfolio</span><span class="v" id="ps-risk"></span><span class="s" id="ps-risk-l"></span></div></div>' +
       '<div class="sstrip" id="ps-scale" aria-hidden="true">' + cells + '</div>' +
       '<div class="apill" id="ps-align" role="status"></div>' +
-      '<div class="gsec"><div class="gsec-h">Fund category split <small id="ps-cat-note"></small></div><div class="cbar" id="ps-cat">' + cat + '</div><div class="cleg">' + leg + '</div></div>' +
+      '<div class="gsec"><div class="gsec-h">Asset split <small id="ps-cat-note"></small></div><div class="cbar" id="ps-cat">' + cat + '</div><div class="cleg">' + leg + '</div>' +
+        '<div class="cnote" id="ps-cat-tm"></div></div>' +
       '<div class="gsec"><div class="gsec-h">Annual charges <small id="ps-chg-note"></small></div>' +
         line('ps-amc', '') + line('ps-fmc', 'Blended fund charge') + line('ps-gch', 'Guarantee') + line('ps-total', 'Total annual charge', 'total') + '</div>' +
       '<div class="gsec sfdr-line"><span>SFDR</span><b id="ps-sfdr"></b></div>' +
@@ -2516,6 +2784,7 @@ function buildPfSummary() {
 function esgText() { return S.risk.esg === true ? 'Yes' : S.risk.esg === false ? 'No' : 'Not recorded'; }
 function renderPfSummary() {
   buildPfSummary();
+  $('pf-side').hidden = !glanceVisible();
   var pf = portfolioState(), isPrsa = S.product === 'prsa', hasMix = pf.mix.length > 0;
   function setLine(id, val) { $(id).querySelector('.cl-val').textContent = val; }
   var full = !!pf.isGlidepath || pfView === 'alloc' || (isPrsa && S.prsa.strat === 'diy' && hasMix);
@@ -2549,16 +2818,17 @@ function renderPfSummary() {
     al.textContent = !pf.mismatch ? '✓ Aligned with the client\'s rating' : done ? 'Override recorded — differs from the client\'s rating'
       : (pf.direction === 'higher' ? 'Higher' : 'Lower') + ' risk than the client\'s rating — a reason is needed';
   }
-  // Fund category split
-  var split = {}, sum = (pf.total || 0) / 100 || 1;
-  FUND_CATEGORIES.forEach(function(k) { split[k.key] = 0; });
-  pf.mix.forEach(function(m) { split[FUND_CATEGORY_OF[m.fund.id] || 'multi'] += m.weight; });
-  FUND_CATEGORIES.forEach(function(k) {
-    var p = hasMix ? split[k.key] / sum * 100 : 0;
-    $('ps-cat').querySelector('[data-cat="' + k.key + '"]').style.width = p + '%';
-    document.querySelector('#pf-summary [data-catp="' + k.key + '"]').textContent = Math.round(p) + '%';
+  // Asset split (indicative: DMAS from rescaled factsheet exposure, Strategy Select at its target mix)
+  var split = assetSplit(pf.mix);
+  ASSET_CLASSES.forEach(function(k) {
+    var p = hasMix ? split[k.key] * 100 : 0;
+    $('ps-cat').querySelector('[data-asset="' + k.key + '"]').style.width = p + '%';
+    document.querySelector('#pf-summary [data-assetp="' + k.key + '"]').textContent = Math.round(p) + '%';
+    document.querySelector('#pf-summary [data-assetl="' + k.key + '"]').hidden = k.key !== 'eq' && k.key !== 'fi' && !(p > 0);
   });
-  $('ps-cat-note').textContent = pf.isGlidepath ? '(at start)' : '';
+  $('ps-cat-note').textContent = pf.isGlidepath ? '(indicative, at start)' : '(indicative)';
+  $('ps-cat-tm').textContent = qtAssetNote(pf.mix, true);
+  $('ps-cat-tm').hidden = !$('ps-cat-tm').textContent;
   // Charges: AMC (trail is part of it, not on top) + blended fund charge + guarantee = total
   var code = codeTableFor(S.product)[S[S.product].code];
   $('ps-amc').querySelector('.cl-label').textContent = (isPrsa ? 'AMC' : 'Policy charge') + ' · incl. ' + pct(code.ongoing) + ' trail';
@@ -2642,6 +2912,16 @@ function strategyPhrase() {
 // ─── Step 6: results ──────────────────────────────────────────────────────────
 var RES_TABS = [['proj', 'Projection'], ['chg', 'Charges'], ['rem', 'Remuneration']];
 function allTabsSeen() { return RES_TABS.every(function(t) { return S.resSeen[t[0]]; }); }
+// The tab after the current one, or after the last: the first not yet seen. null when there is nothing left to review.
+function resNextTab() {
+  var i = RES_TABS.map(function(t) { return t[0]; }).indexOf(S.resTab);
+  if (i >= 0 && i < RES_TABS.length - 1) return RES_TABS[i + 1];
+  return RES_TABS.filter(function(t) { return !S.resSeen[t[0]]; })[0] || null;
+}
+function resPrevTab() {
+  var i = RES_TABS.map(function(t) { return t[0]; }).indexOf(S.resTab);
+  return i > 0 ? RES_TABS[i - 1] : null;
+}
 function setResTab(t) { S.resTab = t; S.resSeen[t] = true; footErr = ''; renderResults(); renderFoot(); }
 function toggleAllYears() { S.resAllYears = !S.resAllYears; renderResults(); }
 function toggleRemTable() { S.remTable = !S.remTable; renderResults(); }
@@ -2684,58 +2964,39 @@ function sumCol(label, step, head, sub, rows) {
       return '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>';
     }).join('') + '</div></div>';
 }
-// Quote summary card: replaces the old KPI band and stays visible on all three tabs.
+// Quote summary card: stays visible on all three tabs. Kept to what identifies the quotation;
+// charges and remuneration are on their own tabs.
 function resSummary(r) {
   var isPrsa = S.product === 'prsa', isArf = S.product === 'arf';
   var cName = [S.client.salutation, S.client.first, S.client.last].join(' ');
   var ageStart = r.ageAtStart != null ? r.ageAtStart : r.startAge;
-  var gender = S.client.gender === 'F' ? 'female' : 'male';
   var risk = S.risk.sri ? S.risk.sri + ' · ' + ESMA_LABELS[S.risk.sri] : '—';
-  var esg = S.risk.esg === true ? 'ESG preference' : S.risk.esg === false ? 'No preference' : 'Not answered';
-  var client = sumCol('Client', 2, escHtml(cName),
-    'Born ' + escHtml(fmtDate(S.client.dobStr)) + ' · age ' + Math.floor(ageStart) + ' · ' + gender, [
-      ['Start date', escHtml(fmtDate(r.inputs.startStr))],
-      isPrsa ? ['Retirement age', r.nra + ' · ' + (r.termMonths / 12).toFixed(1) + ' years']
-             : isArf ? ['Income from age', escHtml(String(r.inputs.incomeStartAge || Math.floor(ageStart)))]
-             : ['Policyholder', escHtml(r.policyholderType)],
-      ['Attitude to risk', escHtml(risk)],
-      ['Sustainability', esg]
+  var client = sumCol('Client', 2, escHtml(cName), 'Born ' + escHtml(fmtDate(S.client.dobStr)) + ' · age ' + Math.floor(ageStart), [
+      ['Attitude to risk', escHtml(risk)]
     ]);
 
-  var initComm = r.totalInitialComm != null ? r.totalInitialComm : r.initialComm;
-  var ctype = isPrsa ? (r.prsaType === 'standard' ? 'Standard PRSA' : 'Non-Standard PRSA') + ' · version ' + r.code
-                     : 'version ' + r.code;
-  var product = sumCol('Product', 2, escHtml(QT_TEXT.productBrands[S.product] || productName()), escHtml(ctype), [
-      ['Management charge', pct(r.cc.admin)],
-      ['Contribution charge', (r.spContribCharge > 0 || r.rpContribCharge > 0) ? 'Applies' : 'None'],
-      initComm != null ? ['Initial commission', fEUR(initComm)] : null,
-      ['Trail commission', pct(r.cc.ongoing) + ' a year']
-    ]);
-
-  var y1, paid, invRows;
+  // Product and investment in one column: what it is, when it starts and the money going in
+  var ctype = isPrsa ? (r.prsaType === 'standard' ? 'Standard PRSA' : 'Non-Standard PRSA') + ' · version ' + r.code : 'Version ' + r.code;
+  var planRows;
   if (isPrsa) {
-    y1 = fEUR(r.ofvRaw + r.spRaw + (r.annualRp || 0)) + ' in year 1';
-    paid = fEUR(r.totalContrib) + ' paid in by age ' + r.nra;
-    invRows = [
-      r.ofvRaw > 0 ? ['Transfer value', fEUR(r.ofvRaw)] : null,
-      r.spRaw > 0 ? ['Single contribution', fEUR(r.spRaw)] : null,
-      r.rpRaw > 0 ? ['Regular contribution', fEUR(r.rpRaw) + ' a ' + String(r.freq).replace('monthly', 'month').replace('quarterly', 'quarter').replace('annual', 'year')] : null,
-      ['Paid by', 'Client']
+    planRows = [
+      ['Start date', escHtml(fmtDate(r.inputs.startStr))],
+      ['Retirement age', r.nra + ' · ' + Math.round(r.termMonths / 12) + ' years'],
+      ['Total paid in', fEUR(r.totalContrib)]
     ];
   } else if (isArf) {
-    y1 = fEUR(r.contribution);
-    paid = 'transferred into your ARF';
-    invRows = [['Income', escHtml(qtArfIncomeShort(r))], ['Age at start', String(Math.floor(ageStart))]];
+    planRows = [
+      ['Start date', escHtml(fmtDate(r.inputs.startStr))],
+      ['Investment', fEUR(r.contribution)],
+      ['Income', escHtml(qtArfIncomeShort(r))]
+    ];
   } else {
-    y1 = fEUR(r.contribution + (r.rp || 0) * (r.inputs.freq === 'monthly' ? 12 : r.inputs.freq === 'quarterly' ? 4 : 1)) + ' in year 1';
-    paid = r.totalContrib != null ? fEUR(r.totalContrib) + ' paid in' : '';
-    invRows = [
-      r.contribution > 0 ? ['Single contribution', fEUR(r.contribution)] : null,
-      r.rp > 0 ? ['Regular contribution', fEUR(r.rp) + ' ' + escHtml(r.inputs.freq)] : null,
-      ['Exit tax', pct(r.taxRate)]
+    planRows = [
+      ['Start date', escHtml(fmtDate(r.inputs.startStr))],
+      ['Total paid in', fEUR(r.totalContrib != null ? r.totalContrib : r.contribution)]
     ];
   }
-  var investment = sumCol('Investment', 4, y1, paid, invRows);
+  var plan = sumCol('Plan', 4, escHtml(QT_TEXT.productBrands[S.product] || productName()), escHtml(ctype), planRows);
 
   var rows = qtFundRows({ product: S.product, r: r });
   var pf = portfolioState(), pr = Math.round(r.portfolioSri);
@@ -2747,7 +3008,7 @@ function resSummary(r) {
               (+(fr.weight * 100).toFixed(1)) + '%'];
     }).concat(rows.length > 4 ? [['+ ' + (rows.length - 4) + ' more', '']] : []));
 
-  return '<section class="qsum">' + client + product + investment + funds + '</section>';
+  return '<section class="qsum">' + client + plan + funds + '</section>';
 }
 function legendHtml(items) {
   return '<div class="legend">' + items.map(function(it) { return '<span><i class="' + it[0] + '"' + (it[2] ? ' style="' + it[2] + '"' : '') + '></i>' + escHtml(it[1]) + '</span>'; }).join('') + '</div>';
@@ -2785,7 +3046,7 @@ function resPrsaProjection(r) {
   var panel = projPanel(
     ['Projected fund value at ' + r.nra, fEUR(r.fundWC), 'projected, not guaranteed'],
     [['In today\'s money', fEUR(r.realMat)],
-     ['Estimated income', fEUR(r.annualIncomeReal) + ' a year'],
+     ['Income in today\'s money', fEUR(r.annualIncomeReal) + ' a year'],
      ['Total paid in', fEUR(r.totalContrib)]],
     'Growth ' + (gp ? 'up to ' : '') + pct(r.blendedGross) + ' a year. Inflation ' + pct(INFLATION) +
       ' a year. Income in today\'s money, from an annuity at ' + r.nra + '.');
@@ -2976,7 +3237,7 @@ function packNext() { var st = packStages(), i = st.indexOf(S.packStage); if (i 
 function packBack() { var st = packStages(), i = st.indexOf(S.packStage); if (i > 0) setPackStage(st[i - 1]); }
 function packFoot() {
   var st = packStages(), i = st.indexOf(S.packStage), next = st[i + 1], status = '';
-  if (S.packStage === 'contents') { var n = SECTION_KEYS.filter(function(k) { return S.sections[k]; }).length; status = n + ' sections selected'; }
+  if (S.packStage === 'contents') { var n = packItems().length; status = n + (n === 1 ? ' item' : ' items') + ' in the pack' + (attachItems().length ? ', plus attached documents' : ''); }
   else if (S.packStage === 'cover' || S.packStage === 'sos') {
     var left = docIssues(S.packStage);
     status = modeOf(S.packStage) === 'own' ? (left ? 'Write the ' + (S.packStage === 'cover' ? 'letter' : 'statement') + ' to continue' : 'Ready')
@@ -3034,9 +3295,9 @@ function textContext() {
     portfolioRiskSentence = qtFill(T.sosPortfolioRiskNumeric, { portfolioSri: pr, portfolioSriLabel: ESMA_LABELS[pr] });
   }
   // Cover letter "Enclosed:" list, from the sections in the pack
-  var enc = ['sos', 'summary', 'projection', 'charges', 'funds', 'remun'].filter(function(k) { return S.sections[k]; });
+  var enc = ['sos', 'riskprofile'].filter(function(k) { return S.sections[k] && !sectionNA(k); });
+  enc.push('quotation');
   if (S.sections.product || S.sections.tax) enc.push('product');
-  if (S.sections.important) enc.push('important');
   var enclosedList = enc.length ? enc.map(function(k) { return '- ' + T.coverEnclosed[k]; }).join('\n') : '- Your personalised quotation';
   var initial = isPrsa ? r.totalInitialComm : r.initialComm;
   var remun = initial > 0
@@ -3048,12 +3309,19 @@ function textContext() {
   else if (S.risk.esg !== true || sp.unknown > 0.0001) esg = T.sosEsgPrompt;
   else if (sp.art8 > 0.9999) esg = T.sosEsgAllArt8;
   else esg = qtFill(T.sosEsgPartArt8, { art8: Math.round(sp.art8 * 100) + '%' });
+  // Risk profiler answers (Step 3) fill the circumstances and attitude-to-risk passages
+  var prof = profilerDone(), narr = null;
+  if (prof) narr = RiskProfiler.narrative(S.risk.pAnswers, rpContext(), prof, { suggestedSri: prof.sri, chosenSri: S.risk.sri, overrideReason: S.risk.pReason });
   var ctx = {
     salutation: S.client.salutation, clientLast: S.client.last, productName: productName(),
     openingLine: T.coverOpening[S.product], enclosedList: enclosedList,
     sosSentence: S.sections.sos ? T.coverSosSentence : '', brokerPhone: S.broker.phone, brokerEmail: S.broker.email,
     clientSri: S.risk.sri, clientSriLabel: ESMA_LABELS[S.risk.sri],
-    profilerPhrase: S.risk.profiler.trim() ? qtFill(T.sosProfilerPhrase, { profiler: S.risk.profiler.trim() }) : '',
+    profilerPhrase: prof ? qtFill(T.sosProfilerPhrase, { profiler: qtFill(RP_CONFIG.text.usedPhrase, { profiler: RP_CONFIG.name, date: fmtDate(S.risk.pDate || todayStr()) }) })
+      : S.risk.profiler.trim() ? qtFill(T.sosProfilerPhrase, { profiler: S.risk.profiler.trim() }) : '',
+    profilerSentence: narr ? [narr.risk, narr.experience, narr.override].filter(Boolean).join(' ') : '',
+    circumstancesSentence: narr ? narr.circumstances : '',
+    circumstancesPrompt: T.sosCircumstancesPrompt[S.product][prof ? 'profiled' : 'plain'],
     esgSentence: esg,
     strategyName: strategyPhrase(), portfolioRiskSentence: portfolioRiskSentence,
     riskSentence: riskSentence, remunSentence: remun
@@ -3096,7 +3364,7 @@ function templateText(kind) {
     var v = String(ctx[k]);
     return !v.trim() || /\n|\[\[/.test(v) ? v : AO + v + AC;
   });
-  return filled.replace(/ +\n/g, '\n').replace(/ {2,}/g, ' ').replace(/\n{3,}/g, '\n\n');
+  return filled.replace(/ +\n/g, '\n').replace(/\n +/g, '\n').replace(/ {2,}/g, ' ').replace(/\n{3,}/g, '\n\n');
 }
 // Keep unedited text in step with the quotation; flag edited text whose template has changed
 function syncTemplates() {
@@ -3133,7 +3401,24 @@ function renderReport() {
 }
 // ── Attached documents (factsheets, KIDs) ──
 // Sections printed as pages of the pack (everything except the attached PDFs)
-function packSections() { return SECTION_KEYS.filter(function(k) { return S.sections[k] && ATTACH_SECTIONS.indexOf(k) < 0; }); }
+function packSections() { return SECTION_KEYS.filter(function(k) { return S.sections[k] && !sectionNA(k) && ATTACH_SECTIONS.indexOf(k) < 0; }); }
+// packSections() with the Allianz quotation's sections shown as the single item 'quotation'
+function packItems() {
+  var out = [];
+  packSections().forEach(function(k) {
+    if (QUOTE_KEYS.indexOf(k) < 0) out.push(k);
+    else if (out.indexOf('quotation') < 0) out.push('quotation');
+  });
+  return out;
+}
+function packItemLabel(k) { return k === 'quotation' ? QUOTE_LABEL : QT_TEXT.sections[k]; }
+// Attached documents as one line per kind, e.g. "Fund factsheets (4)"
+function attachItems() {
+  var d = attachDocs(), inc = attachInclude(), out = [];
+  if (inc.kids && d.kids.length) out.push('Key Information Documents (' + d.kids.length + ')');
+  if (inc.factsheets && d.factsheets.length) out.push('Fund factsheets (' + d.factsheets.length + ')');
+  return out;
+}
 // Documents that apply to the current quotation: { kids: [...], factsheets: [...] }
 function attachDocs() {
   var r = S.result;
@@ -3154,7 +3439,7 @@ function attachSub(k) {
   var list = attachDocs()[k];
   if (!list.length) return k === 'kids' ? 'No KID held for the selected funds' : 'No factsheet held for the selected funds';
   var what = k === 'kids' ? 'KID' : 'factsheet';
-  return list.length + ' ' + what + (list.length === 1 ? '' : 's') + ' for the selected funds, attached as a separate PDF';
+  return list.length + ' ' + what + (list.length === 1 ? '' : 's') + ' for the selected funds, added to the end of the pack PDF';
 }
 function setAttachMsg(html, kind) {
   var el = $('attach-msg');
@@ -3166,50 +3451,60 @@ function renderAttach() {
   var list = attachedList();
   if (!list.length) { host.innerHTML = ''; return; }
   host.innerHTML = '<span class="card-t" style="margin-top:14px;display:block">Attached documents</span>' +
-    '<div class="hint" style="margin:4px 0 6px">Saved as a separate PDF with the pack: KIDs first, then factsheets.</div>' +
+    '<div class="hint" style="margin:4px 0 6px">Added to the end of the pack PDF: KIDs first, then factsheets.</div>' +
     '<ul style="margin:0 0 8px;padding-left:18px;font-size:12.5px">' + list.map(function(d) {
       return '<li>' + escHtml(d.title) + (d.asOf ? ' <small>(' + escHtml(d.asOf) + ')</small>' : '') + '</li>';
-    }).join('') + '</ul>' +
-    '<button type="button" class="btn block" id="btn-attach" onclick="downloadAttachments()">Download supporting documents</button>';
+    }).join('') + '</ul>';
 }
-function downloadAttachments() {
-  var d = attachDocs(), inc = attachInclude(), list = attachedList();
-  if (!list.length) return;
-  var btn = $('btn-attach');
-  if (btn) btn.disabled = true;
-  setAttachMsg('Preparing ' + list.length + (list.length === 1 ? ' document' : ' documents') + '…', 'info');
-  qtBuildSupportingPdf(d, inc).then(function(res) {
-    var blob = new Blob([res.bytes], { type: 'application/pdf' }), a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = packFileName().replace(/\.pdf$/, '') + '_Supporting-documents.pdf';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function() { URL.revokeObjectURL(a.href); }, 5000);
-    setAttachMsg(res.missing.length ? 'Saved, but these could not be included: ' + res.missing.map(escHtml).join(', ') + '.' : 'Supporting documents saved (' + res.count + ' ' + (res.count === 1 ? 'document' : 'documents') + ').', res.missing.length ? 'warn' : 'info');
-  }).catch(function(e) {
-    setAttachMsg(escHtml(e.message || 'The documents could not be prepared.') + '<br>Open them one by one: ' +
-      list.map(function(x) { return '<a href="' + escHtml(x.path) + '" target="_blank" rel="noopener">' + escHtml(x.title) + '</a>'; }).join(' · '), 'warn');
-  }).then(function() { if (btn) btn.disabled = false; });
+// Renders the open pack window to images and saves them as one PDF with the factsheets / KIDs appended
+function savePackPdf(win) {
+  var d = attachDocs(), inc = attachInclude(), list = attachedList(), tries = 0;
+  setAttachMsg('Preparing the PDF with ' + list.length + (list.length === 1 ? ' attached document' : ' attached documents') + '…', 'info');
+  function fail(e) {
+    setAttachMsg(escHtml((e && e.message) || 'The PDF could not be prepared.') + ' Use Print / Save as PDF in the pack window instead; the factsheets are not included.', 'warn');
+    try { win.print(); } catch (x) {}
+  }
+  (function wait() {
+    if (win.closed) { setAttachMsg('', 'info'); return; }
+    if (!win.__paginated || !win.qtRasterPages) { if (++tries > 150) return fail(new Error('The pack did not finish loading.')); return void setTimeout(wait, 200); }
+    win.qtRasterPages().then(function(jpegs) {
+      return qtBuildSupportingPdf(d, inc, jpegs);
+    }).then(function(res) {
+      var blob = new Blob([res.bytes], { type: 'application/pdf' }), a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = packFileName();
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 5000);
+      setAttachMsg(res.missing.length ? 'Saved, but these could not be attached: ' + res.missing.map(escHtml).join(', ') + '.' : 'PDF saved with ' + res.count + (res.count === 1 ? ' attached document' : ' attached documents') + '.', res.missing.length ? 'warn' : 'info');
+      try { win.document.querySelectorAll('.topbar button')[1].disabled = false; } catch (x) {}
+    }).catch(fail);
+  })();
 }
 function renderContents() {
   var L = QT_TEXT.sections, h = '';
   SECTION_GROUPS.forEach(function(g) {
     h += '<section class="pgrp"><div class="pgrp-h"><span class="t">' + escHtml(g.title) + '</span>' + (g.note ? '<span class="n">' + escHtml(g.note) + '</span>' : '') + '</div>';
     g.keys.forEach(function(k) {
+      if (k === 'quotation') {
+        h += '<div class="prow"><div><div class="pn">' + escHtml(QUOTE_LABEL) + '</div><div class="ps">' +
+          escHtml(QUOTE_KEYS.map(function(q) { return L[q]; }).join(' · ')) + '</div></div><span class="pill req">Required</span></div>';
+        return;
+      }
+      if (k === 'kids' && S.product !== 'ib') return;   // KIDs are only held for the Investment Bond
       var req = REQUIRED_SECTIONS.indexOf(k) >= 0, na = sectionNA(k), soon = COMING_SOON.indexOf(k) >= 0 || na, sub = attachSub(k) || SECTION_SUBS[k];
-      var ctl = na ? '<span class="pill soon">Investment Bond only</span>' : soon ? '<span class="pill soon">Coming soon</span>' : req ? '<span class="pill req">Required</span>'
+      var ctl = na ? '<span class="pill soon">' + escHtml(sectionNAText(k)) + '</span>' : soon ? '<span class="pill soon">Coming soon</span>' : req ? '<span class="pill req">Required</span>'
         : '<label class="tgl"><input type="checkbox" role="switch" data-sec="' + k + '"' + (S.sections[k] ? ' checked' : '') + ' aria-label="Include ' + escHtml(L[k]) + '"></label>';
-      h += '<div class="prow' + (soon ? ' soon' : '') + '"><div><div class="pn">' + escHtml(L[k]) + (NEW_SECTIONS.indexOf(k) >= 0 ? ' <span class="tag-new">New</span>' : '') + '</div>' +
+      h += '<div class="prow' + (soon ? ' soon' : '') + '"><div><div class="pn">' + escHtml(L[k]) + '</div>' +
         (sub ? '<div class="ps">' + escHtml(sub) + '</div>' : '') + '</div>' + ctl + '</div>';
     });
     h += '</section>';
   });
   $('secs').innerHTML = h;
-  var inc = packSections();
-  var att = attachedList();
-  $('pack-order').innerHTML = '<div class="po-h"><span>Pack order</span><span class="n">' + inc.length + ' sections</span></div><ol class="po-list">' +
-    inc.map(function(k, i) { return '<li><span class="i">' + (i + 1) + '</span><span>' + escHtml(L[k]) + '</span><span class="tg">' + (k === 'cover' || k === 'sos' ? 'Letterhead' : '') + '</span></li>'; }).join('') + '</ol>' +
-    (att.length ? '<div class="po-h" style="margin-top:14px"><span>Attached PDF</span><span class="n">' + att.length + (att.length === 1 ? ' document' : ' documents') + '</span></div><ol class="po-list">' +
-      att.map(function(d, i) { return '<li><span class="i">' + (i + 1) + '</span><span>' + escHtml(d.title) + '</span><span class="tg"></span></li>'; }).join('') + '</ol>' : '');
+  var inc = packItems(), att = attachItems();
+  $('pack-order').innerHTML = '<div class="po-h"><span>Pack order</span><span class="n">' + inc.length + (inc.length === 1 ? ' item' : ' items') + '</span></div><ol class="po-list">' +
+    inc.map(function(k, i) { return '<li><span class="i">' + (i + 1) + '</span><span>' + escHtml(packItemLabel(k)) + '</span><span class="tg">' + (k === 'cover' || k === 'sos' || k === 'riskprofile' ? 'Letterhead' : '') + '</span></li>'; }).join('') + '</ol>' +
+    (att.length ? '<div class="po-h" style="margin-top:14px"><span>Attached PDF</span></div><ol class="po-list">' +
+      att.map(function(t, i) { return '<li><span class="i">' + (i + 1) + '</span><span>' + escHtml(t) + '</span><span class="tg"></span></li>'; }).join('') + '</ol>' : '');
   document.querySelectorAll('#secs [data-sec]').forEach(function(el) {
     el.addEventListener('change', function() { S.sections[el.getAttribute('data-sec')] = el.checked; renderReport(); });
   });
@@ -3307,7 +3602,7 @@ function renderEditorStage(k) {
   var h = '<div class="mode-row"><div class="seg" role="radiogroup" aria-label="How to write the ' + name + '">' +
     '<button type="button" role="radio" aria-checked="' + (mode === 'template') + '" class="' + (mode === 'template' ? 'on' : '') + '" onclick="setMode(\'' + k + '\', \'template\')">Use the Allianz template</button>' +
     '<button type="button" role="radio" aria-checked="' + (mode === 'own') + '" class="' + (mode === 'own' ? 'on' : '') + '" onclick="setMode(\'' + k + '\', \'own\')">Write your own</button></div>' +
-    '<span class="hint">' + (mode === 'template' ? 'Type anywhere. Grey text is filled from the quotation; highlighted text shows what to cover.' : 'Plain text: ## starts a heading, - starts a bullet, a blank line starts a new paragraph.') + '</span></div>';
+    '<span class="hint">' + (mode === 'template' ? 'Type anywhere. Grey text is filled from the quotation; highlighted text shows what to cover.' : 'Write it yourself. Use the toolbar for headings, bold and bullet points.') + '</span></div>';
   h += '<div class="dv-row"><div class="dv-tabs" role="tablist" aria-label="' + label + ' view">' +
     '<button type="button" role="tab" aria-selected="' + (view === 'edit') + '" class="' + (view === 'edit' ? 'on' : '') + '" onclick="setDocView(\'' + k + '\', \'edit\')">Edit</button>' +
     '<button type="button" role="tab" aria-selected="' + (view === 'preview') + '" class="' + (view === 'preview' ? 'on' : '') + '" onclick="setDocView(\'' + k + '\', \'preview\')">Preview</button></div>' +
@@ -3324,16 +3619,14 @@ function renderEditorStage(k) {
     if (S.stale[k]) h += '<div class="alert warn">The quotation has changed since this text was edited, so some figures in it may be out of date. <button type="button" class="lnk" onclick="resetText(\'' + k + '\')">Reset to template</button> to refresh it (your edits will be lost).</div>';
     h += '<div class="ed-grid"><aside class="ed-side"><div class="card ed-prog" id="ed-prog-' + k + '"></div><nav class="ed-ol" id="ed-ol-' + k + '" aria-label="Sections"></nav>' +
       '<p class="ed-help">Every word here is yours to change — click anywhere and type. Grey boxes are filled from your answers. Highlighted text suggests what to cover; replace or delete it. Anything still highlighted is left out of the pack.</p></aside>' +
-      '<div class="stack" style="gap:12px"><article class="doc"><div class="ed-tb" role="toolbar" aria-label="Formatting">' +
-      '<button type="button" class="tb b" title="Bold" onmousedown="event.preventDefault()" onclick="edCmd(\'' + k + '\', \'bold\')">B</button>' +
-      '<button type="button" class="tb" onmousedown="event.preventDefault()" onclick="edCmd(\'' + k + '\', \'heading\')">Heading</button>' +
-      '<button type="button" class="tb" onmousedown="event.preventDefault()" onclick="edCmd(\'' + k + '\', \'list\')">• List</button>' +
-      '<button type="button" class="lnk" onclick="resetText(\'' + k + '\')">Reset to template</button></div>' +
+      '<div class="stack" style="gap:12px"><article class="doc">' + edToolbar(k, true) +
       '<div class="ed-body" id="ed-' + k + '" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' + label + '" spellcheck="true"></div></article>' +
       '<div class="ed-foot">' + (k === 'cover' ? 'The "Enclosed" list follows the sections in the pack. Your signature block is added automatically.' : 'Signature lines for you and the client are added automatically.') + '</div></div></div>';
   } else {
-    h += '<textarea class="own-ta" id="own-' + k + '" aria-label="Your ' + name + '" placeholder="' + (k === 'cover' ? 'Dear …' : '## Your needs and objectives\n…') + '"></textarea>' +
-      '<div class="hint" style="margin:0">' + (k === 'cover' ? 'Your signature block is added automatically.' : 'Signature lines for you and the client are added automatically.') + ' Your text is kept if you switch back to the template.</div>';
+    // Write your own: the same editor and formatting as the template, starting from a blank page
+    h += '<div class="stack" style="gap:12px"><article class="doc">' + edToolbar(k, false) +
+      '<div class="ed-body own" id="ed-' + k + '" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Your ' + name + '" spellcheck="true" data-ph="' + (k === 'cover' ? 'Dear …' : 'Start with a heading, e.g. Your needs and objectives') + '"></div></article>' +
+      '<div class="ed-foot">' + (k === 'cover' ? 'Your signature block is added automatically.' : 'Signature lines for you and the client are added automatically.') + ' Your text is kept if you switch back to the template.</div></div>';
   }
   host.innerHTML = h;
   if (view === 'preview') {
@@ -3358,10 +3651,21 @@ function renderEditorStage(k) {
     ed.addEventListener('focus', function() { try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (x) {} });
     edSide(k);
   } else {
-    var ta = $('own-' + k);
-    ta.value = S.own[k];
-    ta.addEventListener('input', function() { S.own[k] = ta.value; renderFoot(); });
+    var oe = $('ed-' + k);
+    oe.innerHTML = S.own[k].trim() ? edRender(S.own[k]) : '<p><br></p>';
+    oe.toggleAttribute('data-empty', !S.own[k].trim());
+    oe.addEventListener('input', function() { edChanged(k); });
+    oe.addEventListener('focus', function() { try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (x) {} });
   }
+}
+// Formatting toolbar shared by the template and write-your-own editors
+function edToolbar(k, template) {
+  function b(cmd, label, cls, title) {
+    return '<button type="button" class="tb' + (cls ? ' ' + cls : '') + '"' + (title ? ' title="' + title + '" aria-label="' + title + '"' : '') +
+      ' onmousedown="event.preventDefault()" onclick="edCmd(\'' + k + '\', \'' + cmd + '\')">' + label + '</button>';
+  }
+  return '<div class="ed-tb" role="toolbar" aria-label="Formatting">' + b('bold', 'B', 'b', 'Bold') + b('heading', 'Heading') + b('list', '• List') +
+    (template ? '<button type="button" class="lnk" onclick="resetText(\'' + k + '\')">Reset to template</button>' : '') + '</div>';
 }
 // A true-to-print render of just this one document, using the real pack renderer
 function renderDocPreview(k) {
@@ -3407,6 +3711,12 @@ window.addEventListener('resize', function() {
 });
 function edChanged(k) {
   var ed = $('ed-' + k);
+  if (modeOf(k) === 'own') {
+    S.own[k] = edSerialize(ed);
+    ed.toggleAttribute('data-empty', !S.own[k].trim());
+    renderFoot();
+    return;
+  }
   // A highlight stops being a placeholder the moment its text differs from the guidance
   [].forEach.call(ed.querySelectorAll('.sug'), function(sp) {
     sp.classList.toggle('done', sp.textContent !== sp.getAttribute('data-sug'));
@@ -3484,7 +3794,7 @@ function renderReview() {
   $('gen-errs').innerHTML = !ready ? '<div class="alert warn">Complete the items marked ! before generating the pack.</div>'
     : warns ? '<div class="alert warn">You can generate the pack now. Passages you have not written are left out of the PDF rather than printed.</div>' : '';
   $('fname').innerHTML = '<b>' + escHtml(packFileName()) + '</b><span id="fname-pages">Counting pages…</span>';
-  var inc = packSections();
+  var inc = packItems();
   renderAttach();
   renderThumbs(inc, null);
   var seq = ++measureSeq;
@@ -3494,17 +3804,16 @@ function renderReview() {
     renderThumbs(inc, m);
   });
 }
-var THUMB_BLOCK = { summary: 1, projection: 1, funds: 1 };
+var THUMB_BLOCK = { quotation: 1 };
 function renderThumbs(keys, m) {
-  var L = QT_TEXT.sections;
   $('thumbs').innerHTML = keys.map(function(k) {
-    var lbl = '';
+    var lbl = '', of = k === 'quotation' ? QUOTE_KEYS : [k];
     if (m) {
-      var pgs = []; m.pages.forEach(function(secs, i) { if (secs.indexOf(k) >= 0) pgs.push(i + 1); });
+      var pgs = []; m.pages.forEach(function(secs, i) { if (of.some(function(x) { return secs.indexOf(x) >= 0; })) pgs.push(i + 1); });
       lbl = !pgs.length ? '' : pgs.length === 1 ? 'p. ' + pgs[0] : 'pp. ' + pgs[0] + '–' + pgs[pgs.length - 1];
     }
-    var lh = k === 'cover' || k === 'sos';
-    return '<div class="thumb"><div class="pg" aria-hidden="true"><div class="band' + (lh ? ' lt' : '') + '"></div><div class="nm">' + escHtml(L[k]) + '</div>' +
+    var lh = k === 'cover' || k === 'sos' || k === 'riskprofile';
+    return '<div class="thumb"><div class="pg" aria-hidden="true"><div class="band' + (lh ? ' lt' : '') + '"></div><div class="nm">' + escHtml(packItemLabel(k)) + '</div>' +
       '<div class="ln" style="width:90%"></div><div class="ln" style="width:76%"></div>' + (THUMB_BLOCK[k] ? '<div class="bx"></div>' : '<div class="ln" style="width:82%"></div>') +
       '<div class="ln" style="width:84%"></div><div class="ln" style="width:60%"></div></div><span class="lbl">' + (lbl || '&nbsp;') + '</span></div>';
   }).join('');
@@ -3536,11 +3845,24 @@ function measurePack(cb) {
     if (++tries < 150) setTimeout(poll, 100); else finish(null);
   })();
 }
+// The sections switched on, less any that cannot be offered (no completed risk profile)
+function packSectionFlags() {
+  var f = {};
+  SECTION_KEYS.forEach(function(k) { f[k] = !!S.sections[k] && !sectionNA(k); });
+  return f;
+}
+// What the Risk profile page needs, or null until the risk profiler is complete
+function profilePackData() {
+  var res = profilerDone();
+  if (!res) return null;
+  var c = rpContext(), narr = RiskProfiler.narrative(S.risk.pAnswers, c, res, { suggestedSri: res.sri, chosenSri: S.risk.sri, overrideReason: S.risk.pReason });
+  return { result: res, summary: RiskProfiler.summary(S.risk.pAnswers, c), narrative: narr, name: RP_CONFIG.name, date: S.risk.pDate || todayStr(), config: RP_CONFIG };
+}
 function packData(noAutoPrint) {
   return {
     product: S.product, r: S.result, broker: S.broker, client: S.client, risk: S.risk,
     quoteRef: S.quoteRef, productName: productName(), strategyName: strategyName(),
-    sections: S.sections, coverText: docText('cover'), sosText: docText('sos'), noAutoPrint: !!noAutoPrint,
+    sections: packSectionFlags(), profile: profilePackData(), coverText: docText('cover'), sosText: docText('sos'), noAutoPrint: !!noAutoPrint,
     docTitle: packFileName().replace(/\.pdf$/, '')
   };
 }
@@ -3548,9 +3870,11 @@ function generatePack(preview) {
   compute();
   if (S.result.errors) { $('gen-errs').innerHTML = '<div class="alert err">' + S.result.errors.map(escHtml).join('<br>') + '</div>'; return; }
   if (!packReady()) { renderReview(); return; }
-  qtOpenPack(packData(preview));
-  // The factsheets / KIDs are a separate PDF, saved alongside the pack
-  if (!preview && attachedList().length) downloadAttachments();
+  var Q = packData(preview), attach = attachedList().length > 0 && location.protocol !== 'file:';
+  // With factsheets / KIDs to attach, the pack is rendered to images and saved as one PDF (see savePackPdf)
+  if (attach) Q.libBase = location.href.replace(/[?#].*$/, '').replace(/[^\/]*$/, '');
+  var win = qtOpenPack(Q);
+  if (win && attach && !preview) savePackPdf(win);
 }
 
 init();

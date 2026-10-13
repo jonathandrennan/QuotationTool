@@ -26,27 +26,79 @@ function ageBetween(dobStr, atStr) {
   return (new Date(atStr) - new Date(dobStr)) / (365.25 * 24 * 3600 * 1000);
 }
 
-// ─── SRI display (ESMA / PRIIPs summary risk indicator 1–7) ───────────────────
+// ─── SRI display (ESMA / PRIIPs ESMA risk rating 1–7) ───────────────────
 var ESMA_COLORS = ['', '#1a9e5c', '#4ab566', '#a0c840', '#f5c400', '#f5820a', '#e03333', '#990000'];
 var ESMA_LABELS = ['', 'Very Low', 'Low', 'Low to Medium', 'Medium', 'Medium to High', 'High', 'Very High'];
 
 // Formats an indicative (weighted) risk figure: one decimal on screen, whole number otherwise.
 function fmtRisk(v, decimals) { return decimals ? (+v).toFixed(1) : String(Math.round(v)); }
 
-// ─── Fund categories (Portfolio Builder grouping — no look-through) ───────────
+// ─── Fund categories (Portfolio Builder grouping — brochure pp.19 and 31) ─────
+// label: group heading in the builder · short: per-fund tag in the builder and the pack
 var FUND_CATEGORIES = [
-  { key:'fic',   label:'Fixed Income & Cash' },
-  { key:'multi', label:'Multi-Asset' },
-  { key:'eq',    label:'Equity' }
+  { key:'ma',  label:'Multi-Asset Solutions',         short:'Multi-asset' },
+  { key:'pg',  label:'Protected Growth',              short:'Protected growth' },
+  { key:'cbb', label:'Complementary Building Blocks', short:'Building block' },
+  { key:'idx', label:'Index-Tracking',                short:'Index tracker' }
 ];
 var FUND_CATEGORY_OF = {
   // PRSA fund ids
-  cash:'fic', afisd:'fic', afie:'fic',
-  ss30:'multi', dm15:'multi', ss50:'multi', ss75:'multi', dm50:'multi', dm75:'multi',
-  bsri:'eq', etfe:'eq', etfw:'eq', etfs:'eq',
+  dm15:'ma', dm50:'ma', dm75:'ma',
+  ss30:'pg', ss50:'pg', ss75:'pg',
+  bsri:'cbb', afie:'cbb', afisd:'cbb', cash:'cbb',
+  etfw:'idx', etfs:'idx', etfe:'idx',
   // ARF fund ids (where they differ)
-  afsd:'fic', bsge:'eq', hesc:'eq', hmw:'eq', hsp:'eq'
+  afsd:'cbb', bsge:'cbb', hesc:'idx', hmw:'idx', hsp:'idx'
 };
+var FUND_CATEGORY_MAP = {};
+FUND_CATEGORIES.forEach(function(c) { FUND_CATEGORY_MAP[c.key] = c; });
+
+// ─── Asset split (indicative) ─────────────────────────────────────────────────
+// DMAS funds: look-through exposure from the factsheets (FUND_FACTSHEET, prsa_data.js). The published
+// figures include derivatives and total over 100%, so each class is rescaled to its share of the total.
+// Every other fund: its nominal split (`assets` in the fund data). For Strategy Select that is the
+// stock/bond mix whose RETURN the fund aims to match (brochure pp.33–34), not what it holds — its
+// factsheet exposures are not reliable at the moment, so they are not used. Either way the split is
+// always shown as indicative.
+var ASSET_CLASSES = [
+  { key:'eq',   label:'Equity' },
+  { key:'fi',   label:'Fixed income' },
+  { key:'cash', label:'Cash' },
+  { key:'com',  label:'Commodities' },
+  { key:'alt',  label:'Alternatives' }
+];
+var ASSET_FROM_FACTSHEET = ['dm15', 'dm50', 'dm75'];
+// A fund's asset split as fractions summing to 1: { eq, fi, cash, com, alt }.
+function fundAssets(f) {
+  var fs = ASSET_FROM_FACTSHEET.indexOf(f.id) >= 0 && typeof FUND_FACTSHEET !== 'undefined' ? FUND_FACTSHEET[f.id] : null;
+  if (fs) {
+    var g = { eq: fs.equity || 0, fi: fs.bonds || 0, cash: 0, com: fs.commodities || 0, alt: fs.alt || 0 };
+    var t = g.eq + g.fi + g.com + g.alt;
+    if (t > 0) { for (var k in g) g[k] /= t; return g; }
+  }
+  var a = f.assets || {};
+  return { eq: a.eq || 0, fi: a.fi || 0, cash: a.cash || 0, com: 0, alt: 0 };
+}
+// Share of a fund mix ([{ fund, weight }]) by asset class, as fractions of the mix.
+function assetSplit(mix) {
+  var out = {}, tot = 0;
+  ASSET_CLASSES.forEach(function(c) { out[c.key] = 0; });
+  (mix || []).forEach(function(m) { tot += m.weight; });
+  (mix || []).forEach(function(m) {
+    var a = fundAssets(m.fund), w = tot ? m.weight / tot : 0;
+    ASSET_CLASSES.forEach(function(c) { out[c.key] += w * a[c.key]; });
+  });
+  return out;
+}
+// Which split bases a mix uses, for the note under the split: { factsheet, target } (DMAS, Strategy Select).
+function assetSplitBasis(mix) {
+  var b = { factsheet: false, target: false };
+  (mix || []).forEach(function(m) {
+    if (ASSET_FROM_FACTSHEET.indexOf(m.fund.id) >= 0) b.factsheet = true;
+    else if (FUND_CATEGORY_OF[m.fund.id] === 'pg') b.target = true;
+  });
+  return b;
+}
 
 // ─── Managed strategy → suitable client risk ratings ──────────────────────────
 // Glidepath strategies (DIS/Autopilot/Life Cycle) don't have a published SRI — the fund
