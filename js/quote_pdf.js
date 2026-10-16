@@ -502,7 +502,7 @@ function qtBuildPack(Q) {
       ];
     }
     var chargeRows = [
-      [isPrsa ? 'Annual management charge (incl. trail commission)' : 'Policy charge', pct(mix.admin) + ' a year'],
+      [(isPrsa ? 'Annual management charge' : 'Policy charge') + ' (incl. trail commission)', pct(mix.admin) + ' a year'],
       ['Fund charges, weighted', pct(mix.fmc) + ' a year'],
       mix.gtee > 0 ? ['Guarantee charge, weighted', pct(mix.gtee) + ' a year'] : null,
       ['Contribution charge', (r.spContribCharge > 0 || r.rpContribCharge > 0) ? 'Applies, see Charges' : 'None'],
@@ -675,7 +675,7 @@ function qtBuildPack(Q) {
   if (Q.sections.charges) {
     sec = 'charges';
     pageTitle(T.sections.charges, T.packLeads.charges);
-    var ct = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Allocation</th><th>' + (isPrsa ? 'AMC (incl. trail commission)' : 'Policy charge') + '</th><th>Fund charge</th><th>Guarantee charge</th><th>Total annual charge</th></tr></thead><tbody>';
+    var ct = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Allocation</th><th>' + (isPrsa ? 'AMC' : 'Policy charge') + ' (incl. trail commission)</th><th>Fund charge</th><th>Guarantee charge</th><th>Total annual charge</th></tr></thead><tbody>';
     var bAdmin = 0, bFmc = 0, bG = 0;
     fundRows.forEach(function(fr) {
       ct += '<tr><td class="l">' + escHtml(fr.fund.name) + '</td><td>' + (fr.weight * 100).toFixed(1) + '%</td><td>' + pct(fr.admin) + '</td><td>' + pct(fr.fmc) + '</td><td>' + (fr.gtee > 0 ? pct(fr.gtee) : '&ndash;') + '</td><td>' + pct(fr.total) + '</td></tr>';

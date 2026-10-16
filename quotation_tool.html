@@ -2900,7 +2900,7 @@ function renderPfSummary() {
   $('ps-cat-tm').hidden = !$('ps-cat-tm').textContent;
   // Charges: AMC (trail is part of it, not on top) + blended fund charge + guarantee = total
   var code = codeTableFor(S.product)[S[S.product].code];
-  $('ps-amc').querySelector('.cl-label').textContent = (isPrsa ? 'AMC (incl. ' + pct(code.ongoing) + ' trail commission)' : 'Policy charge · incl. ' + pct(code.ongoing) + ' trail');
+  $('ps-amc').querySelector('.cl-label').textContent = (isPrsa ? 'AMC' : 'Policy charge') + ' (incl. ' + pct(code.ongoing) + ' trail commission)';
   setLine('ps-amc', pct(code.admin));
   setLine('ps-fmc', hasMix ? pct(pf.fmc) : '–');
   $('ps-gch').hidden = !(pf.gteeCharge > 0);
@@ -3207,7 +3207,7 @@ function resCharges(r) {
     notes.push('A government levy of ' + pct(IB_GOVT_LEVY) + ' applies to every contribution.' + (r.hasSurrender ? ' Exit charges on full encashment in the early years: ' + r.cc.surrender.filter(function(x){ return x > 0; }).map(pct).join(' / ') + '.' : ''));
   }
   return '<div class="card flush"><div class="tcard-h"><h3 class="card-t">Charges by fund</h3></div>' +
-    projTable(['Fund', 'Allocation', isPrsa ? 'AMC (incl. trail commission)' : 'Policy charge', 'Fund charge', 'Guarantee', 'Total'], trs) +
+    projTable(['Fund', 'Allocation', (isPrsa ? 'AMC' : 'Policy charge') + ' (incl. trail commission)', 'Fund charge', 'Guarantee', 'Total'], trs) +
     '<div class="chg-notes">' + notes.map(function(n) { return '<p>' + escHtml(n) + '</p>'; }).join('') + '</div></div>';
 }
 function kcard(k, v, s, cls) { return '<div class="card kcard"><div class="k">' + k + '</div><div class="v' + (cls ? ' ' + cls : '') + '">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>'; }
