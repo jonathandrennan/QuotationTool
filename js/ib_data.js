@@ -26,10 +26,13 @@ var IB_POLICYHOLDER_TYPES = [
   { id: 'exempt',     label: 'Exempt' }
 ];
 
-// Large-case tiered bonus allocation (applied automatically on the single contribution amount)
+// Large-case tiered bonus allocation on the single contribution amount. Off, as in the IB workbook
+// (Projections!C65 = "No") and the product spec (s1.4.6: "Charges and commissions will not be tiered").
+var IB_TIERED_BONUS_ON = false;
 var IB_TIERED_BONUS = [ { min: 0, bonus: 0 }, { min: 100000, bonus: 0.005 }, { min: 500000, bonus: 0.01 } ];
 function ibTieredBonus(singleContribution) {
   var b = 0;
+  if (!IB_TIERED_BONUS_ON) return b;
   IB_TIERED_BONUS.forEach(function(t) { if (singleContribution >= t.min) b = t.bonus; });
   return b;
 }

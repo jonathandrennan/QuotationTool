@@ -28,7 +28,6 @@ h1, h2, h3, h4 { margin:0; }
 .rail-top { padding:26px 24px 22px; border-bottom:1px solid #EDF1F5; }
 .rail-top img { display:block; height:24px; }
 .rail-ttl { margin-top:14px; font-size:15px; font-weight:700; color:var(--navy); }
-.rail-ref { margin-top:2px; font-size:12px; color:var(--muted); }
 .rail-steps { display:flex; flex-direction:column; gap:2px; padding:18px 14px; }
 .rs { display:flex; align-items:center; gap:12px; width:100%; padding:10px; border:none; border-radius:8px; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer; }
 .rs:disabled { cursor:default; }
@@ -62,6 +61,8 @@ h1:focus { outline:none; }
 .lead { max-width:640px; margin:0; font-size:15px; line-height:1.55; color:var(--muted); }
 .back-link { align-self:flex-start; padding:0; border:none; background:none; color:var(--teal); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
 .back-link:hover { color:var(--navy); }
+.crumbs { display:flex; align-items:center; gap:10px; }
+.crumb-sep { color:var(--faint); font-size:13px; }
 .sec-cap { margin-bottom:12px; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
 .stack { display:flex; flex-direction:column; gap:20px; min-width:0; }
 .cols { display:grid; grid-template-columns:minmax(0, 1fr) 320px; gap:32px; align-items:start; }
@@ -95,6 +96,11 @@ h1:focus { outline:none; }
 .fsec { display:grid; grid-template-columns:200px minmax(0, 1fr); gap:28px; }
 .fsec-h h2 { margin-bottom:6px; font-size:16px; font-weight:700; }
 .fsec-h p { margin:0; font-size:13px; line-height:1.5; color:var(--muted); }
+.lite-card { margin-bottom:20px; }
+.lite-row { display:flex; align-items:center; justify-content:space-between; gap:28px; }
+.lite-row h2 { margin:0 0 6px; font-size:16px; font-weight:700; }
+.lite-row p { margin:0; font-size:13px; line-height:1.5; color:var(--muted); max-width:640px; }
+#step-1.lite-on .cols { display:none; }
 .fields { display:grid; grid-template-columns:repeat(var(--cols, 1), minmax(0, 1fr)); gap:18px 16px; align-items:start; }
 .span2 { grid-column:span 2; }
 .spanall { grid-column:1 / -1; }
@@ -758,7 +764,6 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
   <div class="rail-top">
     <img src="allianz-logo.svg" alt="Allianz">
     <div class="rail-ttl">Quotation Tool</div>
-    <div class="rail-ref" id="hdr-ref"></div>
   </div>
   <nav class="rail-steps" id="stepnav" aria-label="Steps"></nav>
   <div class="rail-foot">
@@ -769,6 +774,7 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
     </div>
     <input type="file" id="imp-file" accept=".json,application/json" hidden onchange="importSettings(this)">
     <div class="rail-msg" id="settings-msg" role="status"></div>
+    <div class="rail-links" id="rail-lite" hidden><button type="button" class="lnk" onclick="setLite(false); goStep(1)">Lite mode on · switch off</button></div>
   </div>
 </aside>
 
@@ -782,6 +788,12 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
     <h1>Adviser details</h1>
     <p class="lead">These appear on the cover letter, Statement of Suitability and remuneration statement. Saved in this browser for next time.</p>
   </header>
+  <div class="card lite-card">
+    <div class="lite-row">
+      <div><h2>Lite mode</h2><p>For quick internal quotes. Skips the adviser details and the risk rating, leaves out the client risk rating and asset split, and builds the pack with the core quotation only.</p></div>
+      <label class="tgl"><input type="checkbox" id="lite-toggle" onchange="setLite(this.checked)" aria-label="Lite mode"></label>
+    </div>
+  </div>
   <div class="cols">
     <div class="stack">
       <section class="card fsec">
@@ -840,12 +852,11 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
   </section>
   <section class="card fsec">
     <div class="fsec-h"><h2>Policy</h2><p>Start date and retirement age set the projection term.</p></div>
-    <div class="fields" style="--cols:3">
+    <div class="fields" style="--cols:2">
       <div><label class="f" for="q-start">Policy start date</label><input type="date" id="q-start"></div>
       <div class="prsa-only"><label class="f" for="q-nra">Retirement age</label>
         <div class="stp"><button type="button" aria-label="Decrease retirement age" onclick="stepNra(-1)">−</button><input type="number" id="q-nra" min="60" max="75" step="1"><button type="button" aria-label="Increase retirement age" onclick="stepNra(1)">+</button></div>
         <div class="hint">60 to 75</div></div>
-      <div><label class="f" for="q-ref">Quotation reference</label><input type="text" id="q-ref" readonly></div>
       <div class="spanall strip" id="age-hint" aria-live="polite"></div>
     </div>
   </section>
@@ -1076,9 +1087,9 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
 
   <div class="pf-view" id="pf-view-alloc" hidden>
     <header class="ph">
-      <button type="button" class="back-link" onclick="setPfView('pick', true)"><span aria-hidden="true">← </span>Change funds</button>
+      <div class="crumbs"><button type="button" class="back-link" id="alloc-back-strat" onclick="setPfView('strat', true)"><span aria-hidden="true">← </span>How to invest</button><span class="crumb-sep" id="alloc-crumb-sep" aria-hidden="true">·</span><button type="button" class="back-link" id="alloc-back-pick" onclick="setPfView('pick', true)"><span aria-hidden="true" id="alloc-pick-arrow" hidden>← </span>Change funds</button></div>
       <h1 id="alloc-h" tabindex="-1">Build Your Own Portfolio</h1>
-      <div class="subs"><span class="ss done"><span class="sd">✓</span>Choose funds</span><span class="sep"></span><span class="ss on"><span class="sd">2</span>Allocate</span></div>
+      <div class="subs"><button type="button" class="ss done" onclick="setPfView('pick', true)"><span class="sd">✓</span>Choose funds</button><span class="sep"></span><span class="ss on"><span class="sd">2</span>Allocate</span></div>
     </header>
     <div class="cols c340">
       <div class="stack">
@@ -1217,7 +1228,9 @@ var SECTION_KEYS = ['cover', 'sos', 'riskprofile', 'summary', 'funds', 'projecti
 // cover letter's "Enclosed" list as ONE item. Compliance to confirm.
 var QUOTE_KEYS = ['summary', 'funds', 'projection', 'charges', 'remun', 'important', 'glossary'];
 var QUOTE_LABEL = 'Your Allianz quotation';
-var REQUIRED_SECTIONS = QUOTE_KEYS;
+// The remuneration statement prints as part of the quotation but can be left out
+var OPTIONAL_QUOTE_KEYS = ['remun'];
+var REQUIRED_SECTIONS = QUOTE_KEYS.filter(function(k) { return OPTIONAL_QUOTE_KEYS.indexOf(k) < 0; });
 // Listed in Step 7 but not available yet: shown, never selectable, never in the pack.
 var COMING_SOON = ['product', 'tax', 'appform'];
 // Attached PDFs (js/quote_docs.js): merged into a companion file, not printed as pages of the pack.
@@ -1225,11 +1238,12 @@ var COMING_SOON = ['product', 'tax', 'appform'];
 var ATTACH_SECTIONS = ['factsheets', 'kids'];
 // Sections that cannot be offered right now: KIDs are only held for the Investment Bond, and the risk
 // profile record needs a completed risk profiler (Step 3).
-function sectionNA(k) { return (k === 'kids' && S.product !== 'ib') || (k === 'riskprofile' && !profilerDone()); }
-function sectionNAText(k) { return k === 'riskprofile' ? 'Complete the risk profiler' : 'Investment Bond only'; }
+var LITE_OFF = ['cover', 'sos', 'riskprofile'];   // need adviser details or the client's risk rating
+function sectionNA(k) { return (S.lite && LITE_OFF.indexOf(k) >= 0) || (k === 'kids' && S.product !== 'ib') || (k === 'riskprofile' && !profilerDone()); }
+function sectionNAText(k) { return S.lite && LITE_OFF.indexOf(k) >= 0 ? 'Not in lite mode' : k === 'riskprofile' ? 'Complete the risk profiler' : 'Investment Bond only'; }
 var SECTION_GROUPS = [
   { title: 'Your documents', note: 'on your letterhead', keys: ['cover', 'sos', 'riskprofile'] },
-  { title: 'Quotation', note: 'Allianz Global Life', keys: ['quotation'] },
+  { title: 'Quotation', note: 'Allianz Global Life', keys: ['quotation', 'remun'] },
   { title: 'Supporting information', note: '', keys: ['product', 'tax', 'factsheets', 'kids', 'appform'] }
 ];
 var SECTION_SUBS = {
@@ -1237,10 +1251,11 @@ var SECTION_SUBS = {
   sos: 'Use the template or write your own in a later step',
   riskprofile: 'The client\'s answers and the result, as a record to go with the Statement of Suitability',
   summary: 'One-page summary',
-  funds: 'Fund split, asset split, portfolio risk and fund details',
+  funds: 'Fund split, asset split, portfolio risk and fund details',   // lite: see sectionSub
   factsheets: 'Factsheets for the selected funds, added to the end of the pack PDF',
   kids: 'KIDs for the selected funds, added to the end of the pack PDF',
-  appform: 'Pre-filled with client and plan details'
+  appform: 'Pre-filled with client and plan details',
+  remun: 'Initial and trail remuneration paid to the adviser, printed after the charges'
 };
 // Auto-filled values in the cover letter / SoS text are wrapped in these (private-use) characters
 // so the guided editor can show them as grey boxes. They are stripped before the pack is built.
@@ -1248,10 +1263,12 @@ var AO = '\uE000', AC = '\uE001';
 
 var S = {
   step: 1, maxStep: 1, product: 'prsa',
+  // lite: quick internal quote. Skips the adviser and risk steps, drops the client risk rating and asset split, and limits the pack to the core quotation.
+  lite: true,   // on by default (set again in init)
   broker: { firm:'', name:'', title:'', email:'', phone:'', address:'', regStatement:'' },
   consent: false,
   client: { salutation:'Mr', first:'', last:'', address:'', dobStr:'', gender:'M' },
-  startStr: '', quoteRef: newQuoteRef(),
+  startStr: '',
   // override: audit record when the adviser proceeds with a portfolio that doesn't match the
   // client's rating — { key, strategy, clientSri, direction, reason, recordedAt (ISO) }
   // esg: sustainability preferences (true | false | null = not answered); profiler: risk profiler used
@@ -1385,6 +1402,7 @@ function init() {
   renderSriCards();
   setGender(S.client.gender);
   setProduct('prsa');
+  setLite(true);   // the tool opens in lite mode; the toggle on the first screen switches to the full flow
   goStep(1);
 }
 
@@ -1454,13 +1472,43 @@ function stepCaption(s) {
   } catch (e) {}
   return '';
 }
+// Lite mode leaves out the adviser and risk steps (step 1 stays visible while it is the current screen, for the toggle)
+function liteSkipped(n) { return S.lite && (n === 1 || n === 3); }
+function liteHidden(n) { return liteSkipped(n) && n !== S.step; }
+function renderEyebrows() {
+  var vis = STEP_NAMES.map(function(x, i) { return i + 1; }).filter(function(n) { return !liteSkipped(n); });
+  document.querySelectorAll('.step .eyebrow').forEach(function(el) {
+    var n = +el.closest('.step').id.replace('step-', ''), i = vis.indexOf(n);
+    el.textContent = i < 0 ? 'Lite mode' : 'Step ' + (i + 1) + ' of ' + vis.length;
+  });
+}
+// Lite mode: set from the toggle on the first screen
+function setLite(on) {
+  S.lite = !!on;
+  $('lite-toggle').checked = S.lite;
+  $('step-1').classList.toggle('lite-on', S.lite);
+  $('rail-lite').hidden = !S.lite;
+  if (S.lite) {
+    // The core quotation only: nothing else is switched on, and the adviser/risk documents are not offered
+    SECTION_KEYS.forEach(function(k) { if (QUOTE_KEYS.indexOf(k) < 0) S.sections[k] = false; });
+    S.risk.override = null; S.risk.reason = '';
+  } else {
+    SECTION_KEYS.forEach(function(k) { S.sections[k] = COMING_SOON.indexOf(k) < 0; });
+  }
+  invalidate(1);
+  renderEyebrows();
+  renderFoot();
+  renderStepNav();
+}
 function renderStepNav() {
-  var h = '';
+  var h = '', pos = 0;
   STEP_NAMES.forEach(function(n, i) {
     var s = i + 1, on = s === S.step, done = !on && s <= S.maxStep;
+    if (liteHidden(s)) return;
+    pos++;
     var cap = on ? 'In progress' : done ? stepCaption(s) : '';
     h += '<button type="button" class="rs' + (on ? ' on' : done ? ' done' : '') + '"' + (s > S.maxStep ? ' disabled' : '') + (on ? ' aria-current="step"' : '') +
-         ' onclick="goStep(' + s + ')"><span class="dot" aria-hidden="true">' + (done ? '✓' : s) + '</span><span class="tx"><span class="lb">' + escHtml(n) + '</span>' +
+         ' onclick="goStep(' + s + ')"><span class="dot" aria-hidden="true">' + (done ? '✓' : pos) + '</span><span class="tx"><span class="lb">' + escHtml(n) + '</span>' +
          (cap ? '<span class="cap">' + escHtml(cap) + '</span>' : '') + '</span></button>';
   });
   $('stepnav').innerHTML = h;
@@ -1474,7 +1522,7 @@ function setFootMsg(text, isErr) {
 function renderFoot() {
   var n = S.step, lbl = '', dis = false, status = '';
   if (n === 1) lbl = 'Continue to client';
-  else if (n === 2) lbl = 'Continue to risk';
+  else if (n === 2) lbl = S.lite ? 'Continue to plan' : 'Continue to risk';
   else if (n === 3) lbl = 'Continue to plan';
   else if (n === 4) lbl = 'Continue to portfolio';
   else if (n === 5) {
@@ -1517,17 +1565,18 @@ function onNext() {
     packNext();
     return;
   }
-  goStep(S.step + 1);
+  goStep(S.lite && S.step === 2 ? 4 : S.step + 1);
 }
 function onBack() {
   if (S.step === 6 && resPrevTab() && !(S.result && S.result.errors)) { setResTab(resPrevTab()[0]); return; }
   if (S.step === 5 && pfView === 'alloc') { setPfView('pick', true); return; }
   if (S.step === 5 && (pfView === 'pick' || pfView === 'managed') && S.product === 'prsa') { setPfView('strat', true); return; }
   if (S.step === 7 && S.packStage !== 'contents') { packBack(); return; }
-  goStep(S.step - 1);
+  goStep(S.lite && S.step === 4 ? 2 : S.step - 1);
 }
 function goStep(n) {
   if (n < 1 || n > 7) return;
+  if (S.lite && n === 3) n = S.step > 3 ? 2 : 4;
   if (S.step === 5 && n > 5 && pfView === 'pick') { pfToAlloc(); return; }   // Choose funds -> Allocate first
   if (n > S.step) {
     // validate every step between the current one and the target
@@ -1553,6 +1602,7 @@ function showStep(n) {
   if (n === 5) renderPortfolio();
   if (n === 6) { S.resTab = 'proj'; S.resSeen.proj = true; compute(); renderResults(); }
   if (n === 7) { compute(); S.packStage = 'contents'; renderReport(); }
+  renderEyebrows();
   renderFoot();
   renderStepNav();
   window.scrollTo(0, 0);
@@ -1567,6 +1617,7 @@ function markInvalid(ids) { ids.forEach(function(id) { var el = $(id); if (el) e
 
 function validateStep(s) {
   var errs = [], bad = [];
+  if (liteSkipped(s)) return errs;
   if (s === 1) {
     [['b-firm','firm'],['b-name','name'],['b-email','email'],['b-phone','phone'],['b-reg','regStatement']].forEach(function(p) {
       if (!String(S.broker[p[1]] || '').trim()) bad.push(p[0]);
@@ -1666,8 +1717,6 @@ function stepNra(d) {
   onClientChange();
 }
 function onClientChange() {
-  $('q-ref').value = S.quoteRef;
-  $('hdr-ref').textContent = 'Ref. ' + S.quoteRef;
   var h = '', ageTxt = '';
   if (S.client.dobStr && S.startStr) {
     var age = ageBetween(S.client.dobStr, S.startStr);
@@ -2193,16 +2242,18 @@ function prsaTermMonths() { return prsaTerm(S.client.dobStr, S.startStr, S.prsa.
 function renderPortfolio() {
   var isPrsa = S.product === 'prsa';
   $('pf-lead').textContent = 'Build a portfolio fund by fund, or choose one of the managed strategies.';
-  $('managed-lead').textContent = 'Glidepaths that move into lower-risk funds as retirement approaches. Strategies suited to the client\'s rating of ' + S.risk.sri + ' are marked.';
+  $('managed-lead').textContent = 'Glidepaths that move into lower-risk funds as retirement approaches.' + (S.lite ? '' : ' Strategies suited to the client\'s rating of ' + S.risk.sri + ' are marked.');
   $('mismatch-reason').value = S.risk.reason;
   mmPromptKey = null;   // the mismatch warning reappears when the adviser next tries to proceed
   if (isPrsa) {
-    $('low-sri-note').innerHTML = S.risk.sri <= 2 ? '<div class="alert info">' + escHtml(QT_TEXT.lowSriNote) + '</div>' : '';
+    $('low-sri-note').innerHTML = !S.lite && S.risk.sri <= 2 ? '<div class="alert info">' + escHtml(QT_TEXT.lowSriNote) + '</div>' : '';
     closePop(false);
     buildStrategyCards();
     syncStrategyCards();
   }
   $('pf-back').hidden = !isPrsa;
+  $('alloc-back-strat').hidden = $('alloc-crumb-sep').hidden = !isPrsa;   // ARF / Bond have no strategy choice to go back to
+  $('alloc-pick-arrow').hidden = isPrsa;
   $('pick-eyebrow').hidden = isPrsa;
   $('pick-h').textContent = $('alloc-h').textContent = isPrsa ? 'Build Your Own Portfolio' : 'Fund selection';
   $('esg-pill').hidden = S.risk.esg !== true;
@@ -2328,7 +2379,7 @@ function infoBtnHtml(kind, id, label) {
 }
 function stratName(id) { return (QT_CONTENT.strategies[id] || {}).name || id; }
 function buildStrategyCards() {
-  var type = S.prsa.prsaType, key = type + ':' + S.risk.sri;
+  var type = S.prsa.prsaType, key = type + ':' + (S.lite ? 'lite' : S.risk.sri);
   if ($('strat-opts').getAttribute('data-built') === key) return;   // the "suits" marks depend on the client's rating
   var C = QT_CONTENT.strategyCards, fams = stratFamilies();
   $('strats').innerHTML =
@@ -2343,7 +2394,7 @@ function buildStrategyCards() {
   var dis = stratById('dis'), rg = strategySuitableRange(dis), fit = strategyRiskFit(dis, S.risk.sri);
   h += '<div class="strat" data-strat="dis"><button type="button" class="strat-main" role="radio" aria-checked="false" onclick="pickStrat(\'dis\', this)">' +
     '<span class="sl">' + escHtml(C.dis.name) + '</span><span class="sm">' + escHtml(C.dis[type] || C.dis.nonstandard) + '</span>' +
-    (rg ? '<span class="suit' + (fit.aligned ? ' ok' : '') + '">' + (fit.aligned ? '✓ ' : '') + 'Suits ratings ' + fmtRatingRange(rg) + '</span>' : '') +
+    (rg && !S.lite ? '<span class="suit' + (fit.aligned ? ' ok' : '') + '">' + (fit.aligned ? '✓ ' : '') + 'Suits ratings ' + fmtRatingRange(rg) + '</span>' : '') +
     '</button>' + infoBtnHtml('strat', 'dis', stratName('dis')) + '</div>';
   fams.forEach(function(f) {
     var fc = C[f.label] || { name: f.label };
@@ -2351,8 +2402,8 @@ function buildStrategyCards() {
       infoBtnHtml('strat', 'fam:' + f.key, fc.name) + '<div class="sopts-h">Choose an option</div><div class="sopts" role="group" aria-label="' + escHtml(fc.name) + ' options">';
     f.items.forEach(function(s) {
       var r = strategySuitableRange(s), ok = !!r && strategyRiskFit(s, S.risk.sri).aligned;
-      h += '<button type="button" class="sopt" data-strat="' + s.id + '" role="radio" aria-checked="false" aria-label="' + escHtml(stratName(s.id)) + ', suits ratings ' + (r ? fmtRatingRange(r) : 'none') + '" onclick="pickStrat(\'' + s.id + '\', this)">' +
-        '<span class="radio-dot" aria-hidden="true"></span><span class="nm">' + escHtml(strategyProfile(s) || s.sub) + '</span><span class="rg' + (ok ? ' ok' : '') + '" title="Suits risk ratings ' + (r ? fmtRatingRange(r) : '–') + '">' + (ok ? '✓ ' : '') + (r ? fmtRatingRange(r) : '–') + '</span></button>';
+      h += '<button type="button" class="sopt" data-strat="' + s.id + '" role="radio" aria-checked="false" aria-label="' + escHtml(stratName(s.id)) + (S.lite ? '' : ', suits ratings ' + (r ? fmtRatingRange(r) : 'none')) + '" onclick="pickStrat(\'' + s.id + '\', this)">' +
+        '<span class="radio-dot" aria-hidden="true"></span><span class="nm">' + escHtml(strategyProfile(s) || s.sub) + '</span>' + (S.lite ? '' : '<span class="rg' + (ok ? ' ok' : '') + '" title="Suits risk ratings ' + (r ? fmtRatingRange(r) : '–') + '">' + (ok ? '✓ ' : '') + (r ? fmtRatingRange(r) : '–') + '</span>') + '</button>';
     });
     h += '</div></div>';
   });
@@ -2762,7 +2813,7 @@ function portfolioState() {
   // ratings their risk profile suits (strategyRiskFit) rather than a numeric comparison.
   var profile = isGlidepath ? strategyProfile(stratObj) : null;
   var fit = isGlidepath ? strategyRiskFit(stratObj, S.risk.sri) : null, pr = Math.round(sri);
-  var mismatch = ready && (isGlidepath ? !fit.aligned : pr !== S.risk.sri);
+  var mismatch = !S.lite && ready && (isGlidepath ? !fit.aligned : pr !== S.risk.sri);   // lite: no client rating to compare with
   var direction = !mismatch ? null : isGlidepath ? fit.direction : (pr > S.risk.sri ? 'higher' : 'lower');
   var message = mix.length ? 'Fund allocations must total 100% (currently ' + (+total.toFixed(2)) + '%).'
     : diySelIds().length ? 'Please enter the allocation for the selected funds.' : 'Please choose at least one fund.';
@@ -2781,14 +2832,14 @@ function buildPfSummary() {
   });
   function line(id, label, cls) { return '<div class="crow' + (cls ? ' ' + cls : '') + '" id="' + id + '"><span class="cl-label">' + label + '</span><span class="cl-val"></span></div>'; }
   $('pf-summary').innerHTML =
-    '<div id="ps-empty"><div class="kv"><span>Client risk rating</span><b id="ps-client0"></b></div><div class="kv"><span>Sustainability preference</span><b id="ps-esg0"></b></div>' +
-      '<div class="empty">Portfolio risk, charges and asset split appear here as you build.</div></div>' +
+    '<div id="ps-empty"><div class="kv lite-x"><span>Client risk rating</span><b id="ps-client0"></b></div><div class="kv lite-x"><span>Sustainability preference</span><b id="ps-esg0"></b></div>' +
+      '<div class="empty">Portfolio risk and charges appear here as you build.</div></div>' +
     '<div id="ps-full">' +
-      '<div class="tiles"><div class="tile"><span class="k">Client</span><span class="v" id="ps-client"></span><span class="s" id="ps-client-l"></span></div>' +
+      '<div class="tiles"><div class="tile lite-x"><span class="k">Client</span><span class="v" id="ps-client"></span><span class="s" id="ps-client-l"></span></div>' +
         '<div class="tile"><span class="k" id="ps-risk-k">Portfolio</span><span class="v" id="ps-risk"></span><span class="s" id="ps-risk-l"></span></div></div>' +
       '<div class="sstrip" id="ps-scale" aria-hidden="true">' + cells + '</div>' +
       '<div class="apill" id="ps-align" role="status"></div>' +
-      '<div class="gsec"><div class="gsec-h">Asset split <small id="ps-cat-note"></small></div><div class="cbar" id="ps-cat">' + cat + '</div><div class="cleg">' + leg + '</div>' +
+      '<div class="gsec lite-x"><div class="gsec-h">Asset split <small id="ps-cat-note"></small></div><div class="cbar" id="ps-cat">' + cat + '</div><div class="cleg">' + leg + '</div>' +
         '<div class="cnote" id="ps-cat-tm"></div></div>' +
       '<div class="gsec"><div class="gsec-h">Annual charges <small id="ps-chg-note"></small></div>' +
         line('ps-amc', '') + line('ps-fmc', 'Blended fund charge') + line('ps-gch', 'Guarantee') + line('ps-total', 'Total annual charge', 'total') + '</div>' +
@@ -2801,6 +2852,9 @@ function renderPfSummary() {
   buildPfSummary();
   $('pf-side').hidden = !glanceVisible();
   var pf = portfolioState(), isPrsa = S.product === 'prsa', hasMix = pf.mix.length > 0;
+  // Lite mode: no client risk rating or asset split
+  document.querySelectorAll('#pf-summary .lite-x').forEach(function(el) { el.hidden = S.lite; });
+  $('pf-summary').querySelector('.tiles').style.gridTemplateColumns = S.lite ? '1fr' : '';
   function setLine(id, val) { $(id).querySelector('.cl-val').textContent = val; }
   var full = !!pf.isGlidepath || pfView === 'alloc' || (isPrsa && S.prsa.strat === 'diy' && hasMix);
   $('ps-empty').hidden = full; $('ps-full').hidden = !full;
@@ -2826,7 +2880,7 @@ function renderPfSummary() {
     d.classList.toggle('pf', n === markAt); d.classList.toggle('cl', n === S.risk.sri);
   });
   var al = $('ps-align');
-  al.hidden = !pf.ready;
+  al.hidden = !pf.ready || S.lite;
   if (pf.ready) {
     var done = pf.mismatch && overrideValid();
     al.className = 'apill ' + (pf.mismatch ? 'warn' : 'ok');
@@ -2846,7 +2900,7 @@ function renderPfSummary() {
   $('ps-cat-tm').hidden = !$('ps-cat-tm').textContent;
   // Charges: AMC (trail is part of it, not on top) + blended fund charge + guarantee = total
   var code = codeTableFor(S.product)[S[S.product].code];
-  $('ps-amc').querySelector('.cl-label').textContent = (isPrsa ? 'AMC' : 'Policy charge') + ' · incl. ' + pct(code.ongoing) + ' trail';
+  $('ps-amc').querySelector('.cl-label').textContent = (isPrsa ? 'AMC (incl. ' + pct(code.ongoing) + ' trail commission)' : 'Policy charge · incl. ' + pct(code.ongoing) + ' trail');
   setLine('ps-amc', pct(code.admin));
   setLine('ps-fmc', hasMix ? pct(pf.fmc) : '–');
   $('ps-gch').hidden = !(pf.gteeCharge > 0);
@@ -2986,9 +3040,8 @@ function resSummary(r) {
   var cName = [S.client.salutation, S.client.first, S.client.last].join(' ');
   var ageStart = r.ageAtStart != null ? r.ageAtStart : r.startAge;
   var risk = S.risk.sri ? S.risk.sri + ' · ' + ESMA_LABELS[S.risk.sri] : '—';
-  var client = sumCol('Client', 2, escHtml(cName), 'Born ' + escHtml(fmtDate(S.client.dobStr)) + ' · age ' + Math.floor(ageStart), [
-      ['Attitude to risk', escHtml(risk)]
-    ]);
+  var client = sumCol('Client', 2, escHtml(cName), 'Born ' + escHtml(fmtDate(S.client.dobStr)) + ' · age ' + Math.floor(ageStart),
+    S.lite ? [] : [['Attitude to risk', escHtml(risk)]]);
 
   // Product and investment in one column: what it is, when it starts and the money going in
   var ctype = isPrsa ? (r.prsaType === 'standard' ? 'Standard PRSA' : 'Non-Standard PRSA') + ' · version ' + r.code : 'Version ' + r.code;
@@ -3016,7 +3069,7 @@ function resSummary(r) {
   var rows = qtFundRows({ product: S.product, r: r });
   var pf = portfolioState(), pr = Math.round(r.portfolioSri);
   var fitTxt = r.isGlidepath ? escHtml(strategyProfile(r.stratObj) || 'Medium risk') + ' profile'
-    : 'Portfolio risk ' + pr + ' · ' + (pr === S.risk.sri ? 'matches client' : 'differs from client');
+    : 'Portfolio risk ' + pr + (S.lite ? '' : ' · ' + (pr === S.risk.sri ? 'matches client' : 'differs from client'));
   var funds = sumCol('Funds', 5, escHtml(strategyName()), fitTxt,
     rows.slice(0, 4).map(function(fr) {
       return [escHtml(fr.fund.name.replace(/^Allianz /, '')) + (fr.gmab ? ' <span class="g">· Guarantee</span>' : ''),
@@ -3125,7 +3178,7 @@ function resIbProjection(r) {
     '<div class="wbox">' + escHtml(QT_TEXT.packWarnings.estimates) + '</div></div>';
   return '<div class="cols">' + chart + '<div class="stack">' + rates + '</div></div>' +
     '<div class="card flush"><div class="tcard-h"><h3 class="card-t">Projected values</h3></div>' +
-    projTable(['Year', 'Age', 'A. Contributions', 'B. Growth to date', 'C. Charges to date', 'D. Tax to date', 'E. Income to date', 'F. Projected value'],
+    projTable(['Year', 'Age', 'A. Contributions', 'B. Growth to date', 'C. Charges to date', 'D. Tax to date', 'E. Income to date (after tax)', 'F. Projected value'],
       p.rows.map(function(rw) { return { tot: p.fundZeroYear === rw.year, c: [rw.year, rw.age, fEUR(rw.A), fEUR(rw.B), fEUR(rw.C), fEUR(rw.D), fEUR(rw.E), fEUR(rw.F)] }; })) + '</div>';
 }
 function stat3(k, v, s) { return '<div><div class="k">' + k + '</div><div class="v">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>'; }
@@ -3154,7 +3207,7 @@ function resCharges(r) {
     notes.push('A government levy of ' + pct(IB_GOVT_LEVY) + ' applies to every contribution.' + (r.hasSurrender ? ' Exit charges on full encashment in the early years: ' + r.cc.surrender.filter(function(x){ return x > 0; }).map(pct).join(' / ') + '.' : ''));
   }
   return '<div class="card flush"><div class="tcard-h"><h3 class="card-t">Charges by fund</h3></div>' +
-    projTable(['Fund', 'Allocation', isPrsa ? 'AMC' : 'Policy charge', 'Fund charge', 'Guarantee', 'Total'], trs) +
+    projTable(['Fund', 'Allocation', isPrsa ? 'AMC (incl. trail commission)' : 'Policy charge', 'Fund charge', 'Guarantee', 'Total'], trs) +
     '<div class="chg-notes">' + notes.map(function(n) { return '<p>' + escHtml(n) + '</p>'; }).join('') + '</div></div>';
 }
 function kcard(k, v, s, cls) { return '<div class="card kcard"><div class="k">' + k + '</div><div class="v' + (cls ? ' ' + cls : '') + '">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>'; }
@@ -3317,7 +3370,7 @@ function textContext() {
   }
   // Cover letter "Enclosed:" list, from the sections in the pack
   var enc = ['sos', 'riskprofile'].filter(function(k) { return S.sections[k] && !sectionNA(k); });
-  enc.push('quotation');
+  enc.push(S.sections.remun ? 'quotation' : 'quotationNoRemun');
   if (S.sections.product || S.sections.tax) enc.push('product');
   var enclosedList = enc.length ? enc.map(function(k) { return '- ' + T.coverEnclosed[k]; }).join('\n') : '- Your personalised quotation';
   var initial = isPrsa ? r.totalInitialComm : r.initialComm;
@@ -3344,7 +3397,8 @@ function textContext() {
     circumstancesSentence: narr ? narr.circumstances : '',
     esgSentence: esg,
     strategyName: strategyPhrase(), portfolioRiskSentence: portfolioRiskSentence,
-    riskSentence: riskSentence, remunSentence: remun
+    riskSentence: riskSentence, remunSentence: remun,
+    remunRef: S.sections.remun ? ' and the Remuneration Statement' : ''
   };
   if (isPrsa) {
     var parts = [];
@@ -3388,6 +3442,7 @@ function templateText(kind) {
 }
 // Keep unedited text in step with the quotation; flag edited text whose template has changed
 function syncTemplates() {
+  if (S.lite) return;   // no cover letter or Statement of Suitability in lite mode
   ['cover', 'sos'].forEach(function(k) {
     var tpl = templateText(k);
     var edited = S.text[k] != null && S.text[k] !== S.basis[k];
@@ -3507,11 +3562,11 @@ function renderContents() {
     g.keys.forEach(function(k) {
       if (k === 'quotation') {
         h += '<div class="prow"><div><div class="pn">' + escHtml(QUOTE_LABEL) + '</div><div class="ps">' +
-          escHtml(QUOTE_KEYS.map(function(q) { return L[q]; }).join(' · ')) + '</div></div><span class="pill req">Required</span></div>';
+          escHtml(REQUIRED_SECTIONS.map(function(q) { return L[q]; }).join(' · ')) + '</div></div><span class="pill req">Required</span></div>';
         return;
       }
       if (k === 'kids' && S.product !== 'ib') return;   // KIDs are only held for the Investment Bond
-      var req = REQUIRED_SECTIONS.indexOf(k) >= 0, na = sectionNA(k), soon = COMING_SOON.indexOf(k) >= 0 || na, sub = attachSub(k) || SECTION_SUBS[k];
+      var req = REQUIRED_SECTIONS.indexOf(k) >= 0, na = sectionNA(k), soon = COMING_SOON.indexOf(k) >= 0 || na, sub = attachSub(k) || (S.lite && k === 'funds' ? 'Fund split, portfolio risk and fund details' : SECTION_SUBS[k]);
       var ctl = na ? '<span class="pill soon">' + escHtml(sectionNAText(k)) + '</span>' : soon ? '<span class="pill soon">Coming soon</span>' : req ? '<span class="pill req">Required</span>'
         : '<label class="tgl"><input type="checkbox" role="switch" data-sec="' + k + '"' + (S.sections[k] ? ' checked' : '') + ' aria-label="Include ' + escHtml(L[k]) + '"></label>';
       h += '<div class="prow' + (soon ? ' soon' : '') + '"><div><div class="pn">' + escHtml(L[k]) + '</div>' +
@@ -3799,7 +3854,7 @@ function edCmd(k, cmd) {
 // ── Review & generate ──
 function packFileName() {
   var sur = String(S.client.last || 'Client').trim().replace(/[^A-Za-z0-9'-]+/g, '-').replace(/^-+|-+$/g, '') || 'Client';
-  return 'Quotation_' + S.quoteRef + '_' + sur + '.pdf';
+  return 'Quotation_' + sur + '_' + todayStr() + '.pdf';
 }
 function reviewChecks() {
   var out = [], pf = portfolioState();
@@ -3811,7 +3866,7 @@ function reviewChecks() {
     else out.push({ ok: false, warn: true, text: nm + ': ' + n + (n === 1 ? ' passage' : ' passages') + ' not written — left out of the pack' });
   });
   out.push({ ok: allTabsSeen(), text: allTabsSeen() ? 'Results reviewed' : 'Results: review all three tabs' });
-  out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk differs from the client\'s rating, reason recorded' : 'Risk aligned, no override needed' });
+  if (!S.lite) out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk differs from the client\'s rating, reason recorded' : 'Risk aligned, no override needed' });
   return out;
 }
 // Warnings are the adviser's call to make; only hard failures hold the pack back.
@@ -3894,8 +3949,9 @@ function profilePackData() {
 }
 function packData(noAutoPrint) {
   return {
-    product: S.product, r: S.result, broker: S.broker, client: S.client, risk: S.risk,
-    quoteRef: S.quoteRef, productName: productName(), strategyName: strategyName(),
+    // Lite mode: the pack carries no adviser details, even if some were entered before lite was switched on
+    product: S.product, r: S.result, broker: S.lite ? { firm:'', name:'', title:'', email:'', phone:'', address:'', regStatement:'' } : S.broker, client: S.client, risk: S.risk, lite: S.lite,
+    productName: productName(), strategyName: strategyName(),
     sections: packSectionFlags(), profile: profilePackData(), coverText: docText('cover'), sosText: docText('sos'), noAutoPrint: !!noAutoPrint,
     docTitle: packFileName().replace(/\.pdf$/, '')
   };

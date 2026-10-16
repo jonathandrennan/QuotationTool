@@ -47,7 +47,9 @@ function ibDefaultRate(inp) { return Math.min(arfBlendedMetrics(inp).gross, IB_M
 // (lower commission -> higher allocation, and vice versa) +/- the tiered large-case bonus.
 function ibSpAllocationRate(inp) {
   var cc = IB_CODES[inp.code];
-  return 1 + (cc.spUp - ibSpUpRate(inp)) + ibTieredBonus(inp.contribution || 0);
+  // K/L/M versions also invest 101% of the single contribution (Parameters col I = 1.01; spec 1.4.7)
+  var versionBonus = cc.rpAllocBonus ? cc.rpAllocBonus - 1 : 0;
+  return 1 + (cc.spUp - ibSpUpRate(inp)) + versionBonus + ibTieredBonus(inp.contribution || 0);
 }
 function ibRpAllocationRate(inp) {
   var cc = IB_CODES[inp.code];
@@ -92,7 +94,6 @@ function ibRunProjection(inp, annualGrossRate) {
   }
   var firstYearRpTotal = rpSchedule.slice(0, 12).reduce(function(a, b) { return a + b; }, 0);
   var rpInitialComm = rpAllowed ? cc.rpUp * firstYearRpTotal : 0;
-  var clawbackYears = cc.surrender.filter(function(x) { return x > 0; }).length;
 
   var incomeType = inp.incomeType || 'none';
   var incomeStartMonth = (incomeType !== 'none' && inp.incomeStartAge != null)
@@ -105,10 +106,11 @@ function ibRunProjection(inp, annualGrossRate) {
   var Y = 0, AB = 0, prevAA = 0, prevIsDisposal = false, prevTaxDue = 0;
   var cumPremium = 0, cumGrowth = 0, cumCharges = 0, cumAllocBonus = 0, cumRealizedTax = 0, cumIncome = 0, cumNetIncome = 0;
   var yrPremium = 0, yrGrowth = 0, yrCharges = 0, yrIncome = 0, yrComm = 0, yrRealizedTax = 0;
-  var rows = [], commRows = [], yearly = [], fundByYear = [0];
+  var rows = [], commRows = [], yearly = [], fundByYear = [contrib * (spAllocRate - IB_GOVT_LEVY)];   // year 0: the single contribution as invested, after the levy (0 for a regular-only plan)
   var fundZeroYear = null, fundZeroMonth = null;
-  var cfNoCharge = [], cfChargeNoTax = [];
-  var riyHorizonMonths = null; // resolved once the fund either depletes or we pass the RIY window
+  // Per-month series for the reduction-in-yield cashflows, assembled after the loop because
+  // the workbook's window depends on the fund-zero year (Projections AX:BB).
+  var riy = { prem: [], income: [], mainOpen: [], bdOpen: [], bhOpen: [] };
 
   for (var month = 1; month <= MAX_MONTHS; month++) {
     var yr = Math.ceil(month / 12);
@@ -139,11 +141,9 @@ function ibRunProjection(inp, annualGrossRate) {
 
     // Exit cost if fully encashed this month, after this month's income (which the mutually
     // exclusive RP/income rule means always comes from the SP share): surrender penalty on
-    // the SP-sourced share, clawback of the RP initial commission on the RP-sourced share.
+    // the SP-sourced share. The workbook has no RP commission clawback (Projections AF).
     var spRate = (yr <= cc.surrender.length) ? cc.surrender[yr - 1] : 0;
-    var clawbackRemaining = (rpInitialComm > 0 && yr < clawbackYears) ? rpInitialComm * (clawbackYears - yr) / clawbackYears : 0;
-    var fundRPAvail = fundAvail - fundSPAvail;
-    var exitCost = Math.max(0, fundSPAvail - income) * spRate + Math.min(fundRPAvail, clawbackRemaining);
+    var exitCost = Math.max(0, fundSPAvail - income) * spRate;
 
     Y = premiumRaw + Y * (1 - prevAA);
     var isDisposal = (month % IB_DEEMED_DISPOSAL_MONTHS === 0);
@@ -157,7 +157,8 @@ function ibRunProjection(inp, annualGrossRate) {
     // netted against an actual withdrawal) — this is what really leaves the fund/the client.
     // A real deemed disposal taxes the fund's own gain and is unaffected by any surrender
     // penalty, since the policy isn't actually being encashed.
-    var taxDue = (Y === 0) ? 0 : Math.max(0, trigger * (gain * taxRate - AB));
+    // Not floored at zero: the workbook lets a deemed-disposal credit (negative tax) through (Projections AC).
+    var taxDue = (Y === 0) ? 0 : trigger * (gain * taxRate - AB);
     // The unrealised/"if you encashed today" tax liability, shown to the client as a
     // disclosure figure between chargeable events (zero exactly on a disposal month, since
     // the real liability was just realised via taxDue instead). Matches the Excel's "Exit
@@ -165,7 +166,7 @@ function ibRunProjection(inp, annualGrossRate) {
     // the real deemed-disposal tax, this IS computed net of the surrender penalty, since an
     // actual encashment would incur that cost before any tax is calculated on the proceeds.
     var gainNetOfExit = Math.max(fundAvail - income - exitCost + AB - Y, 0);
-    var hypotheticalTax = isDisposal ? 0 : (Y === 0 ? 0 : Math.max(0, gainNetOfExit * taxRate - AB));
+    var hypotheticalTax = isDisposal ? 0 : gainNetOfExit * taxRate - AB;
     var netCash = income - (isDisposal ? AA : 1) * taxDue;
     var fundReductionFromTax = isDisposal ? (1 - AA) * taxDue : 0;
 
@@ -173,14 +174,18 @@ function ibRunProjection(inp, annualGrossRate) {
     var zSP = fundAvail > 0 ? fundSPAvail / fundAvail : 1;
     fundSP = Math.max(0, fundSPAvail - income - fundReductionFromTax * zSP);
 
-    // Shadow pools for the reduction-in-yield calculation (charges-only and no-charge-at-all).
-    var growthNT = (fundNoTax + allocated) * monthlyGrowRate;
-    var chargesNT = (fundNoTax + allocated + growthNT / 2) * totalMonthlyCharge + premiumRaw * IB_GOVT_LEVY;
-    var fundNoTaxAvail = Math.max(0, fundNoTax + allocated + growthNT - chargesNT);
-    fundNoTax = Math.max(0, fundNoTaxAvail - income);
-
-    var growthNC = (noChargeFund + premiumRaw) * monthlyGrowRate;
-    noChargeFund = Math.max(0, noChargeFund + premiumRaw + growthNC - income);
+    // Shadow pools for the reduction-in-yield calculation (Projections BD:BK). Neither pool is
+    // floored at zero. The no-charge pool still bears the levy, and in month 1 it starts from the
+    // raw premium rather than the allocated one (BH75 = I75 + O75).
+    var ntOpen = fundNoTax + allocated;
+    var growthNT = ntOpen * monthlyGrowRate;
+    var chargesNT = (ntOpen + growthNT / 2) * totalMonthlyCharge + premiumRaw * IB_GOVT_LEVY;
+    var ncOpen = noChargeFund + (month === 1 ? premiumRaw : allocated);
+    var growthNC = ncOpen * monthlyGrowRate;
+    riy.prem.push(premiumRaw); riy.income.push(income); riy.mainOpen.push(fund);
+    riy.bdOpen.push(ntOpen); riy.bhOpen.push(ncOpen);
+    fundNoTax = ntOpen + growthNT - chargesNT - income;
+    noChargeFund = ncOpen + growthNC - premiumRaw * IB_GOVT_LEVY - income;
 
     var commBase = fund + premiumRaw + growth / 2 - charges / 2 - income / 2;
     var commM = commBase * ongoingM;
@@ -197,21 +202,6 @@ function ibRunProjection(inp, annualGrossRate) {
     var isDepletionMonth = fund <= 0.005 && cumPremium > 0;
     if (isDepletionMonth && fundZeroMonth == null) { fundZeroMonth = month; fundZeroYear = yr; }
 
-    // RIY cashflow horizon: depletion, or IB_RIY_YEARS if the fund never depletes. At the
-    // terminal month, add a redemption inflow of whatever the shadow pool is still worth,
-    // so the IRR comparison isolates the effect of charges (and separately tax) on the
-    // terminal outcome rather than just on withdrawals taken so far — same convention as
-    // the "windfall" term in arfRunProjection.
-    if (riyHorizonMonths == null) {
-      if (fundZeroMonth != null) riyHorizonMonths = fundZeroMonth;
-      else if (month === IB_RIY_YEARS * 12) riyHorizonMonths = month;
-    }
-    if (riyHorizonMonths == null || month <= riyHorizonMonths) {
-      var isTerminal = (month === riyHorizonMonths);
-      cfNoCharge.push(premiumRaw - income - (isTerminal ? noChargeFund : 0));
-      cfChargeNoTax.push(premiumRaw - income - (isTerminal ? fundNoTax : 0));
-    }
-
     if (month % 12 === 0) {
       // "Taxation to date" is the full effective tax picture: tax already actually deducted
       // from the policy at past deemed-disposal events, plus the unrealised liability that
@@ -221,7 +211,7 @@ function ibRunProjection(inp, annualGrossRate) {
       // reading the internal `fund` variable directly, so the two can never drift apart.
       var taxToDate = cumRealizedTax + hypotheticalTax;
       var chargesToDate = cumCharges + exitCost - cumAllocBonus;
-      var displayFund = Math.max(0, cumPremium + cumGrowth - chargesToDate - taxToDate - cumIncome);
+      var displayFund = Math.max(0, cumPremium + cumGrowth - chargesToDate - taxToDate - cumNetIncome);
 
       if (yr <= 40) fundByYear.push(Math.round(fund));
 
@@ -231,7 +221,7 @@ function ibRunProjection(inp, annualGrossRate) {
         rows.push({
           year: yr, age: Math.floor(startAge + yr + 1e-9),
           A: Math.round(cumPremium), B: Math.round(cumGrowth), C: Math.round(chargesToDate),
-          D: Math.round(taxToDate), E: Math.round(cumIncome), F: Math.round(displayFund)
+          D: Math.round(taxToDate), E: Math.round(cumNetIncome), F: Math.round(displayFund)
         });
       }
       if (ARF_MILESTONES[yr]) commRows.push({ year: yr, contrib: yr === 1 ? contrib + firstYearRpTotal : (rpAllowed ? rpSchedule[month - 1] * 12 : 0), comm: Math.round(yrComm) });
@@ -241,6 +231,24 @@ function ibRunProjection(inp, annualGrossRate) {
     }
   }
 
+  // Workbook window (Projections C52, C53, AX:BB): with a fund-zero year (FZY) the flows run to the end of
+  // that year; without one they run 20 years and the pool is cashed in at month 240. The cash-in is the
+  // OPENING pool value of the month, and for the charges pools only happens while that pool is still
+  // positive and runs out next month.
+  var fzy = fundZeroYear, c53 = fzy != null ? 0 : IB_RIY_YEARS;
+  var horizon = Math.max(c53, fzy || 0) * 12, EPS = 0.005;
+  var cfNoCharge = [], cfChargeNoTax = [];
+  for (var t = 1; t <= MAX_MONTHS; t++) {
+    var yrT = Math.ceil(t / 12), pastFzy = fzy != null && yrT > fzy;
+    var open = riy.bdOpen[t - 1], nextOpen = t < MAX_MONTHS ? riy.bdOpen[t] : 1;
+    var ax = (t === 1) ? riy.prem[0]
+           : ((pastFzy || riy.mainOpen[t - 1] <= EPS || t > c53 * 12) ? 0 : riy.prem[t - 1]);
+    var cash = (t === c53 * 12) ||
+               (fzy != null && (yrT === fzy || yrT + 1 === fzy) && Math.abs(nextOpen) <= EPS && open > EPS);
+    var inc = (pastFzy || Math.abs(open) <= EPS || t > horizon) ? 0 : riy.income[t - 1];
+    cfNoCharge.push(ax - inc - (cash ? riy.bhOpen[t - 1] : 0));
+    cfChargeNoTax.push(ax - inc - (cash ? open : 0));
+  }
   var irrNoChargeM = arfSolveIRR(cfNoCharge, monthlyGrowRate);
   var irrChargeM = arfSolveIRR(cfChargeNoTax, monthlyGrowRate - totalMonthlyCharge);
   var irrNoChargeA = Math.pow(1 + irrNoChargeM, 12) - 1;

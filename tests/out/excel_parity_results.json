@@ -1,0 +1,240 @@
+{
+ "total_checks": 10256,
+ "total_mismatches": 0,
+ "total_known": 261,
+ "known": {
+  "open: monthly charge conversion for DIS / Standard Lifecycle Opportunity (section 5)": 206,
+  "open: workbook leaves the transfer value out of contributions, the tool includes it": 28,
+  "workbook issue 2: trail commission on the transfer value is anchored to the opening value": 14,
+  "workbook issue 1: SP charge scaled twice in the final month (terms of 250+ months)": 10,
+  "workbook Parameters!F14 to be corrected (tool 2% is right)": 1,
+  "workbook table runs to age 152; the engine treats age 120+ as qx = 1": 2
+ },
+ "cases": {
+  "prsa/P1": {
+   "desc": "NS A5, DIS, SP 50k + RP 500/m, M, NRA 65",
+   "n": 184,
+   "fail": 0,
+   "known": 83,
+   "fields": {}
+  },
+  "prsa/P2": {
+   "desc": "NS B3, Autopilot Dynamic (GMAB), transfer 120k + RP 300/q esc 3%, F, NRA 66",
+   "n": 165,
+   "fail": 0,
+   "known": 29,
+   "fields": {}
+  },
+  "prsa/P3": {
+   "desc": "Std E2, Lifecycle Opportunity, SP 8k (<10k charge) + RP 80/m (<100 charge) esc 2%, M, NRA 60",
+   "n": 225,
+   "fail": 0,
+   "known": 81,
+   "fields": {}
+  },
+  "prsa/P4": {
+   "desc": "NS F4, DIY SS50(GMAB) 40 / DMAS75 30 / MSCI World 30, SP 200k, SP comm override 2.5%, F, NRA 65",
+   "n": 94,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "prsa/P5": {
+   "desc": "NS A3, Lifecycle Balanced, RP 1,000/yr only, M, NRA 68",
+   "n": 249,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "prsa/P6": {
+   "desc": "NS C2, DIY Cash 20 / AFISD 30 / SS30(GMAB) 50, SP 30k + RP 270/q, term <5y (IL annuity), F, NRA 66",
+   "n": 53,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "prsa/P7": {
+   "desc": "Std E1, DIS, RP 250/m esc 3%, F, NRA 67",
+   "n": 118,
+   "fail": 0,
+   "known": 38,
+   "fields": {}
+  },
+  "prsa/P8": {
+   "desc": "NS D1, Lifecycle Dynamic, SP 100k only, M, NRA 70",
+   "n": 207,
+   "fail": 0,
+   "known": 10,
+   "fields": {}
+  },
+  "prsa/P9": {
+   "desc": "Std E3, DIY SS75 60 / S&P500 40, transfer 60k + RP 400/m, M, NRA 66",
+   "n": 149,
+   "fail": 0,
+   "known": 13,
+   "fields": {}
+  },
+  "ib/I1": {
+   "desc": "D5, SP 100k, SS50(GMAB) 75 / S&P500 25, individual, no income (= workbook saved case)",
+   "n": 411,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "ib/I2": {
+   "desc": "K1, SP 50k + RP 500/m, Euro Cash 100, individual",
+   "n": 414,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "ib/I3": {
+   "desc": "A1, SP 200k, SS50 100, exempt, income 5% of fund from start",
+   "n": 412,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "ib/I4": {
+   "desc": "C4, SP 600k (tier bonus off), DMAS50 40 / MSCI World 30 / SS30(GMAB) 30, corporate, income 30k esc 2% from age 70",
+   "n": 400,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "ib/I5": {
+   "desc": "M2, RP only 1,000/q esc 3%, Best Styles 50 / AFIE 50, individual",
+   "n": 412,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "ib/I6": {
+   "desc": "G3, SP 150k (tier bonus off), S&P500 60 / Euro Stoxx 40, individual, SP comm override 1.5%",
+   "n": 411,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "ib/I7": {
+   "desc": "E6, SP 80k, SS75 100, individual, income 9,000 p.a. level from start (fund depletes)",
+   "n": 382,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "ib/I8": {
+   "desc": "L1, SP 40k + RP 200/m, DMAS15 100, corporate",
+   "n": 414,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "arf/R1": {
+   "desc": "A5, SP 300k, SS50 60 / AFIE 40, default income (4%), from start (age 66)",
+   "n": 661,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "arf/R2": {
+   "desc": "B2, SP 150k, SS75(GMAB) 50 / MSCI World 50, fixed 12,000 p.a. esc 3%, age 71",
+   "n": 636,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "arf/R3": {
+   "desc": "F3, SP 2.5m (6% deemed), DMAS50 100, custom 7%, age 62, SP comm override 1%",
+   "n": 641,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "arf/R4": {
+   "desc": "D1, SP 40k, Euro Cash 100, fixed 9,000 p.a. esc 2%, age 76, growth rate 1 override 4.5%",
+   "n": 616,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "arf/R5": {
+   "desc": "C2, SP 500k, SS30(GMAB) 50 / DMAS15 30 / S&P500 20, default income deferred to age 68 (start 65)",
+   "n": 671,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "arf/R6": {
+   "desc": "A1, SP 80k, Euro Stoxx 100, custom 4.5% from age 70 (crosses 71 -> 5% deemed minimum)",
+   "n": 666,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "arf/R7": {
+   "desc": "F5, SP 60k, AFISD 50 / Cash 50, fixed 6,000 p.a. level (0% esc), age 65 (depletes)",
+   "n": 631,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "data/PRSA funds": {
+   "desc": "",
+   "n": 42,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "data/PRSA codes": {
+   "desc": "",
+   "n": 110,
+   "fail": 0,
+   "known": 1,
+   "fields": {}
+  },
+  "data/PRSA glidepaths": {
+   "desc": "",
+   "n": 55,
+   "fail": 0,
+   "known": 4,
+   "fields": {}
+  },
+  "data/PRSA mortality": {
+   "desc": "",
+   "n": 4,
+   "fail": 0,
+   "known": 2,
+   "fields": {}
+  },
+  "data/IB/ARF funds": {
+   "desc": "",
+   "n": 39,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "data/IB codes": {
+   "desc": "",
+   "n": 536,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "data/ARF codes": {
+   "desc": "",
+   "n": 209,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  },
+  "data/ARF funds": {
+   "desc": "",
+   "n": 39,
+   "fail": 0,
+   "known": 0,
+   "fields": {}
+  }
+ },
+ "mismatches": []
+}

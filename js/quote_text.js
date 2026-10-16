@@ -67,8 +67,6 @@ var QT_TEXT = {
 
   // ─── PRSA projection — from SRP ──────────────────────────────────────────────
   prsaProjectionIntro: 'The table below shows how your PRSA could grow up to your chosen retirement age of {nra}, based on the contributions shown in this quotation. Column D shows the projected value of your PRSA after all charges.',
-  prsaRateFlat: 'These figures assume your fund grows at {rate} per annum before charges. This rate is for illustration purposes only; the benefits payable will depend on the performance of the underlying funds and may be more or less than illustrated.',
-  prsaRateGlidepath: 'These figures assume your fund grows at the assumed glidepath rate (up to {rate} per annum at policy start, reducing as retirement approaches). This rate is for illustration purposes only; the benefits payable will depend on the performance of the underlying funds and may be more or less than illustrated.',
   prsaImportantFlat: 'THESE ILLUSTRATIONS ASSUME AN INVESTMENT RETURN BEFORE RETIREMENT OF {rate} PER ANNUM AND INFLATION OF {inflation} PER ANNUM. THESE RATES ARE FOR ILLUSTRATION PURPOSES ONLY AND ARE NOT GUARANTEED.',
   prsaImportantGlidepath: 'THESE ILLUSTRATIONS ASSUME AN INVESTMENT RETURN BEFORE RETIREMENT OF UP TO {rate} PER ANNUM (GLIDEPATH, VARYING OVER TIME) AND INFLATION OF {inflation} PER ANNUM. THESE RATES ARE FOR ILLUSTRATION PURPOSES ONLY AND ARE NOT GUARANTEED.',
   prsaImportant2: 'ACTUAL INVESTMENT GROWTH WILL DEPEND ON THE PERFORMANCE OF THE UNDERLYING FUNDS AND MAY BE MORE OR LESS THAN ILLUSTRATED.',
@@ -109,7 +107,8 @@ var QT_TEXT = {
   chargesIntro: 'The charges below are deducted on a monthly basis, either directly from your policy or indirectly from the funds in which it invests.',
   prsaFundCharges: 'An Annual Management Charge (AMC) of {admin} and a Fund Management Charge (FMC), which varies by fund, apply to your PRSA. Where you have chosen a fund guarantee, a guarantee charge also applies.',
   arfFundCharges: 'An annual policy charge of {admin} and a fund management charge, which varies by fund, apply to your ARF. Where you have chosen the optional rolling guarantee, a guarantee charge also applies.',
-  prsaContribCharges: 'A contribution charge of {spCharge} applies to single contributions below {spThreshold}, and of {rpCharge} to regular contributions below {rpThreshold} per month. No contribution charge applies to transfers from other pension arrangements.',
+  // Contribution charges table on the Charges page: when each charge applies
+  prsaContribRule: { sp: '{charge} on single contributions below {threshold}', rp: '{charge} on regular contributions below {threshold}', ofv: 'No charge on transfers' },
   prsaRiy: 'For your plan, the total effect of these charges on the projected benefits at retirement is equivalent to a single charge of {riy} per annum. In other words, charges reduce the assumed growth rate from {gross} to {net}.',
   arfRiyCharges: 'At {rate} growth, the total effect of charges is equivalent to reducing the assumed growth rate to {netRate} per annum.',
   arfExitCharges: 'An exit charge applies if you fully encash your ARF in the early years, as shown below. No exit charge applies to income payments or partial withdrawals.',
@@ -126,7 +125,10 @@ var QT_TEXT = {
   chargesFundNote: 'The illustration uses the current level of fund management charges, which may vary in the future. Further details are available in the Schedule of Fees and Charges.',
 
   // ─── Funds and risk — DRAFT ──────────────────────────────────────────────────
-  fundsIntro: 'Each fund has a published ESMA risk rating from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Your own risk rating comes from the risk profiling your adviser carried out with you. To compare the two, we show an indicative risk figure for your portfolio, worked out as the weighted average of its funds\' ESMA ratings. Glidepath strategies change their fund mix as you approach retirement, so they are matched to you on their risk profile instead.',
+  // Lite mode: no client risk rating to compare with
+  // The weighted-average explanation is in the footnote under the risk figures (riskFootnote), not repeated here
+  fundsIntroLite: 'Each fund has a published ESMA risk rating from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Glidepath strategies change their fund mix as you approach retirement, so they are described by their risk profile instead.',
+  fundsIntro: 'Each fund has a published ESMA risk rating from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Your own risk rating comes from the risk profiling your adviser carried out with you, and is compared below with the indicative risk of your portfolio. Glidepath strategies change their fund mix as you approach retirement, so they are matched to you on their risk profile instead.',
   riskMatch: 'The risk of your portfolio is in line with your assessed attitude to risk.',
   riskHigher: 'The indicative risk of your portfolio ({portfolioSri}) is higher than your assessed attitude to risk ({clientSri}). Your adviser has recorded the reason for this recommendation: {reason}',
   riskLower: 'The indicative risk of your portfolio ({portfolioSri}) is lower than your assessed attitude to risk ({clientSri}). Your adviser has recorded the reason for this recommendation: {reason}',
@@ -139,9 +141,11 @@ var QT_TEXT = {
   glidepathNote: 'Your investment strategy is a glidepath: the fund mix shown is the allocation at the start of your plan, and it gradually moves into lower-risk funds as you approach your retirement age.',
   // Funds-page guarantee note. {funds} and {level} are built from the guaranteed funds actually in
   // the quotation, so the note reads correctly for one fund or several, at any protected percentage.
-  guaranteeFundNote: 'If the value of this fund on a policy anniversary is below {level} of its value at the previous anniversary, we add units to bring it back to {level}. The guarantee applies to this fund only.',
-  guaranteeFundNoteMixed: 'If the value of a guaranteed fund on a policy anniversary is below its protected percentage ({levels}) of its value at the previous anniversary, we add units to bring it back up. The guarantee applies only to the funds named above.',
-  guaranteeFundNoteGeneric: 'The optional rolling guarantee protects a percentage of your fund value against falls in the guaranteed fund, in return for an additional charge. Full terms are set out in the product terms and conditions.',
+  // Wording agreed 16/10/2026.
+  guaranteeFundNote: 'The Annual Guarantee applies only to the part of your plan invested in {funds}. At each policy anniversary, we set a guaranteed value equal to {level} of the value of your units in this fund. If, at the next policy anniversary, the value of your units in this fund is below that guaranteed value, we add units to top it back up to the guaranteed value. The guarantee does not apply to any other fund in your plan. Please see the product brochure for further details.',
+  guaranteeFundNoteMixed: 'The Annual Guarantee applies only to the parts of your plan invested in the funds named above, each at its own guarantee level ({levels}). At each policy anniversary, we set a guaranteed value for each of these funds equal to its guarantee level of the value of your units in that fund. If, at the next policy anniversary, the value of your units in one of these funds is below its guaranteed value, we add units to top it back up to the guaranteed value. The guarantee does not apply to any other fund in your plan. Please see the product brochure for further details.',
+  // Fallback when a guaranteed fund has no known guarantee level
+  guaranteeFundNoteGeneric: 'The Annual Guarantee applies only to the part of your plan invested in a guaranteed fund. At each policy anniversary, we set a guaranteed value equal to a percentage of the value of your units in that fund. If, at the next policy anniversary, the value of your units in that fund is below its guaranteed value, we add units to top it back up to the guaranteed value. The guarantee does not apply to any other fund in your plan. Please see the product brochure for further details.',
 
   strategyProfiles: {
     Balanced: 'A more cautious blend weighted towards lower-volatility assets and bonds, with a smaller equity allocation. Prioritises capital preservation with modest growth potential.',
@@ -243,6 +247,7 @@ var QT_TEXT = {
 
   // ─── Glossary — DRAFT ────────────────────────────────────────────────────────
   glossary: [
+    ['Annual Guarantee', 'An optional feature on certain funds, for an additional charge. It applies only to the part of your plan invested in the guaranteed fund. At each policy anniversary, a guaranteed value is set at a percentage of the value of your units in that fund; if your units are worth less than this at the next anniversary, we add units to top them back up to the guaranteed value. Please see the product brochure for further details.'],
     ['Annual Management Charge (AMC)', 'A yearly charge, expressed as a percentage of your fund value, for administering your policy.'],
     ['Annuity', 'A regular income for life bought with your pension fund at retirement.'],
     ['Approved Retirement Fund (ARF)', 'A personal investment fund used to hold pension savings after retirement and draw an income from them.'],
@@ -260,7 +265,6 @@ var QT_TEXT = {
     ['PRSA', 'Personal Retirement Savings Account — a flexible personal pension contract.'],
     ['Reduction in yield', 'A single figure showing the total effect of all charges on your projected investment return.'],
     ['Retirement lump sum', 'The part of your pension fund you can take as a lump sum at retirement, up to Revenue limits.'],
-    ['Rolling guarantee', 'An optional feature on certain funds that protects a percentage of your fund value, for an additional charge.'],
     ['ESMA risk rating', 'A rating from 1 (lower risk) to 7 (higher risk) showing the level of risk of a fund.'],
     ['Trail remuneration', 'An ongoing payment to your adviser, calculated as a percentage of your fund value each year.'],
     ['Transfer value', 'The value of benefits moved into your policy from another pension arrangement.']
@@ -275,10 +279,31 @@ var QT_TEXT = {
   },
   packCoverKicker: 'ALLIANZ GLOBAL LIFE',
   packCoverSub: 'Your quotation',
+  // Brochure-style cover: kicker over a two-line headline, then the product name in orange
+  packCoverKickers: { prsa: 'YOUR RETIREMENT, YOUR WAY', arf: 'YOUR RETIREMENT, YOUR WAY', ib: 'ALLIANZ GLOBAL LIFE' },
+  packCoverLines: ['Your personal', 'quotation for'],
+  packCoverFor: 'Prepared for {clientName}',
+  // Contents page (after the cover)
+  packContents: {
+    title: ['In this', 'quotation'],
+    intro: 'This quotation sets out the details of the {productBrand} plan it is based on. Read it together with the product brochure before you decide.',
+    introKid: 'This quotation sets out the details of the {productBrand} plan it is based on. Read it together with the product brochure and the Key Information Document before you decide.',   // Investment Bond only: no PRSA / ARF KIDs exist
+    pageWord: 'PAGE'
+  },
+  // Back page
+  packBack: {
+    contactHead: 'Contact',
+    contactIntro: 'If you\'d like to get in touch, you can contact Allianz Global Life using the details below:',
+    office: 'Registered office address:',
+    emailNote: 'For any queries related to your policy',
+    warningsHead: 'Warnings',
+    notRiskFree: '{productBrand} is not a risk free product.'
+  },
   // Lead line under each page title. Projection and remuneration vary by product.
   packLeads: {
     summary:    'A summary of the details this quotation is based on.',
     charges:    'The charges that apply to your plan. All are yearly and taken from the value of your fund.',
+    fundsLite:  'The funds you have chosen, how your money is invested, the indicative risk of your portfolio, and what each fund does.',
     funds:      'The funds you have chosen, how your money is split, how its risk compares with your attitude to risk, and what each fund does.',
     remun:      'What {company} pays {brokerFirm} for arranging this plan. These payments are included in the charges.',
     important:  'Please read this page carefully before you decide.',
@@ -304,7 +329,7 @@ var QT_TEXT = {
   chargeDefs: [
     ['Annual management charge (AMC)', 'A yearly charge for setting up, managing and servicing your plan. It depends on the product version and the value of your plan. It includes the trail commission paid to your adviser.'],
     ['Fund management charge', 'The yearly cost of each fund, set by the investment manager and shown on the fund\'s factsheet. It varies by fund.'],
-    ['Guarantee charge', 'Applies only to funds where you have chosen the Annual Guarantee. It is a percentage of the value of that fund and varies by fund.']
+    ['Guarantee charge', 'Applies only to the part of your plan invested in a fund where you have chosen the Annual Guarantee. It is a percentage of the value of your units in that fund and varies by fund.']
   ],
   // Important information page. DRAFT: wording, cooling-off and validity periods need Compliance sign-off.
   packImportant: [
@@ -315,7 +340,7 @@ var QT_TEXT = {
     ['Complaints', 'Contact us first. If you are not satisfied, you can refer your complaint to the Financial Services and Pensions Ombudsman.'],
     ['Not risk free', '{productBrand} is not a risk-free product. Only the Annual Guarantee, where chosen, provides any protection.']
   ],
-  packValidity: 'Quotation {quoteRef} · produced {date} · valid for 30 days',
+  packValidity: 'Quotation produced {date} · valid for 30 days',
   // Glossary terms that only make sense for one product. Everything else appears in every pack.
   glossaryOnly: {
     'Approved Retirement Fund (ARF)': 'arf', 'Deemed distribution': 'arf',
@@ -342,10 +367,10 @@ var QT_TEXT = {
     target:    'Strategy Select: the stock/bond mix it aims to match.',
     tail:      'Actual holdings vary.'
   },
-  packFundsSourceNote: 'Fund descriptions, opportunities and risks are summarised from the Allianz Global Life fund guide. Risk ratings are as at 30/06/2026. For full details, see each fund\'s factsheet at www.allianzgloballife.ie.',
+  packFundsFactsheets: 'For each fund\'s opportunities, risks and full details, please see its fund factsheet at www.allianzgloballife.ie.',
+  packFundsSourceNote: 'Fund descriptions are summarised from the Allianz Global Life fund guide. Risk ratings are as at 30/06/2026.',
   packTrailNote: 'Key years shown. Trail figures are estimates based on the projected values in this quotation and will change with the value of your fund.',
   packKeyYearsNote: 'Key years shown.',
-  prsaInflationShort: 'Inflation of {inflation} a year.',
   packChargesAllowed: 'All the charges shown in this quotation are allowed for.',
   resultsLead: 'Check the details below, then review the projection, charges and remuneration.',
 
@@ -378,6 +403,7 @@ var QT_TEXT = {
     sos:       'Statement of Suitability, setting out our recommendation and the reasons for it',
     riskprofile:'A record of your risk profile questionnaire and the result',
     quotation: 'Your Allianz quotation: a summary, your investment and its risk, projected benefits, charges, the remuneration we receive, and important information',
+    quotationNoRemun: 'Your Allianz quotation: a summary, your investment and its risk, projected benefits, charges and important information',
     product:   'Information about the product, tax and other important points'
   },
 
@@ -403,7 +429,7 @@ var QT_TEXT = {
     '',
     '{transferSection}',
     '## Charges and remuneration',
-    'The total effect of the charges on your plan is equivalent to reducing the assumed growth rate by {riy} per annum. {remunSentence} Full details are set out in the Charges section and the Remuneration Statement in this pack.',
+    'The total effect of the charges on your plan is equivalent to reducing the assumed growth rate by {riy} per annum. {remunSentence} Full details are set out in the Charges section{remunRef} in this pack.',
     '',
     '## Risks you should be aware of',
     'The value of your PRSA may go down as well as up and is not guaranteed. The benefits you receive will depend on the contributions paid, investment performance, charges and annuity rates at retirement.',
@@ -440,7 +466,7 @@ var QT_TEXT = {
     '{depletionSentence}',
     '',
     '## Charges and remuneration',
-    'Allowing for all charges, the assumed growth rate of {rate} is reduced to {netRate} per annum. {remunSentence} Full details are set out in the Charges section and the Remuneration Statement in this pack.',
+    'Allowing for all charges, the assumed growth rate of {rate} is reduced to {netRate} per annum. {remunSentence} Full details are set out in the Charges section{remunRef} in this pack.',
     '',
     '## Risks you should be aware of',
     'The value of your ARF may go down as well as up and is not guaranteed. Depending on the income you take and investment returns, your fund could run out during your lifetime.',
@@ -471,7 +497,7 @@ var QT_TEXT = {
     '{depletionSentence}',
     '',
     '## Charges, tax and remuneration',
-    'Allowing for all charges, the assumed growth rate of {rate} is reduced to {netRate} per annum. Exit tax of {exitTaxRate} applies, based on a {policyholderType} policyholder. {remunSentence} Full details are set out in the Charges section and the Remuneration Statement in this pack.',
+    'Allowing for all charges, the assumed growth rate of {rate} is reduced to {netRate} per annum. Exit tax of {exitTaxRate} applies, based on a {policyholderType} policyholder. {remunSentence} Full details are set out in the Charges section{remunRef} in this pack.',
     '',
     '## Risks you should be aware of',
     'The value of your Investment Bond may go down as well as up and is not guaranteed. Depending on any income or withdrawals you take and investment returns, your fund could run out.',

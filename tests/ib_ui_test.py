@@ -107,7 +107,7 @@ def fill_sos_and_preview(d, tag):
 
 def ib_flow(d):
     print('Investment Bond flow')
-    d.get(URL); js(d, "localStorage.clear()"); d.get(URL)
+    d.get(URL); js(d, "localStorage.clear()"); d.get(URL); js(d, 'setLite(false)')   # the tool opens in lite mode
     fill_broker(d)
     click(d, d.find_element(By.CSS_SELECTOR, '#prod-cards [data-prod=ib]'))
     check(js(d, 'return S.product') == 'ib', 'IB product card')

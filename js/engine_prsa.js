@@ -28,6 +28,11 @@ function prsaStrategies(prsaType) {
 function prsaFundIds(prsaType) {
   return prsaType === 'standard' ? STD_FUND_IDS : NONSTD_FUND_IDS;
 }
+// Whether a glidepath strategy charges its guarantee at mtr months to retirement (see gmabMaxMtr in prsa_data.js)
+function prsaGmabOn(s, mtr) {
+  return !!s.gmab && (s.gmabMaxMtr == null || mtr <= s.gmabMaxMtr);
+}
+
 function prsaSpUpRate(inp) {
   return inp.spUpOverride != null ? inp.spUpOverride : CODES[inp.code].spUp;
 }
@@ -35,22 +40,17 @@ function prsaRpUpRate(inp) {
   return inp.rpUpOverride != null ? inp.rpUpOverride : CODES[inp.code].rpPct;
 }
 
-// Calendar term to retirement, matching Excel's ceiling + FMF approach.
+// Term to retirement as the workbook defines it (SRP!A91, D85): age = (start - DoB)/365.25, term in months
+// = ROUNDUP((NRA - age) x 12), and the final month is scaled by fmf = (NRA - age) x 12 + 1 - term.
 function prsaTerm(dobStr, startStr, nra) {
   var dob   = new Date(dobStr);
   var start = new Date(startStr);
   var retDate = new Date(dob.getFullYear() + nra, dob.getMonth(), dob.getDate());
-  var wholeMonths = (retDate.getFullYear() - start.getFullYear()) * 12
-                  + (retDate.getMonth() - start.getMonth());
-  var periodStart = new Date(start.getFullYear(), start.getMonth() + wholeMonths, start.getDate());
-  if (periodStart > retDate) {
-    wholeMonths--;
-    periodStart = new Date(start.getFullYear(), start.getMonth() + wholeMonths, start.getDate());
-  }
-  var periodEnd  = new Date(start.getFullYear(), start.getMonth() + wholeMonths + 1, start.getDate());
-  var fmf        = (retDate - periodStart) / (periodEnd - periodStart);
-  var termMonths = wholeMonths + (fmf > 0.0001 ? 1 : 0);
-  return { termMonths: termMonths, fmf: fmf, retDate: retDate };
+  var ageAtStart = (start - dob) / (365.25 * 24 * 3600 * 1000);
+  var exactMonths = (nra - ageAtStart) * 12;
+  var termMonths = Math.ceil(exactMonths - 1e-9);
+  var fmf = exactMonths + 1 - termMonths;
+  return { termMonths: termMonths, fmf: fmf, retDate: retDate, ageAtStart: ageAtStart };
 }
 
 // Fund mix at policy start: [{ fund, weight (0–1), gmab (bool) }]. For glidepath
@@ -66,10 +66,11 @@ function prsaInitialMix(inp, termMonths) {
   }
   var s = prsaStrategies(inp.prsaType).find(function(x){ return x.id === inp.strat; });
   if (!s || !s.gpKey) return mix;
+  var gOn = prsaGmabOn(s, termMonths);
   var gp = GP_DATA[s.gpKey];
   var w = gp.weights[Math.max(0, Math.min(termMonths, 540))];
   gp.funds.forEach(function(id, i) {
-    if (w[i] > 0) mix.push({ fund: FUNDS_MAP[id], weight: w[i], gmab: !!(s.gmab && FUNDS_MAP[id].gmab > 0) });
+    if (w[i] > 0) mix.push({ fund: FUNDS_MAP[id], weight: w[i], gmab: !!(gOn && FUNDS_MAP[id].gmab > 0) });
   });
   return mix;
 }
@@ -113,7 +114,7 @@ function prsaAnnuityFactor(retAge, gender, intRate, escRate, guaranteeYrs) {
   var age = retAge;
   var gteeMths = guaranteeYrs * 12;
   for (var t = 1; t <= 661; t++) {
-    var qxA = (qx[age] || 0) * qxAdj;
+    var qxA = age >= 120 ? 1 : (qx[age] || 0) * qxAdj;   // workbook: adjusted qx = 1 from age 120
     var qxM = 1 - Math.pow(1 - qxA, 1/12);
     var amount = (t <= gteeMths) ? escMonth : escMonth * px;
     factor += amount * Math.pow(1 + intRate, -t / 12);
@@ -165,7 +166,7 @@ function runPrsaQuote(inp) {
     var initGP = getGP(s.gpKey, termMonths);
     blendedGross      = initGP.gross;
     blendedFundCharge = initGP.amc;
-    blendedGmab       = s.gmab ? initGP.gmab : 0;
+    blendedGmab       = prsaGmabOn(s, termMonths) ? initGP.gmab : 0;
   }
 
   var totalAnnualCharge = cc.admin + blendedFundCharge + blendedGmab;
@@ -177,28 +178,33 @@ function runPrsaQuote(inp) {
 
   var spContribCharge = (spRaw > 0 && spRaw < CONTRIB_SP_THRESHOLD) ? CONTRIB_SP_CHARGE : 0;
   var rpMonthly       = rpRaw;
-  var rpContribCharge = (rpRaw > 0 && rpRaw < CONTRIB_RP_THRESHOLD) ? CONTRIB_RP_CHARGE : 0;
+  // The workbook tests the monthly equivalent of every payment, escalated amounts included (SRP!Z).
+  var payPerYear = freq === 'monthly' ? 12 : freq === 'quarterly' ? 4 : 1;
+  function rpChargeFor(payment) { return (payment * payPerYear / 12 <= CONTRIB_RP_THRESHOLD - 0.01) ? CONTRIB_RP_CHARGE : 0; }
+  var rpContribCharge = rpRaw > 0 ? rpChargeFor(rpRaw) : 0;   // first-year rate, for display
 
-  var termYears = termMonths / 12;
+  var termYears = inp.nra - ageAtStart;                    // SRP!D75, fractional
   var rpUpRate = prsaRpUpRate(inp);
   var rpUpfrontPct = Math.min(rpUpRate * termYears, cc.rpMax);
-  var annualRp = rpMonthly * (freq === 'monthly' ? 12 : freq === 'quarterly' ? 4 : 1);
-  var rpUpfrontComm = rpUpfrontPct * annualRp * (1 - rpContribCharge);
+  var annualRp = rpMonthly * payPerYear;
+  // Initial commission is paid on the gross contribution (SRP!AD)
+  var rpUpfrontComm = rpUpfrontPct * annualRp;
 
   var spNet = spRaw * (1 - spContribCharge);
   var spUpRate = prsaSpUpRate(inp);
-  var spUpfrontComm = spUpRate * spNet;
+  var spUpfrontComm = spUpRate * spRaw;
 
   var ofvNet = ofvRaw;
   var fundNC = ofvNet + spRaw;
-  var fundWC = ofvNet + spNet;
+  var fundWC = ofvNet;              // the single contribution joins in month 1
   var totalContribNC = ofvRaw + spRaw;
   var totalContribWC = ofvNet + spNet;
+  var sp1Charge = spRaw * spContribCharge;
 
   var snapshots = [];
   var commInYear = 0, ongoingInYear = 0, rpInYear = 0, chargesInYear = 0, cumCharges = 0;
   var escalFactor = 1;
-  var ongoingMonthly = Math.pow(1 + cc.ongoing, 1/12) - 1;
+  var ongoingMonthly = 1 - Math.pow(1 - cc.ongoing, 1/12);   // SRP!E68
 
   for (var m = 1; m <= termMonths; m++) {
     if (m > 1 && (m - 1) % 12 === 0) {
@@ -212,24 +218,27 @@ function runPrsaQuote(inp) {
       if (freq === 'annual')    due = (m % 12 === 1);
       if (due) rpGross = rpMonthly * escalFactor;
     }
-    var rpNet = rpGross * (1 - rpContribCharge);
+    var rpCharge = rpGross > 0 ? rpChargeFor(rpGross) : 0;
+    var rpNet = rpGross * (1 - rpCharge);
 
     var mGrossRate = grossMonthlyRate;
     var mMonthlyCharge = fixedMonthlyCharge;
     if (isGlidepath) {
-      var gp = getGP(s.gpKey, termMonths - m);
+      var gp = getGP(s.gpKey, termMonths - m + 1);   // workbook looks up months-to-retirement T-m+1
       mGrossRate     = Math.pow(1 + gp.gross, 1/12) - 1;
       mMonthlyCharge = (1 - Math.pow(1 - cc.admin, 1/12))
                      + (1 - Math.pow(1 - gp.amc, 1/12))
-                     + (s.gmab ? (1 - Math.pow(1 - gp.gmab, 1/12)) : 0);
+                     + (prsaGmabOn(s, termMonths - m + 1) ? (1 - Math.pow(1 - gp.gmab, 1/12)) : 0);   // workbook's months-to-retirement index for month m
     }
-    if (m === termMonths && fmf > 0.0001) {
+    if (m === termMonths) {
       mGrossRate     = mGrossRate * fmf;
       mMonthlyCharge = mMonthlyCharge * fmf;
     }
 
     fundNC = (fundNC + rpGross) * (1 + mGrossRate);
-    var midWC     = fundWC + rpNet;
+    var openWC    = fundWC;
+    var spIn      = (m === 1) ? spRaw : 0;
+    var midWC     = fundWC + rpNet + (m === 1 ? spNet : 0);
     var growthWC  = midWC * mGrossRate;
     var chargesWC = (midWC + growthWC / 2) * mMonthlyCharge;
     fundWC        = midWC + growthWC - chargesWC;
@@ -238,14 +247,17 @@ function runPrsaQuote(inp) {
     totalContribWC += rpNet;
 
     rpInYear      += rpGross;
-    var ongM = fundWC * ongoingMonthly;
-    commInYear    += ongM;
+    // Trail: opening fund plus half the month's growth, contributions at their gross value (SRP!AD)
+    var ongM = (openWC + spIn + rpGross + growthWC / 2) * ongoingMonthly;
+    var initM = (m === 1 ? spUpfrontComm : 0) + (m <= 12 ? rpGross * rpUpfrontPct : 0);
+    commInYear    += ongM + initM;
     ongoingInYear += ongM;
-    chargesInYear += chargesWC + (rpGross - rpNet);
-    cumCharges    += chargesWC + (rpGross - rpNet);
+    var chargeM = chargesWC + (rpGross - rpNet) + (m === 1 ? sp1Charge : 0);
+    chargesInYear += chargeM;
+    cumCharges    += chargeM;
 
     if (m % 12 === 0 || m === termMonths) {
-      var yr = Math.round(m / 12);
+      var yr = Math.ceil(m / 12);   // policy year of the month (SRP!C)
       snapshots.push({
         year:       yr,
         month:      m,
@@ -255,7 +267,7 @@ function runPrsaQuote(inp) {
         growthNC:   fundNC - totalContribNC,
         fundWC:     fundWC,
         rpInYear:   rpInYear,
-        commInYear: (m === 12 ? (commInYear + spUpfrontComm + rpUpfrontComm) : commInYear),
+        commInYear: commInYear,
         ongoingInYear: ongoingInYear,
         chargesInYear: chargesInYear,
         cumCharges: cumCharges,

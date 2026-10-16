@@ -151,11 +151,3 @@ function glidepathSriPath(strat, termMonths) {
   return { start: at(termMonths), end: at(0) };
 }
 
-// Quote reference: Q-YYMMDD-XXXX
-function newQuoteRef() {
-  var d = new Date();
-  var p = function(n) { return (n < 10 ? '0' : '') + n; };
-  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = '';
-  for (var i = 0; i < 4; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
-  return 'Q-' + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + '-' + r;
-}

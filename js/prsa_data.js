@@ -6188,7 +6188,8 @@ var STRATS_STD = [
 ];
 
 var STRATS_NS = [
-  { id:'dis',   label:'Default Investment Strategy', sub:'Medium risk glidepath',           gpKey:'NS_DIS',                      gmab:true  },
+  // gmabMaxMtr: the guarantee is charged only from this many months to retirement (PRSA workbook V5, Investment Strategies!BL)
+  { id:'dis',   label:'Default Investment Strategy', sub:'Medium risk glidepath',           gpKey:'NS_DIS',                      gmab:true, gmabMaxMtr:96 },
   { id:'ap_ba', label:'Autopilot',                   sub:'Balanced glidepath + GMAB',       gpKey:'NS_AutoPilot_Balanced',        gmab:true  },
   { id:'ap_dy', label:'Autopilot',                   sub:'Dynamic glidepath + GMAB',        gpKey:'NS_AutoPilot_Dynamic',         gmab:true  },
   { id:'ap_op', label:'Autopilot',                   sub:'Opportunity glidepath + GMAB',    gpKey:'NS_AutoPilot_Opportunity',     gmab:true  },

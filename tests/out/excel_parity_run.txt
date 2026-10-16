@@ -1,0 +1,385 @@
+Running PRSA workbook ...
+Running IB workbook ...
+Running ARF workbook ...
+
+[FAIL] prsa P1      184 checks,  111 mismatches  NS A5, DIS, SP 50k + RP 500/m, M, NRA 65
+        - final-month factor (fmf)                                x1   max|diff| 0.00663551   first: yr None excel 0.4455852156 engine 0.4522207268 
+        - total monthly charge (month 1, AMC+fund+gtee)           x1   max|diff| 2.46244e-06  first: yr None excel 0.001435328553 engine 0.001437790996 
+        - monthly growth rate: months differing                   x1   max|diff| 36           first: yr None excel 0 engine 36 first at month 99: excel 0.0048675506 engine 0.0048664836
+        - monthly charge rate: months differing                   x1   max|diff| 222          first: yr None excel 0 engine 222 first at month 1: excel 0.0014353286 engine 0.0014377910
+        - gross IRR (BC86)                                        x1   max|diff| 4.08731e-05  first: yr None excel 0.05680643149 engine 0.05676555839 
+        - net IRR (BD86)                                          x1   max|diff| 6.45855e-05  first: yr None excel 0.03640789543 engine 0.03634330991 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 2.37124e-05  first: yr None excel 0.02039853606 engine 0.02042224848 
+        - maturity value no charges (F32)                         x1   max|diff| 180.567      first: yr None excel 332611.8893 engine 332431.3225 
+        - maturity value with charges (G32)                       x1   max|diff| 212.795      first: yr None excel 254479.0781 engine 254266.2835 
+        - maturity value in current prices (K37)                  x1   max|diff| 123.329      first: yr None excel 147487.944 engine 147364.615 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.474164     first: yr None excel 567.0481773 engine 566.5740134 
+        - annual income, current prices (K38*12)                  x1   max|diff| 5.68997      first: yr None excel 6804.578128 engine 6798.888161 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 9.8176       first: yr None excel 11740.77503 engine 11730.95743 
+        - fund value with charges (fundWC)                        x19  max|diff| 212.795      first: yr 1 (m12) excel 58231.89553 engine 58230.25895 
+        - commission in year (commInYear)                         x19  max|diff| 1.61825      first: yr 1 (m12) excel 3336.098497 engine 3335.919585 
+        - charges in year (chargesInYear)                         x19  max|diff| 22.115       first: yr 1 (m12) excel 936.5861906 engine 938.1804645 
+        - charges to date (cumCharges)                            x19  max|diff| 37.8964      first: yr 1 (m12) excel 936.5861906 engine 938.1804645 
+        - fund value no charges (fundNC)                          x11  max|diff| 180.567      first: yr 9 (m108) excel 155587.4286 engine 155574.5982 
+        - growth to date no charges (growthNC)                    x11  max|diff| 180.567      first: yr 9 (m108) excel 51587.42863 engine 51574.59824 
+[FAIL] prsa P2      165 checks,  106 mismatches  NS B3, Autopilot Dynamic (GMAB), transfer 120k + RP 300/q esc 3%, F, NRA 66
+        - final-month factor (fmf)                                x1   max|diff| 0.0444901    first: yr None excel 0.6221765914 engine 0.6666666667 
+        - monthly growth rate: months differing                   x1   max|diff| 12           first: yr None excel 0 engine 12 first at month 44: excel 0.0048675506 engine 0.0048380731
+        - monthly charge rate: months differing                   x1   max|diff| 13           first: yr None excel 0 engine 13 first at month 32: excel 0.0016541300 engine 0.0016295932
+        - gross IRR (BC86)                                        x1   max|diff| 3.45822e-05  first: yr None excel 0.05585556992 engine 0.05582098774 
+        - net IRR (BD86)                                          x1   max|diff| 2.85151e-05  first: yr None excel 0.03619190742 engine 0.03616339227 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 6.06705e-06  first: yr None excel 0.01966366251 engine 0.01965759546 
+        - maturity value no charges (F32)                         x1   max|diff| 136.307      first: yr None excel 298951.1424 engine 298814.8352 
+        - maturity value with charges (G32)                       x1   max|diff| 87.4184      first: yr None excel 230380.8721 engine 230293.4538 
+        - maturity value in current prices (K37)                  x1   max|diff| 56.7189      first: yr None excel 149475.9444 engine 149419.2255 
+        - annuity factor (C52)                                    x1   max|diff| 0.000306408  first: yr None excel 19.38411766 engine 19.38442407 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.231888     first: yr None excel 586.6826792 engine 586.4507915 
+        - annual income, current prices (K38*12)                  x1   max|diff| 2.78265      first: yr None excel 7040.192151 engine 7037.409498 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 4.28878      first: yr None excel 10850.74668 engine 10846.4579 
+        - contributions to date as SRP col D (excl. transfer)     x15  max|diff| 120000       first: yr 1 (m12) excel 1200 engine 121200 SRP!D20 sums X+P only
+        - commission in year (commInYear)                         x15  max|diff| 186.109      first: yr 1 (m12) excel 428.3531077 engine 427.8853111 
+        - fund value with charges (fundWC)                        x13  max|diff| 109.02       first: yr 3 (m36) excel 138633.3686 engine 138636.7596 
+        - charges in year (chargesInYear)                         x13  max|diff| 13.5073      first: yr 3 (m36) excel 2678.682705 engine 2675.357134 
+        - charges to date (cumCharges)                            x13  max|diff| 34.2247      first: yr 3 (m36) excel 7690.227081 engine 7686.901565 
+        - fund value no charges (fundNC)                          x12  max|diff| 180.518      first: yr 4 (m48) excel 157161.4841 engine 157156.8838 
+        - growth to date no charges (growthNC)                    x12  max|diff| 180.518      first: yr 4 (m48) excel 32141.13169 engine 32136.53141 
+[FAIL] prsa P3      226 checks,  123 mismatches  Std E2, Lifecycle Opportunity, SP 8k (<10k charge) + RP 80/m (<100 charge) esc 2%, M, NRA 60
+        - termMonths                                              x1   max|diff| 1            first: yr None excel 281 engine 280 
+        - final-month factor (fmf)                                x1   max|diff| 0.951315     first: yr None excel 0.01642710472 engine 0.9677419355 
+        - total monthly charge (month 1, AMC+fund+gtee)           x1   max|diff| 4.77432e-07  first: yr None excel 0.0007933082726 engine 0.0007937857045 
+        - monthly growth rate: months differing                   x1   max|diff| 84           first: yr None excel 0 engine 84 first at month 197: excel 0.0048675506 engine 0.0048610045
+        - monthly charge rate: months differing                   x1   max|diff| 280          first: yr None excel 0 engine 280 first at month 1: excel 0.0007933083 engine 0.0007937857
+        - gross IRR (BC86)                                        x1   max|diff| 0.000232251  first: yr None excel 0.05844208508 engine 0.05867433573 
+        - net IRR (BD86)                                          x1   max|diff| 0.000174225  first: yr None excel 0.04750687861 engine 0.04733265353 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 0.000406476  first: yr None excel 0.01093520647 engine 0.0113416822 
+        - maturity value no charges (F32)                         x1   max|diff| 216.3        first: yr None excel 86688.9192 engine 86472.61923 
+        - maturity value with charges (G32)                       x1   max|diff| 604.074      first: yr None excel 72933.7498 engine 72329.67577 
+        - total contributions incl. transfer (D32+OFV)            x1   max|diff| 126.152      first: yr None excel 36321.92439 engine 36195.77245 
+        - maturity value in current prices (K37)                  x1   max|diff| 303.066      first: yr None excel 36591.122 engine 36288.05591 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.996837     first: yr None excel 120.3545201 engine 119.3576834 
+        - annual income, current prices (K38*12)                  x1   max|diff| 11.962       first: yr None excel 1444.254241 engine 1432.292201 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 23.8428      first: yr None excel 2878.700399 engine 2854.857553 
+        - SP initial commission (P91*D66)                         x1   max|diff| 1.6          first: yr None excel 80 engine 78.4 
+        - RP initial commission (sum yr-1 RP x D67)               x1   max|diff| 0.96         first: yr None excel 48 engine 47.04 
+        - fund value with charges (fundWC)                        x24  max|diff| 473.271      first: yr 1 (m12) excel 9197.900369 engine 9197.850269 
+        - commission in year (commInYear)                         x17  max|diff| 2.57248      first: yr 1 (m12) excel 138.290858 engine 135.7183758 
+        - charges in year (chargesInYear)                         x24  max|diff| 159.951      first: yr 1 (m12) excel 260.6511559 engine 100.6999639 
+        - charges to date (cumCharges)                            x24  max|diff| 159.951      first: yr 1 (m12) excel 260.6511559 engine 100.6999639 
+        - fund value no charges (fundNC)                          x8   max|diff| 83.8547      first: yr 17 (m204) excel 53553.64153 engine 53547.41365 
+        - growth to date no charges (growthNC)                    x8   max|diff| 83.8547      first: yr 17 (m204) excel 26342.05341 engine 26335.82552 
+        - snapshot year label (Excel policy year of month)        x1   max|diff| 1            first: yr 24 (m280) excel 24 engine 23 
+[FAIL] prsa P4       95 checks,   24 mismatches  NS F4, DIY SS50(GMAB) 40 / DMAS75 30 / MSCI World 30, SP 200k, SP comm override 2.5%, F, NRA 65
+        - final-month factor (fmf)                                x1   max|diff| 0.0294761    first: yr None excel 0.5133470226 engine 0.4838709677 
+        - gross IRR (BC86)                                        x1   max|diff| 2.09194e-05  first: yr None excel 0.05965499086 engine 0.05963407146 
+        - net IRR (BD86)                                          x1   max|diff| 1.32209e-05  first: yr None excel 0.03808798096 engine 0.03807476002 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 7.69846e-06  first: yr None excel 0.0215670099 engine 0.02155931144 
+        - maturity value no charges (F32)                         x1   max|diff| 43.5681      first: yr None excel 304419.5456 engine 304375.9775 
+        - maturity value with charges (G32)                       x1   max|diff| 24.2146      first: yr None excel 262257.3544 engine 262233.1399 
+        - maturity value in current prices (K37)                  x1   max|diff| 19.5671      first: yr None excel 211923.1511 engine 211903.584 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.0764837    first: yr None excel 828.3618994 engine 828.2854157 
+        - annual income, current prices (K38*12)                  x1   max|diff| 0.917805     first: yr None excel 9940.342793 engine 9939.424988 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 1.13579      first: yr None excel 12301.28936 engine 12300.15356 
+        - commission in year (commInYear)                         x8   max|diff| 7.36109      first: yr 1 (m12) excel 6227.275418 engine 6221.400658 
+        - snapshot year label (Excel policy year of month)        x1   max|diff| 1            first: yr 8 (m87) excel 8 engine 7 
+        - fund value with charges (fundWC)                        x1   max|diff| 24.2146      first: yr 8 (m87) excel 262257.3544 engine 262233.1399 
+        - fund value no charges (fundNC)                          x1   max|diff| 43.5681      first: yr 8 (m87) excel 304419.5456 engine 304375.9775 
+        - growth to date no charges (growthNC)                    x1   max|diff| 43.5681      first: yr 8 (m87) excel 104419.5456 engine 104375.9775 
+        - charges in year (chargesInYear)                         x1   max|diff| 13.3526      first: yr 8 (m87) excel 1134.027211 engine 1120.674627 
+        - charges to date (cumCharges)                            x1   max|diff| 13.3526      first: yr 8 (m87) excel 34330.38064 engine 34317.02806 
+[FAIL] prsa P5      249 checks,  156 mismatches  NS A3, Lifecycle Balanced, RP 1,000/yr only, M, NRA 68
+        - final-month factor (fmf)                                x1   max|diff| 0.0160959    first: yr None excel 0.112936345 engine 0.1290322581 
+        - RP contribution charge (as applied, Z91)                x1   max|diff| 0.02         first: yr None excel 0.02 engine 0 
+        - monthly growth rate: months differing                   x1   max|diff| 193          first: yr None excel 0 engine 193 first at month 128: excel 0.0048675506 engine 0.0048532862
+        - monthly charge rate: months differing                   x1   max|diff| 204          first: yr None excel 0 engine 204 first at month 117: excel 0.0015491636 engine 0.0015477398
+        - gross IRR (BC86)                                        x1   max|diff| 3.72848e-05  first: yr None excel 0.05335575331 engine 0.05331846856 
+        - net IRR (BD86)                                          x1   max|diff| 0.00130404   first: yr None excel 0.0342246979 engine 0.03552874172 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 0.00134133   first: yr None excel 0.01913105541 engine 0.01778972684 
+        - maturity value no charges (F32)                         x1   max|diff| 35.2366      first: yr None excel 59554.92914 engine 59519.69257 
+        - maturity value with charges (G32)                       x1   max|diff| 885.13       first: yr None excel 44250.47501 engine 45135.60508 
+        - maturity value in current prices (K37)                  x1   max|diff| 403.302      first: yr None excel 20162.33832 engine 20565.64002 
+        - annuity factor (C52)                                    x1   max|diff| 0.00102513   first: yr None excel 17.23102697 engine 17.23205211 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 1.63428      first: yr None excel 81.95148794 engine 83.58576819 
+        - annual income, current prices (K38*12)                  x1   max|diff| 19.6114      first: yr None excel 983.4178553 engine 1003.029218 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 43.0412      first: yr None excel 2158.316488 engine 2201.357732 
+        - fund value with charges (fundWC)                        x27  max|diff| 885.13       first: yr 1 (m12) excel 1019.69842 engine 1040.508592 
+        - commission in year (commInYear)                         x27  max|diff| 3.3408       first: yr 1 (m12) excel 105.0223219 engine 105.0973742 
+        - charges in year (chargesInYear)                         x27  max|diff| 19.6204      first: yr 1 (m12) excel 38.59914199 engine 18.97871632 
+        - charges to date (cumCharges)                            x27  max|diff| 371.508      first: yr 1 (m12) excel 38.59914199 engine 18.97871632 
+        - fund value no charges (fundNC)                          x17  max|diff| 37.3661      first: yr 11 (m132) excel 15867.72304 engine 15866.61971 
+        - growth to date no charges (growthNC)                    x17  max|diff| 37.3661      first: yr 11 (m132) excel 4867.723044 engine 4866.619709 
+[FAIL] prsa P6       53 checks,   27 mismatches  NS C2, DIY Cash 20 / AFISD 30 / SS30(GMAB) 50, SP 30k + RP 270/q, term <5y (IL annuity), F, NRA 66
+        - final-month factor (fmf)                                x1   max|diff| 0.0231348    first: yr None excel 0.4435318275 engine 0.4666666667 
+        - RP contribution charge (as applied, Z91)                x1   max|diff| 0.02         first: yr None excel 0.02 engine 0 
+        - RP upfront commission % (rate x term, capped)           x1   max|diff| 0.000185489  first: yr None excel 0.01081451061 engine 0.011 
+        - gross IRR (BC86)                                        x1   max|diff| 3.33736e-05  first: yr None excel 0.04402276215 engine 0.04405613572 
+        - net IRR (BD86)                                          x1   max|diff| 0.000702758  first: yr None excel 0.03101493104 engine 0.03171768861 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 0.000669384  first: yr None excel 0.01300783111 engine 0.01233844711 
+        - maturity value no charges (F32)                         x1   max|diff| 3.12374      first: yr None excel 36943.4152 engine 36946.53894 
+        - maturity value with charges (G32)                       x1   max|diff| 64.4187      first: yr None excel 35738.85214 engine 35803.2708 
+        - maturity value in current prices (K37)                  x1   max|diff| 59.4709      first: yr None excel 32993.89014 engine 33053.36106 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.241372     first: yr None excel 133.9109325 engine 134.1523046 
+        - annual income, current prices (K38*12)                  x1   max|diff| 2.89647      first: yr None excel 1606.93119 engine 1609.827656 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 3.13744      first: yr None excel 1740.62155 engine 1743.75899 
+        - RP initial commission (sum yr-1 RP x D67)               x1   max|diff| 0.200329     first: yr None excel 11.67967146 engine 11.88 
+        - fund value with charges (fundWC)                        x3   max|diff| 64.4187      first: yr 1 (m12) excel 32047.70959 engine 32069.74348 
+        - commission in year (commInYear)                         x3   max|diff| 0.204017     first: yr 1 (m12) excel 349.1023993 engine 349.3064163 
+        - charges in year (chargesInYear)                         x3   max|diff| 21.4345      first: yr 1 (m12) excel 398.9280511 engine 377.4935401 
+        - charges to date (cumCharges)                            x3   max|diff| 57.4861      first: yr 1 (m12) excel 398.9280511 engine 377.4935401 
+        - fund value no charges (fundNC)                          x1   max|diff| 3.12374      first: yr 3 (m33) excel 36943.4152 engine 36946.53894 
+        - growth to date no charges (growthNC)                    x1   max|diff| 3.12374      first: yr 3 (m33) excel 3973.415196 engine 3976.538938 
+[FAIL] prsa P7      119 checks,   78 mismatches  Std E1, DIS, RP 250/m esc 3%, F, NRA 67
+        - final-month factor (fmf)                                x1   max|diff| 0.0279407    first: yr None excel 0.9363449692 engine 0.9642857143 
+        - total monthly charge (month 1, AMC+fund+gtee)           x1   max|diff| 4.77432e-07  first: yr None excel 0.0007933082726 engine 0.0007937857045 
+        - monthly growth rate: months differing                   x1   max|diff| 125          first: yr None excel 0 engine 125 first at month 1: excel 0.0047679243 engine 0.0047578988
+        - monthly charge rate: months differing                   x1   max|diff| 125          first: yr None excel 0 engine 125 first at month 1: excel 0.0007933083 engine 0.0007937857
+        - gross IRR (BC86)                                        x1   max|diff| 2.25737e-05  first: yr None excel 0.05299086475 engine 0.05296829103 
+        - net IRR (BD86)                                          x1   max|diff| 3.21108e-05  first: yr None excel 0.04302466402 engine 0.04299255322 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 9.53708e-06  first: yr None excel 0.009966200728 engine 0.009975737807 
+        - maturity value no charges (F32)                         x1   max|diff| 5.51712      first: yr None excel 47222.59909 engine 47217.08196 
+        - maturity value with charges (G32)                       x1   max|diff| 7.40708      first: yr None excel 44855.7103 engine 44848.30322 
+        - maturity value in current prices (K37)                  x1   max|diff| 5.44495      first: yr None excel 32973.47689 engine 32968.03193 
+        - annuity factor (C52)                                    x1   max|diff| 0.000532541  first: yr None excel 18.8189442 engine 18.81947674 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.0261458    first: yr None excel 135.1733197 engine 135.1471739 
+        - annual income, current prices (K38*12)                  x1   max|diff| 0.313749     first: yr None excel 1622.079836 engine 1621.766087 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 0.426811     first: yr None excel 2206.608162 engine 2206.181351 
+        - fund value with charges (fundWC)                        x11  max|diff| 10.8257      first: yr 1 (m12) excel 3077.242324 engine 3077.062537 
+        - fund value no charges (fundNC)                          x11  max|diff| 10.2479      first: yr 1 (m12) excel 3093.245984 engine 3093.074721 
+        - growth to date no charges (growthNC)                    x11  max|diff| 10.2479      first: yr 1 (m12) excel 93.24598367 engine 93.07472128 
+        - commission in year (commInYear)                         x10  max|diff| 0.123147     first: yr 2 (m24) excel 12.14312627 engine 12.13255542 
+        - charges in year (chargesInYear)                         x10  max|diff| 1.05471      first: yr 2 (m24) excel 46.18655734 engine 46.21057528 
+        - charges to date (cumCharges)                            x10  max|diff| 1.77067      first: yr 2 (m24) excel 61.9177628 engine 61.95063485 
+        - snapshot year label (Excel policy year of month)        x1   max|diff| 1            first: yr 11 (m125) excel 11 engine 10 
+[FAIL] prsa P8      207 checks,   80 mismatches  NS D1, Lifecycle Dynamic, SP 100k only, M, NRA 70
+        - final-month factor (fmf)                                x1   max|diff| 0.00718686   first: yr None excel 0.5071868583 engine 0.5 
+        - monthly growth rate: months differing                   x1   max|diff| 124          first: yr None excel 0 engine 124 first at month 141: excel 0.0048675506 engine 0.0048664836
+        - monthly charge rate: months differing                   x1   max|diff| 180          first: yr None excel 0 engine 180 first at month 85: excel 0.0008083150 engine 0.0008103731
+        - gross IRR (BC86)                                        x1   max|diff| 2.98447e-05  first: yr None excel 0.05773335816 engine 0.05770351342 
+        - net IRR (BD86)                                          x1   max|diff| 3.6849e-05   first: yr None excel 0.0471830544 engine 0.04714620543 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 7.00422e-06  first: yr None excel 0.01055030376 engine 0.01055730798 
+        - maturity value no charges (F32)                         x1   max|diff| 213.335      first: yr None excel 343776.6886 engine 343563.3536 
+        - maturity value with charges (G32)                       x1   max|diff| 213.384      first: yr None excel 275738.4487 engine 275525.0645 
+        - maturity value in current prices (K37)                  x1   max|diff| 111.499      first: yr None excel 144080.6239 engine 143969.125 
+        - annuity factor (C52)                                    x1   max|diff| 0.00170596   first: yr None excel 16.14165945 engine 16.14336541 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.561093     first: yr None excel 637.9987332 engine 637.43764 
+        - annual income, current prices (K38*12)                  x1   max|diff| 6.73312      first: yr None excel 7655.984799 engine 7649.251681 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 12.8857      first: yr None excel 14651.86167 engine 14638.97597 
+        - fund value with charges (fundWC)                        x15  max|diff| 213.384      first: yr 8 (m96) excel 147487.6297 engine 147483.9929 
+        - charges in year (chargesInYear)                         x15  max|diff| 47.8502      first: yr 8 (m96) excel 1416.837122 engine 1420.378288 
+        - charges to date (cumCharges)                            x15  max|diff| 26.8392      first: yr 8 (m96) excel 9507.493594 engine 9511.03476 
+        - fund value no charges (fundNC)                          x11  max|diff| 213.335      first: yr 12 (m144) excel 201212.6531 engine 201206.086 
+        - growth to date no charges (growthNC)                    x11  max|diff| 213.335      first: yr 12 (m144) excel 101212.6531 engine 101206.086 
+[FAIL] prsa P9      150 checks,   33 mismatches  Std E3, DIY SS75 60 / S&P500 40, transfer 60k + RP 400/m, M, NRA 66
+        - final-month factor (fmf)                                x1   max|diff| 0.0339493    first: yr None excel 0.1006160164 engine 0.06666666667 
+        - RP upfront commission % (rate x term, capped)           x1   max|diff| 0.000599589  first: yr None excel 0.09673374401 engine 0.09733333333 
+        - gross IRR (BC86)                                        x1   max|diff| 1.75558e-05  first: yr None excel 0.05953598651 engine 0.05951843074 
+        - net IRR (BD86)                                          x1   max|diff| 1.49144e-05  first: yr None excel 0.05024950777 engine 0.05023459342 
+        - reduction in yield / total charge (BE86)                x1   max|diff| 2.64141e-06  first: yr None excel 0.009286478735 engine 0.00928383732 
+        - maturity value no charges (F32)                         x1   max|diff| 34.0601      first: yr None excel 206213.1989 engine 206179.1388 
+        - maturity value with charges (G32)                       x1   max|diff| 26.4655      first: yr None excel 188974.891 engine 188948.4255 
+        - maturity value in current prices (K37)                  x1   max|diff| 18.5121      first: yr None excel 132184.3386 engine 132165.8265 
+        - annuity factor (C52)                                    x1   max|diff| 0.000390849  first: yr None excel 18.32938152 engine 18.32977236 
+        - monthly annuity, current prices (K38)                   x1   max|diff| 0.0868611    first: yr None excel 538.2802747 engine 538.1934136 
+        - annual income, current prices (K38*12)                  x1   max|diff| 1.04233      first: yr None excel 6459.363296 engine 6458.320964 
+        - annual income, nominal (K36/(C52*C47))                  x1   max|diff| 1.49015      first: yr None excel 9234.509076 engine 9233.018924 
+        - RP initial commission (sum yr-1 RP x D67)               x1   max|diff| 2.87803      first: yr None excel 464.3219713 engine 467.2 
+        - contributions to date as SRP col D (excl. transfer)     x13  max|diff| 60000        first: yr 1 (m12) excel 4800 engine 64800 SRP!D20 sums X+P only
+        - commission in year (commInYear)                         x1   max|diff| 2.87803      first: yr 1 (m12) excel 464.3219713 engine 467.2 
+        - snapshot year label (Excel policy year of month)        x1   max|diff| 1            first: yr 13 (m146) excel 13 engine 12 
+        - fund value with charges (fundWC)                        x1   max|diff| 26.4655      first: yr 13 (m146) excel 188974.891 engine 188948.4255 
+        - fund value no charges (fundNC)                          x1   max|diff| 34.0601      first: yr 13 (m146) excel 206213.1989 engine 206179.1388 
+        - growth to date no charges (growthNC)                    x1   max|diff| 34.0601      first: yr 13 (m146) excel 87813.19889 engine 87779.1388 
+        - charges in year (chargesInYear)                         x1   max|diff| 4.7497       first: yr 13 (m146) excel 153.3918724 engine 148.6421686 
+        - charges to date (cumCharges)                            x1   max|diff| 4.7497       first: yr 13 (m146) excel 12696.17056 engine 12691.42086 
+[FAIL] ib   I1      411 checks,    3 mismatches  D5, SP 100k, SS50(GMAB) 75 / S&P500 25, individual, no income (= workbook saved case)
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.000790622  first: yr None excel 0.05946784111 engine 0.06025846265 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 0.000167306  first: yr None excel 0.03872033873 engine 0.03888764489 
+        - reduction in yield (BA71)                               x1   max|diff| 0.000623315  first: yr None excel 0.02074750238 engine 0.02137081776 
+[FAIL] ib   I2      414 checks,  176 mismatches  K1, SP 50k + RP 500/m, Euro Cash 100, individual
+        - SP allocation rate (C67)                                x1   max|diff| 0.01         first: yr None excel 1.01 engine 1 
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.000451567  first: yr None excel 0.03173910236 engine 0.0321906696 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 0.000123244  first: yr None excel 0.0210916141 engine 0.02096837046 
+        - reduction in yield (BA71)                               x1   max|diff| 0.000574811  first: yr None excel 0.01064748825 engine 0.01122229914 
+        - fund value after tax & income (internal)                x40  max|diff| 583.976      first: yr 1 excel 57123.74621 engine 56613.20187 
+        - projected policy value, col F/H (displayFund)           x40  max|diff| 895.228      first: yr 1 excel 55592.08658 engine 54696.85857 
+        - charges in year incl. levy                              x40  max|diff| 6.2807       first: yr 1 excel 1133.102259 engine 1127.724724 
+        - tax realised in year                                    x5   max|diff| 224.523      first: yr 8 excel 5081.35148 engine 4856.828246 
+        - table B growth to date [rounded]                        x12  max|diff| 612.672      first: yr 1 excel 1696.848468 engine 1681 
+        - table C charges to date [rounded]                       x12  max|diff| 879.238      first: yr 1 excel 2104.761892 engine 2984 
+        - table F policy value [rounded]                          x12  max|diff| 895.087      first: yr 1 excel 55592.08658 engine 54697 
+        - table D taxation to date [rounded]                      x11  max|diff| 344.308      first: yr 2 excel 514.5942844 engine 244 
+[FAIL] ib   I3      412 checks,    3 mismatches  A1, SP 200k, SS50 100, exempt, income 5% of fund from start
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.000864497  first: yr None excel 0.05676527937 engine 0.05762977624 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 3.65977e-06  first: yr None excel 0.04938439693 engine 0.04938073716 
+        - reduction in yield (BA71)                               x1   max|diff| 0.000868157  first: yr None excel 0.007380882435 engine 0.008249039084 
+[FAIL] ib   I4      400 checks,   43 mismatches  C4, SP 600k (tier bonus off), DMAS50 40 / MSCI World 30 / SS30(GMAB) 30, corporate, income 30k esc 2% from age 70
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.0236511    first: yr None excel 0.03662171658 engine 0.06027286585 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 0.00696267   first: yr None excel 0.03662171658 engine 0.04358438334 
+        - reduction in yield (BA71)                               x1   max|diff| 0.0166885    first: yr None excel 0 engine 0.0166884825 
+        - projected policy value, col F/H (displayFund)           x25  max|diff| 36426.5      first: yr 3 excel 612222.1369 engine 611482.5885 
+        - table E income to date (Excel: after tax) [rounded]     x8   max|diff| 38390.5      first: yr 3 excel 30472.45165 engine 31212 
+        - table F policy value [rounded]                          x7   max|diff| 35635.9      first: yr 3 excel 612222.1369 engine 611483 
+[FAIL] ib   I5      412 checks,   19 mismatches  M2, RP only 1,000/q esc 3%, Best Styles 50 / AFIE 50, individual
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.00141965   first: yr None excel 0.05627971831 engine 0.0576993697 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 0.000319173  first: yr None excel 0.03772492929 engine 0.03804410253 
+        - reduction in yield (BA71)                               x1   max|diff| 0.00110048   first: yr None excel 0.01855478903 engine 0.01965526717 
+        - projected policy value, col F/H (displayFund)           x4   max|diff| 458.895      first: yr 1 excel 4034.43511 engine 3575.5405 
+        - table C charges to date [rounded]                       x4   max|diff| 480.477      first: yr 1 excel 84.52308675 engine 565 
+        - table D taxation to date [rounded]                      x4   max|diff| 102.537      first: yr 1 excel 21.10538996 engine 0 
+        - table F policy value [rounded]                          x4   max|diff| 458.435      first: yr 1 excel 4034.43511 engine 3576 
+[FAIL] ib   I6      411 checks,    3 mismatches  G3, SP 150k (tier bonus off), S&P500 60 / Euro Stoxx 40, individual, SP comm override 1.5%
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.000790622  first: yr None excel 0.05946784111 engine 0.06025846265 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 0.000210768  first: yr None excel 0.04918068623 engine 0.04939145468 
+        - reduction in yield (BA71)                               x1   max|diff| 0.000579853  first: yr None excel 0.01028715489 engine 0.01086700797 
+[FAIL] ib   I7      382 checks,   27 mismatches  E6, SP 80k, SS75 100, individual, income 9,000 p.a. level from start (fund depletes)
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.0253355    first: yr None excel 0.03562319571 engine 0.06095872402 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 0.00507171   first: yr None excel 0.03562319571 engine 0.04069490762 
+        - reduction in yield (BA71)                               x1   max|diff| 0.0202638    first: yr None excel 0 engine 0.0202638164 
+        - projected policy value, col F/H (displayFund)           x10  max|diff| 4240.39      first: yr 1 excel 69693.60267 engine 69649.25073 
+        - table E income to date (Excel: after tax) [rounded]     x7   max|diff| 4344.98      first: yr 1 excel 8955.648057 engine 9000 
+        - table F policy value [rounded]                          x6   max|diff| 4240.87      first: yr 1 excel 69693.60267 engine 69649 
+        - table D taxation to date [rounded]                      x1   max|diff| 94.9351      first: yr 10 excel 6648.064862 engine 6743 
+[FAIL] ib   I8      414 checks,  216 mismatches  L1, SP 40k + RP 200/m, DMAS15 100, corporate
+        - SP allocation rate (C67)                                x1   max|diff| 0.01         first: yr None excel 1.01 engine 1 
+        - gross IRR no charges (AY71)                             x1   max|diff| 0.000608453  first: yr None excel 0.04656355758 engine 0.04717201012 
+        - net IRR / RIY reduced-to (AZ71)                         x1   max|diff| 0.000185565  first: yr None excel 0.02984450953 engine 0.02965894477 
+        - reduction in yield (BA71)                               x1   max|diff| 0.000794017  first: yr None excel 0.01671904805 engine 0.01751306536 
+        - fund value after tax & income (internal)                x40  max|diff| 803.603      first: yr 1 excel 43633.36572 engine 43221.42894 
+        - projected policy value, col F/H (displayFund)           x40  max|diff| 784.214      first: yr 1 excel 42397.52514 engine 41837.94647 
+        - commission in year                                      x40  max|diff| 2.04118      first: yr 1 excel 1344.846756 engine 1343.914172 
+        - charges in year incl. levy                              x40  max|diff| 13.4428      first: yr 1 excel 1115.374236 engine 1108.682969 
+        - tax realised in year                                    x5   max|diff| 126.522      first: yr 8 excel 3270.817812 engine 3144.296236 
+        - table B growth to date [rounded]                        x12  max|diff| 1007.84      first: yr 1 excel 1924.739951 engine 1906 
+        - table C charges to date [rounded]                       x12  max|diff| 540.785      first: yr 1 excel 1927.214809 engine 2468 
+        - table F policy value [rounded]                          x12  max|diff| 784.607      first: yr 1 excel 42397.52514 engine 41838 
+        - table D taxation to date [rounded]                      x11  max|diff| 261.869      first: yr 2 excel 431.4174043 engine 307 
+[FAIL] arf  R1      661 checks,  277 mismatches  A5, SP 300k, SS50 60 / AFIE 40, default income (4%), from start (age 66)
+        - rate1 IRR no charges (AO64 annualised)                  x1   max|diff| 3.34752e-05  first: yr None excel 0.05160143326 engine 0.05163490846 
+        - rate1 reduction in yield                                x1   max|diff| 3.29046e-05  first: yr None excel 0.0142409282 engine 0.01427383275 
+        - rate1 fund value                                        x25  max|diff| 1927.08      first: yr 5 excel 290900.3501 engine 290761.3976 
+        - rate1 value after surrender penalty (col E)             x25  max|diff| 1927.08      first: yr 5 excel 287991.3466 engine 287853.7836 
+        - rate1 income in year                                    x26  max|diff| 1951.45      first: yr 5 excel 13692.87283 engine 13829.70422 
+        - rate1 commission in year                                x26  max|diff| 4.66336      first: yr 5 excel 732.3556248 engine 732.1957302 
+        - rate1 charges in year                                   x26  max|diff| 25.396       first: yr 5 excel 4000.887142 engine 4000.093135 
+        - rate1 table B growth to date [rounded]                  x6   max|diff| 1071.1       first: yr 5 excel 74381.36687 engine 74378 
+        - rate1 table C charges+surrender to date [rounded]       x6   max|diff| 291.42       first: yr 5 excel 23168.23386 engine 23166 
+        - rate1 table D income to date [rounded]                  x6   max|diff| 963.922      first: yr 5 excel 63221.78636 engine 63359 
+        - rate1 table E value [rounded]                           x5   max|diff| 1472         first: yr 5 excel 287991.3466 engine 287854 
+        - rate2 IRR no charges (AO686 annualised)                 x1   max|diff| 0.000144343  first: yr None excel 0.03234428254 engine 0.03219993968 
+        - rate2 reduction in yield                                x1   max|diff| 0.000144542  first: yr None excel 0.01419062762 engine 0.01404608513 
+        - rate2 fund value                                        x20  max|diff| 886.703      first: yr 5 excel 262688.6866 engine 262657.6916 
+        - rate2 value after surrender penalty (col E)             x20  max|diff| 886.703      first: yr 5 excel 260061.7997 engine 260031.1147 
+        - rate2 income in year                                    x21  max|diff| 894.661      first: yr 5 excel 13103.86136 engine 13134.62356 
+        - rate2 commission in year                                x21  max|diff| 2.13976      first: yr 5 excel 667.9985339 engine 667.9627163 
+        - rate2 charges in year                                   x21  max|diff| 11.6414      first: yr 5 excel 3649.651145 engine 3649.473344 
+        - rate2 table B growth to date [rounded]                  x5   max|diff| 259.677      first: yr 5 excel 44546.6933 engine 44546 
+        - rate2 table C charges+surrender to date [rounded]       x5   max|diff| 112.357      first: yr 5 excel 21915.59392 engine 21915 
+        - rate2 table D income to date [rounded]                  x5   max|diff| 572.952      first: yr 5 excel 62569.29966 engine 62600 
+        - rate2 table E value [rounded]                           x4   max|diff| 657.455      first: yr 5 excel 260061.7997 engine 260031 
+[FAIL] arf  R2      636 checks,    4 mismatches  B2, SP 150k, SS75(GMAB) 50 / MSCI World 50, fixed 12,000 p.a. esc 3%, age 71
+        - rate1 IRR no charges (AO64 annualised)                  x1   max|diff| 0.000471626  first: yr None excel 0.06118920566 engine 0.06071757963 
+        - rate1 reduction in yield                                x1   max|diff| 0.000471626  first: yr None excel 0.01616314036 engine 0.01569151433 
+        - rate2 IRR no charges (AO686 annualised)                 x1   max|diff| 5.80974e-05  first: yr None excel 0.03248725847 engine 0.03242916112 
+        - rate2 reduction in yield                                x1   max|diff| 5.80974e-05  first: yr None excel 0.01539446472 engine 0.01533636737 
+[FAIL] arf  R3      641 checks,  218 mismatches  F3, SP 2.5m (6% deemed), DMAS50 100, custom 7%, age 62, SP comm override 1%
+        - SP allocation rate (C75; engine has none = 1)           x1   max|diff| 0.01         first: yr None excel 1.01 engine 1 
+        - rate1 IRR no charges (AO64 annualised)                  x1   max|diff| 8.90169e-05  first: yr None excel 0.05790690421 engine 0.05781788728 
+        - rate1 net IRR (AP64 annualised)                         x1   max|diff| 0.0013099    first: yr None excel 0.03857322511 engine 0.03726332974 
+        - rate1 reduction in yield                                x1   max|diff| 0.00122088   first: yr None excel 0.0193336791 engine 0.02055455754 
+        - rate1 first-year income                                 x1   max|diff| 488.069      first: yr None excel 175534.7975 engine 175046.7283 
+        - rate1 fund value                                        x16  max|diff| 32343.3      first: yr 1 excel 2439592.024 engine 2414172.952 
+        - rate1 value after surrender penalty (col E)             x16  max|diff| 32343.3      first: yr 1 excel 2366404.263 engine 2341747.763 
+        - rate1 income in year                                    x17  max|diff| 33036.2      first: yr 1 excel 175534.7975 engine 175046.7283 
+        - rate1 commission in year                                x17  max|diff| 239.81       first: yr 1 excel 43666.33496 engine 43493.57547 
+        - rate1 charges in year                                   x17  max|diff| 622.409      first: yr 1 excel 48588.82158 engine 48099.76725 
+        - rate1 table B growth to date [rounded]                  x8   max|diff| 26370.4      first: yr 1 excel 138715.6429 engine 137319 
+        - rate1 table C charges+surrender to date [rounded]       x8   max|diff| 23748.4      first: yr 1 excel 96776.5823 engine 120525 
+        - rate1 table D income to date [rounded]                  x8   max|diff| 42133.6      first: yr 1 excel 175534.7975 engine 175047 
+        - rate1 table E value [rounded]                           x7   max|diff| 31846.1      first: yr 1 excel 2366404.263 engine 2341748 
+        - rate2 IRR no charges (AO686 annualised)                 x1   max|diff| 0.000256096  first: yr None excel 0.03261775565 engine 0.03236165998 
+        - rate2 net IRR (AP686 annualised)                        x1   max|diff| 0.0014469    first: yr None excel 0.01367386545 engine 0.01222696711 
+        - rate2 reduction in yield                                x1   max|diff| 0.0011908    first: yr None excel 0.0189438902 engine 0.02013469287 
+        - rate2 first-year income                                 x1   max|diff| 253.491      first: yr None excel 175268.0917 engine 175014.6005 
+        - rate2 fund value                                        x13  max|diff| 25234.3      first: yr 1 excel 2379265.523 engine 2354219.68 
+        - rate2 value after surrender penalty (col E)             x13  max|diff| 25234.3      first: yr 1 excel 2307887.558 engine 2283593.09 
+        - rate2 income in year                                    x14  max|diff| 25425.2      first: yr 1 excel 175268.0917 engine 175014.6005 
+        - rate2 commission in year                                x14  max|diff| 188.961      first: yr 1 excel 43439.08368 engine 43267.23903 
+        - rate2 charges in year                                   x14  max|diff| 490.254      first: yr 1 excel 47999.29811 engine 47512.8069 
+        - rate2 table B growth to date [rounded]                  x7   max|diff| 10885.6      first: yr 1 excel 77532.91328 engine 76747 
+        - rate2 table C charges+surrender to date [rounded]       x7   max|diff| 23761.7      first: yr 1 excel 94377.26381 engine 118139 
+        - rate2 table D income to date [rounded]                  x7   max|diff| 29146.2      first: yr 1 excel 175268.0917 engine 175015 
+        - rate2 table E value [rounded]                           x6   max|diff| 25232.7      first: yr 1 excel 2307887.558 engine 2283593 
+[FAIL] arf  R4      616 checks,    4 mismatches  D1, SP 40k, Euro Cash 100, fixed 9,000 p.a. esc 2%, age 76, growth rate 1 override 4.5%
+        - rate1 IRR no charges (AO64 annualised)                  x1   max|diff| 0.00283396   first: yr None excel 0.04950932718 engine 0.04667536752 
+        - rate1 reduction in yield                                x1   max|diff| 0.00283396   first: yr None excel 0.008337722128 engine 0.005503762468 
+        - rate2 IRR no charges (AO686 annualised)                 x1   max|diff| 0.00561094   first: yr None excel 0.03881940113 engine 0.0332084582 
+        - rate2 reduction in yield                                x1   max|diff| 0.00561094   first: yr None excel 0.01105492724 engine 0.005443984309 
+[FAIL] arf  R5      671 checks,  282 mismatches  C2, SP 500k, SS30(GMAB) 50 / DMAS15 30 / S&P500 20, default income deferred to age 68 (start 65)
+        - rate1 IRR no charges (AO64 annualised)                  x1   max|diff| 1.6429e-05   first: yr None excel 0.05438686866 engine 0.05440329763 
+        - rate1 reduction in yield                                x1   max|diff| 1.59535e-05  first: yr None excel 0.01275474422 engine 0.01277069774 
+        - rate1 fund value                                        x26  max|diff| 3776.4       first: yr 7 excel 559234.645 engine 558883.2374 
+        - rate1 value after surrender penalty (col E)             x26  max|diff| 3776.4       first: yr 7 excel 559234.645 engine 558883.2374 
+        - rate1 income in year                                    x27  max|diff| 3833.62      first: yr 7 excel 27845.6724 engine 28183.92284 
+        - rate1 commission in year                                x27  max|diff| 4.45498      first: yr 7 excel 674.6402101 engine 674.2340219 
+        - rate1 charges in year                                   x27  max|diff| 45.1566      first: yr 7 excel 6858.782721 engine 6854.833368 
+        - rate1 table B growth to date [rounded]                  x6   max|diff| 2399.31      first: yr 10 excel 290594.9155 engine 290501 
+        - rate1 table C charges+surrender to date [rounded]       x6   max|diff| 554.478      first: yr 10 excel 67088.96309 engine 67067 
+        - rate1 table D income to date [rounded]                  x6   max|diff| 1845.83      first: yr 10 excel 185050.3106 engine 185546 
+        - rate1 table E value [rounded]                           x5   max|diff| 3321.05      first: yr 10 excel 538455.6418 engine 537887 
+        - rate2 IRR no charges (AO686 annualised)                 x1   max|diff| 3.32e-05     first: yr None excel 0.03220062092 engine 0.03216742097 
+        - rate2 reduction in yield                                x1   max|diff| 3.34949e-05  first: yr None excel 0.01256835256 engine 0.01253485762 
+        - rate2 fund value                                        x20  max|diff| 2862.62      first: yr 7 excel 479883.6991 engine 479701.6834 
+        - rate2 value after surrender penalty (col E)             x20  max|diff| 2862.62      first: yr 7 excel 479883.6991 engine 479701.6834 
+        - rate2 income in year                                    x21  max|diff| 2888.51      first: yr 7 excel 24249.75572 engine 24428.49294 
+        - rate2 commission in year                                x21  max|diff| 3.40462      first: yr 7 excel 585.1248229 engine 584.912277 
+        - rate2 charges in year                                   x21  max|diff| 34.4736      first: yr 7 excel 5948.767657 engine 5946.701965 
+        - rate2 table B growth to date [rounded]                  x5   max|diff| 901.114      first: yr 10 excel 155804.2568 engine 155763 
+        - rate2 table C charges+surrender to date [rounded]       x5   max|diff| 347.991      first: yr 10 excel 60223.53232 engine 60208 
+        - rate2 table D income to date [rounded]                  x5   max|diff| 2200.91      first: yr 10 excel 165172.437 engine 165640 
+        - rate2 table E value [rounded]                           x4   max|diff| 2672.84      first: yr 10 excel 430408.2875 engine 429915 
+[FAIL] arf  R6      666 checks,  323 mismatches  A1, SP 80k, Euro Stoxx 100, custom 4.5% from age 70 (crosses 71 -> 5% deemed minimum)
+        - rate1 IRR no charges (AO64 annualised)                  x1   max|diff| 8.2057e-06   first: yr None excel 0.06035959969 engine 0.06035139399 
+        - rate1 reduction in yield                                x1   max|diff| 8.9997e-06   first: yr None excel 0.0122028458 engine 0.0121938461 
+        - rate1 fund value                                        x29  max|diff| 575.88       first: yr 2 excel 79890.56348 engine 79862.65693 
+        - rate1 value after surrender penalty (col E)             x29  max|diff| 575.88       first: yr 2 excel 79890.56348 engine 79862.65693 
+        - rate1 income in year                                    x30  max|diff| 581.875      first: yr 2 excel 3989.332344 engine 4016.039003 
+        - rate1 commission in year                                x30  max|diff| 4.23916      first: yr 2 excel 602.254014 engine 602.0524182 
+        - rate1 charges in year                                   x30  max|diff| 6.50706      first: yr 2 excel 927.1233445 engine 926.8265121 
+        - rate1 table B growth to date [rounded]                  x10  max|diff| 396.293      first: yr 2 excel 9351.231804 engine 9350 
+        - rate1 table C charges+surrender to date [rounded]       x10  max|diff| 78.7316      first: yr 2 excel 1854.552131 engine 1854 
+        - rate1 table D income to date [rounded]                  x10  max|diff| 317.562      first: yr 2 excel 7606.116196 engine 7633 
+        - rate1 table E value [rounded]                           x9   max|diff| 575.392      first: yr 2 excel 79890.56348 engine 79863 
+        - rate2 IRR no charges (AO686 annualised)                 x1   max|diff| 0.000194572  first: yr None excel 0.03242912164 engine 0.03223454968 
+        - rate2 reduction in yield                                x1   max|diff| 0.000195177  first: yr None excel 0.01211872672 engine 0.01192355009 
+        - rate2 fund value                                        x20  max|diff| 448.446      first: yr 2 excel 75680.87006 engine 75662.44425 
+        - rate2 value after surrender penalty (col E)             x20  max|diff| 448.446      first: yr 2 excel 75680.87006 engine 75662.44425 
+        - rate2 income in year                                    x21  max|diff| 453.795      first: yr 2 excel 3833.877654 engine 3851.961046 
+        - rate2 commission in year                                x21  max|diff| 3.33936      first: yr 2 excel 578.2352208 engine 578.1003929 
+        - rate2 charges in year                                   x21  max|diff| 5.11955      first: yr 2 excel 890.1500316 engine 889.951616 
+        - rate2 table D income to date [rounded]                  x8   max|diff| 343.596      first: yr 2 excel 7434.376876 engine 7452 
+        - rate2 table E value [rounded]                           x7   max|diff| 417.488      first: yr 2 excel 75680.87006 engine 75662 
+        - rate2 table B growth to date [rounded]                  x7   max|diff| 139.435      first: yr 3 excel 7272.383394 engine 7271 
+        - rate2 table C charges+surrender to date [rounded]       x7   max|diff| 51.4336      first: yr 3 excel 2668.032342 engine 2667 
+[FAIL] arf  R7      631 checks,    4 mismatches  F5, SP 60k, AFISD 50 / Cash 50, fixed 6,000 p.a. level (0% esc), age 65 (depletes)
+        - rate1 IRR no charges (AO64 annualised)                  x1   max|diff| 6.9913e-05   first: yr None excel 0.03791737845 engine 0.03784746547 
+        - rate1 reduction in yield                                x1   max|diff| 6.9913e-05   first: yr None excel 0.01623554344 engine 0.01616563046 
+        - rate2 IRR no charges (AO686 annualised)                 x1   max|diff| 2.98529e-05  first: yr None excel 0.0324917696 engine 0.03252162251 
+        - rate2 reduction in yield                                x1   max|diff| 2.98529e-05  first: yr None excel 0.01606524572 engine 0.01609509863 
+[PASS] data PRSA funds   42 checks,    0 mismatches  
+[FAIL] data PRSA codes  110 checks,    1 mismatches  
+        - B3 SP upfront (Parameters!F)                            x1   max|diff| 0.015        first: yr None excel 0.035 engine 0.02 
+[FAIL] data PRSA glidepaths   55 checks,    4 mismatches  
+        - standard/lc_op monthly fund-charge conversion 1-(1-x)^(1/12): months-to-retirement rows differing (of 541) x1   max|diff| 541          first: yr None excel 0 engine 541 e.g. mtr 540: excel 0.0002080949986 engine 0.0002085724306
+        - nonstandard/dis monthly fund-charge conversion 1-(1-x)^(1/12): months-to-retirement rows differing (of 541) x1   max|diff| 541          first: yr None excel 0 engine 541 e.g. mtr 540: excel 0.0004719065776 engine 0.0004743690212
+        - nonstandard/dis monthly GMAB conversion 1-(1-x)^(1/12): months-to-retirement rows differing (of 541) x1   max|diff| 97           first: yr None excel 0 engine 97 e.g. mtr 96: excel 0.0006228618011 engine 0.0006271587887
+        - standard/dis monthly fund-charge conversion 1-(1-x)^(1/12): months-to-retirement rows differing (of 541) x1   max|diff| 541          first: yr None excel 0 engine 541 e.g. mtr 540: excel 0.0002080949986 engine 0.0002085724306
+[FAIL] data PRSA mortality    4 checks,    4 mismatches  
+        - ILT15 male base qx: ages differing                      x1   max|diff| 43           first: yr None excel 0 engine 43 e.g. age 121 excel 1 engine None; age 122 excel 1 engine None; age 123 excel 1 engine None
+        - ILT15 female base qx: ages differing                    x1   max|diff| 43           first: yr None excel 0 engine 43 e.g. age 121 excel 1 engine None; age 122 excel 1 engine None; age 123 excel 1 engine None
+        - ILT15 male adjusted qx: ages differing                  x1   max|diff| 44           first: yr None excel 0 engine 44 e.g. age 120 excel 1 engine 0.42; age 121 excel 1 engine 0.0; age 122 excel 1 engine 0.0
+        - ILT15 female adjusted qx: ages differing                x1   max|diff| 44           first: yr None excel 0 engine 44 e.g. age 120 excel 1 engine 0.5; age 121 excel 1 engine 0.0; age 122 excel 1 engine 0.0
+[PASS] data IB/ARF funds   39 checks,    0 mismatches  
+[PASS] data IB codes  536 checks,    0 mismatches  
+[PASS] data ARF codes  209 checks,    0 mismatches  
+[PASS] data ARF funds   39 checks,    0 mismatches  
+
+TOTAL: 10260 checks, 2349 mismatches  (details: tests/out/excel_parity_diff.csv, excel_parity_results.json)

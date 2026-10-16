@@ -109,8 +109,9 @@ def pick_sri(d, sri, esg=True):
     check(not d.find_elements(By.ID, 'sri-panel') and 'Risk profiling' not in css(d, '#step-3').text, 'no "suited to" panel or method caption')
     # What the ratings mean: the PRIIPs wording for each class
     click(d, css(d, '#sri-info-btn'))
+    # wait for focus and for the .18s fade-in to finish (Selenium treats a near-transparent dialog as hidden)
     for _ in range(20):
-        if js(d, "return document.activeElement.id") == 'sri-info-x': break
+        if js(d, "return document.activeElement.id") == 'sri-info-x' and css(d, '#sri-info').is_displayed() and 'medium-low level' in css(d, '#sri-info').text: break
         time.sleep(0.1)
     info = css(d, '#sri-info').text
     check(css(d, '#sri-info').is_displayed() and len(d.find_elements(By.CSS_SELECTOR, '#sri-info .rs-tbl tbody tr')) == 7 and
@@ -146,10 +147,17 @@ def see_all_tabs(d):
 def pack_flow(d, tag):
     # 7.1 Contents
     check(js(d, 'return S.packStage') == 'contents' and css(d, '#pack-h').text == 'What goes in the pack', 'step 7 opens on Contents')
-    for k in ['summary', 'funds', 'projection', 'charges', 'remun', 'important', 'glossary']:
+    for k in ['summary', 'funds', 'projection', 'charges', 'important', 'glossary']:
         check(js(d, "return S.sections[arguments[0]] && !document.querySelector('[data-sec=' + arguments[0] + ']')", k), 'section %s required (no toggle)' % k)
+    # The remuneration statement is part of the quotation but can be switched off
+    check(js(d, "return S.sections.remun && !!document.querySelector('[data-sec=remun]')"), 'remuneration statement on by default, with a toggle')
+    click(d, css(d, '[data-sec=remun]'))
+    check(js(d, "return !S.sections.remun && qtBuildPack(packData(true)).indexOf('data-sec=\"remun\"') < 0"), 'remuneration statement left out of the pack when switched off')
+    check('Remuneration Statement' not in js(d, "return templateText('sos')") and 'remuneration we receive' not in js(d, "return templateText('cover')"), 'SoS and cover letter stop referring to it')
+    click(d, css(d, '[data-sec=remun]'))
+    check(js(d, 'return S.sections.remun'), 'remuneration statement switched back on')
     quo = [r.text for r in d.find_elements(By.CSS_SELECTOR, '#secs .prow') if 'Your Allianz quotation' in r.text]
-    check(len(quo) == 1 and 'Required' in quo[0] and 'Glossary' in quo[0], 'the Allianz quotation is one required item: %s' % quo)
+    check(len(quo) == 1 and 'Required' in quo[0] and 'Glossary' in quo[0] and 'Remuneration' not in quo[0], 'the Allianz quotation is one required item: %s' % quo)
     for k in ['product', 'tax', 'appform']:
         check(js(d, "return !S.sections[arguments[0]] && !document.querySelector('[data-sec=' + arguments[0] + ']')", k), 'section %s coming soon and excluded' % k)
     # Factsheets are appended to the pack PDF and can be switched off; KIDs only exist for the Investment Bond
@@ -235,7 +243,7 @@ def pack_flow(d, tag):
         if re.search(r'\d+ page', css(d, '#fname').text): break
         time.sleep(0.1)
     fn = css(d, '#fname').text
-    check(re.match(r'Quotation_Q-\d{6}-\w{4}_Murphy\.pdf', fn) and re.search(r'\d+ pages', fn), 'file name and page count: %r' % fn)
+    check(re.match(r'Quotation_Murphy_\d{4}-\d{2}-\d{2}\.pdf', fn) and re.search(r'\d+ pages', fn), 'file name and page count: %r' % fn)
     labels = [e.text for e in d.find_elements(By.CSS_SELECTOR, '#thumbs .lbl')]
     check(len(labels) == 3 and labels[0] == 'p. 1' and all(re.match(r'pp?\. \d', l) for l in labels), 'thumbnails (cover, SoS, the Allianz quotation) with page numbers: %s' % labels)
     check(d.find_element(By.ID, 'btn-generate').get_attribute('disabled') is None, 'generate enabled after passages written')
@@ -283,7 +291,7 @@ def pack_flow(d, tag):
     blocks = js(d, "return [].map.call(document.querySelectorAll('#pages .fbh'), function(e){ return e.textContent; })")
     check([b for b in blocks if b in ('YOU', 'YOUR PLAN', 'CONTRIBUTIONS', 'CHARGES', 'YOUR INVESTMENT')] and
           'YOU' in blocks and 'CHARGES' in blocks, '%s glance has the labelled blocks: %s' % (tag, blocks))
-    glance = js(d, "var p=[].slice.call(document.querySelectorAll('#pages .page')).filter(function(p){return /Your quotation at a glance/.test(p.textContent)})[0]; return p ? p.textContent : ''")
+    glance = js(d, "var p=[].slice.call(document.querySelectorAll('#pages .page')).filter(function(p){ var h=p.querySelector('.ptitle h2'); return h && h.textContent === 'Your quotation at a glance'; })[0]; return p ? p.textContent : ''")
     check('Total annual charge' in glance and 'Your attitude to risk' in glance, '%s glance shows charges and the risk strip' % tag)
     check(not re.search(r'Projected value|today\'s money', glance), '%s glance carries no projections: %r' % (tag, glance[:100]))
     check(js(d, "return document.querySelectorAll('#pages .rstrip > div.on').length") == 1, '%s risk strip marks one cell' % tag)
@@ -291,6 +299,8 @@ def pack_flow(d, tag):
     check(not dec, '%s pack shows a decimal risk figure outside the footnote: %s' % (tag, dec[:3]))
     wboxes = js(d, "return [].map.call(document.querySelectorAll('#pages .wbox'), function(e){ return e.textContent; })")
     check(len(wboxes) >= 3 and all('Warning:' in w for w in wboxes), '%s boxed warnings beside the figures (%d)' % (tag, len(wboxes)))
+    lone = js(d, "return [].filter.call(document.querySelectorAll('#pages .page .pbody'), function(b){ return b.children.length === 1 && b.querySelector('.wbox'); }).length")
+    check(lone == 0, '%s no page holds only a warnings box (%d)' % (tag, lone))
     # match on the page title, not the text: the cover letter's "Enclosed" list names this page too
     imp = js(d, "var p=[].slice.call(document.querySelectorAll('#pages .page')).filter(function(p){"
                 "var h=p.querySelector('.ptitle h2'); return h && h.textContent === 'Important information'; })[0];"
@@ -333,7 +343,7 @@ def pack_flow(d, tag):
 
 def prsa_flow(d):
     print('PRSA flow')
-    d.get(URL); js(d, "localStorage.clear()"); d.get(URL)
+    d.get(URL); js(d, "localStorage.clear()"); d.get(URL); js(d, 'setLite(false)')   # the tool opens in lite mode
     fill_broker(d)
     fill_client(d, 'prsa', '1980-03-15', 65)
     pick_sri(d, 3)
@@ -505,7 +515,14 @@ def prsa_flow(d):
     check(not pop.is_displayed(), 'outside click closes the popover')
     d.save_screenshot(str(OUT / 'prsa_step5_build.png'))
     # Change funds: back to the tick list, allocation kept; unticking drops a fund's allocation
-    click(d, css(d, '#pf-view-alloc .back-link'))
+    # How to invest: straight back to the strategy choice from Allocate, allocation kept
+    check(d.find_element(By.ID, 'alloc-back-strat').is_displayed(), 'Allocate offers a link back to How to invest')
+    click(d, d.find_element(By.ID, 'alloc-back-strat'))
+    time.sleep(0.5)
+    check(views() == ['strat'] and js(d, 'return S.prsa.diyAllocs[arguments[0]]', g) == 60, 'How to invest goes back from Allocate with the allocation kept (%s)' % views())
+    click(d, css(d, '[data-strat=diy] .strat-main')); time.sleep(0.5)
+    click(d, d.find_element(By.ID, 'btn-next')); time.sleep(0.5)
+    click(d, d.find_element(By.ID, 'alloc-back-pick'))
     time.sleep(0.5)
     check(views() == ['pick'] and js(d, 'return S.prsa.diyAllocs[arguments[0]]', g) == 60, 'Change funds goes back with allocation kept')
     tick('etfw'); tick('etfw')
@@ -603,7 +620,7 @@ def prsa_flow(d):
 
 def arf_flow(d):
     print('ARF flow')
-    d.get(URL)
+    d.get(URL); js(d, 'setLite(false)')   # the tool opens in lite mode
     check(js(d, "return document.getElementById('b-firm').value") == 'Test Financial Ltd', 'broker details persisted')
     click(d, d.find_element(By.ID, 'b-consent'))
     nxt(d)
@@ -652,7 +669,7 @@ def arf_flow(d):
 def standard_prsa_funds(d):
     """Standard PRSA: Non-Standard-only funds are greyed out and can't be allocated."""
     print('Standard PRSA fund availability')
-    d.get(URL)
+    d.get(URL); js(d, 'setLite(false)')   # the tool opens in lite mode
     time.sleep(0.4)
     js(d, "S.client.first='A'; S.client.last='B'; S.client.dobStr='1980-03-15'; S.startStr='2026-10-01'; S.risk.sri=3; S.risk.esg=false; "
           "setProduct('prsa'); setPrsaType('standard'); showStep(5); openBuilder();")
@@ -682,7 +699,7 @@ def responsive_check(d):
     ~1000px to work with. Fields must reflow onto new lines, never shrink below a usable width."""
     print('Responsive (1024px and up)')
     js(d, "localStorage.clear()")
-    d.get(URL)
+    d.get(URL); js(d, 'setLite(false)')   # the tool opens in lite mode
     fill_broker(d)
     fill_client(d, 'prsa', '1980-04-12', 65)
     pick_sri(d, 4)

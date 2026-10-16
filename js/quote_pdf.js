@@ -8,9 +8,10 @@
 // Depends on quote_common.js, quote_text.js and the data/engine files.
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
-function qtLogoSvg(height) {
+function qtLogoSvg(height, color) {
+  color = color || '#003781';   // white on the cover photo and the navy back page
   return '<svg xmlns="http://www.w3.org/2000/svg" height="' + height + '" viewBox="0 0 399.76 99.15" style="display:block">' +
-    '<path d="M36.43,52.48H22.78l7.27-23.72ZM15.7,78.62,20.36,63H38.75l4.36,15.58h17L43.22,19.18c-1-3.51-3.1-5.13-6.79-5.13H12.32v5.61h2c2.52,0,3.88,1,3.88,2.91,0,1.27-.28,2.33-1.28,5.22L0,78.62Z" fill="#003781"/><path d="M79.78,78.62V19c0-3.11-1.82-4.95-4.83-4.95H60v5.61h1c2.51,0,3.58,1.07,3.58,3.61V78.62Z" fill="#003781"/><path d="M105.62,78.62V19c0-3.11-1.85-4.95-4.84-4.95H85.88v5.61h1c2.52,0,3.59,1.07,3.59,3.61V78.62Z" fill="#003781"/><path d="M132.13,19.94c0-4.33-3.21-7-8.71-7s-8.73,2.62-8.73,7,3.31,7,8.73,7,8.71-2.6,8.71-7m-.29,58.68V35.16c0-3.1-1.84-4.93-4.85-4.93H112.28v5.5h.87c2.51,0,3.58,1.16,3.58,3.68V78.62Z" fill="#003781"/><path d="M165.12,55.38v9.41C162.59,67.4,159.51,69,156.9,69s-3.68-1.34-3.68-5,.76-5.21,3.48-6.26a38.66,38.66,0,0,1,8.42-2.36m-20.44-11.3a36.51,36.51,0,0,1,14.91-3.78c4.08,0,5.53,1.45,5.53,5.68v1.08c-6.19,1-8.13,1.38-11.62,2.15A34.7,34.7,0,0,0,147.78,51c-6.11,2.45-9,7.17-9,14.42,0,9.2,4,13.64,12.19,13.64a21.94,21.94,0,0,0,8.14-1.53,27.07,27.07,0,0,0,6.49-4.16v.68c0,3,1.54,4.53,4.55,4.53H184V73.41h-.68c-2.61,0-3.57-1.17-3.57-4.26V46.1c0-12.29-4.27-16.57-16.58-16.57a51.9,51.9,0,0,0-11.59,1.37,38.84,38.84,0,0,0-10.27,3.88Z" fill="#003781"/><path d="M206.05,78.62V45.9c2.53-2.81,5.13-4.08,8.13-4.08,3.21,0,4,1.27,4,6.14V78.62h15.1V45.72c0-7.66-.55-10.08-3-12.68-2-2.25-5.13-3.39-9.12-3.39-5.91,0-10.07,1.83-15.66,7.06V34.78c0-3-1.57-4.55-4.66-4.55H186.49v5.5h.87c2.51,0,3.59,1.16,3.59,3.68V78.62Z" fill="#003781"/><path d="M278.07,68.46H257l20.15-28.25v-10H245.55c-3.58,0-5.23,1.64-5.23,5.23v8.8h5.61v-.86c0-2.23,1.16-3.29,3.57-3.29h10.86L240,68.66v10h38Z" fill="#003781"/><path d="M357.34,77.39V22.68c0-4.36-1.55-5.83-5.78-5.83H338.75V23h.77c2.92,0,3.49.66,3.49,4.18V77.39Zm6.32,0h14.22V34.78c0-4.28-1.65-5.82-5.82-5.82h-8.4Zm-26.93,0V29H328.3c-4.17,0-5.8,1.54-5.8,5.82V77.39Zm54.61-27.81c0,24.11-17.34,41.64-41.15,41.64S309,73.69,309,49.58,326.37,7.94,350.19,7.94s41.15,17.63,41.15,41.64m8.42,0C399.76,21.23,378.55,0,350.19,0S300.6,21.23,300.6,49.58s21.21,49.57,49.59,49.57S399.76,78,399.76,49.58" fill="#003781"/></svg>';
+    '<path d="M36.43,52.48H22.78l7.27-23.72ZM15.7,78.62,20.36,63H38.75l4.36,15.58h17L43.22,19.18c-1-3.51-3.1-5.13-6.79-5.13H12.32v5.61h2c2.52,0,3.88,1,3.88,2.91,0,1.27-.28,2.33-1.28,5.22L0,78.62Z" fill="' + color + '"/><path d="M79.78,78.62V19c0-3.11-1.82-4.95-4.83-4.95H60v5.61h1c2.51,0,3.58,1.07,3.58,3.61V78.62Z" fill="' + color + '"/><path d="M105.62,78.62V19c0-3.11-1.85-4.95-4.84-4.95H85.88v5.61h1c2.52,0,3.59,1.07,3.59,3.61V78.62Z" fill="' + color + '"/><path d="M132.13,19.94c0-4.33-3.21-7-8.71-7s-8.73,2.62-8.73,7,3.31,7,8.73,7,8.71-2.6,8.71-7m-.29,58.68V35.16c0-3.1-1.84-4.93-4.85-4.93H112.28v5.5h.87c2.51,0,3.58,1.16,3.58,3.68V78.62Z" fill="' + color + '"/><path d="M165.12,55.38v9.41C162.59,67.4,159.51,69,156.9,69s-3.68-1.34-3.68-5,.76-5.21,3.48-6.26a38.66,38.66,0,0,1,8.42-2.36m-20.44-11.3a36.51,36.51,0,0,1,14.91-3.78c4.08,0,5.53,1.45,5.53,5.68v1.08c-6.19,1-8.13,1.38-11.62,2.15A34.7,34.7,0,0,0,147.78,51c-6.11,2.45-9,7.17-9,14.42,0,9.2,4,13.64,12.19,13.64a21.94,21.94,0,0,0,8.14-1.53,27.07,27.07,0,0,0,6.49-4.16v.68c0,3,1.54,4.53,4.55,4.53H184V73.41h-.68c-2.61,0-3.57-1.17-3.57-4.26V46.1c0-12.29-4.27-16.57-16.58-16.57a51.9,51.9,0,0,0-11.59,1.37,38.84,38.84,0,0,0-10.27,3.88Z" fill="' + color + '"/><path d="M206.05,78.62V45.9c2.53-2.81,5.13-4.08,8.13-4.08,3.21,0,4,1.27,4,6.14V78.62h15.1V45.72c0-7.66-.55-10.08-3-12.68-2-2.25-5.13-3.39-9.12-3.39-5.91,0-10.07,1.83-15.66,7.06V34.78c0-3-1.57-4.55-4.66-4.55H186.49v5.5h.87c2.51,0,3.59,1.16,3.59,3.68V78.62Z" fill="' + color + '"/><path d="M278.07,68.46H257l20.15-28.25v-10H245.55c-3.58,0-5.23,1.64-5.23,5.23v8.8h5.61v-.86c0-2.23,1.16-3.29,3.57-3.29h10.86L240,68.66v10h38Z" fill="' + color + '"/><path d="M357.34,77.39V22.68c0-4.36-1.55-5.83-5.78-5.83H338.75V23h.77c2.92,0,3.49.66,3.49,4.18V77.39Zm6.32,0h14.22V34.78c0-4.28-1.65-5.82-5.82-5.82h-8.4Zm-26.93,0V29H328.3c-4.17,0-5.8,1.54-5.8,5.82V77.39Zm54.61-27.81c0,24.11-17.34,41.64-41.15,41.64S309,73.69,309,49.58,326.37,7.94,350.19,7.94s41.15,17.63,41.15,41.64m8.42,0C399.76,21.23,378.55,0,350.19,0S300.6,21.23,300.6,49.58s21.21,49.57,49.59,49.57S399.76,78,399.76,49.58" fill="' + color + '"/></svg>';
 }
 
 // ─── SVG line chart ───────────────────────────────────────────────────────────
@@ -270,7 +271,7 @@ function qtGuaranteeNote(rows) {
   if (lv.some(function(x) { return !x; })) return T.guaranteeFundNoteGeneric;
   var uniq = lv.filter(function(x, i) { return lv.indexOf(x) === i; });
   return uniq.length === 1
-    ? qtFill(T.guaranteeFundNote, { level: uniq[0] })
+    ? qtFill(T.guaranteeFundNote, { level: uniq[0], funds: qtNameList(g.map(function(fr) { return fr.fund.name; })) })
     : qtFill(T.guaranteeFundNoteMixed, { levels: qtNameList(uniq) });
 }
 
@@ -291,7 +292,8 @@ function qtFactBlock(title, rows) {
 }
 // Three headline figures under a 2px navy rule. Items are [label, value, sub].
 function qtStat3(items) {
-  return '<div class="stat3">' + items.filter(Boolean).map(function(i) {
+  items = items.filter(Boolean);
+  return '<div class="stat3"' + (items.length === 3 ? '' : ' style="grid-template-columns: repeat(' + items.length + ', 1fr)"') + '>' + items.map(function(i) {
     return '<div><span>' + escHtml(i[0]) + '</span><b>' + i[1] + '</b>' +
       (i[2] ? '<span class="sub">' + escHtml(i[2]) + '</span>' : '') + '</div>';
   }).join('') + '</div>';
@@ -320,7 +322,7 @@ function qtChargeMix(fundRows) {
 }
 
 // ─── Pack builder ─────────────────────────────────────────────────────────────
-// Q = { product, r, broker{}, client{}, risk{sri,reason}, quoteRef, dateStr,
+// Q = { product, r, broker{}, client{}, risk{sri,reason}, dateStr,
 //       productName, strategyName, sections{}, coverText, sosText, embed }
 // Q.embed renders the pages for display inside the tool (no print toolbar, transparent backdrop).
 function qtBuildPack(Q) {
@@ -338,7 +340,7 @@ function qtBuildPack(Q) {
   // Page title and lead, as it appears on every Allianz page.
   function pageTitle(title, lead) {
     add('<div class="ptitle"><h2>' + escHtml(title) + '</h2>' +
-        (lead ? '<span>' + escHtml(lead) + '</span>' : '') + '</div>', { cls: 'newpage kwn' });
+        (lead ? '<span class="lead">' + escHtml(lead) + '</span>' : '') + '</div>', { cls: 'newpage kwn' });
   }
   function h2(title, newpage, hdr) { add('<h2>' + escHtml(title) + '</h2>', { cls: 'kwn' + (newpage ? ' newpage' : ''), hdr: hdr }); }
   function p(txt, cls) { add('<p' + (cls ? ' class="' + cls + '"' : '') + '>' + escHtml(txt) + '</p>'); }
@@ -348,13 +350,16 @@ function qtBuildPack(Q) {
   var dateLong = fmtDateLong(new Date());
   // Short product name for the quotation cover and the footer brand line.
   var brand = T.productBrands[Q.product] || Q.productName;
+  // Every CPC warning, for Important information and the back page
+  var wAll = [T.packWarnings.value, T.packWarnings.currency, T.packWarnings.lose, T.packWarnings.past, T.packWarnings.income]
+    .concat(isPrsa ? [T.packWarnings.access] : [], [T.packWarnings.estimates]);
 
   // ── 1. Cover letter (adviser letterhead) ──
   if (Q.sections.cover) {
     sec = 'cover';
     var addr = (Q.client.address || '').split('\n').filter(function(x){ return x.trim(); });
     add('<div class="letter-top"><div>' + escHtml(Q.client.salutation + ' ' + clientName) + '<br>' + addr.map(escHtml).join('<br>') + '</div>' +
-        '<div class="ldate">' + escHtml(dateLong) + '<br><span class="muted">Our ref: ' + escHtml(Q.quoteRef) + '</span></div></div>',
+        '<div class="ldate">' + escHtml(dateLong) + '</div></div>',
         { hdr: 'broker', cls: 'newpage' });
     add('<p class="re"><b>Re: Your ' + escHtml(Q.productName) + ' quotation</b></p>', { hdr: 'broker' });
     qtMarkupBlocks(Q.coverText).forEach(function(b) { add(b, { hdr: 'broker' }); });
@@ -368,7 +373,7 @@ function qtBuildPack(Q) {
     add('<h1>' + escHtml(T.sections.sos) + '</h1>', { hdr: 'broker', cls: 'kwn newpage' });
     add('<table class="kv"><tr><td>Client</td><td>' + escHtml(clientName) + '</td><td>Adviser</td><td>' + escHtml(Q.broker.name) + '</td></tr>' +
         '<tr><td>Date</td><td>' + escHtml(dateLong) + '</td><td>Firm</td><td>' + escHtml(Q.broker.firm) + '</td></tr>' +
-        '<tr><td>Product</td><td>' + escHtml(Q.productName) + '</td><td>Quote ref.</td><td>' + escHtml(Q.quoteRef) + '</td></tr></table>', { hdr: 'broker' });
+        '<tr><td>Product</td><td colspan="3">' + escHtml(Q.productName) + '</td></tr></table>', { hdr: 'broker' });
     qtMarkupBlocks(Q.sosText).forEach(function(b, i, all) { add(b, { hdr: 'broker', cls: i === all.length - 1 ? 'kwn' : '' }); });
     add('<div class="sigs"><div><p>' + escHtml(T.sosDeclaration) + '</p><div class="sigline"></div>Adviser: ' + escHtml(Q.broker.name) +
         '<div class="sigline short"></div>Date</div>' +
@@ -417,14 +422,28 @@ function qtBuildPack(Q) {
   // Products without a cover image fall back to the plain navy cover.
   var aglSections = ['summary', 'projection', 'charges', 'funds', 'remun', 'important', 'glossary'];
   var hasAgl = aglSections.some(function(k) { return Q.sections[k]; });
+  // Brochure-style: PRSA and ARF have the photo across the top with the title on white below;
+  // the Investment Bond cover is a full-page photo with the title over the sky.
+  var tocAt = -1;
   if (hasAgl) {
     sec = 'summary';
     var coverImg = (typeof QT_COVERS !== 'undefined' && QT_COVERS) ? QT_COVERS[Q.product] : null;
-    add('<div class="cover' + (coverImg ? '' : ' plain') + '"' + (coverImg ? ' style="background-image:url(' + coverImg + ')"' : '') + '>' +
-        '<div class="clogo">' + qtLogoSvg(30) + '</div>' +
-        '<div class="ctitle"><span class="ck">' + escHtml(T.packCoverKicker) + '</span>' +
-        '<span class="cn">' + escHtml(brand) + '</span>' +
-        '<span class="cs">' + escHtml(T.packCoverSub) + '</span></div></div>', { full: true });
+    var coverFull = coverImg && isIb;
+    var bw = brand.split(' '), brandLines = brand.length > 22 ? [bw.slice(0, 2).join(' '), bw.slice(2).join(' ')] : [brand];
+    var ctitle = '<div class="ctitle"><span class="ck">' + escHtml(T.packCoverKickers[Q.product] || T.packCoverKicker) + '</span>' +
+        '<h1 class="cn">' + T.packCoverLines.map(function(l, i) { return '<span class="cl' + i + '">' + escHtml(l) + '</span>'; }).join('') +
+        brandLines.map(function(l, i) { return '<span class="cb cb' + i + '">' + escHtml(l) + '</span>'; }).join('') + '</h1></div>';
+    var cfor = '<div class="cfor"><b>' + escHtml(qtFill(T.packCoverFor, { clientName: Q.client.salutation + ' ' + clientName })) + '</b>' +
+        '<span>' + escHtml(dateLong) + '</span></div>';
+    if (!coverImg) {
+      add('<div class="cover plain"><div class="clogo">' + qtLogoSvg(30, '#fff') + '</div>' + ctitle + cfor + '</div>', { full: true });
+    } else if (coverFull) {
+      add('<div class="cover full" style="background-image:url(' + coverImg + ')"><div class="clogo">' + qtLogoSvg(30, '#fff') + '</div>' + ctitle + cfor + '</div>', { full: true });
+    } else {
+      add('<div class="cover half"><div class="cphoto" style="background-image:url(' + coverImg + ')"><div class="clogo">' + qtLogoSvg(30) + '</div></div>' +
+          '<div class="cbody">' + ctitle + cfor + '</div></div>', { full: true });
+    }
+    tocAt = B.length;   // the contents page goes here once every section is known
   }
 
   // ── Allianz 2. Your quotation at a glance ──
@@ -440,7 +459,7 @@ function qtBuildPack(Q) {
       ['Name', escHtml(Q.client.salutation + ' ' + clientName)],
       ['Date of birth', escHtml(fmtDate(r.inputs.dobStr)) + ' &middot; age ' + Math.floor(ageStart)],
       cAddr ? ['Address', escHtml(cAddr)] : null,
-      ['Adviser', escHtml(Q.broker.name + ', ' + Q.broker.firm)]
+      (Q.broker.name || Q.broker.firm) ? ['Adviser', escHtml([Q.broker.name, Q.broker.firm].filter(Boolean).join(', '))] : null   // blank in lite mode
     ];
     var planRows, contribRows;
     if (isPrsa) {
@@ -483,7 +502,7 @@ function qtBuildPack(Q) {
       ];
     }
     var chargeRows = [
-      [isPrsa ? 'Annual management charge' : 'Policy charge', pct(mix.admin) + ' a year'],
+      [isPrsa ? 'Annual management charge (incl. trail commission)' : 'Policy charge', pct(mix.admin) + ' a year'],
       ['Fund charges, weighted', pct(mix.fmc) + ' a year'],
       mix.gtee > 0 ? ['Guarantee charge, weighted', pct(mix.gtee) + ' a year'] : null,
       ['Contribution charge', (r.spContribCharge > 0 || r.rpContribCharge > 0) ? 'Applies, see Charges' : 'None'],
@@ -502,17 +521,25 @@ function qtBuildPack(Q) {
         '<tbody>' + ivRows + '</tbody></table></div>', { cls: 'split' });
 
     var gRisk = qtPortfolioRisk(Q);
+    if (Q.lite) {
+      // Lite mode: no client rating, so show the portfolio's own risk only
+      var lr = Math.round(r.portfolioSri);
+      add('<div class="riskrow"><div class="rl"><span>' + (r.isGlidepath ? 'Strategy risk profile' : 'Portfolio risk') + '</span><b>' +
+          (r.isGlidepath ? escHtml(strategyProfile(r.stratObj) || 'Medium risk') : lr + ' &ndash; ' + ESMA_LABELS[lr] + (gRisk.mark || '')) + '</b></div>' +
+          (r.isGlidepath ? '' : qtRiskStrip(lr)) + '</div>');
+    } else {
     add('<div class="riskrow"><div class="rl"><span>Your attitude to risk</span><b>' + Q.risk.sri + ' &ndash; ' +
         ESMA_LABELS[Q.risk.sri] + '</b>' +
         (gRisk.short ? '<span>' + gRisk.short.replace(/^indicative /, '').replace(/^portfolio risk/, 'Portfolio risk') + (gRisk.mark || '') + '</span>' : '') + '</div>' +
         qtRiskStrip(Q.risk.sri) + '</div>');
+    }
     if (gRisk.footnote) p(gRisk.glide ? T.packRiskFootnoteGlide : qtFill(T.packRiskFootnote, { exact: fmtRisk(r.portfolioSri, 1) }), 'tiny');
   }
 
   // ── Allianz 3. Your investment and risk: fund split → asset split → portfolio risk → the funds ──
   if (Q.sections.funds) {
     sec = 'funds';
-    pageTitle(T.sections.funds, T.packLeads.funds);
+    pageTitle(T.sections.funds, Q.lite ? T.packLeads.fundsLite : T.packLeads.funds);
     var FH = T.packFundsHeads, gp = isPrsa && r.isGlidepath, pr6 = Math.round(r.portfolioSri);
     // Fund split
     add('<h3 class="kwn">' + escHtml(FH.split) + '</h3>');
@@ -525,6 +552,7 @@ function qtBuildPack(Q) {
     add(ft + '</tbody></table>', { cls: 'split' });
     if (gp) p(T.glidepathNote, 'small');
     // Asset split: indicative (DMAS from rescaled factsheet exposure, Strategy Select at its target mix)
+    if (!Q.lite) {   // lite mode leaves the asset split out
     var ASC = { eq: '#003781', fi: '#0377A8', cash: '#9DC4E3', com: '#B58A2E', alt: '#7A8794' }, as = assetSplit(fundRows), sb = '', lg = '';
     ASSET_CLASSES.forEach(function(c) {
       if (!(as[c.key] > 0.0005)) return;
@@ -534,14 +562,17 @@ function qtBuildPack(Q) {
     add('<div class="catsplit kwn"><div class="bt">' + escHtml(FH.assets) + (gp ? ' at the start of your plan' : '') + '</div>' +
         '<div class="catbar">' + sb + '</div><div class="catleg">' + lg + '</div></div>');
     p(qtAssetNote(fundRows), 'tiny');
+    }
     // Portfolio risk
     add('<h3 class="kwn">' + escHtml(FH.risk) + '</h3>');
     var fRisk = qtPortfolioRisk(Q), sfs = qtSfdrSplit(r.mix);
     var t2 = gp ? ['Strategy risk profile', escHtml(strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
     var sus = sfs.unknown > 0.0001 ? '&ndash;' : sfs.art8 > 0.9999 ? '100% Article 8' : Math.round(sfs.art8 * 100) + '% Article 8';
-    add(qtStat3([['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], [t2[0], t2[1]], ['Sustainability', sus]]));
-    p(T.fundsIntro);
-    if (gp) {
+    add(qtStat3([Q.lite ? null : ['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], [t2[0], t2[1]], ['Sustainability', sus]]));
+    p(Q.lite ? T.fundsIntroLite : T.fundsIntro);
+    if (Q.lite) {
+      if (gp && fRisk.line) add('<p>' + fRisk.line + '</p>');   // no client rating to compare with
+    } else if (gp) {
       var profile = strategyProfile(r.stratObj) || 'Medium risk', fit = strategyRiskFit(r.stratObj, Q.risk.sri);
       if (fRisk.line) add('<p>' + fRisk.line + '</p>');
       if (fit.aligned) p(T.riskMatch);
@@ -556,24 +587,21 @@ function qtBuildPack(Q) {
           '<span>' + escHtml(qtGuaranteeNote(fundRows)) + '</span></div>');
     }
     if (fRisk.footnote) p(fRisk.footnote, 'tiny');
-    // The funds: brochure objective, key facts, opportunities and risks (largest holding first)
+    // The funds: brochure objective and key facts (largest holding first); opportunities and risks are left to the factsheets
     add('<h3 class="kwn">' + escHtml(FH.funds) + '</h3>');
+    p(T.packFundsFactsheets);
     fundRows.forEach(function(fr) {
       var f = fr.fund, info = qtFundInfo(f.id) || {}, cat = FUND_CATEGORY_MAP[fr.cat], lv = qtGteeLevel(f.id);
       var facts = [f.isin ? 'ISIN ' + escHtml(f.isin) : '', 'Risk ' + Math.round(f.esma) + ' of 7', 'Fund charge ' + pct(fr.fmc),
                    info.sfdr ? 'SFDR Article ' + info.sfdr : '', fr.gmab ? '<span class="g">Annual Guarantee' + (lv ? ' ' + lv : '') + '</span>' : ''].filter(Boolean);
-      function list(title, items) {
-        return items && items.length ? '<div><div class="bt">' + title + '</div><ul>' + items.map(function(x) { return '<li>' + escHtml(x) + '</li>'; }).join('') + '</ul></div>' : '';
-      }
-      var or = list('Opportunities', info.opportunities) + list('Risks', info.risks);
       add('<div class="fcard"><div class="fch"><b>' + escHtml(f.name) + '</b><span>' + escHtml(info.category || (cat ? cat.label : '')) +
           ' &middot; ' + (+(fr.weight * 100).toFixed(1)) + '% of your plan</span></div>' +
           '<div class="fcm">' + facts.join(' &middot; ') + '</div>' +
-          '<p>' + escHtml(info.desc || f.desc || '') + '</p>' +
-          (or ? '<div class="fcor">' + or + '</div>' : '') + '</div>');
+          '<p>' + escHtml(info.desc || f.desc || '') + '</p></div>');
     });
     // fmcNote says projections use the maximum FMC, which holds for the PRSA only (ARF / Bond illustrate at the quoted FMC)
-    p(T.packFundsSourceNote + (isPrsa ? ' ' + T.fmcNote : ''), 'tiny');
+    // kwn: if the warnings below don't fit, this note goes over with them rather than leaving them alone on a page
+    add('<p class="tiny">' + escHtml(T.packFundsSourceNote + (isPrsa ? ' ' + T.fmcNote : '')) + '</p>', { cls: 'kwn' });
     add(qtWarnBox([T.packWarnings.past, T.packWarnings.currency]));
   }
 
@@ -588,7 +616,7 @@ function qtBuildPack(Q) {
         ['In today\'s money', fEUR(r.realMat)],
         ['Estimated income', fEUR(r.annualIncomeReal), 'a year']
       ]));
-      add('<div class="chart">' + qtPrsaChart(r, 640, 210) + '</div>');
+      add('<div class="chart">' + qtPrsaChart(r, 640, 180) + '</div>');
       // Key years only: the full year-by-year run is in the adviser's on-screen results.
       var th = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Age</th><th>Total paid in</th>' +
         '<th class="em">Projected value</th><th>In today\'s money</th></tr></thead><tbody>';
@@ -598,10 +626,9 @@ function qtBuildPack(Q) {
           '</td><td>' + fEUR(x.contribNC) + '</td><td class="em"><b>' + fEUR(x.fundWC) + '</b></td><td>' + fEUR(real) + '</td></tr>';
       });
       add(th + '</tbody></table>', { cls: 'split' });
-      p(T.packKeyYearsNote, 'tiny');
-      add('<p class="assume"><b>Assumptions.</b> ' + escHtml(qtFill(r.isGlidepath ? T.prsaRateGlidepath : T.prsaRateFlat, { rate: rate })) +
-          ' ' + escHtml(qtFill(T.prsaInflationShort, { inflation: pct(INFLATION) })) +
-          ' ' + escHtml(T.packChargesAllowed) + '</p>');
+      p(T.packKeyYearsNote + ' ' + T.packChargesAllowed, 'tiny');   // one line, so the warnings below stay on this page
+      // IMPORTANT box under the figures, as for the ARF and Investment Bond
+      imp([qtFill(r.isGlidepath ? T.prsaImportantGlidepath : T.prsaImportantFlat, { rate: rate, inflation: pct(INFLATION) }), T.prsaImportant2]);
       add(qtWarnBox([T.packWarnings.estimates, T.packWarnings.value]));
       if (r.strat === 'dis') p(T.prsaDisNote, 'tiny');
     } else if (isArf) {
@@ -629,7 +656,7 @@ function qtBuildPack(Q) {
       add('<div class="chart">' + qtIbChart(r, 640, 220) + '</div>');
       var ibRt = pct(r.rate);
       var ti = '<table class="num split"><thead><tr class="ltr"><th></th><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F = A + B &minus; C &minus; D &minus; E</th></tr>' +
-        '<tr><th>Year</th><th>Age</th><th>Contributions paid</th><th>Investment growth to date</th><th>Charges to date</th><th>Tax to date</th><th>Income taken to date</th><th>Projected value</th></tr></thead><tbody>';
+        '<tr><th>Year</th><th>Age</th><th>Contributions paid</th><th>Investment growth to date</th><th>Charges to date</th><th>Tax to date</th><th>Income taken to date (after tax)</th><th>Projected value</th></tr></thead><tbody>';
       r.p.rows.forEach(function(rw) {
         ti += '<tr' + (r.p.fundZeroYear === rw.year ? ' class="mat"' : '') + '><td>' + rw.year + '</td><td>' + rw.age + '</td><td>' + fEUR(rw.A) + '</td><td>' + fEUR(rw.B) + '</td><td>' + fEUR(rw.C) + '</td><td>' + fEUR(rw.D) + '</td><td>' + fEUR(rw.E) + '</td><td><b>' + fEUR(rw.F) + '</b></td></tr>';
       });
@@ -648,7 +675,7 @@ function qtBuildPack(Q) {
   if (Q.sections.charges) {
     sec = 'charges';
     pageTitle(T.sections.charges, T.packLeads.charges);
-    var ct = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Allocation</th><th>' + (isPrsa ? 'AMC' : 'Policy charge') + '</th><th>Fund charge</th><th>Guarantee charge</th><th>Total annual charge</th></tr></thead><tbody>';
+    var ct = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Allocation</th><th>' + (isPrsa ? 'AMC (incl. trail commission)' : 'Policy charge') + '</th><th>Fund charge</th><th>Guarantee charge</th><th>Total annual charge</th></tr></thead><tbody>';
     var bAdmin = 0, bFmc = 0, bG = 0;
     fundRows.forEach(function(fr) {
       ct += '<tr><td class="l">' + escHtml(fr.fund.name) + '</td><td>' + (fr.weight * 100).toFixed(1) + '%</td><td>' + pct(fr.admin) + '</td><td>' + pct(fr.fmc) + '</td><td>' + (fr.gtee > 0 ? pct(fr.gtee) : '&ndash;') + '</td><td>' + pct(fr.total) + '</td></tr>';
@@ -658,12 +685,18 @@ function qtBuildPack(Q) {
     add(ct + '</tbody></table>', { cls: 'split' });
     if (isPrsa) {
       if (r.isGlidepath) p(T.glidepathNote);
-      p(qtFill(T.prsaContribCharges, { spCharge: pct(CONTRIB_SP_CHARGE), spThreshold: fEUR(CONTRIB_SP_THRESHOLD), rpCharge: pct(CONTRIB_RP_CHARGE), rpThreshold: fEUR(CONTRIB_RP_THRESHOLD) }));
-      var ccLines = [];
-      if (r.spRaw > 0) ccLines.push('Single contribution of ' + fEUR(r.spRaw) + ': ' + (r.spContribCharge > 0 ? pct(r.spContribCharge) + ' contribution charge applies' : 'no contribution charge'));
-      if (r.rpRaw > 0) ccLines.push('Regular contribution of ' + fEUR(r.rpRaw) + ': ' + (r.rpContribCharge > 0 ? pct(r.rpContribCharge) + ' contribution charge applies' : 'no contribution charge'));
-      if (r.ofvRaw > 0) ccLines.push('Transfer value of ' + fEUR(r.ofvRaw) + ': no contribution charge');
-      add('<ul>' + ccLines.map(function(l){ return '<li>' + escHtml(l) + '</li>'; }).join('') + '</ul>');
+      // Contribution charges: one row per contribution in the plan, with the rule that sets the charge
+      var CR = T.prsaContribRule, per = { monthly: ' a month', quarterly: ' a quarter', annual: ' a year' }[r.freq] || '';
+      var ccRows = [
+        r.spRaw > 0 ? ['Single contribution', fEUR(r.spRaw), r.spContribCharge, qtFill(CR.sp, { charge: pct(CONTRIB_SP_CHARGE), threshold: fEUR(CONTRIB_SP_THRESHOLD) })] : null,
+        r.rpRaw > 0 ? ['Regular contribution', fEUR(r.rpRaw) + per, r.rpContribCharge, qtFill(CR.rp, { charge: pct(CONTRIB_RP_CHARGE), threshold: fEUR(CONTRIB_RP_THRESHOLD) })] : null,
+        r.ofvRaw > 0 ? ['Transfer value', fEUR(r.ofvRaw), 0, CR.ofv] : null
+      ].filter(Boolean);
+      add('<h3 class="kwn">Contribution charges</h3>');
+      add('<table class="dt num split"><thead><tr><th class="l">Contribution</th><th>Amount</th><th class="em">Contribution charge</th><th class="l">When a charge applies</th></tr></thead><tbody>' +
+        ccRows.map(function(c) {
+          return '<tr><td class="l">' + c[0] + '</td><td>' + c[1] + '</td><td class="em"><b>' + (c[2] > 0 ? pct(c[2]) : 'None') + '</b></td><td class="l">' + escHtml(c[3]) + '</td></tr>';
+        }).join('') + '</tbody></table>', { cls: 'split' });
       if (QT_SHOW_EFFECT_OF_CHARGES) add('<h3 class="kwn">Effect of charges</h3>');
       if (QT_SHOW_EFFECT_OF_CHARGES) p(qtFill(T.prsaRiy, { riy: pct(Math.max(0, r.grossRate - r.netRate)), gross: pct(r.grossRate), net: pct(r.netRate) }) + ' ' + qtRiyWhy('prsa', r));
     } else if (isArf) {
@@ -697,10 +730,10 @@ function qtBuildPack(Q) {
       if (QT_SHOW_EFFECT_OF_CHARGES) add('<h3 class="kwn">Effect of charges</h3>');
       if (QT_SHOW_EFFECT_OF_CHARGES) p(qtFill(T.ibRiyCharges, { rate: pct(r.rate), netRate: pct(r.p.netRate) }) + ' ' + qtRiyWhy('ib', r));
     }
-    // Contribution and transfer charges, then plain-English definitions of each charge.
-    add('<div class="pair">' +
-        '<div class="fbr"><span>Contribution charge</span><b>' + (r.spContribCharge > 0 || r.rpContribCharge > 0 ? 'Applies, see above' : 'None') + '</b></div>' +
-        '<div class="fbr"><span>Transfer charge</span><b>' + (isPrsa ? 'None' : 'Not applicable') + '</b></div></div>');
+    // ARF / Bond: no contribution charges (the PRSA has its own table above). Then plain-English definitions of each charge.
+    if (!isPrsa) add('<div class="pair">' +
+        '<div class="fbr"><span>Contribution charge</span><b>None</b></div>' +
+        '<div class="fbr"><span>Transfer charge</span><b>Not applicable</b></div></div>');
     add('<div class="defs">' + T.chargeDefs.map(function(d) {
       return '<div><b>' + escHtml(d[0]) + '</b><span>' + escHtml(d[1]) + '</span></div>';
     }).join('') + '</div>');
@@ -712,7 +745,7 @@ function qtBuildPack(Q) {
   // ── 6. Remuneration ──
   if (Q.sections.remun) {
     sec = 'remun';
-    pageTitle(T.sections.remun, qtFill(T.packLeads.remun, { company: cs.name, brokerFirm: Q.broker.firm }));
+    pageTitle(T.sections.remun, qtFill(T.packLeads.remun, { company: cs.name, brokerFirm: Q.broker.firm || 'your adviser' }));
     var initComm = r.totalInitialComm != null ? r.totalInitialComm : r.initialComm;
     var trailComm = r.totalOngoingComm != null ? r.totalOngoingComm
       : (r.p1 || r.p) ? ((r.p1 || r.p).yearly.reduce(function(a, y) { return a + y.comm; }, 0) - (r.initialComm || 0)) : null;
@@ -724,7 +757,7 @@ function qtBuildPack(Q) {
     ]));
     var rt2 = '<table class="dt num"><thead><tr><th class="l">Type</th><th class="l">Basis</th><th>Amount</th></tr></thead><tbody>';
     if (isPrsa) {
-      if (r.spRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; single contribution</td><td class="l">' + pct(r.spUpRate) + ' of single contribution' + (r.spContribCharge > 0 ? ' (after contribution charge)' : '') + '</td><td>' + fEUR(r.spUpfrontComm) + '</td></tr>';
+      if (r.spRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; single contribution</td><td class="l">' + pct(r.spUpRate) + ' of single contribution</td><td>' + fEUR(r.spUpfrontComm) + '</td></tr>';
       if (r.rpRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; regular contributions</td><td class="l">' + pct(r.rpUpfrontPct) + ' of first year\'s regular contributions</td><td>' + fEUR(r.rpUpfrontComm) + '</td></tr>';
       rt2 += '<tr><td class="l">Trail</td><td class="l">' + pct(r.cc.ongoing) + ' a year of fund value</td><td>' + fEUR(r.totalOngoingComm) + '<br><span class="muted">projected total to retirement</span></td></tr>';
       rt2 += '<tr class="mat"><td class="l" colspan="2">Total projected remuneration</td><td>' + fEUR(r.totalInitialComm + r.totalOngoingComm) + '</td></tr>';
@@ -789,18 +822,13 @@ function qtBuildPack(Q) {
     sec = 'important';
     pageTitle(T.sections.important, T.packLeads.important);
     // Every CPC warning together, as well as beside the figures each one relates to.
-    var wAll = [T.packWarnings.value, T.packWarnings.currency, T.packWarnings.lose, T.packWarnings.past, T.packWarnings.income];
-    if (isPrsa) wAll.push(T.packWarnings.access);
-    wAll.push(T.packWarnings.estimates);
     add(qtWarnBox(wAll));
     add('<div class="defs two">' + T.packImportant.map(function(d) {
       return '<div><b>' + escHtml(d[0]) + '</b><span>' + escHtml(qtFill(d[1], { productBrand: brand })) + '</span></div>';
     }).join('') + '</div>');
     T.importantInfo.forEach(function(l) { p(qtFill(l, { regDoc: isPrsa ? T.regDocPrsa : isArf ? T.regDocArf : T.regDocIb }), 'tiny'); });
-    // Standing projection disclosures: they belong with the other standing notes, not beside the figures.
+    // Standing projection notes (the IMPORTANT assumptions box is on the projection page)
     if (isPrsa) {
-      p(qtFill(r.isGlidepath ? T.prsaImportantGlidepath : T.prsaImportantFlat, { rate: pct(r.blendedGross), inflation: pct(INFLATION) }), 'tiny');
-      p(T.prsaImportant2, 'tiny');
       p(T.prsaAverageNote, 'tiny');
       p(T.prsaAnnuityNote, 'tiny');
     }
@@ -822,20 +850,44 @@ function qtBuildPack(Q) {
     add(gt + '</tbody></table>', { cls: 'split' });
   }
 
-  // ── Allianz 9. Back page ──
+  // ── Allianz 9. Back page: navy, as in the brochures (contact, warnings, small print) ──
   if (hasAgl) {
     sec = 'glossary';
-    add('<div class="backp"><div class="clogo">' + qtLogoSvg(30) + '</div>' +
-        '<div class="bpfoot"><div class="bpa"><b>' + escHtml(cs.name) + '</b><span>' + cs.addressLines.map(escHtml).join('<br>') + '</span></div>' +
-        '<div class="bpc"><span>Tel</span><span>' + escHtml(cs.phone) + '</span><span>Email</span><span>' + escHtml(cs.email) + '</span></div>' +
-        '<div class="bpr"><span>' + escHtml(cs.regulatory) + '</span>' +
-        '<span>' + escHtml(qtFill(T.packValidity, { quoteRef: Q.quoteRef, date: dateLong })) + '</span></div></div></div>', { full: true });
+    var BP = T.packBack;
+    add('<div class="backp"><div class="clogo">' + qtLogoSvg(30, '#fff') + '</div>' +
+        '<div class="bpmain"><div class="bpsec"><b class="bph">' + escHtml(BP.contactHead) + '</b><p>' + escHtml(BP.contactIntro) + '</p>' +
+        '<p><b>' + escHtml(BP.office) + '</b><br>' + escHtml(cs.name) + '<br>' + cs.addressLines.map(escHtml).join(', ') + '</p>' +
+        '<p><b>Email:</b> <span class="bpl">' + escHtml(cs.email) + '</span> &ndash; ' + escHtml(BP.emailNote) + '</p>' +
+        '<p><b>Tel:</b> ' + escHtml(cs.phone) + '</p></div>' +
+        '<div class="bprule"></div>' +
+        '<div class="bpsec"><b class="bph">' + escHtml(BP.warningsHead) + '</b><p>' + escHtml(qtFill(BP.notRiskFree, { productBrand: brand })) + '</p>' +
+        qtWarnBox(wAll) + '</div></div>' +
+        '<div class="bpr"><span>' + escHtml(qtFill(T.packValidity, { date: dateLong })) + '</span>' +
+        '<span>' + escHtml(cs.regulatory) + '</span></div></div>', { full: true });
+  }
+
+  // ── Allianz 1b. Contents, after the cover (page numbers are filled in by the paginator) ──
+  if (tocAt >= 0) {
+    var tocKeys = [];
+    B.forEach(function(b) {
+      if (b.full || b.grp !== 'agl' || tocKeys.indexOf(b.sec) >= 0) return;
+      tocKeys.push(b.sec);
+    });
+    var TC = T.packContents;
+    sec = 'summary';
+    add('<div class="tocp"><div class="toct"><span>' + escHtml(TC.title[0]) + '</span><span>' + escHtml(TC.title[1]) + '</span></div>' +
+        '<p>' + escHtml(qtFill(isIb ? TC.introKid : TC.intro, { productBrand: brand })) + '</p>' +
+        '<div class="tocl">' + tocKeys.map(function(k) {
+          return '<div class="toci"><span class="tpg">' + escHtml(TC.pageWord) + ' <b data-toc="' + k + '"></b></span>' +
+            '<span class="ttl">' + escHtml(T.sections[k]) + '</span></div>';
+        }).join('') + '</div></div>', { full: true });
+    B.splice(tocAt, 0, B.pop());
   }
 
   // ── Assemble ──
-  // Allianz pages: logo left, quotation reference and who it is for on the right.
-  var hdrAgl = '<div class="hl">' + qtLogoSvg(20) + '</div><div class="hr">Quotation ' + escHtml(Q.quoteRef) +
-    '<br>Prepared for ' + escHtml(clientName) + ' &middot; ' + escHtml(dateLong) + '</div>';
+  // Allianz pages: logo left, who the quotation is for on the right (as on the Statement of Reasonable Projection).
+  var hdrAgl = '<div class="hl">' + qtLogoSvg(20) + '</div><div class="hr">Quotation for ' + escHtml(clientName) +
+    '<br>' + escHtml(dateLong) + '</div>';
   var bAddr = (Q.broker.address || '').split('\n').filter(function(x){ return x.trim(); }).map(escHtml);
   var hdrBroker = '<div class="hl"><div class="firm">' + escHtml(Q.broker.firm) + '</div></div>' +
     '<div class="hr">' + bAddr.concat(Q.broker.phone ? [escHtml(Q.broker.phone)] : []).join('<br>') + '</div>';
@@ -849,8 +901,8 @@ function qtBuildPack(Q) {
       (b.full ? ' data-full="1"' : '') + ' data-sec="' + b.sec + '">' + b.html + '</div>';
   }).join('');
 
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.docTitle || (Q.productName + ' – Quotation – ' + clientName + ' – ' + Q.quoteRef)) + '</title>' +
-    '<style>' + qtPackCss() + (Q.embed ? qtEmbedCss() : '') + '</style></head><body>' +
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.docTitle || (Q.productName + ' – Quotation – ' + clientName)) + '</title>' +
+    '<style>' + qtPackCss() + (Q.embed ? qtEmbedCss() : '') + '</style></head><body class="p-' + escHtml(Q.product) + '">' +
     (Q.embed ? '' : '<div class="topbar"><span>' + escHtml(Q.productName) + ' &ndash; Quotation &ndash; ' + escHtml(clientName) + '</span><button onclick="window.print()">Print / Save as PDF</button>' +
       (Q.libBase ? '<button onclick="this.disabled=true;window.opener&&window.opener.savePackPdf&&window.opener.savePackPdf(window)">Save PDF with factsheets</button>' : '') + '</div>') +
     '<template id="hdr-agl">' + hdrAgl + '</template><template id="hdr-broker">' + hdrBroker + '</template>' +
@@ -909,7 +961,7 @@ function qtStrategyDescription(Q) {
   if (Q.product !== 'prsa' || r.strat === 'diy') return T.diyDescription;
   if (r.strat === 'dis') return T.disDescription;
   var prof = strategyProfile(r.stratObj);
-  return (prof ? T.strategyProfiles[prof] : '') + (r.stratObj && r.stratObj.gmab ? ' ' + T.guaranteeFundNote : '');
+  return (prof ? T.strategyProfiles[prof] : '') + (r.stratObj && r.stratObj.gmab ? ' ' + T.guaranteeFundNoteGeneric : '');
 }
 
 // Allianz Neo, as loaded by a1-elements.css in the tool itself
@@ -933,8 +985,8 @@ function qtPackCss() {
     'html, body { font-family: "Allianz Neo", Arial, Helvetica, sans-serif; color: #0E1E33; font-synthesis: none; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }',
     'body { background: #dfe3e8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
     '#src { position: absolute; left: -10000px; top: 0; width: 178mm; }',
-    '.topbar { position: sticky; top: 0; z-index: 2; background: #003781; color: #fff; padding: 10px 20px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }',
-    '.topbar button { background: #fff; color: #003781; border: none; padding: 7px 18px; border-radius: 6px; font: inherit; font-weight: 700; cursor: pointer; }',
+    '.topbar { position: sticky; top: 0; z-index: 2; background: #003680; color: #fff; padding: 10px 20px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }',
+    '.topbar button { background: #fff; color: #003680; border: none; padding: 7px 18px; border-radius: 6px; font: inherit; font-weight: 700; cursor: pointer; }',
     '.page { width: 210mm; height: 297mm; background: #fff; margin: 8mm auto; position: relative; overflow: hidden; page-break-after: always; break-after: page; }',
     '.page:last-child { page-break-after: auto; break-after: auto; }',
     '.phdr { position: absolute; top: 12mm; left: 16mm; right: 16mm; height: 13mm; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 0.6pt solid #D5DDE6; padding-bottom: 3mm; }',
@@ -945,10 +997,9 @@ function qtPackCss() {
     '.pfoot { position: absolute; bottom: 8mm; left: 16mm; right: 16mm; font-size: 6.8pt; color: #8A96A3; border-top: 0.5pt solid #E2E8EF; padding-top: 2mm; display: flex; justify-content: space-between; gap: 6mm; }',
     '.pfoot .pn { white-space: nowrap; }',
     '.blk { margin-bottom: 3.2mm; }',
-    'h1 { font-size: 19pt; color: #003781; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2mm; }',
-    'h2 { font-size: 17pt; color: #003781; font-weight: 700; letter-spacing: -0.01em; padding-bottom: 1mm; }',
-    'h3 { font-size: 10.5pt; color: #003781; font-weight: 700; margin-top: 1.5mm; }',
-    '.blk .ptitle + * { margin-top: 1mm; }',
+    'h1 { font-size: 19pt; color: #003680; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2mm; }',
+    'h2 { font-size: 17pt; color: #003680; font-weight: 700; letter-spacing: -0.01em; padding-bottom: 1mm; }',
+    'h3 { font-size: 10.5pt; color: #003680; font-weight: 700; margin-top: 1.5mm; }',
     'p, li { font-size: 9pt; line-height: 1.5; color: #1E2B3B; }',
     'p + p { margin-top: 2mm; }',
     'ul { padding-left: 5mm; } li { margin-bottom: 1.2mm; }',
@@ -959,7 +1010,7 @@ function qtPackCss() {
     'h1.prep { font-size: 22pt; margin-bottom: 1mm; }',
     '.byline { font-size: 9pt; color: #5E6B78; }',
     '.hero { display: grid; grid-template-columns: 1.1fr 1fr; border: 0.75pt solid #E2E8EF; border-radius: 2.5mm; overflow: hidden; }',
-    '.hero .hl { background: #003781; color: #fff; padding: 5mm 5.5mm; }',
+    '.hero .hl { background: #003680; color: #fff; padding: 5mm 5.5mm; }',
     '.hero .k, .hero .s { font-size: 8pt; color: #DCE6F4; line-height: 1.45; }',
     '.hero .v { font-size: 24pt; font-weight: 700; line-height: 1.15; margin: 1.5mm 0 1mm; }',
     '.hero .hr { padding: 4mm 5mm; display: flex; align-items: center; }',
@@ -968,7 +1019,7 @@ function qtPackCss() {
     '.chart { margin: 1mm 0; }',
     '.cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }',
     '.pcard { border: 0.75pt solid #E2E8EF; border-radius: 2.5mm; padding: 4mm 4.5mm; }',
-    '.pcard .pt { font-size: 9pt; font-weight: 700; color: #003781; margin-bottom: 1.5mm; }',
+    '.pcard .pt { font-size: 9pt; font-weight: 700; color: #003680; margin-bottom: 1.5mm; }',
     '.pcard p { font-size: 8.4pt; }',
     'table.kv2 td { font-size: 8.4pt; padding: 0.9mm 0; color: #5E6B78; }',
     'table.kv2 td + td { text-align: right; color: #0E1E33; font-weight: 700; }',
@@ -976,27 +1027,27 @@ function qtPackCss() {
     '.tiles3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }',
     '.tiles3 > div { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; }',
     '.tiles3 span { display: block; font-size: 7.6pt; color: #5E6B78; }',
-    '.tiles3 b { display: block; font-size: 12pt; color: #003781; margin-top: 0.5mm; }',
+    '.tiles3 b { display: block; font-size: 12pt; color: #003680; margin-top: 0.5mm; }',
     '.g { color: #0B7A3E; font-weight: 700; }',
     '.splitrow { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }',
     '.splitrow.one { grid-template-columns: 1fr; }',
-    '.splitrow .bt { font-size: 8.8pt; font-weight: 700; color: #003781; margin-bottom: 1.5mm; }',
+    '.splitrow .bt { font-size: 8.8pt; font-weight: 700; color: #003680; margin-bottom: 1.5mm; }',
     '.gnote { background: #E6F4EC; border-radius: 2mm; padding: 3mm 3.5mm; font-size: 7.8pt; line-height: 1.45; color: #1E2B3B; }',
     '.gnote b { display: block; color: #0B7A3E; margin-bottom: 0.8mm; }',
     'table { width: 100%; border-collapse: collapse; }',
-    'table.num th { font-size: 7.4pt; color: #5E6B78; font-weight: 700; text-align: right; padding: 1.5mm 1.8mm; vertical-align: bottom; border-bottom: 1pt solid #003781; line-height: 1.3; }',
-    'table.num th.em { color: #003781; }',
-    'table.num tr.ltr th { border-bottom: none; font-size: 9pt; color: #003781; padding-bottom: 0; }',
+    'table.num th { font-size: 7.4pt; color: #5E6B78; font-weight: 700; text-align: right; padding: 1.5mm 1.8mm; vertical-align: bottom; border-bottom: 1pt solid #003680; line-height: 1.3; }',
+    'table.num th.em { color: #003680; }',
+    'table.num tr.ltr th { border-bottom: none; font-size: 9pt; color: #003680; padding-bottom: 0; }',
     'table.num td { font-size: 8.4pt; text-align: right; padding: 1.5mm 1.8mm; border-bottom: 0.5pt solid #EEF2F6; }',
     'table.num th:first-child, table.num td:first-child { text-align: left; }',
     'table.num .l { text-align: left; }',
-    'table.num tr.mat td { font-weight: 700; color: #003781; background: #EEF4FA; }',
+    'table.num tr.mat td { font-weight: 700; color: #003680; background: #EEF4FA; }',
     'table.num tr.cat td { font-weight: 700; color: #0E1E33; background: #F7FAFC; font-size: 8pt; }',
     'table.kv td { font-size: 8.6pt; padding: 1.2mm 2mm; border-bottom: 0.5pt solid #EEF2F6; }',
     'table.kv td:nth-child(odd) { color: #5E6B78; width: 16%; }',
     'table.gloss td { font-size: 8.6pt; padding: 1.6mm 2mm; border-bottom: 0.5pt solid #EEF2F6; vertical-align: top; line-height: 1.45; }',
-    'table.gloss td:first-child { width: 34%; color: #003781; }',
-    '.imp { border-left: 2.5pt solid #003781; background: #EEF4FA; padding: 2.5mm 4mm; border-radius: 0 1.5mm 1.5mm 0; }',
+    'table.gloss td:first-child { width: 34%; color: #003680; }',
+    '.imp { border-left: 2.5pt solid #003680; background: #EEF4FA; padding: 2.5mm 4mm; border-radius: 0 1.5mm 1.5mm 0; }',
     '.imp b { font-size: 8.6pt; }',
     '.imp p { font-size: 8.4pt; font-weight: 700; margin-top: 1.2mm; }',
     '.warn { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; }',
@@ -1027,41 +1078,22 @@ function qtPackCss() {
     // ── Redesigned quotation pack (handoff §8, 9 Oct 2026) ──
     // Full-bleed pages: the block is the page, with no header, footer or page number.
     '.page.full { padding: 0; }',
-    '.page.full .blk { margin: 0; height: 100%; }',
-    '.cover { position: relative; height: 100%; padding: 17mm 17mm 15mm; background-size: cover; background-position: center; display: flex; flex-direction: column; }',
-    '.cover.plain { background: #003781; }',
-    '.cover.plain .ck, .cover.plain .cn, .cover.plain .cs { color: #fff; }',
-    '.cover .clogo { align-self: flex-start; }',
-    '.cover .ctitle { margin-top: 37mm; display: flex; flex-direction: column; gap: 3.5mm; max-width: 120mm; }',
-    '.cover .ck { font-size: 10.5pt; font-weight: 700; letter-spacing: 0.14em; color: #003781; }',
-    '.cover .cn { font-size: 45pt; line-height: 1.02; font-weight: 700; color: #003781; letter-spacing: -0.02em; }',
-    '.cover .cs { font-size: 16.5pt; color: #003781; }',
-    '.backp { height: 100%; padding: 17mm; display: flex; flex-direction: column; }',
-    '.backp .bpfoot { margin-top: auto; display: flex; flex-direction: column; gap: 6mm; font-size: 9.5pt; line-height: 1.6; }',
-    '.backp .bpa b { display: block; font-size: 13.5pt; color: #003781; margin-bottom: 1mm; }',
-    '.backp .bpc { display: grid; grid-template-columns: 20mm auto; gap: 1mm 3mm; }',
-    '.backp .bpc span:nth-child(odd) { color: #5E6B78; }',
-    '.backp .bpr { padding-top: 5mm; border-top: 0.5pt solid #E2E8EF; font-size: 8pt; color: #5E6B78; display: flex; flex-direction: column; gap: 1.5mm; }',
-    // Page title and lead
-    '.ptitle { margin-bottom: 1mm; }',
-    '.ptitle h2 { font-size: 21pt; font-weight: 700; color: #003781; letter-spacing: -0.01em; padding: 0; }',
-    '.ptitle span { display: block; margin-top: 1.5mm; font-size: 10.5pt; color: #3A4756; }',
     // Label/value blocks on "At a glance"
     '.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 9mm; }',
     '.fblk { display: flex; flex-direction: column; }',
-    '.fbh { font-size: 9pt; font-weight: 700; letter-spacing: 0.08em; color: #003781; padding-bottom: 2mm; border-bottom: 1.5pt solid #003781; }',
+    '.fbh { font-size: 9pt; font-weight: 700; letter-spacing: 0.08em; color: #003680; padding-bottom: 2mm; border-bottom: 1.5pt solid #003680; }',
     '.fbr { display: flex; justify-content: space-between; gap: 4mm; padding: 1.9mm 0; border-bottom: 0.5pt solid #EEF2F6; font-size: 9pt; }',
     '.fbr span { color: #5E6B78; }',
     '.fbr b { text-align: right; }',
-    '.fbr.tot { padding-top: 2.4mm; border-bottom: none; font-size: 10pt; color: #003781; }',
-    '.fbr.tot span { color: #003781; font-weight: 700; }',
+    '.fbr.tot { padding-top: 2.4mm; border-bottom: none; font-size: 10pt; color: #003680; }',
+    '.fbr.tot span { color: #003680; font-weight: 700; }',
     '.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 9mm; }',
     // Three headline figures under a navy rule
-    '.stat3 { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1.5pt solid #003781; border-bottom: 0.5pt solid #E2E8EF; }',
+    '.stat3 { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1.5pt solid #003680; border-bottom: 0.5pt solid #E2E8EF; }',
     '.stat3 > div { padding: 3mm 4mm 3mm 0; display: flex; flex-direction: column; gap: 0.8mm; }',
     '.stat3 > div + div { padding-left: 4mm; border-left: 0.5pt solid #E2E8EF; }',
     '.stat3 span { font-size: 9pt; color: #5E6B78; }',
-    '.stat3 b { font-size: 16pt; color: #003781; line-height: 1.15; }',
+    '.stat3 b { font-size: 16pt; color: #003680; line-height: 1.15; }',
     '.stat3 .sub { font-size: 8pt; }',
     // Boxed CPC warnings
     '.wbox { padding: 3mm 4mm; border: 1.2pt solid #0E1E33; display: flex; flex-direction: column; gap: 1mm; font-size: 8.8pt; font-weight: 700; line-height: 1.45; }',
@@ -1069,53 +1101,113 @@ function qtPackCss() {
     '.riskrow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6mm; align-items: center; padding: 4mm 4.5mm; background: #F4F7FA; }',
     '.riskrow .rl { display: flex; flex-direction: column; gap: 0.5mm; font-size: 9pt; }',
     '.riskrow .rl span { color: #5E6B78; }',
-    '.riskrow .rl b { font-size: 12pt; color: #003781; }',
+    '.riskrow .rl b { font-size: 12pt; color: #003680; }',
     '.rstrip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.8mm; }',
     '.rstrip > div { height: 5.5mm; background: #E3EAF2; color: #5E6B78; font-size: 8pt; font-weight: 700; display: flex; align-items: center; justify-content: center; }',
-    '.rstrip > div.on { background: #003781; color: #fff; }',
+    '.rstrip > div.on { background: #003680; color: #fff; }',
     '.rstrip .lo { grid-column: 1 / 4; font-size: 7.5pt; color: #5E6B78; }',
     '.rstrip .hi { grid-column: 5 / 8; font-size: 7.5pt; color: #5E6B78; text-align: right; }',
     // Data tables
     'table.dt { width: 100%; border-collapse: collapse; }',
-    'table.dt thead th { padding: 2mm 1.5mm; border-bottom: 1.5pt solid #003781; font-size: 8.2pt; font-weight: 700; color: #5E6B78; text-align: right; }',
+    'table.dt thead th { padding: 2mm 1.5mm; border-bottom: 1.5pt solid #003680; font-size: 8.2pt; font-weight: 700; color: #5E6B78; text-align: right; }',
     'table.dt thead th.l { text-align: left; padding-left: 0; }',
-    'table.dt thead th.em { color: #003781; }',
+    'table.dt thead th.em { color: #003680; }',
     'table.dt tbody td { padding: 2.4mm 1.5mm; border-bottom: 0.5pt solid #EEF2F6; font-size: 9pt; text-align: right; }',
     'table.dt tbody td.l { text-align: left; padding-left: 0; }',
-    'table.dt tbody td.em { color: #003781; }',
-    'table.dt tbody tr.tot td, table.dt tbody tr.mat td { background: #F4F7FA; font-weight: 700; color: #003781; border-bottom: none; }',
+    'table.dt tbody td.em { color: #003680; }',
+    'table.dt tbody tr.tot td, table.dt tbody tr.mat td { background: #F4F7FA; font-weight: 700; color: #003680; border-bottom: none; }',
     'table.dt .g { color: #0B7A3E; font-weight: 700; }',
     // Definition lists (charge definitions, important information)
     '.defs { display: flex; flex-direction: column; gap: 3mm; }',
     '.defs.two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; }',
-    '.defs b { display: block; color: #003781; font-size: 9.2pt; }',
+    '.defs b { display: block; color: #003680; font-size: 9.2pt; }',
     '.defs span { display: block; font-size: 9pt; line-height: 1.55; color: #1E2B3B; }',
     // Asset split (Investment page)
-    '.catsplit .bt { font-size: 9.5pt; font-weight: 700; color: #003781; margin-bottom: 2mm; }',
+    '.catsplit .bt { font-size: 9.5pt; font-weight: 700; color: #003680; margin-bottom: 2mm; }',
     // Fund details cards (Investment page)
     '.fcard { border-top: 0.5pt solid #E2E8EF; padding: 3.5mm 0 1mm; }',
     '.fch { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; }',
-    '.fch b { font-size: 10pt; color: #003781; }',
+    '.fch b { font-size: 10pt; color: #003680; }',
     '.fch span { font-size: 8pt; color: #5E6B78; text-align: right; }',
     '.fcm { font-size: 8pt; color: #5E6B78; margin: 1mm 0 2mm; }',
     '.fcm .g { color: #0B7A3E; font-weight: 700; }',
     '.fcard p { margin: 0 0 2mm; }',
-    '.fcor { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }',
-    '.fcor .bt { font-size: 8.4pt; font-weight: 700; color: #003781; margin-bottom: 1mm; }',
-    '.fcor ul { margin: 0; } .fcor li { font-size: 8pt; line-height: 1.4; margin-bottom: 0.8mm; }',
     // Guarantee note
     '.gnote { padding: 4mm 4.5mm; background: #F4F7FA; display: flex; flex-direction: column; gap: 1mm; line-height: 1.6; }',
-    '.gnote b { color: #003781; font-size: 9.2pt; }',
+    '.gnote b { color: #003680; font-size: 9.2pt; }',
     '.gnote span { font-size: 9pt; }',
     // Two-column glossary
     'table.gloss.two { width: 100%; border-collapse: collapse; }',
     'table.gloss.two td { width: 50%; vertical-align: top; padding: 0 5mm 3.5mm 0; border: none; }',
-    'table.gloss.two td b { display: block; color: #003781; font-size: 9pt; }',
+    'table.gloss.two td b { display: block; color: #003680; font-size: 9pt; }',
     'table.gloss.two td span { display: block; font-size: 8.6pt; line-height: 1.5; }',
     '.tiny { font-size: 7.6pt; line-height: 1.55; color: #5E6B78; }',
-    '.assume { font-size: 8.6pt; line-height: 1.55; color: #3A4756; }',
     // Footer brand line
-    '.pfoot .fbrand { font-weight: 700; letter-spacing: 0.08em; color: #003781; white-space: nowrap; }',
+    '.pfoot .fbrand { font-weight: 700; letter-spacing: 0.08em; color: #003680; white-space: nowrap; }',
+    // ── Brochure cover, contents and back page; the pages between follow the Statement of Reasonable Projection ──
+    'body { --navy: #003680; --ink: #1D3962; --toc: #0A7EB5; --rule: #E4E8EB; --tint: #F4F8FB; --tint2: #EDF2F9; }',
+    '.page.full .blk { margin: 0; height: 100%; }',
+    // Inner pages: logo over a thin light-blue rule, dark grey text, navy headings and table headers
+    '.phdr.agl { border-bottom: 0.75pt solid #13A0D3; }',
+    'p, li { color: #2B2B2B; }',
+    '.pfoot, .pfoot .fbrand { color: #777777; }',
+    '.ptitle { margin-bottom: 2mm; }',
+    '.ptitle h2 { font-size: 19pt; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; padding: 0; }',
+    '.ptitle .lead { display: block; margin-top: 1.5mm; font-size: 9.6pt; color: #545454; }',
+    '.blk .ptitle + * { margin-top: 1mm; }',
+    'h2, h3 { color: var(--navy); }',
+    '.fbh { color: var(--navy); border-bottom: 1pt solid var(--navy); }',
+    '.fbr { border-bottom-color: var(--rule); }',
+    '.fbr span, .stat3 span, .riskrow .rl span, .rstrip .lo, .rstrip .hi { color: #545454; }',
+    '.fbr.tot, .fbr.tot span, .stat3 b, .riskrow .rl b, .fch b, .defs b, table.gloss.two td b { color: var(--navy); }',
+    '.stat3 { border-top: 1pt solid var(--navy); border-bottom-color: var(--rule); }',
+    '.riskrow, .gnote { background: var(--tint); }',
+    '.imp { background: var(--tint); border-left: 2.5pt solid var(--navy); border-radius: 0; }',
+    '.fcard { border-top-color: var(--rule); }',
+    'table.dt thead th { color: var(--navy); border-bottom: 1pt solid var(--navy); }',
+    'table.dt tbody td { border-bottom-color: var(--rule); }',
+    'table.dt tbody tr.tot td, table.dt tbody tr.mat td, table.num tr.mat td { background: var(--tint2); color: var(--navy); }',
+    'table.num th { color: var(--navy); border-bottom-color: var(--navy); }',
+    'table.num td { border-bottom-color: var(--rule); }',
+    '.rstrip > div { background: var(--rule); color: #545454; }',
+    '.rstrip > div.on { background: var(--navy); }',
+    '.wbox { border: 1pt solid #2B2B2B; }',
+    // Cover: brochure photo; title in navy with the product name in bold
+    '.cover { position: relative; height: 100%; display: flex; flex-direction: column; background-size: cover; background-position: center; }',
+    '.cover .clogo { position: absolute; top: 14mm; left: 14mm; }',
+    '.cover .ctitle { display: flex; flex-direction: column; gap: 5mm; }',
+    '.cover .ck { font-size: 9pt; font-weight: 700; letter-spacing: 0.02em; color: var(--navy); }',
+    '.cover .cn { display: flex; flex-direction: column; font-size: 31pt; line-height: 1.12; font-weight: normal; color: var(--navy); letter-spacing: -0.01em; margin: 0; }',
+    '.cover .cl1, .cover .cb1 { padding-left: 24mm; }',
+    '.cover .cb { font-weight: 700; }',
+    '.cover .cfor { display: flex; flex-direction: column; gap: 1mm; font-size: 10.5pt; color: var(--navy); }',
+    '.cover.half .cphoto { position: relative; height: 152mm; background-size: cover; background-position: center; }',
+    '.cover.half .cbody { flex: 1; padding: 18mm 16mm 16mm; display: flex; flex-direction: column; justify-content: space-between; }',
+    '.cover.full { padding: 40mm 14mm 14mm; justify-content: space-between; }',
+    '.cover.full .cfor { color: #fff; }',
+    '.cover.plain { background: var(--navy); padding: 50mm 16mm 16mm; justify-content: space-between; }',
+    '.cover.plain .ck, .cover.plain .cn, .cover.plain .cfor { color: #fff; }',
+    // Contents page: one colour (blue), the large two-colour title, then the list
+    '.tocp { height: 100%; background: var(--toc); color: #fff; padding: 30mm 16mm 16mm; overflow: hidden; display: flex; flex-direction: column; }',
+    '.toct { display: flex; flex-direction: column; font-size: 96pt; line-height: 0.86; letter-spacing: -0.02em; margin-left: -17.5mm; white-space: nowrap; }',
+    '.toct span:last-child { color: #233259; padding-left: 9mm; }',
+    '.tocp p { color: #fff; font-size: 10.5pt; line-height: 1.5; max-width: 112mm; margin: 22mm 0 16mm; }',
+    '.tocl { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: min-content; gap: 8mm 12mm; }',
+    '.toci { display: flex; flex-direction: column; gap: 1.6mm; }',
+    '.toci .tpg { font-size: 6.6pt; font-weight: 700; color: #fff; letter-spacing: 0.04em; }',
+    '.toci .tpg:before { content: ""; display: block; width: 7mm; border-top: 0.75pt solid #fff; margin-bottom: 1.8mm; }',
+    '.toci .ttl { font-size: 13.5pt; color: #fff; line-height: 1.25; }',
+    // Back page: navy, white text, each warning in its own outlined box
+    '.backp { height: 100%; padding: 14mm 16mm 12mm; display: flex; flex-direction: column; background: var(--ink); color: #fff; }',
+    '.backp .bpmain { margin-top: 30mm; display: flex; flex-direction: column; gap: 9mm; }',
+    '.backp .bpsec { display: flex; flex-direction: column; gap: 3mm; }',
+    '.backp .bph { font-size: 12pt; }',
+    '.backp p { color: #fff; font-size: 8.8pt; line-height: 1.55; margin: 0; }',
+    '.backp .bpl { color: #A2D2DE; text-decoration: underline; }',
+    '.backp .bprule { width: 70mm; border-top: 0.6pt solid #A2D2DE; }',
+    '.backp .wbox { padding: 0; border: none; gap: 1.6mm; }',
+    '.backp .wbox span { display: block; border: 0.9pt solid #fff; padding: 1mm 2.4mm; font-size: 8.2pt; color: #fff; }',
+    '.backp .bpr { margin-top: auto; display: flex; flex-direction: column; gap: 2mm; font-size: 7.4pt; line-height: 1.5; color: #fff; }',
     '@media print { body { background: #fff; } .topbar { display: none; } .page { margin: 0; } }'
   ].join('\n');
 }
@@ -1153,7 +1245,7 @@ function qtPaginatorSrc() {
     function tpl(id) { return document.getElementById(id).innerHTML; }
     function newPage(hdr, grp) {
       var pg = document.createElement('div');
-      pg.className = 'page';
+      pg.className = 'page pg-' + hdr;
       pg.setAttribute('data-grp', grp || 'agl');
       pg.innerHTML = '<div class="phdr ' + hdr + '">' + tpl('hdr-' + hdr) + '</div><div class="pbody"></div>' +
         '<div class="pfoot">' + tpl('foot-' + hdr) + '<span class="pn"></span></div>';
@@ -1228,6 +1320,14 @@ function qtPaginatorSrc() {
         var el = pg.querySelector('.pn');
         if (el) el.textContent = (i + 1) + ' / ' + list.length;
       });
+    });
+    // Contents page: each section's first page, counted as in the footers
+    [].forEach.call(document.querySelectorAll('[data-toc]'), function(el) {
+      var k = el.getAttribute('data-toc'), list = byGrp.agl || [];
+      for (var i = 0; i < list.length; i++) {
+        if (!list[i].classList.contains('full') && list[i].querySelector('.blk[data-sec="' + k + '"]')) { el.textContent = i + 1; return; }
+      }
+      el.parentNode.parentNode.style.display = 'none';   // nothing on any page: leave it out
     });
     src.parentNode.removeChild(src);
     window.__paginated = pages.length;

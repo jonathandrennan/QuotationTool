@@ -107,26 +107,31 @@ function arfRunProjection(inp, annualGrossRate) {
 
   var incomeStartMonth = inp.incomeStartAge ? Math.max(1, Math.round((inp.incomeStartAge - startAge) * 12) + 1) : 1;
 
-  var fund = contrib;
-  var noChargeFund = contrib;
+  // Allocation: 1 + (standard commission - commission used), so an override changes the amount invested
+  var allocation = 1 + (cc.spUp - spUpRate);
+  var fund = contrib * allocation;
+  var noChargeFund = contrib * allocation;
   var cumGrowth = 0, cumCharges = 0, cumIncome = 0, cumComm = 0;
   var rows = [], commRows = [], yearly = [];
   var month = 0, MAX_MONTHS = 50 * 12;
   var fundZeroYear = null, fundZeroMonth = null, noChargeAtDepletion = null;
   var yrGrowth = 0, yrComm = 0, yrIncome = 0, yrCharges = 0;
-  var fundByYear = [contrib];
+  var fundByYear = [contrib * allocation];
   var incomeHistory = [];
 
   while (month < MAX_MONTHS) {
     month++;
     var yr = Math.ceil(month / 12);
-    var ageNow = startAge + month / 12;
+    var ageNow = startAge + (month - 1) / 12;   // workbook uses age at the start of the month
 
     var deemedRateM;
-    if (fund >= 2000000) deemedRateM = ARF_DEEMED.over2m / 12;
+    // the workbook tests the premium (not the uplifted fund) in month 1
+    var fundForTest = month === 1 ? contrib : fund;
+    if (fundForTest >= 2000000) deemedRateM = ARF_DEEMED.over2m / 12;
     else if (ageNow < 71) deemedRateM = ARF_DEEMED.age61 / 12;
     else deemedRateM = ARF_DEEMED.age71 / 12;
 
+    var noChargeOpen = noChargeFund;
     var growth   = fund * monthlyGrowRate;
     var chargesM = (fund + growth / 2) * totalMonthlyCharge;
     var fundAvail = Math.max(0, fund + growth - chargesM);
@@ -145,12 +150,15 @@ function arfRunProjection(inp, annualGrossRate) {
 
     var fundClosing = fundAvail - incomeM;
 
-    var commBase = (fund + fundClosing) / 2;
+    // workbook month 1: commission base uses the premium, not the uplifted allocation
+    var commBase = (fund + fundClosing) / 2 - (month === 1 ? contrib * (allocation - 1) : 0);
     var commM = commBase * ongoingM;
     if (month === 1) commM += spUpRate * contrib;
 
     var noChargeGrowth = noChargeFund * monthlyGrowRate;
     noChargeFund = Math.max(0, noChargeFund + noChargeGrowth - incomeM);
+    // workbook roll-forward (U = premium + income + growth on the allocated premium) leaves out the uplift after month 1
+    if (month === 1) noChargeFund = Math.max(0, noChargeFund - contrib * (allocation - 1));
 
     fund = Math.max(0, fundClosing);
 
@@ -167,7 +175,7 @@ function arfRunProjection(inp, annualGrossRate) {
     if (isDepletionMonth && fundZeroMonth == null) {
       fundZeroMonth = month;
       fundZeroYear = yr;
-      noChargeAtDepletion = noChargeFund;
+      noChargeAtDepletion = noChargeOpen;   // workbook windfall is the no-charge fund at the start of the last month
     }
 
     if (month % 12 === 0) {
@@ -189,7 +197,7 @@ function arfRunProjection(inp, annualGrossRate) {
           age: Math.floor(startAge + yr + 1e-9),
           A: contrib,
           B: Math.round(cumGrowth),
-          C: Math.round(cumCharges + surPenalty),
+          C: Math.round(cumCharges + surPenalty - contrib * (allocation - 1)),   // workbook nets the allocation uplift off charges
           D: Math.round(cumIncome),
           E: Math.round(displayFund),
           yrIncome: Math.round(yrIncome)

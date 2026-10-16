@@ -1,0 +1,9 @@
+PRSA flow
+  FAIL prsa pack console errors: [{'level': 'SEVERE', 'message': 'https://elements.cdn.allianz.com/master/dist/a1-elements/a1-elements.css - Failed to load resource: net::ERR_TIMED_OUT', 'source': 'network', 'timestamp': 1792143064275}]
+  prsa pack: 14 pages, saved C:\Github\QuotationTool\tests\out\prsa_pack.pdf
+ARF flow
+  arf pack: 14 pages, saved C:\Github\QuotationTool\tests\out\arf_pack.pdf
+Standard PRSA fund availability
+Responsive (1024px and up)
+
+1 failure(s)
