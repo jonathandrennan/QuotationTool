@@ -240,6 +240,20 @@ Let s = Q8 + Q9: **s ≤ 3 → Low (1)**; **s = 4–5 → Medium (2)**; **s = 6 
 - If Risk Profile > 2 and term ≤ 5 years, show a time-horizon warning.
 - Term 15 is shown as "15+ years".
 
+### Sustainability Assessment (read from the live tool, 20/10/2026)
+
+Gate question at the start: "Yes – I have sustainability preferences and would like to complete the Sustainability Assessment" / "No – I do not have sustainability preferences and do not need to complete the Sustainability Assessment". Choosing Yes adds a page after the 9 risk questions. It does not change the Risk Profile; the answers are listed on the result page and PDF.
+
+The page explains the three categories (EU Taxonomy-aligned, SFDR-aligned, investments that consider Principal Adverse Impacts), says they "should not be viewed as a hierarchy" and that "there are no right or wrong answers", and notes that several funds hold sovereign bonds, which the client may include or exclude. Then:
+
+1. "Please tick the boxes below to indicate your sustainability preferences": the three categories as checkboxes.
+2. For each of Taxonomy-aligned and SFDR-aligned: "How important it is to you that you invest in …" (Not / Slightly / Moderately / Very / Extremely important) and "Please specify the minimum proportion that you would like invested in …" (a free % field with − / + buttons, default 0).
+3. For PAIs: the same importance scale, then "Please select all categories that you would like to be considered in your investment decisions from the sample list below" (11 checkboxes):
+   - Environmental: Greenhouse gas emissions; Carbon footprint; Activities that negatively affect biodiversity-sensitive areas; Emissions to water
+   - Social: Exposure to controversial weapons; Gender pay gap and board gender diversity; Adherence with the UN Global Compact
+   - Governance: Corruption and bribery matters; Inadequate governance; Tax evasion; Breaches of regulation, international norms and conventions
+   - Followed by: "the above is not an exhaustive list … please discuss these with your Financial Advisor."
+
 ### Differences from the others
 Zurich is the only one of the four that feeds **age and investment term** into the risk number, and the only one that produces a separate **capacity for loss** result. Q4–Q7 are a bespoke question set (not the EV bank). Its result descriptions cover 7 profiles ("Very low risk" … ) with an explanation of the typical fund mix for each.
 

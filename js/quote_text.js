@@ -53,7 +53,6 @@ var QT_TEXT = {
     funds:     'Your investment and risk',
     remun:     'Remuneration statement',
     product:   'Product Brochure',
-    tax:       'Tax information',
     important: 'Important information',
     glossary:  'Glossary',
     factsheets:'Fund information',
@@ -404,7 +403,7 @@ var QT_TEXT = {
     riskprofile:'A record of your risk profile questionnaire and the result',
     quotation: 'Your Allianz quotation: a summary, your investment and its risk, projected benefits, charges, the remuneration we receive, and important information',
     quotationNoRemun: 'Your Allianz quotation: a summary, your investment and its risk, projected benefits, charges and important information',
-    product:   'Information about the product, tax and other important points'
+    product:   'The product brochure'
   },
 
   // ─── Statement of Suitability templates (adviser-editable in Step 7) — DRAFT ─
@@ -511,10 +510,12 @@ var QT_TEXT = {
   // empty unless the risk profiler has been completed. The wording of the profiler sentences themselves is in
   // risk_profiler_data.js. DRAFT.
   // "Your sustainability preferences" — from the Step 3 answer and the SFDR classification of the
-  // recommended funds. DRAFT: new wording, needs Compliance sign-off.
+  // recommended funds. With the risk profiler, its sustainability sentences (risk_profiler_data.js) replace
+  // sosEsgYes and sosEsgNo. DRAFT: new wording, needs Compliance sign-off.
   sosEsgNo: 'You told us that you do not have sustainability preferences for this investment, so they were not a factor in our recommendation.',
-  sosEsgAllArt8: 'You told us that you have sustainability preferences. All of the recommended funds are classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which means they promote environmental or social characteristics.',
-  sosEsgPartArt8: 'You told us that you have sustainability preferences. {art8} of your portfolio is invested in funds classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which promote environmental or social characteristics. The rest is invested in funds classified under Article 6, which do not.',
+  sosEsgYes: 'You told us that you have sustainability preferences.',
+  sosEsgAllArt8: 'All of the recommended funds are classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which means they promote environmental or social characteristics.',
+  sosEsgPartArt8: '{art8} of your portfolio is invested in funds classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which promote environmental or social characteristics. The rest is invested in funds classified under Article 6, which do not.',
 
   // Footnotes for fund asset splits, volatility and fund charges. DRAFT: wording follows the PDC / Point of Sale
   // disclosures ("may be more or less than illustrated", "may vary in the future"); needs Compliance sign-off.

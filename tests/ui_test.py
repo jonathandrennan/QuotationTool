@@ -158,20 +158,21 @@ def pack_flow(d, tag):
     check(js(d, 'return S.sections.remun'), 'remuneration statement switched back on')
     quo = [r.text for r in d.find_elements(By.CSS_SELECTOR, '#secs .prow') if 'Your Allianz quotation' in r.text]
     check(len(quo) == 1 and 'Required' in quo[0] and 'Glossary' in quo[0] and 'Remuneration' not in quo[0], 'the Allianz quotation is one required item: %s' % quo)
-    for k in ['product', 'tax', 'appform']:
-        check(js(d, "return !S.sections[arguments[0]] && !document.querySelector('[data-sec=' + arguments[0] + ']')", k), 'section %s coming soon and excluded' % k)
+    check(js(d, "return !S.sections.appform && !document.querySelector('[data-sec=appform]')"), 'section appform coming soon and excluded')
+    check(js(d, "return SECTION_KEYS.indexOf('tax') < 0 && !document.querySelector('[data-sec=tax]')"), 'no tax information toggle')
+    check(js(d, "return S.sections.product && !!document.querySelector('[data-sec=product]') && attachDocs().product.length === 1"), 'product brochure has a toggle and attaches the product brochure')
     # Factsheets are appended to the pack PDF and can be switched off; KIDs only exist for the Investment Bond
     check(js(d, "return S.sections.factsheets && !!document.querySelector('[data-sec=factsheets]')"), 'factsheets on by default with a toggle')
     kids_na = js(d, "return S.product !== 'ib'")
     check(js(d, "return !!document.querySelector('[data-sec=kids]')") == (not kids_na), 'KIDs toggle only for the Investment Bond')
     check(kids_na <= (len(d.find_elements(By.XPATH, "//*[@id='secs']//*[contains(@class,'pn')][normalize-space()='Key Information Documents']")) == 0), 'no KIDs row for PRSA / ARF')
-    check(len(d.find_elements(By.CSS_SELECTOR, '#secs .pill.soon')) == 4 and len(d.find_elements(By.CSS_SELECTOR, '#secs .tag-new')) == 0, 'coming-soon tags and no New tags (the risk profile record shows "Complete the risk profiler" until Step 3 is done)')
+    check(len(d.find_elements(By.CSS_SELECTOR, '#secs .pill.soon')) == 2 and len(d.find_elements(By.CSS_SELECTOR, '#secs .tag-new')) == 0, 'coming-soon tags and no New tags (the risk profile record shows "Complete the risk profiler" until Step 3 is done)')
     check(len(d.find_elements(By.CSS_SELECTOR, '#preset-seg')) == 0, 'no preset selector')
     n_order = lambda: len(d.find_elements(By.CSS_SELECTOR, '#pack-order ol:first-of-type li'))   # printed sections only, not attached PDFs
     order = [e.text for e in d.find_elements(By.CSS_SELECTOR, '#pack-order ol:first-of-type li')]
     check(n_order() == 3 and 'Your Allianz quotation' in order[2], 'pack order: cover letter, SoS, the quotation: %s' % order)
     att = [e.text for e in d.find_elements(By.CSS_SELECTOR, '#pack-order ol:nth-of-type(2) li')]
-    check(len(att) == 1 and re.search(r'Fund factsheets \(\d+\)', att[0]), 'attached factsheets on one line: %s' % att)
+    check(len(att) == 2 and 'Product brochure' in att[0] and re.search(r'Fund factsheets \(\d+\)', att[1]), 'attached brochure and factsheets, one line each: %s' % att)
     sw = css(d, '[data-sec=cover]')
     click(d, sw)
     check(not js(d, 'return S.sections.cover') and n_order() == 2 and 'Cover letter' not in css(d, '#pack-subs').text, 'cover letter toggled off drops its stage')
@@ -184,7 +185,7 @@ def pack_flow(d, tag):
     check(js(d, 'return S.packStage') == 'cover' and css(d, '#pack-h').text == 'Cover letter', 'cover letter stage')
     cover = js(d, "return stripMarks(S.text.cover)")
     check('[[' not in cover and 'Enclosed:' in cover, 'cover letter has no prompts and lists enclosures')
-    check('Your Allianz quotation:' in cover and cover.count('\n- ') == 2, 'enclosed list: the SoS and the quotation as one item')
+    check('Your Allianz quotation:' in cover and cover.count('\n- ') == 3, 'enclosed list: the SoS, the quotation as one item and the brochure')
     check(len(d.find_elements(By.CSS_SELECTOR, '#ed-cover .auto')) >= 2, 'auto-filled values shown in grey boxes')
     click(d, css(d, '#stage-cover .mode-row button:nth-child(2)'))
     check(js(d, 'return S.coverMode') == 'own' and css(d, '#ed-cover.own').is_displayed() and js(d, "return docIssues('cover')") == 1, 'Write your own: empty letter counts as unfinished')

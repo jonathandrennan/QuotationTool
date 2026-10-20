@@ -389,10 +389,10 @@ function qtBuildPack(Q) {
     add('<h1>' + escHtml(T.sections.riskprofile) + '</h1>', { hdr: 'broker', cls: 'kwn newpage' });
     add('<table class="kv"><tr><td>Client</td><td>' + escHtml(clientName) + '</td><td>Adviser</td><td>' + escHtml(Q.broker.name) + '</td></tr>' +
         '<tr><td>Completed</td><td>' + escHtml(fmtDateLong(pf.date)) + '</td><td>Questionnaire</td><td>' + escHtml(pf.name) + '</td></tr></table>', { hdr: 'broker' });
+    var lowered = Q.risk.sri < pr.sri;
     add(qtStat3([
-      ['Your risk profile', pr.sri + ' &ndash; ' + escHtml(pr.sriLabel)],
-      ['Your risk rating', Q.risk.sri + ' &ndash; ' + escHtml(ESMA_LABELS[Q.risk.sri])],
-      ['Experience and knowledge', escHtml(pr.experience.label)]
+      ['Your risk rating', Q.risk.sri + ' &ndash; ' + escHtml(ESMA_LABELS[Q.risk.sri]), lowered ? 'Lowered by your adviser from ' + pr.sri : ''],
+      ['Capacity for loss', escHtml(pr.capacity.label)]
     ]), { hdr: 'broker' });
     add(qtRiskStrip(Q.risk.sri), { hdr: 'broker' });
     if (pnarr.risk) add('<p>' + escHtml(pnarr.risk) + '</p>', { hdr: 'broker' });
@@ -401,20 +401,21 @@ function qtBuildPack(Q) {
     pf.summary.forEach(function(s) {
       var t = '<table class="dt split"><thead><tr><th class="l" colspan="2">' + escHtml(s.title) + '</th></tr></thead><tbody>';
       s.rows.forEach(function(rw) {
-        t += '<tr><td class="l" style="width:52%">' + escHtml(rw.q) + '</td><td class="l"><b>' + rw.a.map(escHtml).join('<br>') + '</b></td></tr>';
+        t += '<tr><td class="l" style="width:52%">' + escHtml((rw.num ? (/^S/.test(rw.num) ? rw.num : 'Q' + rw.num) + '. ' : '') + rw.q) + '</td><td class="l"><b>' + rw.a.map(escHtml).join('<br>') + '</b></td></tr>';
       });
       add(t + '</tbody></table>', { hdr: 'broker', cls: 'split' });
     });
-    add('<h3 class="kwn">How the result was worked out</h3>', { hdr: 'broker' });
-    add(qtFactBlock('YOUR RESULT', [
-      ['Earning capacity, after your regular commitments', escHtml(pcfg.levels.capacity[pr.steps.adjustedEarningCapacity])],
-      ['Wealth (your savings and the time horizon)', escHtml(pcfg.levels.capacity[pr.steps.totalAssets])],
-      ['Financial capacity to take on risk', escHtml(pcfg.levels.capacity[pr.steps.financialCapacity])],
-      ['Reaction to a fall in value', pr.tolerance + ' of 7'],
-      ['Risk profile (1 to 7 scale)', pr.sri + ' &ndash; ' + escHtml(pr.sriLabel) + (pr.ageCapped ? ' (limited by age from ' + pr.profileRaw + ')' : '')]
+    var kn = pr.knowledge;
+    add(qtFactBlock('KNOWLEDGE AND EXPERIENCE', [
+      ['Stated (Q7)', escHtml(pcfg.levels.knowledge[kn.stated].label)],
+      ['Knowledge check (Q8)', kn.check === 'right' ? 'Right' : kn.check === 'dontknow' ? 'Did not know' : 'Not right'],
+      ['Knowledge level', escHtml(kn.label) + (kn.level !== kn.stated ? ' (one level lower after the check)' : ''), true]
     ]), { hdr: 'broker' });
-    add('<p>' + escHtml(pcfg.text.howCalculated) + '</p>', { hdr: 'broker' });
-    add('<p class="tiny">' + escHtml(pcfg.text.disclaimer) + '</p>', { hdr: 'broker' });
+    if (pnarr.sustainability) add('<p>' + escHtml(pnarr.sustainability) + '</p>', { hdr: 'broker' });
+    add('<h3 class="kwn">Points for your adviser</h3>', { hdr: 'broker' });
+    add(pr.flags.length ? '<ul>' + pr.flags.map(function(f) { return '<li><b>' + escHtml(f.title) + ':</b> ' + escHtml(f.text) + '</li>'; }).join('') + '</ul>'
+      : '<p>No flags were raised.</p>', { hdr: 'broker' });
+    add('<p class="tiny">' + escHtml(pcfg.text.recordNote) + ' Questionnaire version ' + escHtml(pcfg.version) + '.</p>', { hdr: 'broker' });
   }
 
   // ── Allianz quotation: cover / divider ──
@@ -758,6 +759,7 @@ function qtBuildPack(Q) {
     var rt2 = '<table class="dt num"><thead><tr><th class="l">Type</th><th class="l">Basis</th><th>Amount</th></tr></thead><tbody>';
     if (isPrsa) {
       if (r.spRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; single contribution</td><td class="l">' + pct(r.spUpRate) + ' of single contribution</td><td>' + fEUR(r.spUpfrontComm) + '</td></tr>';
+      if (r.ofvRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; transfer</td><td class="l">' + pct(r.spUpRate) + ' of transfer value</td><td>' + fEUR(r.ofvUpfrontComm) + '</td></tr>';
       if (r.rpRaw > 0) rt2 += '<tr><td class="l">Initial &ndash; regular contributions</td><td class="l">' + pct(r.rpUpfrontPct) + ' of first year\'s regular contributions</td><td>' + fEUR(r.rpUpfrontComm) + '</td></tr>';
       rt2 += '<tr><td class="l">Trail</td><td class="l">' + pct(r.cc.ongoing) + ' a year of fund value</td><td>' + fEUR(r.totalOngoingComm) + '<br><span class="muted">projected total to retirement</span></td></tr>';
       rt2 += '<tr class="mat"><td class="l" colspan="2">Total projected remuneration</td><td>' + fEUR(r.totalInitialComm + r.totalOngoingComm) + '</td></tr>';
@@ -806,18 +808,7 @@ function qtBuildPack(Q) {
     if (r.spUpOverridden || (isPrsa && r.rpUpOverridden)) p(T.overrideNote);
   }
 
-  // ── 8–10. Product, tax, important ──
-  if (Q.sections.product) {
-    sec = 'product';
-    h2(T.sections.product, true);
-    add('<ul>' + (isPrsa ? T.prsaProduct : isArf ? T.arfProduct : T.ibProduct).map(function(l){ return '<li>' + escHtml(l) + '</li>'; }).join('') + '</ul>');
-  }
-  if (Q.sections.tax) {
-    sec = 'tax';
-    h2(T.sections.tax, !Q.sections.product);
-    p(T.taxIntro, 'small');
-    add('<ul>' + (isPrsa ? T.prsaTax : isArf ? T.arfTax : T.ibTax).map(function(l){ return '<li>' + escHtml(l) + '</li>'; }).join('') + '</ul>');
-  }
+  // ── 8. Important ──
   if (Q.sections.important) {
     sec = 'important';
     pageTitle(T.sections.important, T.packLeads.important);
@@ -904,13 +895,24 @@ function qtBuildPack(Q) {
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + escHtml(Q.docTitle || (Q.productName + ' – Quotation – ' + clientName)) + '</title>' +
     '<style>' + qtPackCss() + (Q.embed ? qtEmbedCss() : '') + '</style></head><body class="p-' + escHtml(Q.product) + '">' +
     (Q.embed ? '' : '<div class="topbar"><span>' + escHtml(Q.productName) + ' &ndash; Quotation &ndash; ' + escHtml(clientName) + '</span><button onclick="window.print()">Print / Save as PDF</button>' +
-      (Q.libBase ? '<button onclick="this.disabled=true;window.opener&&window.opener.savePackPdf&&window.opener.savePackPdf(window)">Save PDF with factsheets</button>' : '') + '</div>') +
+      (Q.libBase ? '<button onclick="this.disabled=true;window.opener&&window.opener.savePackPdf&&window.opener.savePackPdf(window)">Save PDF with attached documents</button>' : '') + '</div>') +
     '<template id="hdr-agl">' + hdrAgl + '</template><template id="hdr-broker">' + hdrBroker + '</template>' +
     '<template id="foot-agl">' + footAgl + '</template><template id="foot-broker">' + footBroker + '</template>' +
-    '<div id="src">' + src + '</div><div id="pages"></div>' +
+    '<div id="src">' + src + '</div><div id="pages"></div>' + qtAttachedPreview(Q) +
     // Pages are rasterised here (html2canvas) so the opener can merge the factsheets / KIDs into one PDF
     (Q.libBase ? '<script src="' + Q.libBase + 'js/vendor/html2canvas.min.js"><\/script><script>' + qtRasterSrc() + '<\/script>' : '') +
     '<script>' + (Q.noAutoPrint || Q.libBase ? 'window.__noAutoPrint = true;' : '') + qtPaginatorSrc() + '<\/script></body></html>';
+}
+
+// The documents that will be added to the saved PDF, shown below the pages in the pack window (never printed)
+function qtAttachedPreview(Q) {
+  if (!Q.libBase || !Q.attached || !Q.attached.length) return '';
+  return '<style>#attached { max-width: 210mm; margin: 8mm auto 16mm; font-family: Arial, sans-serif; } #attached h2 { font-size: 14pt; color: #003781; margin: 0 0 2mm; }' +
+    ' #attached p { font-size: 9.5pt; color: #5E6B78; margin: 0 0 4mm; } #attached details { margin-bottom: 3mm; background: #fff; border: 1px solid #E2E8EF; border-radius: 2mm; }' +
+    ' #attached summary { padding: 3mm 4mm; font-size: 10pt; font-weight: 700; cursor: pointer; } #attached embed { display: block; width: 100%; height: 280mm; border: 0; }' +
+    ' @media print { #attached { display: none; } }</style>' +
+    '<div id="attached"><h2>Attached documents</h2><p>These are added after the pages above when you choose Save PDF with attached documents. Open one to check it.</p>' +
+    Q.attached.map(function(d) { return '<details><summary>' + escHtml(d.title) + '</summary><embed src="' + escHtml(d.url) + '" type="application/pdf"></details>'; }).join('') + '</div>';
 }
 
 // Rows shown in PRSA tables: years 1–5, every 5th year, and retirement.

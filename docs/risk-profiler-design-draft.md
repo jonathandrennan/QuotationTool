@@ -1,159 +1,148 @@
 # Risk profiler – proposed questions and scoring
 
-A proposed client risk questionnaire that gives a rating on the ESMA 1 to 7 scale. The highest rating it gives is 6. It has 10 questions and a date of birth. This draft is for discussion. Every cut-off is a proposal for Compliance to confirm.
+This is the suitability section of the advised sale. The adviser uses it with the client to set a risk rating from 1 to 6 on the ESMA scale. It has 8 scored questions, a date of birth, and up to 4 sustainability questions that are asked after the rating. Draft for Compliance review, 19/10/2026. Every cut-off in it is a proposal.
 
-_Generated alongside `Risk-Profiler-Proposal.docx`; keep the two in step._
+_Generated alongside `Risk-Profiler-Proposal.docx` by `build_risk_profiler_docx.py`; edit this file, then rebuild._
 
-## 1. At a glance
+## 1. Summary
 
-| Part | # | Question | Feeds |
+| Part | # | Question | Used for |
 |---|---|---|---|
-| Your finances | Q1 | Income source and security | Capacity for loss |
-|  | Q2 | Regular commitments | Capacity for loss |
-|  | Q3 | Emergency savings | Capacity for loss |
-|  | Q4 | How much you rely on this money | Capacity for loss |
-| Your timing | Q5 | When the money is needed | Time limit |
-| Your attitude to risk | Q6 | Largest 12-month fall you could accept | Attitude rating |
-|  | Q7 | What you would do after a 20% fall | Attitude rating |
-|  | Q8 | What you want from the investment | Attitude rating |
-| Your knowledge | Q9 | Knowledge and experience | Knowledge level (flag only) |
-|  | Q10 | Knowledge check (multiple choice) | Knowledge level (flag only) |
-| About you | DOB | Date of birth | Flag only |
+| Your finances | Q1 | Financial cushion | Capacity for loss |
+|  | Q2 | Impact of a loss | Capacity for loss |
+| Your timing | Q3 | Investment horizon | Time limit |
+| Your attitude to risk | Q4 | Largest 12-month fall you could accept (slider) | Attitude rating |
+|  | Q5 | What you would do after a 20% fall | Attitude rating |
+|  | Q6 | What you want from the investment | Attitude rating |
+| Your knowledge | Q7 | Knowledge and experience | Knowledge level (flag) |
+|  | Q8 | Knowledge check: rank four investments by risk | Knowledge level (flag) |
+| About you | DOB | Date of birth | Age (flag) |
+| Sustainability | S1–S4 | Sustainability preferences (asked after the rating) | Fund choice only |
 
 ### How the rating is worked out
 
-| Step | What | How | Gives |
-|---|---|---|---|
-| 1 | Attitude rating | Middle value (median) of the ratings from Q6, Q7 and Q8, and no more than one level above the Q6 rating | 1 to 6 |
-| 2 | Time limit | From Q5 | 1, 2, 4, 6 or none |
-|  | Risk rating | The lower of steps 1 and 2, and never above 6. The adviser may lower it, with a recorded reason. When the time limit lowers the result, the client is told why. | 1 to 6 |
-|  | Capacity for loss | Shown alongside the rating, as Zurich does; it does not change the rating. Q1 + Q2 + Q3 + Q4 = 4 to 12: Low (4–6), Medium (7–9), High (10–12). Less than 3 months' savings (Q3), or relying on the money (Q4): no higher than Medium. If capacity is below what the rating needs, the client is asked to confirm, as Aviva does, and the adviser records how it is addressed. | Low, Medium or High |
+| Step | How | Result |
+|---|---|---|
+| 1. Attitude | The middle value of the Q4, Q5 and Q6 ratings, and no more than one level above Q4 | 1 to 6 |
+| 2. Limits | Time limit from Q3. Capacity limit: Low capacity (Q1 + Q2) allows no more than 4 | A ceiling, or none |
+| 3. Risk rating | The lower of steps 1 and 2. The adviser may lower it, with a recorded reason. The client is told when a limit applies | 1 to 6 |
 
-### The ESMA scale
+Knowledge and age do not change the rating. They raise flags for the adviser (section 3).
+
+### The rating scale
 
 | Rating | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 |---|---|---|---|---|---|---|---|
 | Volatility | 0–0.5% | 0.5–2% | 2–5% | 5–10% | 10–15% | 15–25% | over 25% |
-| Risk | Very low | Low | Low to medium | Medium | Medium to high | High | Very high |
+| Risk | Very low | Low | Low to medium | Medium | Medium to high | High | Very high (not given) |
+
+### Key design choices
+
+- **Highest rating 6:** Level 7 is not offered, as at Aviva.
+- **The loss answer anchors the rating:** The attitude rating can be at most one level above the Q4 answer, so a client who will accept only a small loss cannot be rated high on objectives alone.
+- **Capacity limits the rating:** Low capacity for loss caps the rating at 4. Aviva and Zurich only report it. We limit it because the client must be able to bear the losses.
+- **Short horizons limit the rating:** Under 5 years allows no more than 4.
+- **Sustainability preferences do not change the rating:** They are asked after it, and only narrow the fund list.
+- **Knowledge and age raise flags only:** They don't change the rating. The adviser decides what to do.
+- **Scope:** This tool is the suitability section only. The application form collects personal and financial details, and the adviser handles updates, vulnerability and joint applicants (section 4).
 
 ## 2. The questions
 
+### Introduction (shown before Q1)
+
+> **Introduction:** We ask these questions so that your adviser can recommend an investment that suits you. It is our responsibility, not yours, to decide whether an investment is suitable. The questions cover your finances, how long you plan to invest, how you would act if the value of your investment fell, and what you know about investing. Please answer as accurately and fully as you can: if the answers are not accurate and complete, we cannot recommend an investment. Your answers give a risk rating from 1 (very low risk) to 6 (high risk), which your adviser uses, with your other circumstances, to choose suitable funds. Your adviser can help with any question and will go through the result with you. If your circumstances change, please tell your adviser.
+
+- *Regulation:* Explains why the questions are asked and that the firm decides suitability (ESMA 11–12). States how the answers are used and that an adviser is involved (ESMA 17). It contains no disclaimer and asks the client to confirm nothing (ESMA 14–15).
+
 ### Part A – Your finances
 
-**Q1 Income** – What is your main source of income, and how secure is it?
-
-| Answer | Points |
-|---|---|
-| Permanent employment, a pension, or secure investment income | 3 |
-| Self-employed, commission-based, or a fixed-term contract | 2 |
-| Temporary work, unemployed, or dependent on someone else | 1 |
-
-- *Why we ask:* Shows whether the client could make good a loss from income.
-- *Competitors:* Not asked by Aviva, Zurich, Standard Life or Irish Life.
-- *ESMA:* Source of income and whether it is permanent or temporary (para 37); job security and closeness to retirement (para 24).
-
-**Q2 Regular commitments** – Roughly what share of your take-home income goes on regular commitments, such as loan or mortgage repayments, or supporting children or other family?
-
-| Answer | Points |
-|---|---|
-| Under 10% | 3 |
-| 10% to 40% | 2 |
-| Over 40% | 1 |
-
-- *Why we ask:* Debts and dependants reduce the ability to absorb a loss.
-- *Competitors:* Not asked by any of the four.
-- *ESMA:* Regular commitments and debts (para 37); ask for facts, not whether the client feels they have enough (para 46); family situation (para 24).
-
-**Q3 Emergency savings** – If your income stopped, how many months of normal spending could you cover from savings other than this investment?
+**Q1 Financial cushion** – If your income stopped, how long could you cover your normal spending (including any loan or mortgage repayments and support for family) from savings you can get at easily (not pensions or this investment)?
 
 | Answer | Points |
 |---|---|
 | 12 months or more | 3 |
 | 3 to 11 months | 2 |
-| Less than 3 months (capacity is no higher than Medium) | 1 |
+| Less than 3 months | 1 |
 
-- *Why we ask:* With an emergency fund, a fall in value does not force a sale.
-- *Competitors:* Zurich Q8: "Do you have other savings available to you, should you encounter a financial emergency?" (none / some, not earmarked / yes, specific savings). Not asked by Aviva, Standard Life or Irish Life.
-- *ESMA:* Liquid assets (para 37).
+- *Why:* Shows whether a fall in value could force the client to sell. It is a fact the client can work out, not a feeling. Pensions are excluded because the client usually cannot reach them.
+- *Regulation:* Ability to bear losses (IDD Art 30; ESMA 80). Asks for facts, not whether the client feels they have enough (ESMA 46). Similar to Zurich Q8.
 
-**Q4 Reliance on this money** – If this investment fell sharply in value, what effect would it have on your plans?
+**Q2 Impact of a loss** – If this investment lost a large part of its value, what impact would this have on your finances?
 
 | Answer | Points |
 |---|---|
-| Little or none: I have other savings and income to rely on | 3 |
-| Some: I would need to change some of my plans | 2 |
-| Serious: I rely on this money, or need it for a specific purpose (capacity is no higher than Medium) | 1 |
+| A big impact: I would struggle to meet my living costs or commitments | 1 |
+| Some impact: I would need to make adjustments to my plans, but I could manage | 2 |
+| Little or no impact: I have other savings and income to rely on | 3 |
 
-- *Why we ask:* Shows how much the client depends on this money. Q3 measures the cash buffer; this measures what a loss would do to their plans.
-- *Competitors:* Aviva Q2: "How important to you is the investment you are considering now?" Zurich Q9: "If this investment were to perform poorly, what impact would this have on your financial well-being?" Not asked by Standard Life or Irish Life.
-- *ESMA:* Ability to bear losses (paras 12, 80); the overall financial situation (paras 37, 43).
+- *Why:* Q1 measures the cash buffer; Q2 measures how much rides on this money. The first answer is about hardship, not purpose: almost all pension money has a specific purpose (retirement), and that alone should not make capacity Low.
+- *Regulation:* Ability to bear losses (IDD Art 30; ESMA 12, 80). Based on Zurich Q9, in our own words.
 
-> **Result:** Capacity for loss = Q1 + Q2 + Q3 + Q4 (4 to 12): Low (4–6), Medium (7–9), High (10–12). Less than 3 months' savings at Q3, or relying on the money at Q4: no higher than Medium. It is a separate result and does not change the rating, in line with Aviva and Zurich. If the rating is 5 or more with Low capacity, or 7 with Medium capacity, the client is asked to confirm and the adviser records how it is addressed.
+> **Result:** Capacity for loss = Q1 + Q2: Low (2–3), Medium (4), High (5–6). Low capacity limits the risk rating to 4. Medium and High are shown to the adviser but do not change the rating.
 
 ### Part B – Your timing
 
-**Q5 Time horizon** – When do you expect to need to start taking money out of this investment?
+**Q3 Investment horizon** – How long do you plan to hold this investment?
 
 | Answer | Highest rating allowed |
 |---|---|
-| In less than 1 year | 1 |
-| In 1 year to less than 3 years | 2 |
-| In 3 years to less than 5 years | 4 |
-| In 5 years or more | No limit (6) |
+| Less than 1 year | 1 |
+| 1 year to less than 3 years | 2 |
+| 3 years to less than 5 years | 4 |
+| 5 years or more | No limit |
 
-- *Why we ask:* Higher-risk funds need time to recover from falls. The ESMA scale assumes holding for 5 years or more, so 3 to 5 years is limited to 4 (balanced) and flagged, and 5 years or more has no limit.
-- *Competitors:* Zurich Q2: "How long do you plan to invest for?" (1 to 15+ years): shorter terms lower the profile, and 5 years or less shows a warning. Aviva: a term slider used only for its charts. Not asked by Standard Life or Irish Life.
-- *ESMA:* Holding period and need for liquidity (para 24); effect of time horizon on risk and return (para 80).
+- *Why:* Higher-risk funds need time to recover from falls. The ESMA scale assumes 5 years or more.
+- *Regulation:* Holding period (ESMA 24, 37, 80). Zurich also lowers the profile for short terms.
 
 ### Part C – Your attitude to risk
 
-**Q6 Largest fall you could accept** – Imagine you invest €10,000. What is the largest fall in value over 12 months that you could accept without changing your plans?
+**Q4 Largest fall you could accept** – Imagine you invest €10,000. What is the largest fall in value over 12 months that you could accept without changing your plans?
 
-| Answer | Points to rating |
-|---|---|
-| No fall at all | 1 |
-| About €250 (2.5%) | 2 |
-| About €700 (7%) | 3 |
-| About €1,500 (15%) | 4 |
-| About €2,500 (25%) | 5 |
-| About €4,000 (40%) or more | 6 |
+_Built as a slider_ from "No fall" to "40% or more", in 0.5% steps, starting with no value selected. The € amount is shown as the client moves it. A value between two marks scores the lower band.
 
-- *Why we ask:* Each figure is a "bad year" for a fund at that ESMA level: twice the middle of its volatility band. The figures sit between Aviva's and Zurich's (Appendix A). This answer also anchors the attitude rating, which can be at most one level above it.
-- *Competitors:* Aviva Q5: "Maximum percentage loss tolerable in 12 months?" (slider 0–40%). Zurich Q5: "How concerned would you be with a short-term (6 months) 10% decline?" and Q6: acceptable range of values for €10,000 after 5 years (worst cases 2% to 37%). Standard Life Q7 / Irish Life Q9: "How much would you be willing to place in an investment with possible high returns but a similar chance of losing some of your money?"
-- *ESMA:* The model question: what loss over a given period the client would accept (para 46); use concrete figures (paras 31, 48).
+| Slider value | Shown as | Rating |
+|---|---|---|
+| 0% to under 2.5% | No fall, or under €250 | 1 |
+| 2.5% to under 7% | About €250 to €700 | 2 |
+| 7% to under 15% | About €700 to €1,500 | 3 |
+| 15% to under 25% | About €1,500 to €2,500 | 4 |
+| 25% to under 40% | About €2,500 to €4,000 | 5 |
+| 40% or more | About €4,000 or more | 6 |
 
-**Q7 Reaction to a fall** – Six months after you invest €10,000, markets fall and your investment is worth €8,000. What would you most likely do?
+- *Why:* Each mark is a "bad year" for a fund at that level: twice the middle of its volatility band (Appendix B). This answer anchors the attitude rating.
+- *Regulation:* This is the question ESMA gives as its example: what loss over a given period the client would accept (ESMA 46). It uses concrete figures (ESMA 31, 48). Aviva asks it the same way (a 0–40% slider).
 
-| Answer | Points to rating |
+**Q5 Reaction to a fall** – Six months after you invest €10,000, markets fall and your investment is worth €8,000. What would you most likely do?
+
+| Answer | Rating |
 |---|---|
 | Sell everything | 2 |
 | Sell part, to limit further losses | 3 |
 | Keep it and wait for a recovery | 4 |
 | Keep it and invest more | 6 |
 
-- *Why we ask:* What the client would do, not how they feel. Holding through a 20% fall fits level 4.
-- *Competitors:* Irish Life Q7: "Six months after making an investment the financial markets start to perform badly … What would your reaction be?" (move to secure / wait / invest more). Zurich Q7: "If you could increase the value of your investment by taking more risk, would you …". Not asked by Aviva.
-- *ESMA:* Ask about personal choices when facing a loss, with figures (para 48); assess the client's response to loss scenarios (para 31).
+- *Why:* Asks what the client would do, not how they would feel.
+- *Regulation:* Asks about the client's own choices when facing a loss, with figures (ESMA 31, 48). Similar to Irish Life Q7.
 
-**Q8 Objective** – What do you want from this investment?
+**Q6 Objective** – What do you want from this investment?
 
-| Answer | Points to rating |
+| Answer | Rating |
 |---|---|
 | To keep my money safe: I want to get back at least what I put in | 1 |
 | A return a little better than a deposit account, with very little risk | 2 |
+| Growth a little above inflation, accepting small rises and falls in value | 3 |
 | Steady growth over the long term, accepting that the value will go up and down | 4 |
 | Strong growth over the long term, accepting large rises and falls in value | 5 |
 | The highest return possible, accepting a high level of risk to get it | 6 |
 
-- *Why we ask:* The same five steps that Aviva and Zurich use, in our own words. Set against Q6 and Q7, it shows up a cautious attitude with ambitious objectives, or the reverse.
-- *Competitors:* Aviva Q4: "What risk and return expectations do you have?" (the same five levels). Zurich Q4: "What is your investment objective?" (protect capital … maximise returns regardless of risk). Standard Life / Irish Life: statements such as "I want my investment money to be safe even if it means lower returns".
-- *ESMA:* Investment objectives must be collected (paras 12, 20); contradiction between a prudent profile and ambitious objectives (para 51).
+- *Why:* One answer for each rating from 1 to 6. Set against Q4 and Q5, it shows a cautious attitude with ambitious objectives, or the reverse.
+- *Regulation:* Investment objectives (IDD Art 30; ESMA 12). Contradictions between objectives and attitude (ESMA 51). Aviva Q4 and Zurich Q4 use five steps; the level-3 answer matches Zurich's "beat inflation without significant risk".
 
-> **Result:** Attitude rating = the middle value of the three ratings from Q6, Q7 and Q8, but no more than one level above the Q6 rating, so the loss answer anchors the result, as it does at Aviva. The highest rating given is 6.
+> **Result:** Attitude rating = the middle value of the Q4, Q5 and Q6 ratings, but no more than one level above Q4.
 
 ### Part D – Your knowledge and experience
 
-**Q9 Knowledge and experience** – Which statement best describes your investment knowledge and experience?
+**Q7 Knowledge and experience** – Which statement best describes your investment knowledge and experience?
 
 | Answer | Knowledge level |
 |---|---|
@@ -163,80 +152,161 @@ _Generated alongside `Risk-Profiler-Proposal.docx`; keep the two in step._
 | I invest regularly in a range of funds, shares or bonds, and I understand how risk, return, time horizon and charges affect them | High |
 | I work or have worked in investments or financial services, or hold a finance qualification, and I invest regularly | High |
 
-- *Why we ask:* Combines Aviva's experience question and Zurich's knowledge question. Each answer describes what the client has done and how recently, not how they rate themselves. It does not change the rating: low knowledge with a rating of 5 or more is flagged for the adviser.
-- *Competitors:* Aviva Q1: "How experienced an investor are you?" (not experienced … made many investments). Zurich Q3: "How would you describe your investment knowledge?" (Expert / High / Moderate / Little / None, each with a definition). Not asked by Standard Life or Irish Life.
-- *ESMA:* Ask what the client has done and how recently, avoid self-assessment and tick-lists (paras 46, 47); little knowledge with an aggressive attitude (para 51). Q10 checks the answer with a multiple-choice question.
+- *Why:* Each answer describes what the client has done and how recently, not how they rate themselves.
+- *Regulation:* Knowledge and experience (IDD Art 30). Ask what the client has done and how recently, and avoid self-assessment (ESMA 46–47).
 
-**Q10 Knowledge check** – If you invest in a fund that holds shares in many different companies, which of these is true?
+**Q8 Knowledge check** – Put these four investments in order, from the one with the lowest risk of losing money to the one with the highest.
 
-| Answer | Result |
+| Investment | Right position |
 |---|---|
-| Its value cannot fall, because it holds many companies | Wrong |
-| The fund manager guarantees that I get my money back | Wrong |
-| Its value can fall, and I could get back less than I put in | Correct |
-| It will always grow faster than a deposit account | Wrong |
-| I don't know | Wrong |
+| A savings deposit | 1 (lowest risk) |
+| Government bonds | 2 |
+| A fund holding shares in many different companies | 3 |
+| Shares in a single company | 4 (highest risk) |
 
-- *Why we ask:* Checks the Q9 answer with a question that has a right answer, in the same plain style as Aviva's and Zurich's questions. It covers what matters most for a fund investor: the value can fall, holding many companies does not stop that, and there is no guarantee. The right answer is not shown first, so the layout does not lead the client. Afterwards the client is shown the right answer and why.
-- *Competitors:* None of the four tests knowledge with a right-or-wrong question. Aviva and Zurich rely on the client's own description (Aviva Q1, Zurich Q3); Standard Life and Irish Life do not assess knowledge.
-- *ESMA:* Test real knowledge with multiple-choice questions instead of self-assessment (para 46); guard against clients overestimating their knowledge (para 52); understanding of risk, risk and return, and concentration (paras 23, 31).
+_Built as_ four items the client drags into order, shown in a mixed order, with an "I don't know" box. Correct only if all four are in the right order. Afterwards the client is shown the right order and why.
 
-> **Result:** Knowledge level = from Q9. If Q10 is wrong or "I don't know", the level drops by one (High to Medium, Medium to Low). It does not change the rating: Low knowledge with a rating of 5 or more is flagged for the adviser.
+- *Why:* Checks Q7 with a question that has a right answer. It tests that cash is safest, that shares carry more risk than bonds, and that spreading money is less risky than one share.
+- *Regulation:* Test real knowledge with a question that has a right answer (ESMA 46). Guards against clients overestimating their knowledge (ESMA 52). Tests understanding of risk and concentration (ESMA 31).
 
-### About you – Date of birth (not a scored question)
+> **Result:** Knowledge level = from Q7, one level lower if Q8 is wrong or "I don't know".
 
-**DOB Age** – Date of birth
+### Part E – Your sustainability preferences (not scored, asked after the risk rating)
 
-| Answer | Effect |
+These questions do not change the risk rating. They are asked once the rating is set, and are used only to choose among the funds that suit that rating.
+
+**S1 Sustainability preferences** – Some investments aim to support environmental or social goals, or to limit harm to them. Would you like your investment to include any of these?
+
+| Answer | Next |
 |---|---|
-| Under 65 | None |
-| 65 or over | Flag for the adviser if the attitude rating is 5 or more |
+| Yes | S2 |
+| No, or I have no preference | End. Funds with and without sustainability features can be recommended |
 
-- *Why we ask:* Age does not change the rating. The time horizon (Q5) already does that work, and older clients with a high rating are flagged for the adviser.
-- *Competitors:* Zurich lowers the profile gradually with age (by about half a level at 70 and over) and raises it for the young. Aviva, Standard Life and Irish Life do not use age; Standard Life's adviser guide says attitude to risk does not depend on age.
-- *ESMA:* Age matters for objectives and holding period (para 24); more care for potentially vulnerable older clients (para 40); retirement as a trigger to review (para 55).
+**S2 Type of investment** – Which of these would you like your investment to include? Tick any that apply.
 
-## 3. Worked examples
+| Answer | Next |
+|---|---|
+| A. Investments in activities that count as environmentally sustainable under EU rules (the EU Taxonomy) | S3 |
+| B. Sustainable investments: companies or projects that contribute to an environmental or social goal without doing significant harm (as defined in EU rules) | S3 |
+| C. Investments that take account of their main negative effects on the environment and society | S4 |
+| I have a preference but not for any of these in particular | End. The adviser records this and explains the funds' sustainability features |
 
-| Client | Capacity for loss | Time (Q5) | Age | Q6 / Q7 / Q8 → attitude | Risk rating |
-|---|---|---|---|---|---|
-| A. Retired, 68, cautious | High | 5+ years: none | Flag only if attitude 5+ | 3 / 3 / 2 → 3 | 3 |
-| B. 35, permanent job, mortgage | High | 5+ years: none | None | 4 / 4 / 4 → 4 | 4 |
-| C. 24, temporary work, no savings, very keen | Low | 5+ years: none | None | 6 / 6 / 6 → 6 | 6, with a capacity confirmation and an adviser flag |
-| D. 45, wealthy, experienced, investing for 20 years | High | 5+ years: none | None | 6 / 6 / 6 → 6 | 6 (the highest given) |
-| E. 72, wealthy, very keen | High | 5+ years: none | Flag | 6 / 6 / 6 → 6 | 6, with an age flag |
+**S3 Minimum share** – For each of A and B that you ticked, what is the smallest share of your investment you would like it to make up?
 
-## 4. Against competitors
+| Answer | Next |
+|---|---|
+| At least 10% | S4 if C ticked, else end |
+| At least 20% | S4 if C ticked, else end |
+| At least 30% | S4 if C ticked, else end |
+| At least 50% | S4 if C ticked, else end |
 
-|  | Proposed | Aviva | Zurich | Standard Life / Irish Life * |
-|---|---|---|---|---|
-| Questions | 10 + date of birth | 5 + term | 9 | 13 / 15 |
-| How the rating is produced | Attitude (anchored on the loss answer), limited by time horizon; highest 6 | Lookup of objective × maximum loss | Points, then adjusted for age, term and knowledge | Total score in bands |
-| Loss question | € fall over 12 months | % fall over 12 months (slider) | Concern at a 10% fall; range after 5 years | How much you would put at risk |
-| Capacity for loss | 4 questions; separate result; confirmation if too low | Reliance used only for confirmation prompts | 2 questions; separate result | Not assessed |
-| Time horizon | Limits the rating; flag under 5 years | Charts only | Adjusts the score; warning at 5 years or less | Not assessed |
-| Age | Flag only (65+) | Not used | Adjusts the score | Not used |
-| Knowledge | Description plus a multiple-choice check; flag | 1 question; prompts | 1 question; adjusts the score | Not assessed |
-| Highest level | 6 | 6 | 7 (young, long term, expert) | SL: 6 and 7 grouped as "High"; IL: 7 |
-| Consistency checks | 6 flags | 3 confirmation prompts | Conflict warnings between answers | Adviser discussion |
+**S4 Negative effects** – Which negative effects matter most to you? Tick any that apply.
 
-_* Standard Life uses the EV (formerly EValue) questionnaire; Irish Life appears to use the same question bank (inferred)._
+| Answer | Next |
+|---|---|
+| Greenhouse gas emissions and energy use | End |
+| Biodiversity, water and waste | End |
+| Social and employee matters, including human rights | End |
+| Corruption and bribery | End |
+
+- *Why:* Collects the client's sustainability preferences in plain language, so the adviser can match them to the funds' features. The options are shown in a fixed, neutral order, and "No" is as easy to give as "Yes".
+- *Regulation:* Sustainability preferences are part of the suitability assessment for insurance-based investment products (Delegated Regulation 2017/2359 as amended by 2021/1257, from memory) and are information the Code requires (Reg 16(3)). Follows ESMA 26–28: a yes or no, then which of the three types, a minimum share for A and B, and the negative-effect categories for C. Asked only after suitability is assessed (ESMA 81), and in a neutral way (ESMA 26). If no fund meets the preferences, the client may change them for this recommendation only, and the reason is recorded (ESMA 82–83).
+
+> **Result:** Sustainability preferences recorded with the profile: none, or the types chosen, minimum shares and negative effects. They filter the fund list after the rating is set, and do not change the rating.
+
+### About you
+
+**DOB Date of birth** – What is your date of birth?
+
+- *Why:* Age does not change the rating; the horizon (Q3) does that work. Clients aged 65 or over with a rating of 5 or more are flagged for the adviser.
+- *Regulation:* Age (ESMA 24); more care with older clients, who may be vulnerable (ESMA 40).
+
+## 3. Checks and flags
+
+Flags do not block the client. They are shown to the adviser and recorded.
+
+| Flag | Shown when | Regulation |
+|---|---|---|
+| F1 Mixed attitude | The Q4, Q5 and Q6 ratings are 3 or more apart | Contradictions in the answers (ESMA 32, 49, 51) |
+| F2 Knowledge | Rating 5 or more and knowledge Low | Little knowledge with an aggressive attitude (ESMA 51–52) |
+| F3 Capacity limit | Capacity is Low and the attitude rating is above 4, so the rating is limited to 4 | The client must be able to bear the losses (ESMA 80) |
+| F4 Short horizon | The time limit lowers the rating, or the horizon is under 5 years and the rating is above 3 | Holding period (ESMA 80) |
+| F5 Age | Age 65 or over and rating 5 or more | Older clients (ESMA 24, 40) |
+| F6 Changed answers | Answers changed after the result was shown | Guard against answers changed to reach a product (ESMA 50, 58) |
+
+## 4. How the design meets the regulations
+
+### Which rules apply
+
+- **Insurance-based investment products (such as investment bonds):** Suitability is governed by the Insurance Distribution Directive (IDD), Article 30, transposed in Ireland by the European Union (Insurance Distribution) Regulations 2018, and by Delegated Regulation (EU) 2017/2359. The Consumer Protection Code 2025 switches off its own suitability chapter for advice on these products (Reg 11(3)).
+- **PRSAs and ARFs:** These may fall outside the definition of an insurance-based investment product, as pension products. If so, the Code's suitability chapter (Regs 16–19) applies. Compliance to confirm.
+- **All products:** The Code's rules on digital tools (Regs 38–39), plain language (Regs 47, 64) and vulnerable consumers (Regs 34–37) apply.
+- **The ESMA suitability guidelines (ESMA35-43-3172):** These are written for MiFID firms. They are used here as the detailed benchmark, because neither the IDD nor the Code sets out how a questionnaire should be built. Paragraph numbers below are ESMA's.
+- **Sources:** The Code was read on the Central Bank website on 19/10/2026. The IDD and Delegated Regulation references are from memory and have not been checked against the texts.
+
+### Requirement by requirement
+
+| Requirement | Source | How the design meets it | Status |
+|---|---|---|---|
+| Explain the purpose; the firm decides suitability; no disclaimers | ESMA 11–15 | The introduction says why we ask, that suitability is our decision, and why complete answers matter. The client is never asked to confirm suitability, and there is no "not a recommendation" note. Wording for Compliance to approve | Met |
+| Knowledge and experience | IDD Art 30; ESMA 30, 46–47, 52 | Q7 asks what the client has done and how recently. Q8 checks it with a question that has a right answer, and a wrong answer lowers the level. Low knowledge with a high rating is flagged | Met |
+| Financial situation, including ability to bear losses | IDD Art 30; ESMA 12, 80; Code Reg 17 | Q1 and Q2 give capacity for loss. Low capacity limits the rating to 4, so a client who cannot bear losses cannot be given a high rating, whatever their attitude | Met |
+| Objectives, including risk tolerance | IDD Art 30; ESMA 46, 48 | Q4 asks the largest € loss over 12 months the client would accept, which is ESMA's own example. Q5 asks what they would do after a 20% fall, and Q6 asks the objective. The loss answer anchors the rating | Met |
+| Holding period | ESMA 24, 37, 80 | Q3. Horizons under 5 years cap the rating | Met |
+| Objective questions, not self-assessment | ESMA 44–48 | Every scored question asks for a fact, an amount, an action or past experience. None asks the client to rate themselves | Met |
+| Clear questions, one topic each | ESMA 21–22; Code Regs 47, 64 | Plain language, one topic per question. Q8 is one ordering task with one right answer, not the grid of self-ratings that ESMA 22 warns against. Not yet tested with clients | Met |
+| Layout must not steer; nothing preselected | ESMA 22; Code Reg 39 | Build rules: no answer preselected, the Q4 slider starts empty, Q8 starts in a mixed order | Met |
+| No skipping | ESMA 22 | Every question must be answered; there is no "prefer not to say" | Met |
+| Contradictions and over-confidence | ESMA 32, 49, 51–52 | Flags F1 to F5 (section 3) | Met |
+| Answers changed to reach a product | ESMA 50, 58 | F6 flags answers changed after the result was shown | Met |
+| Records | ESMA 109–111 | The record holds the answers, ratings, limits applied, flags, any adviser override and its reason, the questionnaire version and the date | Met |
+| Understanding of risk and return | ESMA 23, 31, 80 | Q4 and Q5 show what losses look like in €. Q8 tests the order of risk and concentration. Nothing tests that a higher return needs more risk | Partly met |
+| Tool documented and tested | ESMA 78–79, 90; Code Reg 38 | This document sets out every rule, and 18 test clients were compared with Aviva and Zurich (section 5). Still needed: a test plan, version control, error handling and a named sign-off | Partly met |
+| Sustainability preferences | Delegated Reg 2017/2359 as amended (from memory); Code Reg 16(3); ESMA 26–28, 81–83 | Part E asks whether the client has preferences, which of the three types, a minimum share for the first two, and which negative effects matter. It is asked after the rating, in a neutral way, and only narrows the fund list. The minimum-share bands are to be set against the funds offered | Met |
+| Illiquid products | ESMA 36–37, 80 | No complex products are offered. Whether PRSA lock-in, ARF terms or bond exit charges make a product illiquid is not settled. If they do, Q3 must be checked against them | Open |
+
+### Covered outside this tool
+
+| Requirement | Source | Where it is covered |
+|---|---|---|
+| Income and its source, assets, debts, employment, dependants, health, marital status | Code Reg 16(4)–(7); ESMA 24, 37 | The application form. Aviva, Zurich, Standard Life and Irish Life do not ask these in their risk tools either |
+| Other investments and the portfolio as a whole | ESMA 39, 43 | The application form and the adviser |
+| Identifying and helping clients in vulnerable circumstances | Code Regs 34–37; ESMA 40 | The adviser. The tool adds the age and knowledge flags |
+| Updating the profile and re-profiling | ESMA 53–59 | The adviser. The tool records the date and version of each profile |
+| Joint applicants and legal entities | ESMA 60–70 | A firm policy is needed if joint policies are sold |
+| Staff training | ESMA 104–108; Code Reg 35 | The firm |
+
+### Open points for Compliance
+
+1. **Sustainability preferences (Part E):** Approve the wording, and set the minimum-share bands (S3) against the funds offered. Check that the application form does not ask them again.
+2. **Which rules apply to PRSA and ARF,** and whether any product counts as illiquid.
+3. **Capacity limit of 4:** This makes us stricter than Aviva and Zurich, which both give 6 to client P7.
+4. **Loss figures (Q4):** Test them against our funds' worst 12-month falls and KID stress scenarios, and confirm the slider step and rounding.
+5. **Time limits (Q3):** Check them against the recommended holding periods of the funds offered.
+6. **Introduction wording:** Approve it.
+7. **Application form:** Confirm it covers the Code Reg 16 items listed above.
+8. **Governance:** Add a test plan, version control, error handling and a named sign-off.
+9. **Legal texts:** Check the IDD and Delegated Regulation references against the texts.
 
 ## 5. Testing against Aviva and Zurich
 
+18 example clients were run through the proposed questions, Aviva's tool and Zurich's tool. Aviva's results come from its published scoring code. Zurich's come from its live tool, run on 15/10/2026. The proposal was last re-run on 19/10/2026, with the Q1, Q2 and Q6 changes.
+
 |  | Same rating | Within one level |
 |---|---|---|
-| Proposed and Aviva | 12 of 18 | 16 of 18 |
-| Proposed and Zurich | 9 of 18 | 18 of 18 |
+| Proposed and Aviva | 11 of 18 | 15 of 18 |
+| Proposed and Zurich | 8 of 18 | 17 of 18 |
 | Aviva and Zurich (for reference) | 7 of 18 | 16 of 18 |
 
-- **Method:** Each client was described once (finances, horizon, the largest fall they would accept, how they would react, objective, knowledge) and the description was translated into each tool's answers. Aviva's result comes from its published scoring code. Zurich's comes from submitting the answers to its live tool on 15/10/2026. The translation between tools is our own judgement, so a one-level difference can come from that.
-- **Overall:** The proposed rating is within one level of Zurich for every client, and agrees with each competitor more often than the two competitors agree with each other.
-- **Zurich:** Zurich is one level lower for six clients (P2, P10, P11, P13, P14, P16), mostly because it deducts for age over 50, terms under 10 years and little knowledge; we use those as limits or flags instead. It is one higher for three (P6, P17, P18).
-- **Aviva:** Aviva ignores the time horizon (higher for P8 and P17), never goes below 3 except for its no-risk 0 (P1, P15), and stops at 6. The two clients more than one level from Aviva are P15 (its no-risk 0) and P17 (its horizon is ignored).
-- **Changes after the first run:** The loss answer now anchors the attitude rating (at most one level above Q6): P18, who would accept only a 2.5% fall, moved from 6 to 3, the same as Aviva. Relying on the money (Q4) now caps capacity at Medium: P13 moved from High to Medium, the same as Zurich. No other results changed.
-- **Capacity:** Our capacity matches Zurich's for 12 of 18. Where it differs, ours is one step higher (P2, P4, P11, P15, P16, P18), because we also count income and commitments, which Zurich does not ask about.
-- **Knowledge check:** Clients with low knowledge were assumed to get Q10 wrong. That changed no ratings, because knowledge only raises flags.
+- **Overall:** The proposal agrees with each competitor more often than the two agree with each other.
+- **Where we are stricter:** P7 (temporary job, no savings, relies on the money) gets 4 from us and 6 from both competitors, because of the capacity limit. P17 has a 4-year horizon: we give 4, Zurich 5 and Aviva 6, because Aviva ignores the horizon.
+- **Where Zurich is lower:** Six clients (P2, P10, P11, P13, P14, P16). Zurich deducts points for age over 50, terms under 10 years and little knowledge; we use limits and flags instead.
+- **Changes on 19/10/2026:** The new Q1 and Q2 wording does not change any test client's answers. Q6 now has a level-3 answer. No test client was described with that objective, so no result changed. P10 (first-time investor who would accept 7%) could plausibly choose it: P10 would then get 3, the same as Aviva and Zurich, instead of 4.
+- **Translation caveat:** Each client's description was translated into each tool's answers by us, so a one-level difference can come from that translation.
+
+Results for each client are in Appendix A.
+
+## Appendix A. Test results by client
 
 | Client | Proposed | Aviva | Zurich | What it shows |
 |---|---|---|---|---|
@@ -246,127 +316,41 @@ _* Standard Life uses the EV (formerly EValue) questionnaire; Irish Life appears
 | P4. 32, growth; 15 years; about 25% | 5<br>Capacity High | 5 | 5<br>Capacity Medium | Same. |
 | P5. 50, adventurous, wealthy; about 40% | 6<br>Capacity High | 6 | 6<br>Capacity High | Same. |
 | P6. 40, wealthy expert; would accept more than 50% | 6<br>Capacity High | 6 | 7<br>Capacity High | Zurich gives 7; we and Aviva stop at 6. |
-| P7. 25, very keen; temporary job, no savings, relies on the money | 6<br>Capacity Low<br>Flags: knowledge, capacity | 6<br>Prompts: reliance, expectations | 6<br>Capacity Low | Same rating; all three raise the capacity problem. |
-| P8. 55, growth attitude; needs the money in 3 years | 4<br>Capacity High<br>Flags: time horizon | 5 | 4<br>Capacity High<br>short-horizon warning | Same as Zurich; Aviva ignores the horizon. |
+| P7. 25, very keen; temporary job, no savings, relies on the money | 4<br>Capacity Low<br>Flags: capacity limit | 6<br>Prompts: reliance, expectations | 6<br>Capacity Low | Ours two lower: the capacity limit. The others report the problem but still give 6. |
+| P8. 55, growth attitude; needs the money in 3 years | 4<br>Capacity High<br>Flags: short horizon | 5 | 4<br>Capacity High<br>short-horizon warning | Same as Zurich; Aviva ignores the horizon. |
 | P9. 40, wants strong growth but accepts only 7% and would sell | 3<br>Capacity Medium<br>Flags: mixed attitude | 3<br>Prompts: loss | 3<br>Capacity Medium<br>3 conflict warnings | Same; all three flag the contradiction. |
 | P10. 28, first-time investor; 20 years; about 7% | 4<br>Capacity Medium | 3 | 3<br>Capacity Medium<br>1 conflict warning | Ours one higher: the reaction and objective answers lift it one level above the loss answer. |
 | P11. 60, near retirement, balanced; 6 years; about 15% | 4<br>Capacity High | 4 | 3<br>Capacity Medium | Zurich one lower: it deducts for age 60 and a 6-year term. |
 | P12. 42, self-employed, growth; 15 years; about 25% | 5<br>Capacity Medium | 5 | 5<br>Capacity Medium | Same. |
-| P13. 67, drawing income in 2 years, relies on it; about 7% | 2<br>Capacity Medium<br>Flags: time horizon | 3 | 1<br>Capacity Medium | Ours between the two. Capacity Medium, the same as Zurich. |
-| P14. 35, inheritance, no experience but keen; 10 years; about 25% | 5<br>Capacity High<br>Flags: knowledge | 5 | 4<br>Capacity High | Zurich one lower: it deducts for no knowledge. Ours flags it instead. |
+| P13. 67, drawing income in 2 years, relies on it; about 7% | 2<br>Capacity Medium<br>Flags: short horizon | 3 | 1<br>Capacity Medium | Ours between the two. |
+| P14. 35, inheritance, no experience but keen; 10 years; about 25% | 5<br>Capacity High<br>Flags: knowledge | 5 | 4<br>Capacity High | Zurich deducts for no knowledge; we flag it. |
 | P15. 30, very cautious despite 25 years; about 2.5% | 2<br>Capacity High | 0 (no-risk) | 2<br>Capacity Medium | Same as Zurich. Aviva's 0 means deposit-type only. |
-| P16. 38, balanced, but heavy commitments and little savings; 12 years; about 15% | 4<br>Capacity Medium | 4 | 3<br>Capacity Low | Zurich one lower. Zurich rates capacity Low; ours Medium. |
-| P17. 48, adventurous, but needs the money in 4 years; about 40% | 4<br>Capacity High<br>Flags: time horizon | 6 | 5<br>Capacity High<br>short-horizon warning | Ours the strictest on a 4-year horizon; Aviva ignores it. |
-| P18. 33, accepts only 2.5% but would invest more and wants maximum return | 3<br>Capacity High<br>Flags: mixed attitude | 3<br>Prompts: loss | 4<br>Capacity Medium<br>4 conflict warnings | Same as Aviva, one below Zurich: the loss answer anchors the rating. |
+| P16. 38, balanced, but heavy commitments and little savings; 12 years; about 15% | 4<br>Capacity Low | 4 | 3<br>Capacity Low | Zurich one lower. Both rate capacity Low. |
+| P17. 48, adventurous, but needs the money in 4 years; about 40% | 4<br>Capacity High<br>Flags: short horizon | 6 | 5<br>Capacity High<br>short-horizon warning | Ours the strictest on a 4-year horizon. |
+| P18. 33, accepts only 2.5% but would invest more and wants maximum return | 3<br>Capacity High<br>Flags: mixed attitude | 3<br>Prompts: loss | 4<br>Capacity Medium<br>4 conflict warnings | Same as Aviva: the loss answer anchors the rating. |
 
-## 6. What Aviva, Zurich and Standard Life ask
+## Appendix B. Where the Q4 loss figures come from
 
-### Aviva – Investment Suitability Tool
+| Rating | Volatility band | Middle of band | Q4 mark (2 × middle) | Aviva 12-month worst case |
+|---|---|---|---|---|
+| 1 | 0–0.5% | 0.25% | No fall | none |
+| 2 | 0.5–2% | 1.25% | 2.5% | 0% |
+| 3 | 2–5% | 3.5% | 7% | 4.3% |
+| 4 | 5–10% | 7.5% | 15% | 11.5% |
+| 5 | 10–15% | 12.5% | 25% | 20.8% |
+| 6 | 15–25% | 20% | 40% or more | 35.3% |
 
-5 questions, plus a term slider (5 to 30 years) used only for charts. The rating comes from a lookup of question 4 against question 5, giving 0 (no risk) or 3 to 6. Questions 1 to 3 do not change the rating; they trigger confirmation prompts when answers conflict.
+- **The rule:** A bad year is a fall of twice a fund's volatility, about 1 year in 40. Each mark is twice the middle of the ESMA band.
+- **Against competitors:** Aviva uses the same rule but deducts its expected return, so its figures are a few points lower. Zurich's 5-year worst cases (11%, 21%, 32%, 37%) are higher. Ours sit between the two.
+- **To test:** Real markets can fall further than this assumes. Test against our funds' worst 12-month falls and KID stress scenarios before sign-off.
 
-| # | Question | Answers |
-|---|---|---|
-| 1 | How experienced an investor are you? | I am not experienced; I have rarely invested in the past<br>I have invested before, but only in relatively simple products<br>Although I am not an expert, I do understand how markets work and am comfortable in my ability to make most investment decisions<br>I have made many investments in the past and would consider myself an experienced investor |
-| 2 | How important to you is the investment you are considering now? | I am very reliant on this investment and would be in trouble if I lost any of it<br>I have other funds/sources of income but would feel pain if I suffered significant losses now<br>I will not be reliant on this investment in the next 10 years, but I expect I will be after that<br>These are surplus funds and I am unlikely to be dependent on them |
-| 3 | Thinking of the investment you are about to make, do you agree or disagree: "I want my investment to be safe even if it means lower returns in the long run"? | Strongly agree<br>Tend to agree<br>Neither agree nor disagree<br>Tend to disagree<br>Strongly disagree |
-| 4 | What risk and return expectations do you have for this investment? | I would only invest if I had a guarantee of getting at least my original investment back<br>I want to earn a little more than I could on deposit. I would only take on a small amount of risk to achieve this<br>I am looking for steady long term growth and am prepared for some short term fluctuations in the value of my investment<br>I am looking for strong long term growth and understand this could lead to large fluctuations in the value of my investment<br>I want to maximise returns and am very comfortable taking on a high degree of risk to achieve this |
-| 5 | In order to achieve higher returns you need to be comfortable with short term losses. What is the maximum percentage loss you could tolerate in any 12 month period, before becoming uncomfortable? | Slider from 0% to 40% |
+## Appendix C. How competitors rate clients
 
-### Zurich – Risk Profiler
-
-9 questions on one page. Questions 4 to 7 are scored (8, 6, 4, 2 or 0 points each), and the total is adjusted for age, term and knowledge to give Risk Profile 1 to 7. Questions 8 and 9 give a separate Capacity for Loss (Low, Medium or High).
-
-| # | Question | Answers |
-|---|---|---|
-| 1 | What age are you? | Slider from 19 to 100 |
-| 2 | How long do you plan to invest for? | Slider from 1 to 15+ years |
-| 3 | How would you describe your investment knowledge? | Expert: I have an in-depth knowledge of how investments work<br>High: I have a good understanding of the different types of investments and their risks<br>Moderate: I have knowledge of the basic types of investments and their risks<br>Little: I have little knowledge about investments and their risks<br>None: I have no investment knowledge |
-| 4 | What is your investment objective? | To maximise returns, regardless of risk<br>To make high returns, without excessive risk<br>To make good returns, with limited risk to my capital<br>To make returns which beat inflation, without significant risk to my capital<br>To protect my capital |
-| 5 | How concerned would you be with a short-term (6 months) 10% decline in your investment? | Not concerned<br>Slightly concerned<br>Moderately concerned<br>Very concerned<br>Extremely concerned |
-| 6 | What is your appetite for taking risk? If you invested €10,000 today, what range of potential values would you consider to be an acceptable return for your investment after 5 years? | Between €6,300 and €17,200<br>Between €6,800 and €16,300<br>Between €7,900 and €14,000<br>Between €8,900 and €12,100<br>Between €9,800 and €11,600 |
-| 7 | What is your approach to taking risks? If you could increase the value of your investment by taking more risk, would you: | Take a LOT more risk with ALL of your money<br>Take a LITTLE more risk with ALL of your money<br>Take a LITTLE more risk with SOME of your money<br>Be UNWILLING to take any more risk |
-| 8 | Financial emergency: do you have other savings available to you, should you encounter a financial emergency? | No. I have no other savings I can use in the event of an emergency<br>I have some other savings, but nothing earmarked for a financial emergency<br>Yes. I have specific savings that I can use in an emergency |
-| 9 | Financial well-being: if this investment were to perform poorly, what impact would this have on your financial well-being? | It would have a big impact. This investment is required for a specific purpose<br>It would have some impact. I would need to make some adjustments to my future plans<br>It would have no impact, as I have other savings |
-
-### Standard Life – EV Risk Profiler
-
-13 questions. Each answer is scored and the total is compared with EV's scorecard (not published) to give one of five categories: Low, Low-Medium, Medium, Medium-High or High. Three optional sustainability questions follow and are not scored. Irish Life asks the same 13 questions, plus two: "When I consider investments that have an element of risk I feel quite anxious" and what you would do if your investment fell significantly six months after investing.
-
-| # | Question | Answers |
-|---|---|---|
-| 1 | I would enjoy exploring investment opportunities for my money. | Strongly agree<br>Tend to agree<br>In between<br>Tend to disagree<br>Strongly disagree |
-| 2 | I would go for the best possible return even if there were risk involved. | Always<br>Usually<br>Sometimes<br>Rarely<br>Never |
-| 3 | How would you describe your typical attitude when making important financial decisions? | Very adventurous<br>Fairly adventurous<br>Average<br>Fairly cautious<br>Very cautious |
-| 4 | What amount of risk do you feel you have taken with your past financial decisions? | Very large<br>Large<br>Medium<br>Small<br>Very small |
-| 5 | To reach my financial goal I prefer an investment which is safe and grows slowly but steadily, even if it means lower growth overall. | Strongly agree<br>Tend to agree<br>In between<br>Tend to disagree<br>Strongly disagree |
-| 6 | I am looking for high investment growth. I am willing to accept the possibility of greater losses to achieve this. | Strongly agree<br>Tend to agree<br>In between<br>Tend to disagree<br>Strongly disagree |
-| 7 | If you had money to invest, how much would you be willing to place in an investment with possible high returns but a similar chance of losing some of your money? | All of it<br>More than half<br>Half<br>Less than half<br>Very little, if any |
-| 8 | How do you think a friend who knows you well would describe your attitude to taking financial risks? | Daring<br>Sometimes daring<br>A thoughtful risk taker<br>Careful<br>Very cautious and risk averse |
-| 9 | If you had picked an investment with potential for large gains but also the risk of large losses, how would you feel? | Panicked and very uncomfortable<br>Quite uneasy<br>A little concerned<br>Accepting of the possible highs and lows<br>Excited by the potential for gain |
-| 10 | Imagine that you have some money to invest and a choice of two investment products. Which option would you choose? | A product with low average annual return but almost no risk of loss of the initial investment<br>A product with higher average annual return but some risk of losing part of the initial investment<br>A mixture of the two products |
-| 11 | I would prefer small certain gains to large uncertain ones. | Strongly agree<br>Tend to agree<br>In between<br>Tend to disagree<br>Strongly disagree |
-| 12 | When considering a major financial decision, which statement BEST describes the way you think about the possible losses or the possible gains? | I'm excited about the possible gains<br>I'm optimistic about possible gains<br>I think about both the possible gains and losses<br>I am conscious of the possible losses<br>I worry about the possible losses |
-| 13 | I want my investment money to be safe even if it means lower returns. | Strongly agree<br>Tend to agree<br>In between<br>Tend to disagree<br>Strongly disagree |
-
-## 7. Checks and flags
-
-| Flag | Shown when | Basis |
-|---|---|---|
-| F1 Mixed attitude | The highest and lowest of the Q6, Q7 and Q8 ratings are 3 or more apart | ESMA 49, 51. Zurich and Aviva both check this. |
-| F2 Knowledge | Risk rating 5 or more and knowledge Low (after the Q10 check) | ESMA 51, 52 |
-| F3 Capacity | Risk rating 5 or more with Low capacity. The client is asked to confirm; the adviser records how it is addressed. | ESMA 80: the client must be able to bear the losses. Aviva asks for confirmation; Zurich reports capacity separately. |
-| F4 Limited | The time limit lowers the attitude rating, or the horizon is under 5 years and the rating is above 3 | ESMA 80. Zurich warns when the term is 5 years or less. |
-| F5 Age | Age 65 or over with an attitude rating of 5 or more | ESMA 24, 40, 55 |
-| F6 Changed answers | Answers changed after the result was shown | ESMA 50, 58: guard against steering a client to a product |
-
-## 8. Decisions
-### Taken
-
-- Highest rating: 6, as Aviva. Level 7 is not offered.
-- Age: a flag only (65 or over with an attitude rating of 5 or more). With 6 as the highest rating, the earlier 70+ limit had no effect, so it is removed.
-- Capacity for loss: a separate result (Low, Medium, High) that does not change the rating, in line with Aviva and Zurich. Under 3 months' savings, or relying on the money, caps it at Medium. Too low for the rating: client confirmation and an adviser flag.
-- Attitude: the loss answer (Q6) anchors the rating, which can be at most one level above it.
-- Knowledge: a description (Q9) and a multiple-choice check (Q10); a flag only.
-- Loss figures: our own rule (twice the middle of each ESMA band), not Aviva's figures (Appendix A).
-- Time horizon: 3 to 5 years is limited to 4 and flagged, in line with Zurich.
-- No complex or illiquid products, so no extra questions.
-- Joint applicants and sustainability preferences: out of scope.
-
-### Still open
-
-- Confirm the loss rule. It uses the middle of each band, which replaces the earlier "top of band" choice: the top would make us more cautious than both Aviva and Zurich.
-- Capacity: Compliance to confirm that a confirmation and a recorded adviser response is enough. ESMA para 80 says the client must be able to bear any losses; a warning alone lets a client with Low capacity reach 6.
-- Time limits in Q5 (3 to 5 years: 4; 5 years or more: no limit): check against the recommended holding periods of the funds offered.
-- Test the loss figures against our funds' worst 12-month falls and KID stress scenarios.
-- Compliance: confirm which rules govern (IDD for insurance-based investments; the ESMA MiFID guidelines used here) and add Consumer Protection Code references.
-
-## Appendix A. Where the Q6 loss figures come from
-
-| ESMA level | Volatility band | Middle of band | Our Q6 figure (2 × middle) | Aviva 12-month worst case | Aviva decision table |
+| Provider | Questions | How the rating is produced | Capacity for loss | Time horizon | Highest |
 |---|---|---|---|---|---|
-| 1 | 0–0.5% | 0.25% | No fall | none | – |
-| 2 | 0.5–2% | 1.25% | 2.5% | 0% | not used |
-| 3 | 2–5% | 3.5% | 7% | 4.3% | below 8% |
-| 4 | 5–10% | 7.5% | 15% | 11.5% | from 8% |
-| 5 | 10–15% | 12.5% | 25% | 20.8% | from 16–18% |
-| 6 | 15–25% | 20% | 40% or more | 35.3% | from 28–35% |
-| 7 | over 25% | – | not offered | 55% | not used |
+| Proposed | 8 + date of birth (+ sustainability) | Attitude anchored on the loss answer, limited by horizon and capacity | 2 questions; Low limits the rating to 4 | Limits the rating | 6 |
+| Aviva | 5 + term | Lookup of objective × maximum loss | Used only for prompts | Charts only | 6 |
+| Zurich | 9 | Points, adjusted for age, term and knowledge | 2 questions; shown separately | Adjusts the score | 7 |
+| Standard Life / Irish Life | 13 / 15 | Total score in bands (EV questionnaire) | Not assessed | Not assessed | SL 6; IL 7 |
 
-- **Our rule:** A bad year is a fall of twice a fund's volatility (about 1 year in 40). Q6 uses twice the middle of each ESMA band. The top answer (40% or more) gives 6; level 7 is not offered.
-- **Against Aviva and Zurich:** Aviva uses the same rule but takes off its expected return, so its figures are a few points lower. Zurich's 5-year worst cases (11%, 21%, 32%, 37%) are higher. Ours sit between.
-- **Why the middle of the band:** The top of each band (20% for level 4, 50% for level 6) would be more cautious than both competitors.
-- **Can we stand over it?:** Yes, as a documented convention. Real markets can fall further than this assumes, so test it against our funds' worst 12-month falls and KID stress scenarios, and have Compliance sign it off.
-
-## Appendix B. ESMA suitability guidelines coverage
-
-| Guideline | What it requires | How it is covered |
-|---|---|---|
-| 1 (paras 11–18) | Explain why the questions are asked; the firm, not the client, decides suitability; no disclaimers shifting responsibility | Introduction wording. The client is never asked to confirm a product is suitable. |
-| 2 (paras 19–32) | Clear questions, one topic each; no option to skip financial questions; age, family, employment, liquidity needs; understanding of risk; alerts for inconsistent answers | Q1–Q10 and date of birth; one topic per question; no "prefer not to say" on Q1–Q4; flags F1–F5 |
-| 3 (paras 33–43) | Information in proportion to the products; income, assets and commitments; more care for vulnerable clients | Q1–Q4; date of birth; no complex or illiquid products, so no extra questions |
-| 4 (paras 44–52) | Reliable answers without relying on self-assessment; objective criteria; guard against overestimated knowledge; consistency checks | Q6–Q8 use € figures and choices; Q9 is based on facts and Q10 tests real knowledge; flags F1, F2. |
-| 5 (paras 53–59) | Keep information up to date; review at events such as retirement; do not steer clients to change answers; tell clients when their profile changes | Process: review periodically and at retirement; log changes (F6) |
-| 8 (paras 76–90) | Take account of ability to bear losses and time horizon; tools fit for purpose; documented and tested decision rules | Time limit; capacity reported with confirmation (F3); age flag (F5); this document as the design record; worked examples as the first test cases |
-| 6, 7, 9 | Legal entities, product complexity, equivalent products | Not client questions, or out of scope |
-| 10–12 | Suitability report, staff, records | Record the answers, ratings, flags and any override reason, with the questionnaire version and date |
+The full competitor questions are in `docs/risk-questionnaires.md`.

@@ -1,133 +1,122 @@
 # Risk Profiler module
 
-A self-contained client risk questionnaire. It works out a risk profile from 1 to 7 (the same scale as the ESMA
-risk rating), an experience and knowledge profile (low, medium or high) and the Allianz Global Life funds that are
-eligible. It is used by the Quotation Tool (Step 3) and also runs on its own: open `risk_profiler.html`.
+A self-contained client risk questionnaire. It sets a risk rating from 1 to 6 on the ESMA scale (level 7 is not
+offered), works out the client's capacity for loss and knowledge level, raises flags for the adviser and records
+the client's sustainability preferences. It is used by the Quotation Tool (Step 3) and also runs on its own: open
+`risk_profiler.html`.
 
-Source: the Allianz Global Life risk profile website, riskprofile.allianzgloballife.ie (build `main-MEMR5U7I.js`,
-read 12/10/2026). The questions, scores and tables are the site's, with **corrections** (listed below) that make
-the calculation work as the original Allianz Italy workbook intended. The question wording is tidied. The site's
-behaviour is described in `AdditionalInfo/RiskProfiler/Risk profiler - handoff.md`, section 4.
+Source: `docs/risk-profiler-design-draft.md` ("Risk profiler – proposed questions and scoring", draft for
+Compliance review, 19/10/2026). The questions, answers, scores, limits and flags are the draft's. Every cut-off
+in it is a proposal, so change the numbers in `risk_profiler_data.js` only with Compliance.
 
-## How the answers become a 1 to 7 rating
+## How the answers become a rating
 
-Two strands are worked out and combined: what the client can **earn** and what they **have**. That gives their
-financial capacity. Capacity is then combined with their **reaction to a market fall**, and finally **age** is applied.
+| Part | # | Question | Used for |
+|---|---|---|---|
+| Your finances | Q1 | Financial cushion | Capacity for loss (3, 2 or 1 points) |
+|  | Q2 | Impact of a loss | Capacity for loss (1, 2 or 3 points) |
+| Your timing | Q3 | Investment horizon | Time limit (1, 2, 4 or none) |
+| Your attitude to risk | Q4 | Largest 12-month fall you could accept (slider, 0–40% in 0.5% steps) | Rating 1–6 by band |
+|  | Q5 | What you would do after a 20% fall | Rating 2, 3, 4 or 6 |
+|  | Q6 | What you want from the investment | Rating 1–6 |
+| Your knowledge and experience | Q7 | Knowledge and experience | Knowledge level stated |
+|  | Q8 | Rank four investments by risk | Right, wrong or "I don't know" |
+| About you | – | Date of birth (not asked when the host supplies it) | Age flag |
+| Your sustainability preferences | S1–S4 | Asked after the rating; S2–S4 only when they apply | Recorded only |
 
-1. **Household level (low, medium or high).** Score = 25% × employment + 10% × health + 65% × dependants (each out of
-   100). Below 35 is low, 35 to 64 is medium, 65 or more is high. Dependants count most: no dependants alone gives 65.
-2. **Earning capacity.** With income up to €100k it equals the household level. With income over €100k, a low
-   household level is lifted to medium.
-3. **After commitments.**
-   - **No or low commitments (under 10%):** medium is lifted to high.
-   - **Medium commitments (10% to 40%):** no change.
-   - **High commitments (over 40%):** high drops to medium.
-4. **Wealth**, from liquid assets and the time horizon:
+1. **Attitude:** the middle value of the Q4, Q5 and Q6 ratings, and no more than one level above Q4.
+2. **Limits:** the time limit from Q3. Capacity for loss = Q1 + Q2 points: Low (2–3), Medium (4), High (5–6).
+   Low capacity allows no more than 4.
+3. **Risk rating:** the lower of the attitude and the limits. The rating is set (`result.rated`) once Q1–Q6 are
+   answered; `result.complete` also needs the knowledge, date of birth and sustainability questions.
+4. **Knowledge level:** from Q7, one level lower if Q8 is wrong or "I don't know". It does not change the rating.
 
-   | Liquid assets | Under 5 years | 6 to 10 years | Over 10 years |
-   |---|---|---|---|
-   | Up to €50k | Low | Low | Medium |
-   | €50k to €150k | Medium | Medium | High |
-   | Over €150k | Medium | High | High |
+Q4 bands: under 2.5% is 1, under 7% is 2, under 15% is 3, under 25% is 4, under 40% is 5, 40% or more is 6. A value
+between two marks scores the lower band.
 
-5. **Financial capacity** starts at the wealth level, and earnings can lift it:
-   - **Low earnings (after commitments):** capacity = wealth.
-   - **Medium earnings:** low wealth is lifted to medium.
-   - **High earnings:** wealth is lifted one level, up to high.
-6. **Reaction to a fall: a score from 1 to 7.** The answers are not shown in score order:
+### Flags (shown to the adviser and recorded; they never block)
 
-   | Shown | Answer (short) | Score |
-   |---|---|---|
-   | 1st | Sell immediately | 1 |
-   | 2nd | Wait to recover, then sell | 2 |
-   | 3rd | Hold for a positive long-term return | 5 |
-   | 4th | Keep it and buy more | **7** |
-   | 5th | Stay calm, wait, but look for advice | 4 |
-   | 6th | Look for advice only | 3 |
-   | 7th | Keep it and buy more, with an adviser | **6** |
+| Flag | Raised when |
+|---|---|
+| F1 Mixed attitude | The Q4, Q5 and Q6 ratings are 3 or more apart |
+| F2 Knowledge | Rating 5 or more and knowledge Low |
+| F3 Capacity limit | Capacity is Low and the attitude is above 4 |
+| F4 Short horizon | The time limit lowers the rating, or the horizon is under 5 years and the rating is above 3 |
+| F5 Age | Age 65 or over and rating 5 or more |
+| F6 Changed answers | A scored answer (Q1–Q8) differs from the answers held when the rating was first shown |
 
-7. **Combine capacity and reaction.** The reaction score is the starting point, and low capacity can pull it down:
-   - **High capacity:** the rating is the reaction score.
-   - **Medium capacity:** the same, except a 7 becomes 6.
-   - **Low capacity:** one lower (minimum 1), so 1 stays 1, 2 becomes 1, and 7 becomes 6.
-8. **Age.** A client aged 81 or over cannot be rated 7. A 7 becomes 6. Age is in whole years at today's date.
-
-**Experience and knowledge** (low, medium or high) does not change the rating. It only decides which funds are listed.
-- **Score:** 20% × the higher of education and finance work + 60% × the highest-scoring product ticked + 20% × asset
-  classes answered correctly (100 points each).
-- **Bands:** below 100 is low, below 200 is medium, otherwise high.
-- **Eligible funds:** a fund is listed if its complexity is within the experience level, its risk is at or below the
-  rating, and it is offered for the purpose (PRSA, investment, ARF ...).
-
-### Corrected from the site
-
-| | The site | Here |
-|---|---|---|
-| Market-fall scores | Buy more 6, buy more with an adviser 7 | Buy more 7, with an adviser 6 |
-| Household weights | 25, 10 and 65: always "high", so employment, health and dependants never count | 0.25, 0.10 and 0.65, as in the workbook |
-| Financial capacity | Uses liquid assets instead of earnings, so income and commitments never count | Earnings after commitments × wealth, as in the workbook |
-| Wealth table | Rows and columns swapped (two of nine cells differ) | Liquid assets as the row, as in the workbook |
-| Several products ticked | A broken value (NaN), which counts as high experience | The highest product counts |
-| Experience score of 0 | "Na", counted as high | Low |
-
-Pass `siteQuirks: true` in the context to reproduce the site exactly; the tests use this to compare against it. The
-site's original value is kept beside each corrected one in `risk_profiler_data.js` (`siteScore`, `siteWeights`).
-Products and asset classes are optional, as on the site.
+For F6 the UI records the scored answers (`seen`) the first time it shows the rating: on the result screen, or at
+the top of the sustainability part. The host keeps `seen` with the answers and passes it back in the context.
 
 ## Files
 
 | File | What it is | Depends on |
 |---|---|---|
-| `risk_profiler_data.js` | Questions, scores, lookup tables, the fund list and the wording used in written outputs. Each question and option carries the site's id (`src`), and the site's value beside any corrected one. Wording can be edited; change the numbers only with Compliance. | nothing |
-| `risk_profiler.js` | Scoring engine and summaries: a step-by-step port of the site's calculation, with the corrections. No DOM. Runs in a browser or Node. | `risk_profiler_data.js` |
-| `risk_profiler_ui.js` | The questionnaire as a component: parts shown one at a time (step strip, Back / Continue), then a "Your result" screen with the risk profile and experience profile only. The scores behind them, and the eligible funds, stay in the engine's result and are not shown. Continue holds back until the required questions in the part are answered. Injects its own styles (all under `.rp`) and picks up the host's CSS variables (`--navy`, `--line` ...) if present. | the two above |
+| `risk_profiler_data.js` | Questions, answers, scores, limits, flag rules and every piece of wording (questions, result screen, Statement of Suitability sentences, record of answers). Wording can be edited; change the numbers only with Compliance. All wording is DRAFT. | nothing |
+| `risk_profiler.js` | Scoring engine, flags and summaries. No DOM. Runs in a browser or Node. | `risk_profiler_data.js` |
+| `risk_profiler_ui.js` | The questionnaire as a component: parts shown one at a time (step strip, Back / Continue), the introduction before Q1, then a "Your result" screen with the rating, capacity for loss, knowledge level, any limit (in words for the client), the right order for Q8 and why, and the adviser's flags. Continue holds back until every question in the part is answered. Injects its own styles (all under `.rp`) and picks up the host's CSS variables (`--navy`, `--line` ...) if present. | the two above |
+
+Build rules from the draft that the UI keeps: no answer is preselected; the Q4 slider starts with no value (the
+thumb is hidden until the client moves or clicks it); Q8 starts in a mixed order with no item in its right place
+and counts as answered only once the client moves an item, keeps the order or ticks "I don't know"; there is no
+"prefer not to say". Q8 can be ordered by dragging or with the arrow buttons.
 
 To use it on a website, copy those three files and load them in that order (see `risk_profiler.html`):
 
 ```js
 var profiler = RiskProfilerUI.mount(document.getElementById('host'), {
   answers: {},                          // optional starting answers
-  context: { dob: '1985-06-15', purpose: 'A' },   // optional: if given, these questions are not asked
+  seen: null,                           // optional: the answers when the rating was first shown (F6)
+  context: { dob: '1985-06-15' },       // optional: if given, the date of birth is not asked
   sri: { labels: [...], colors: [...] },// optional: defaults to the scale in the data file
-  onChange: function(state) { /* state.answers, state.result */ },
+  showFlags: true,                      // optional: list the adviser's flags on the result
+  onChange: function(state) { /* state.answers, state.seen, state.result */ },
   onFinish: function(state) { /* optional: adds a button to the completed result */ },
   finishLabel: 'Use this result'
 });
-profiler.goTo('finances');             // or 'result'; profiler.section() gives the part on screen
+profiler.goTo('attitude');              // or 'result'; profiler.section() gives the part on screen
 profiler.goToNext();                    // opens the first unanswered question
+profiler.setAnswers(answers, seen);
 ```
 
 Or use the engine alone:
 
 ```js
-var result = RiskProfiler.evaluate(answers, { dob: '1985-06-15', purpose: 'A' });
-// result.complete, result.sri (1-7), result.experience.level ('LOW' | 'MEDIUM' | 'HIGH' | 'Na'),
-// result.steps.financialCapacity, result.eligible, and every intermediate step
+var result = RiskProfiler.evaluate(answers, { dob: '1985-06-15', seen: seen });
+// result.complete, result.rated, result.sri (1-6), result.capacity, result.attitude, result.limits,
+// result.knowledge, result.flags [{ id, title, text }], result.sustainability, result.changed
 RiskProfiler.summary(answers, ctx);    // the questions and answers as rows, by section
-RiskProfiler.narrative(answers, ctx, result);   // sentences for a suitability statement
+RiskProfiler.narrative(answers, ctx, result, { suggestedSri, chosenSri, overrideReason });
+                                        // sentences for a suitability statement
 ```
+
+Answers are `{ questionId: optionId }`, except `loss` (a number, the slider's %), `check`
+(`{ order: [4 item ids] }` or `{ dontKnow: true }`), `s2` and `s4` (arrays of option ids) and `s3`
+(`{ taxonomy: '10', sustainable: '30' }`).
 
 ## How the Quotation Tool uses it
 
 - **Step 3.** The adviser first chooses how the attitude to risk was assessed: the Allianz Risk Profiler or their own
   risk profiling. The profiler runs in a dialog. Nothing on the page changes until the adviser chooses "Use this
-  result", which sets the risk rating. Closing part-way keeps the answers for later. Closing after editing a finished
-  profile undoes the edits. The adviser can choose another rating, but must give a reason, which is recorded in the
-  Statement of Suitability. Applying changed answers that give a new result replaces the rating. The date of birth
-  comes from Step 2 and the purpose from the product (PRSA = A, Investment Bond = B, ARF = C). Eligible funds are not
-  used: the fund builder compares the blended portfolio's risk with the rating.
-- **Statement of Suitability.** "Your personal and financial circumstances" and "Your attitude to risk" are filled
-  from the answers (wording in `quote_text.js` and `risk_profiler_data.js`). Health is not quoted.
+  result", which sets the risk rating and the sustainability Yes/No (from S1; locked while the profiler is used).
+  Closing part-way keeps the answers for later. Closing after editing a finished profile undoes the edits. The
+  adviser may choose a lower rating, but must give a reason, which is recorded in the Statement of Suitability;
+  higher ratings are locked (an adviser whose assessment is higher uses their own risk profiling). Applying changed
+  answers that give a new result replaces the rating and clears the reason. The flags are listed above the rating
+  picker. The date of birth comes from Step 2.
+- **Statement of Suitability.** "Your personal and financial circumstances" (Q1–Q3), "Your attitude to risk" (the
+  attitude answers, capacity, any limit, the rating, knowledge, and any lower rating with its reason) and "Your
+  sustainability preferences" (the S1–S4 answers, then the SFDR split of the funds) are filled from the profiler.
+  Wording in `risk_profiler_data.js` and `quote_text.js`.
 - **Pack.** A "Risk profile" section (after the Statement of Suitability, on the adviser's letterhead) lists the
-  answers and the result. It is offered once the questionnaire is complete.
+  answers, how the result was worked out, the knowledge check, the sustainability preferences, the flags and the
+  questionnaire version. It is offered once the questionnaire is complete.
 
 ## Tests
 
-- `node tests/risk_profiler_test.js` runs every answer combination (over a million) through the engine (with
-  `siteQuirks`) and through a line-by-line transcription of the site's code, and requires identical numbers. It also
-  checks the corrected engine against the same transcription with only the corrections applied, on every
-  combination, plus hand-worked cases.
-- `python tests/risk_profiler_ui_test.py` drives the standalone page and the tool end to end (headless Edge).
-- `python tests/risk_profiler_live_check.py` checks the engine (with `siteQuirks`) against the live site. Run on
-  12/10/2026: 358 answer sets were set on the site's own form, and the site's results and eligible funds matched in
-  every case.
+- `node tests/risk_profiler_test.js` compares the engine with an independent transcription of the draft's rules on
+  every combination of the scored answers (with Q4 at each band's edges, at two ages), then checks knowledge, flags,
+  completeness, the conditional sustainability questions, the written outputs and the draft's test clients
+  (Appendix A) whose answers can be read from their descriptions (P1, P7, P8, P10, P13, P17, P18).
+- `python tests/risk_profiler_ui_test.py` drives the standalone page and the tool end to end (headless Edge), and
+  saves screenshots and `rp_pack.pdf` in `tests/out`.

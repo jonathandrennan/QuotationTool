@@ -8,6 +8,7 @@
 //   docs/kids/<fund>_single.pdf       Investment Bond fund KIDs, single contribution
 //   docs/kids/<fund>_recurrent.pdf    Investment Bond fund KIDs, recurrent contribution
 //   docs/kids/generic_single.pdf, generic_recurrent.pdf
+//   docs/Brochures/<file>             customer brochure for each product (QT_DOCS.brochures)
 // Downloaded 09/10/2026 from allianzgloballife.ie (fund centre and Investment Bond pages). Refresh by replacing the
 // files and updating the dates below. KIDs are only held for the Investment Bond; no PRSA / ARF KIDs are held yet.
 //
@@ -19,7 +20,9 @@ var QT_DOCS = {
   factsheetAsOf: { cash: '31/08/2026', afisd: '31/08/2026', afie: '31/08/2026', ss30: '31/08/2026', ss50: '31/08/2026', ss75: '31/08/2026',
                    dm15: '31/08/2026', dm50: '31/08/2026', dm75: '31/08/2026', bsri: '31/08/2026', etfe: '2026', etfw: '2026', etfs: '2026' },
   kidFunds: ['cash', 'afisd', 'afie', 'ss30', 'ss50', 'ss75', 'dm15', 'dm50', 'dm75', 'bsri', 'etfe', 'etfw', 'etfs'],
-  kidProducts: ['ib']
+  kidProducts: ['ib'],
+  // Customer brochure for each product, in docs/Brochures/
+  brochures: { prsa: 'PRSA_Customer_Brochure_2026.pdf', arf: 'ARF_Customer_Brochure_2026.pdf', ib: 'Allianz Vantage Investment Bond Customer Brochure.pdf' }
 };
 
 function qtDocFundId(id) { return (typeof QT_FUND_ALIAS !== 'undefined' && QT_FUND_ALIAS[id]) || id; }
@@ -53,7 +56,8 @@ function qtGlidepathFunds(gpKey, termMonths) {
 function qtSupportingDocs(o) {
   var seen = {}, ids = [];
   (o.fundIds || []).forEach(function(raw) { var id = qtDocFundId(raw); if (!seen[id]) { seen[id] = 1; ids.push(id); } });
-  var kids = [], factsheets = [];
+  var kids = [], factsheets = [], product = [];
+  if (QT_DOCS.brochures[o.product]) product.push({ key: 'brochure_' + o.product, kind: 'brochure', title: 'Product brochure', path: QT_DOCS.dir + 'Brochures/' + encodeURIComponent(QT_DOCS.brochures[o.product]) });
   if (QT_DOCS.kidProducts.indexOf(o.product) >= 0) {
     var kinds = [];
     if (o.single) kinds.push('single');
@@ -71,14 +75,14 @@ function qtSupportingDocs(o) {
     if (!QT_DOCS.factsheetAsOf[id]) return;
     factsheets.push({ key: 'fs_' + id, kind: 'factsheet', fund: id, title: qtDocFundName(id) + ' factsheet', path: QT_DOCS.dir + 'factsheets/' + id + '.pdf', asOf: QT_DOCS.factsheetAsOf[id] });
   });
-  return { kids: kids, factsheets: factsheets };
+  return { product: product, kids: kids, factsheets: factsheets };
 }
 
-// Fetches the chosen documents and merges them (KIDs first, then factsheets) into one PDF, after `pageJpegs`
-// (the pack's pages as A4 JPEGs, optional). `include` is { kids: bool, factsheets: bool }.
+// Fetches the chosen documents and merges them (brochure first, then KIDs, then factsheets) into one PDF, after `pageJpegs`
+// (the pack's pages as A4 JPEGs, optional). `include` is { product: bool, kids: bool, factsheets: bool }.
 // Resolves to { bytes, count, missing: [title] } where count is the number of documents attached.
 function qtBuildSupportingPdf(docs, include, pageJpegs) {
-  var list = [].concat(include.kids ? docs.kids : [], include.factsheets ? docs.factsheets : []);
+  var list = [].concat(include.product ? docs.product : [], include.kids ? docs.kids : [], include.factsheets ? docs.factsheets : []);
   pageJpegs = pageJpegs || [];
   if (!list.length && !pageJpegs.length) return Promise.reject(new Error('No documents selected.'));
   if (typeof PDFLib === 'undefined') return Promise.reject(new Error('The PDF library could not be loaded.'));

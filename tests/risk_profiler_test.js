@@ -1,232 +1,164 @@
-// Checks the Risk Profiler engine against the Allianz Global Life risk profile website.
+// Checks the Risk Profiler engine against the rules in docs/risk-profiler-design-draft.md (draft 19/10/2026).
 //
-// SITE below is a line-by-line transcription of the site's scoring (chunk-DEWIXWZV.js, build
-// main-MEMR5U7I: the `n` helpers and SurveyService._calculation), working on the site's own answer
-// shape. The test walks every answer combination through both and requires identical numbers (with
-// ctx.siteQuirks, which turns off the engine's corrections). FIXED is the same transcription with only
-// the corrections applied, and the corrected engine must match it on every combination too. Then
-// hand-worked cases.
+// DRAFT below is an independent transcription of the draft's "How the rating is worked out" and section 3
+// (flags), written from the document's tables rather than from the engine's data. The test walks every
+// combination of the scored answers (with Q4 at each band's edges) through both and requires the same
+// rating, capacity, attitude, limits and flags. Then knowledge, completeness, sustainability, the written
+// outputs, and the draft's own test clients (Appendix A) where their answers can be read from the description.
 //
 // Run:  node tests/risk_profiler_test.js
 const path = require('path');
 const RP = require(path.join(__dirname, '..', 'js', 'risk_profiler.js'));
-const CFG = RP.config;
 
-let fails = 0;
+let fails = 0, checks = 0;
 function eq(actual, expected, msg) {
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) { fails++; console.log('  FAIL', msg, '\n    expected', JSON.stringify(expected), '\n    got     ', JSON.stringify(actual)); }
+  checks++;
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) { fails++; if (fails < 40) console.log('  FAIL', msg, '\n    expected', JSON.stringify(expected), '\n    got     ', JSON.stringify(actual)); }
 }
 
-// ─── The site's scoring, transcribed ─────────────────────────────────────────────────
-const n = {
-  C5: 0.2, E5: (t, e) => Math.max(...t, ...e) * n.C5, Q11: (t) => Math.max(t), Q31: (t) => t.reduce((e, i) => e + i, 0),
-  C8: 0.6, E8: (t) => n.C8 * t, C9: 0.2, E9: (t) => n.C9 * t, C11: (t, e, i) => t + e + i,
-  J11: (t) => (t < 100 ? 'LOW' : t >= 100 && t < 200 ? 'MEDIUM' : 'HIGH'),
-  C19: 25, C20: 10, C21: 65, E19: (t) => Math.max(t) * n.C19, E20: (t) => Math.max(t) * n.C20, E21: (t) => Math.max(t) * n.C21,
-  C24: (t) => Math.round(t.reduce((e, i) => e + i, 0)), J24: (t) => (t < 35 ? 1 : t >= 35 && t < 65 ? 2 : 3),
-  J33: (t, e) => { const i = { 2: [1, 2, 3], 3: [2, 2, 3] }; return t < 1 || e < 1 ? 0 : i[e][t - 1]; },
-  J45: (t, e) => { const i = { 1: [1, 2, 2], 2: [1, 2, 3], 3: [1, 3, 3] }; return t < 1 || e < 1 ? 0 : i[t][e - 1]; },
-  J57: (t, e) => { const i = { 1: [1, 1, 2], 2: [2, 2, 3], 3: [2, 3, 3] }; return t < 1 || e < 1 ? 0 : i[t][e - 1]; },
-  J66: (t, e) => { const i = { 1: [1, 2, 3], 2: [2, 2, 3], 3: [2, 3, 3] }; return t < 1 || e < 1 ? 0 : i[t][e - 1]; },
-  J82: (t, e) => { const i = { 1: [1, 1, 2, 3, 4, 5, 6], 2: [1, 2, 3, 4, 5, 6, 6], 3: [1, 2, 3, 4, 5, 6, 7] }; return t < 1 || e < 1 ? 0 : i[t][e - 1]; },
-  H93: (t, e, i, s) => (t + e + i === 0 ? 'Na' : s), H94: (t, e) => (t === 7 && e > 80 ? 6 : t),
-  I93: (t) => (t === 'LOW' ? 1 : t === 'MEDIUM' ? 2 : 3),
-  ELIGIBLE_PRODUCT: (t, e, i, s) => e && s && t <= e && i <= s
-};
-// e = the site's form value; age = moment().diff(dob, 'years'), or -1 with no date of birth
-function SITE(e, age) {
-  const sp = e.socioPersonalInformation, ek = e.experienceKnowledge, fp = e.financialPosition;
-  let s5 = [0]; sp.sPI_4 && sp.sPI_4.weight && (s5 = [sp.sPI_4.weight]);
-  let a5 = [0]; sp.sPI_2 && sp.sPI_2.weight && (a5 = [sp.sPI_2.weight]);
-  const i = n.E5(s5, a5);
-  let a8 = [];
-  Object.keys(ek.eK_7).forEach((r) => { if ((ek.eK_7[r] || []).length > 0) a8 = [...a8, Number(r.split('___')[1].split('-')[1])]; });
-  const s = n.E8(n.Q11(a8));
-  let a9 = [0];
-  Object.keys(ek.eK_8).forEach((k) => {
-    if ((ek.eK_8[k] || []).length > 0) {
-      const l = k.split('___')[1]; let c = Number(l.split('-')[1]);
-      l.split('-')[0] == 'O31' && ek.eK_8[k] == 'eK_8-know' && (c = 0);
-      (l.split('-')[0] == 'O33' || l.split('-')[0] == 'O35') && ek.eK_8[k] == 'eK_8-held' && (c = 0);
-      a9 = [...a9, c];
-    }
-  });
-  const a = n.E9(n.Q31(a9));
-  const r = n.J11(n.C11(i, s, a));
-  const f = n.J24(n.C24([sp.sPI_3 ? n.E19(sp.sPI_3.weight) : 0, sp.sPI_5 ? n.E20(sp.sPI_5.weight) : 0, sp.sPI_6 ? n.E21(sp.sPI_6.weight) : 0]));
-  const P = fp.fP_9.weight, g = n.J33(f, P), Q = fp.fP_10.weight, G = n.J45(Q, g);
-  const x = fp.fP_11.weight, w = fp.fP_12.weight, h = n.J57(x, w), T = n.J66(w, h);
-  const M = e.riskTolerance.rT_13.weight, y = n.J82(T, M);
-  const D = n.H93(i, s, a, r), K = age > -1 ? n.H94(y, age) : 0, E = n.I93(D);
-  return { experience: r, personalInformation: f, earningCapacity: g, adjustedEarningCapacity: G, totalAssets: h,
-           financialSustainability: T, riskProfile: M, tolleranceForTheRiskProfile: y, finalExperienceAndKnowledgeProfile: D,
-           finalSustenaibleRiskProfile: K, finalExperienceAndKnowledgeProfileInNumber: E, e5: i, e8: s, e9: a };
-}
-// The site's calculation with the corrections, and nothing else changed:
-//   tolerance 6 and 7 swapped; weights 0.25/0.10/0.65; J57 read (liquid assets, horizon); J66 fed adjusted
-//   earning capacity; several products -> the highest; an experience total of 0 -> LOW
-function FIXED(e, age) {
-  const site = SITE(e, age), sp = e.socioPersonalInformation, ek = e.experienceKnowledge, fp = e.financialPosition;
-  const rowsTicked = Object.keys(ek.eK_7).filter((k) => (ek.eK_7[k] || []).length > 0).map((k) => Number(k.split('___')[1].split('-')[1]));
-  const s = n.E8(rowsTicked.length ? Math.max(...rowsTicked) : 0);
-  const sum = n.C11(site.e5, s, site.e9), r = n.J11(sum);
-  const f = n.J24(Math.round((sp.sPI_3 ? sp.sPI_3.weight : 0) * 0.25 + (sp.sPI_5 ? sp.sPI_5.weight : 0) * 0.10 + (sp.sPI_6 ? sp.sPI_6.weight : 0) * 0.65));
-  const P = fp.fP_9.weight, g = n.J33(f, P), Q = fp.fP_10.weight, G = n.J45(Q, g);
-  const x = fp.fP_11.weight, w = fp.fP_12.weight, h = n.J57(w, x), T = n.J66(G, h);
-  const W = e.riskTolerance.rT_13.weight, M = W === 6 ? 7 : W === 7 ? 6 : W, y = n.J82(T, M);
-  const K = age > -1 ? n.H94(y, age) : 0, E = n.I93(r);
-  return { experience: r, personalInformation: f, earningCapacity: g, adjustedEarningCapacity: G, totalAssets: h,
-           financialSustainability: T, riskProfile: M, tolleranceForTheRiskProfile: y, finalExperienceAndKnowledgeProfile: r,
-           finalSustenaibleRiskProfile: K, finalExperienceAndKnowledgeProfileInNumber: E, e5: site.e5, e8: s, e9: site.e9 };
+// ─── The draft's rules, transcribed ──────────────────────────────────────────────────
+const Q1 = { '12plus': 3, '3to11': 2, under3: 1 };                          // points
+const Q2 = { big: 1, some: 2, little: 3 };                                   // points
+const Q3 = { under1: 1, '1to3': 2, '3to5': 4, '5plus': null };               // highest rating allowed
+const Q4 = (v) => (v < 2.5 ? 1 : v < 7 ? 2 : v < 15 ? 3 : v < 25 ? 4 : v < 40 ? 5 : 6);
+const Q5 = { sellall: 2, sellpart: 3, wait: 4, investmore: 6 };
+const Q6 = { safe: 1, deposit: 2, inflation: 3, steady: 4, strong: 5, highest: 6 };
+function DRAFT(a, age) {
+  const pts = Q1[a.cushion] + Q2[a.impact];
+  const capacity = pts <= 3 ? 'LOW' : pts === 4 ? 'MEDIUM' : 'HIGH';
+  const r = [Q4(a.loss), Q5[a.reaction], Q6[a.objective]];
+  const middle = r.slice().sort((x, y) => x - y)[1];
+  const attitude = Math.min(middle, r[0] + 1);
+  const timeLimit = Q3[a.horizon], capLimit = capacity === 'LOW' ? 4 : null;
+  let rating = attitude;
+  if (timeLimit != null) rating = Math.min(rating, timeLimit);
+  if (capLimit != null) rating = Math.min(rating, capLimit);
+  const flags = [];
+  if (Math.max(...r) - Math.min(...r) >= 3) flags.push('F1');
+  if (capacity === 'LOW' && attitude > 4) flags.push('F3');
+  if ((timeLimit != null && timeLimit < attitude) || (timeLimit != null && rating > 3)) flags.push('F4');
+  if (age != null && age >= 65 && rating >= 5) flags.push('F5');
+  return { rating, capacity, attitude, flags };
 }
 
-// Our answers -> the site's form value (ids from the "src" fields in risk_profiler_data.js)
-const Qn = (id) => RP.question(id);
-// the site's own weight for each answer (siteScore where ours is corrected)
-const pick = (id, v) => { const q = Qn(id), o = RP.option(q, v); return o ? { id: q.src + '-answer___' + o.src, weight: o.siteScore != null ? o.siteScore : o.score } : null; };
-function toSite(A) {
-  const pq = Qn('products'), aq = Qn('assetView'), eK_7 = {}, eK_8 = {};
-  pq.options.forEach((o) => {
-    const v = pq.columns.filter((c) => ((A.products || {})[c.id] || []).indexOf(o.id) >= 0).map((c) => c.src);
-    eK_7['eK_7-answer___' + o.src + '-' + o.score] = v.length ? v : null;
-  });
-  aq.rows.forEach((r) => { const o = RP.option(aq, (A.assetView || {})[r.id]); eK_8['eK_8-answer___' + r.src + '-100'] = o ? o.src : null; });
-  return {
-    socioPersonalInformation: { sPI_2: pick('education', A.education), sPI_3: pick('employment', A.employment), sPI_4: pick('financeWork', A.financeWork),
-                                sPI_5: pick('health', A.health), sPI_6: pick('dependants', A.dependants) },
-    experienceKnowledge: { eK_7, eK_8 },
-    financialPosition: { fP_9: pick('income', A.income), fP_10: pick('commitments', A.commitments), fP_11: pick('horizon', A.horizon), fP_12: pick('assets', A.assets) },
-    riskTolerance: { rT_13: pick('tolerance', A.tolerance) }
-  };
-}
-const same = (a, b) => (Number.isNaN(a) && Number.isNaN(b)) || a === b;
-function compare(A, ctx, age, label) { return compareTo(SITE, true, A, ctx, age, 'site mismatch ' + label) && compareTo(FIXED, false, A, ctx, age, 'corrected mismatch ' + label); }
-function compareTo(REF, quirks, A, ctx, age, label) {
-  const ours = RP.evaluate(A, Object.assign({ siteQuirks: quirks }, ctx)), site = REF(toSite(A), age == null ? -1 : age), X = ours.experience, St = ours.steps;
-  const pairs = [[X.e5, site.e5], [X.e8, site.e8], [X.e9, site.e9], [X.level, site.finalExperienceAndKnowledgeProfile],
-    [X.number, site.finalExperienceAndKnowledgeProfileInNumber], [St.personal, site.personalInformation], [St.earningCapacity, site.earningCapacity],
-    [St.adjustedEarningCapacity, site.adjustedEarningCapacity], [St.totalAssets, site.totalAssets], [St.financialCapacity, site.financialSustainability],
-    [ours.tolerance, site.riskProfile], [ours.profileRaw, site.tolleranceForTheRiskProfile], [ours.sri, site.finalSustenaibleRiskProfile]];
-  if (!pairs.every(([o, s]) => same(o, s))) { if (fails < 20) eq(pairs.map((p) => p[0]), pairs.map((p) => p[1]), label + ' ' + JSON.stringify(A)); else fails++; return false; }
-  return true;
-}
+const AT = '2026-10-20';
+const ctx40 = { dob: '1986-06-15', atDate: AT };       // aged 40: no age flag
+const KNOW = { experience: 'regular', check: { order: ['deposit', 'govbonds', 'fund', 'share'] } };   // High, right
+const NOSUS = { s1: 'no' };
 
-const base = {
-  education: 'degree', employment: 'employee', financeWork: 'no', health: 'verygood', dependants: 'none',
-  products: { known: ['funds'], held: ['funds'] }, assetView: { equity: 'high', cash: 'low', bonds: 'low' },
-  income: 'high', commitments: 'none', horizon: 'long', assets: 'high', tolerance: 'buymore'
-};
-const ctx = { dob: '1985-06-15', purpose: 'A', atDate: '2026-10-12' };
-const withA = (o) => Object.assign({}, base, o);
-const ids = (id) => Qn(id).options.map((o) => o.id);
-
-// 1. Every combination of the financial position and tolerance answers, at three ages, matches the site
-//    (with siteQuirks) and the corrected transcription (without)
-let combos = 0;
-for (const employment of ids('employment')) for (const health of ids('health')) for (const dependants of ids('dependants'))
-  for (const income of ids('income')) for (const commitments of ids('commitments')) for (const horizon of ids('horizon'))
-    for (const assets of ids('assets')) for (const tolerance of ids('tolerance'))
-      for (const [dob, age] of [['1985-06-15', 41], ['1946-10-12', 80], ['1945-10-12', 81]]) {
-        combos++;
-        compare(withA({ employment, health, dependants, income, commitments, horizon, assets, tolerance }), Object.assign({}, ctx, { dob }), age, 'financial');
-      }
-console.log('  financial combinations checked against the site and the corrected transcription: ' + combos);
-
-// 2. Every combination of the experience answers (all 4^6 tick patterns, all asset-class answers) matches the site
-const pq = Qn('products'), cells = [[], ['known'], ['held'], ['known', 'held']];
-const avOpts = [undefined, 'low', 'high'];
-let ecombos = 0;
-for (const education of ids('education')) for (const financeWork of ids('financeWork'))
-  for (let m = 0; m < 4096; m++) {
-    const products = { known: [], held: [] };
-    pq.options.forEach((o, k) => cells[(m >> (2 * k)) & 3].forEach((c) => products[c].push(o.id)));
-    for (let v = 0; v < 27; v++) {
-      const assetView = {};
-      ['equity', 'cash', 'bonds'].forEach((r, k) => { const x = avOpts[Math.floor(v / Math.pow(3, k)) % 3]; if (x) assetView[r] = x; });
-      ecombos++;
-      compare(withA({ education, financeWork, products, assetView }), ctx, 41, 'experience');
-    }
+// 1. Every combination of the scored answers
+const lossValues = [0, 2, 2.5, 6.5, 7, 14.5, 15, 24.5, 25, 39.5, 40];
+let n = 0;
+for (const cushion of Object.keys(Q1)) for (const impact of Object.keys(Q2)) for (const horizon of Object.keys(Q3))
+for (const loss of lossValues) for (const reaction of Object.keys(Q5)) for (const objective of Object.keys(Q6)) {
+  const a = Object.assign({ cushion, impact, horizon, loss, reaction, objective }, KNOW, NOSUS);
+  for (const [c, age] of [[ctx40, 40], [{ dob: '1956-01-01', atDate: AT }, 70]]) {
+    const r = RP.evaluate(a, c), d = DRAFT(a, age);
+    const got = { rating: r.sri, capacity: r.capacity.level, attitude: r.attitude.rating, flags: r.flags.map((f) => f.id) };
+    eq(got, d, 'combination ' + JSON.stringify(a) + ' age ' + age);
+    n++;
   }
-console.log('  experience combinations checked against the site and the corrected transcription: ' + ecombos);
+}
+console.log('  ' + n + ' answer combinations compared with the draft');
 
-// 3. Hand-worked cases
-let r = RP.evaluate(base, ctx);
-// personal 0.25*80 + 0.10*100 + 0.65*100 = 95 -> 3; earning 3; adjusted 3; wealth 3; capacity 3; buy more scores 7 -> 7
-eq([r.complete, r.steps.personalScore, r.steps.personal, r.steps.adjustedEarningCapacity, r.steps.totalAssets, r.steps.financialCapacity, r.tolerance, r.sri, r.sriLabel],
-   [true, 95, 3, 3, 3, 3, 7, 7, 'Very High'], 'strongest case -> 7');
-eq(RP.evaluate(base, Object.assign({ siteQuirks: true }, ctx)).steps.personalScore, 9500, 'with siteQuirks: weights x100');
-// experience: 0.2*200 + 0.6*250 + 0.2*300 = 40+150+60 = 250 -> HIGH
-eq([Math.round(r.experience.score), r.experience.level, r.experience.number], [250, 'HIGH', 3], 'experience high');
-// The weakest income side: 0.25*0 + 0.10*30 + 0.65*10 = 9.5 -> 10 -> level 1; income up to 100k -> earning 1;
-// high commitments -> adjusted 1. With strong wealth (3) capacity is 3, with weak wealth (1) it is 1.
-const weak = { employment: 'unemployed', health: 'notgood', dependants: 'three', income: 'low', commitments: 'high' };
-r = RP.evaluate(withA(weak), ctx);
-eq([r.steps.personalScore, r.steps.personal, r.steps.earningCapacity, r.steps.adjustedEarningCapacity, r.steps.financialCapacity, r.sri], [10, 1, 1, 1, 3, 7], 'weak earner, strong wealth: capacity 3');
-eq(RP.evaluate(withA(Object.assign({}, weak, { assets: 'low', horizon: 'short' })), ctx).steps.financialCapacity, 1, 'weak earner, weak wealth: capacity 1');
-// Income-side answers now matter: high commitments cut adjusted earning capacity to 2, and with wealth 2 the capacity is 2, so 7 -> 6
-r = RP.evaluate(withA({ health: 'average', income: 'low', commitments: 'high', horizon: 'short' }), ctx);
-eq([r.steps.personal, r.steps.earningCapacity, r.steps.adjustedEarningCapacity, r.steps.totalAssets, r.steps.financialCapacity, r.sri], [3, 3, 2, 2, 2, 6], 'commitments lower the rating');
-eq(RP.evaluate(withA({ health: 'average', income: 'low', commitments: 'high', horizon: 'short', tolerance: 'buyadviser' }), Object.assign({ siteQuirks: true }, ctx)).sri, 7, 'with siteQuirks the same answers (and the answer the site scores 7) give 7');
-// Wealth reads liquid assets as the row: (liquid, horizon) -> wealth, workbook values
-const wealth = (assets, horizon) => RP.evaluate(withA({ assets, horizon }), ctx).steps.totalAssets;
-const cells9 = [['low', 'short'], ['low', 'medium'], ['low', 'long'], ['mid', 'short'], ['mid', 'medium'], ['mid', 'long'], ['high', 'short'], ['high', 'medium'], ['high', 'long']];
-eq(cells9.map(([a, h]) => wealth(a, h)), [1, 1, 2, 2, 2, 3, 2, 3, 3], 'wealth table (rows = liquid assets)');
-// Financial capacity = adjusted earning capacity x wealth. With adjusted 3:
-const cap = (assets, horizon, o) => RP.evaluate(withA(Object.assign({ assets, horizon }, o || {})), ctx).steps.financialCapacity;
-eq(cells9.map(([a, h]) => cap(a, h)), [2, 2, 3, 3, 3, 3, 3, 3, 3], 'financial capacity with strong earnings');
-eq(cells9.map(([a, h]) => cap(a, h, weak)), [1, 1, 2, 2, 2, 3, 2, 3, 3], 'financial capacity with weak earnings (= wealth)');
-// Tolerance scores are out of display order: 1, 2, 5, 7, 4, 3, 6 (buy more is 7, buy more with an adviser 6)
-eq(ids('tolerance').map((t) => RP.evaluate(withA({ tolerance: t }), ctx).sri), [1, 2, 5, 7, 4, 3, 6], 'tolerance options at capacity 3');
-eq(ids('tolerance').map((t) => RP.evaluate(withA(Object.assign({}, weak, { tolerance: t, assets: 'low', horizon: 'short' })), ctx).sri), [1, 1, 4, 6, 3, 2, 5], 'tolerance options at capacity 1');
-eq(ids('tolerance').map((t) => RP.evaluate(withA({ tolerance: t }), Object.assign({ siteQuirks: true }, ctx)).sri), [1, 2, 5, 6, 4, 3, 7], 'with siteQuirks: the site order 1, 2, 5, 6, 4, 3, 7');
-// Age: only 7 is capped, only over 80; 29 February birthdays count on 28 February
-const sriAt = (dob, atDate, o) => RP.evaluate(withA(o || {}), { dob, purpose: 'A', atDate });
-eq([sriAt('1946-10-12', '2026-10-12').sri, sriAt('1945-10-13', '2026-10-12').sri, sriAt('1945-10-12', '2026-10-12').sri], [7, 7, 6], 'age 80 not capped, 81 capped');
-eq(sriAt('1940-01-01', '2026-10-12', { tolerance: 'buyadviser' }).sri, 6, 'a 6 is not changed by age');
-eq([RP.ageAt('2000-02-29', '2001-02-28'), RP.ageAt('2000-02-29', '2001-02-27'), RP.ageAt('1985-06-15', '2026-06-14'), RP.ageAt('1985-06-15', '2026-06-15')], [1, 0, 40, 41], 'ages as moment counts them');
-// Experience corrections: several product rows score the highest one (the site gives NaN -> HIGH);
-// a total of 0 is LOW (the site gives "Na", counted as 3)
-const exp = (o) => RP.evaluate(withA(o), ctx).experience;
-const expSite = (o) => RP.evaluate(withA(o), Object.assign({ siteQuirks: true }, ctx)).experience;
-const lowAll = { education: 'other', financeWork: 'no', assetView: { equity: 'low', cash: 'high', bonds: 'high' } };
-eq(exp(Object.assign({}, lowAll, { products: { known: ['govbonds'], held: [] } })).level, 'LOW', 'one cheap product: LOW (0.6*50 = 30)');
-const two = Object.assign({}, lowAll, { products: { known: ['govbonds', 'bonds'], held: [] } });
-eq([Math.round(exp(two).e8), exp(two).level], [60, 'LOW'], 'two product rows: the higher (bonds 100 -> 0.6*100 = 60), LOW');
-eq(expSite(two).level, 'HIGH', 'with siteQuirks: two product rows give NaN, HIGH');
-const noneHeld = Object.assign({}, lowAll, { products: { known: ['none'], held: ['govbonds'] } });
-eq([Math.round(exp(noneHeld).e8), exp(noneHeld).level], [30, 'LOW'], '"None" in one column and a product in the other: the product counts (0.6*50 = 30), LOW');
-eq(exp(Object.assign({}, lowAll, { products: { known: ['funds', 'unitlinked', 'govbonds'], held: ['bonds'] } })).e8, 0.6 * 300, 'four rows: the highest (unit-linked 300)');
-const zero = Object.assign({}, lowAll, { products: { known: ['none'], held: ['none'] } });
-eq([exp(zero).score, exp(zero).level, exp(zero).number], [0, 'LOW', 1], 'nothing scored: LOW (1)');
-eq([expSite(zero).level, expSite(zero).number], ['Na', 3], 'with siteQuirks: nothing scored is Na, counted as 3');
-eq(exp(Object.assign({}, lowAll, { products: {}, assetView: {} })).level, 'LOW', 'both optional questions skipped: LOW');
-eq(RP.evaluate(withA(zero), ctx).eligible.map((f) => f.fund).sort(), ['Allianz Euro Cash', 'Allianz Euro Cash'], 'a score of 0 lists only complexity-1 funds, like LOW');
-// 0.2*300 (doctorate) + 0 + 0.2*200 = 100 -> MEDIUM (the boundary is inclusive)
-eq(exp({ education: 'doctorate', products: { known: ['none'], held: ['none'] }, assetView: { equity: 'high', cash: 'low', bonds: 'high' } }).level, 'MEDIUM', 'experience boundary 100 is MEDIUM');
+const base = Object.assign({ cushion: '12plus', impact: 'little', horizon: '5plus', loss: 15, reaction: 'wait', objective: 'steady' }, KNOW, NOSUS);
+const ev = (o, c) => RP.evaluate(Object.assign({}, base, o), c || ctx40);
+let r;
 
-// 4. Completeness: products and asset classes are optional, as on the site
-r = RP.evaluate(withA({ products: undefined, assetView: undefined }), ctx);
-eq([r.complete, r.total], [true, 10], 'optional questions do not block the result');
-r = RP.evaluate({ education: 'degree' }, ctx);
-eq([r.complete, r.answered, r.total, r.sri], [false, 1, 10, null], 'incomplete has no result');
-r = RP.evaluate(base, { atDate: '2026-10-12' });
-eq([r.complete, r.missing], [false, ['dob', 'purpose']], 'dob and purpose asked when the host does not supply them');
+// 2. Ratings never exceed 6, and are always at least 1
+eq(ev({ loss: 40, reaction: 'investmore', objective: 'highest' }).sri, 6, 'the highest answers give 6 (7 is not offered)');
+eq(ev({ loss: 0, reaction: 'sellall', objective: 'safe' }).sri, 1, 'the lowest answers give 1');
 
-// 5. Eligible funds
-const elig = (o, c) => RP.evaluate(withA(o || {}), Object.assign({}, ctx, c || {})).eligible.map((f) => f.fund);
-eq(elig({ tolerance: 'sell' }), ['Allianz Euro Cash', 'Allianz Euro Cash', 'Combination of Life Cycle and Autopilot'], 'risk 1, PRSA: Euro Cash (both PRSAs) and the unrated default strategy');
-eq(elig({}, { purpose: 'C' }).length, 10, 'risk 7, ARF: all ten ARF funds');
-eq(elig({}, { purpose: 'B' }).length, 0, 'investment purpose: nothing listed (no fund is flagged for B)');
-eq(RP.evaluate(withA(Object.assign({}, lowAll, { products: { known: ['govbonds'], held: [] } })), ctx).eligible.map((f) => f.fund).sort(), ['Allianz Euro Cash', 'Allianz Euro Cash'], 'LOW experience: only complexity-1 funds');
+// 3. Q4 bands: a value between two marks scores the lower band
+eq([0, 2.4, 2.5, 6.9, 7, 14.9, 15, 24.9, 25, 39.9, 40].map((v) => RP.lossBand(v).rating), [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6], 'Q4 bands');
 
-// 6. Written outputs
-r = RP.evaluate(base, ctx);
-const nr = RP.narrative(base, ctx, r, { suggestedSri: 7, chosenSri: 5, overrideReason: 'Shorter horizon.' });
-eq(/You are an employee\./.test(nr.circumstances) && /Nobody depends on you/.test(nr.circumstances) && !/health/i.test(nr.circumstances), true, 'circumstances sentences (no health)');
-eq(/risk profile of 7 \(Very High\) on the 1 to 7 scale\./.test(nr.risk), true, 'risk sentence');
-eq(/Following our discussion.*5 because: Shorter horizon\./.test(nr.override), true, 'override sentence');
-const sum = RP.summary(base, ctx);
-eq(sum.map((s) => s.title), ['About you', 'Experience and knowledge', 'Your finances', 'Your attitude to risk'], 'summary sections (no dob or purpose rows when supplied)');
+// 4. Knowledge: from Q7, one level lower if Q8 is wrong or "I don't know"
+const kn = (exp, check) => ev({ experience: exp, check }).knowledge;
+const right = { order: ['deposit', 'govbonds', 'fund', 'share'] }, wrong = { order: ['deposit', 'fund', 'govbonds', 'share'] };
+eq([kn('regular', right).level, kn('regular', wrong).level, kn('regular', { dontKnow: true }).level], ['HIGH', 'MEDIUM', 'MEDIUM'], 'High stated: right stays High, wrong or don\'t know is Medium');
+eq([kn('recent', right).level, kn('recent', wrong).level], ['MEDIUM', 'LOW'], 'Medium stated');
+eq([kn('none', right).level, kn('passive', wrong).level], ['LOW', 'LOW'], 'Low stays Low');
+eq(kn('professional', { order: wrong.order, dontKnow: true }).check, 'dontknow', '"I don\'t know" counts even with an order left from before');
+eq(ev({ experience: 'recent', check: { order: ['fund', 'share', 'deposit', 'govbonds'] } }).knowledge.check, 'wrong', 'the starting order is wrong');
+// F2: rating 5 or more with knowledge Low
+eq(ev({ loss: 25, objective: 'strong', reaction: 'investmore', experience: 'none' }).flags.map((f) => f.id), ['F2'], 'F2 knowledge flag at rating 5 with Low knowledge');
+eq(ev({ experience: 'none' }).flags.map((f) => f.id), [], 'no F2 at rating 4');
+// Knowledge never changes the rating
+eq(ev({ experience: 'none', check: { dontKnow: true } }).sri, ev({}).sri, 'knowledge does not change the rating');
 
-console.log(fails ? fails + ' check(s) FAILED' : 'risk profiler engine: all checks passed');
+// 5. F5 age flag, at 65 (inclusive), and age does not change the rating
+const hi = { loss: 25, reaction: 'investmore', objective: 'strong' };
+eq(ev(hi, { dob: '1961-10-20', atDate: AT }).flags.map((f) => f.id), ['F5'], 'F5 on the 65th birthday with rating 5');
+eq(ev(hi, { dob: '1961-10-21', atDate: AT }).flags.map((f) => f.id), [], 'no F5 the day before');
+eq(ev(hi, { dob: '1931-01-01', atDate: AT }).sri, 5, 'age does not change the rating');
+
+// 6. F6: scored answers changed after the result was shown
+r = ev({ loss: 25 }, Object.assign({ seen: Object.assign({}, base) }, ctx40));
+eq([r.changed, r.flags.map((f) => f.id)], [['loss'], ['F6']], 'F6 names the changed answer');
+eq(/Q4 largest fall you could accept/.test(r.flags[0].text), true, 'F6 text');
+r = ev({ s1: 'yes', s2: ['general'] }, Object.assign({ seen: Object.assign({}, base) }, ctx40));
+eq(r.changed, [], 'sustainability answers are not checked for changes');
+eq(ev({}, Object.assign({ seen: JSON.parse(JSON.stringify(base)) }, ctx40)).changed, [], 'unchanged answers: no F6');
+
+// 7. Completeness and the conditional sustainability questions
+r = RP.evaluate({}, ctx40);
+eq([r.complete, r.rated, r.answered, r.total, r.sri], [false, false, 0, 9, null], 'nothing answered: 9 questions (date of birth supplied)');
+eq(RP.evaluate({}, { atDate: AT }).total, 10, 'the date of birth is asked when the host does not supply it');
+r = ev({ s1: undefined });
+eq([r.complete, r.rated, r.sri, r.missing], [false, true, 4, ['s1']], 'the rating is set before the sustainability questions are answered');
+r = ev({ s1: 'yes' });
+eq([r.complete, r.total, r.missing], [false, 10, ['s2']], 'S1 yes asks S2');
+r = ev({ s1: 'yes', s2: ['general'] });
+eq([r.complete, r.total], [true, 10], 'a general preference ends the questions');
+r = ev({ s1: 'yes', s2: ['taxonomy', 'pai'] });
+eq([r.complete, r.missing], [false, ['s3', 's4']], 'A asks S3, C asks S4');
+r = ev({ s1: 'yes', s2: ['taxonomy', 'sustainable'], s3: { taxonomy: '10' } });
+eq([r.complete, r.missing], [false, ['s3']], 'S3 needs a share for each of A and B');
+r = ev({ s1: 'yes', s2: ['taxonomy', 'sustainable', 'pai'], s3: { taxonomy: '10', sustainable: '30' }, s4: ['ghg'] });
+eq([r.complete, r.sustainability], [true, { preference: 'yes', general: false, types: ['taxonomy', 'sustainable', 'pai'], shares: { taxonomy: 10, sustainable: 30 }, effects: ['ghg'] }], 'sustainability recorded');
+r = ev({ s1: 'no', s2: ['pai'], s4: ['ghg'] });
+eq([r.complete, r.total, r.sustainability.effects], [true, 9, []], 'answers left over from "Yes" are ignored after "No"');
+eq(ev({ s1: 'yes', s2: ['taxonomy', 'pai'], s3: { taxonomy: '50' }, s4: ['social'] }).sri, ev({}).sri, 'sustainability does not change the rating');
+eq(ev({ loss: -1 }).missing, ['loss'], 'a slider value out of range is not an answer');
+eq(ev({ check: { order: ['deposit'] } }).missing, ['check'], 'an incomplete order is not an answer');
+
+// 8. The draft's test clients (Appendix A), with the answers their descriptions give
+const P = (o, c) => ev(o, c);
+r = P({ cushion: '12plus', impact: 'little', horizon: '3to5', loss: 2, reaction: 'sellall', objective: 'safe' }, { dob: '1954-03-01', atDate: AT });
+eq([r.sri, r.capacity.label], [1, 'High'], 'P1 retired, 72, 4 years, about 2%: 1, capacity High');
+r = P({ cushion: 'under3', impact: 'big', horizon: '5plus', loss: 40, reaction: 'investmore', objective: 'highest' }, { dob: '2001-05-01', atDate: AT });
+eq([r.sri, r.capacity.label, r.flags.map((f) => f.id)], [4, 'Low', ['F3']], 'P7 keen, no savings, relies on the money: 4, capacity Low, capacity limit');
+r = P({ horizon: '3to5', loss: 25, reaction: 'wait', objective: 'strong' }, { dob: '1971-01-01', atDate: AT });
+eq([r.sri, r.flags.map((f) => f.id)], [4, ['F4']], 'P8 growth attitude, needs the money in 3 years: 4, short horizon');
+r = P({ cushion: '3to11', impact: 'some', loss: 7, reaction: 'wait', objective: 'steady' });
+eq([r.sri, r.capacity.label], [4, 'Medium'], 'P10 first-time investor, 20 years, about 7%: 4 (one above the loss answer)');
+r = P({ cushion: '3to11', impact: 'some', loss: 7, reaction: 'wait', objective: 'inflation' });
+eq(r.sri, 3, 'P10 choosing the new level-3 objective: 3, as the draft notes');
+r = P({ cushion: '3to11', impact: 'some', horizon: '1to3', loss: 7, reaction: 'wait', objective: 'deposit' }, { dob: '1959-01-01', atDate: AT });
+eq([r.sri, r.flags.map((f) => f.id)], [2, ['F4']], 'P13 drawing income in 2 years, about 7%: 2, short horizon');
+r = P({ horizon: '3to5', loss: 40, reaction: 'investmore', objective: 'highest' });
+eq([r.sri, r.flags.map((f) => f.id)], [4, ['F4']], 'P17 adventurous, needs the money in 4 years: 4, short horizon');
+r = P({ loss: 2.5, reaction: 'investmore', objective: 'highest' });
+eq([r.sri, r.flags.map((f) => f.id)], [3, ['F1']], 'P18 accepts only 2.5% but wants maximum return: 3 (anchored on the loss answer), mixed attitude');
+
+// 9. Written outputs
+const full = Object.assign({}, base, { horizon: '3to5', loss: 40, reaction: 'investmore', objective: 'highest', s1: 'yes', s2: ['sustainable', 'pai'], s3: { sustainable: '20' }, s4: ['ghg'] });
+r = RP.evaluate(full, ctx40);
+const nr = RP.narrative(full, ctx40, r, { suggestedSri: 4, chosenSri: 3, overrideReason: 'Wants to keep part in cash.' });
+eq(/12 months or more/.test(nr.circumstances) && /between 3 and 5 years/.test(nr.circumstances), true, 'circumstances come from Q1 to Q3');
+eq(/40% or more \(€4,000 or more on €10,000\)/.test(nr.risk) && /keep it and invest more/.test(nr.risk) && /attitude to risk of 6 \(High\)/.test(nr.risk), true, 'risk sentence quotes the attitude answers');
+eq(/limited to 4\. This gives a risk rating of 4 \(Medium\)\./.test(nr.risk), true, 'risk sentence tells the client the limit');
+eq(nr.experience, 'Your investment knowledge and experience was assessed as high.', 'knowledge sentence');
+eq(/lower risk rating of 3 because: Wants to keep part in cash\./.test(nr.override), true, 'override sentence');
+eq(RP.narrative(full, ctx40, r, { suggestedSri: 4, chosenSri: 5 }).override, '', 'no override sentence for a higher rating');
+eq(/sustainable investments as defined in EU rules \(at least 20% of your investment\)/.test(nr.sustainability) && /greenhouse gas/.test(nr.sustainability), true, 'sustainability sentence');
+eq(/could not accept any fall/.test(RP.narrative(Object.assign({}, base, { loss: 0 }), ctx40, ev({ loss: 0 })).risk), true, 'no fall accepted');
+eq(RP.narrative(base, ctx40, ev({})).sustainability, RP.config.text.sustainNo, 'no sustainability preferences');
+const sum = RP.summary(full, ctx40);
+eq(sum.map((s) => s.title), ['Your finances', 'Your timing', 'Your attitude to risk', 'Your knowledge and experience', 'Your sustainability preferences'], 'summary sections (no date of birth when supplied)');
+eq(sum[2].rows[0].a, ['40% or more (€4,000 or more on €10,000)'], 'slider answer in the summary');
+eq(sum[3].rows[1].a, ['1. A savings deposit', '2. Government bonds', '3. A fund holding shares in many different companies', '4. Shares in a single company'], 'ranking answer in the summary');
+eq(sum[4].rows.map((x) => x.num), ['S1', 'S2', 'S3', 'S4'], 'all four sustainability questions recorded');
+
+console.log(fails ? fails + ' of ' + checks + ' check(s) FAILED' : 'risk profiler engine: all ' + checks + ' checks passed');
 process.exit(fails ? 1 : 0);

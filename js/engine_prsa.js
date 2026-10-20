@@ -193,6 +193,7 @@ function runPrsaQuote(inp) {
   var spNet = spRaw * (1 - spContribCharge);
   var spUpRate = prsaSpUpRate(inp);
   var spUpfrontComm = spUpRate * spRaw;
+  var ofvUpfrontComm = spUpRate * ofvRaw;   // a transfer in earns the single-premium rate
 
   var ofvNet = ofvRaw;
   var fundNC = ofvNet + spRaw;
@@ -249,7 +250,7 @@ function runPrsaQuote(inp) {
     rpInYear      += rpGross;
     // Trail: opening fund plus half the month's growth, contributions at their gross value (SRP!AD)
     var ongM = (openWC + spIn + rpGross + growthWC / 2) * ongoingMonthly;
-    var initM = (m === 1 ? spUpfrontComm : 0) + (m <= 12 ? rpGross * rpUpfrontPct : 0);
+    var initM = (m === 1 ? spUpfrontComm + ofvUpfrontComm : 0) + (m <= 12 ? rpGross * rpUpfrontPct : 0);
     commInYear    += ongM + initM;
     ongoingInYear += ongM;
     var chargeM = chargesWC + (rpGross - rpNet) + (m === 1 ? sp1Charge : 0);
@@ -314,9 +315,9 @@ function runPrsaQuote(inp) {
     annualIncomeReal: annualIncomeReal, annualIncomeNominal: annualIncomeNominal,
     snapshots: snapshots,
     spUpRate: spUpRate, rpUpRate: rpUpRate, rpUpfrontPct: rpUpfrontPct,
-    spUpfrontComm: spUpfrontComm, rpUpfrontComm: rpUpfrontComm,
+    spUpfrontComm: spUpfrontComm, ofvUpfrontComm: ofvUpfrontComm, rpUpfrontComm: rpUpfrontComm,
     spUpOverridden: inp.spUpOverride != null, rpUpOverridden: inp.rpUpOverride != null,
-    totalInitialComm: spUpfrontComm + rpUpfrontComm, totalOngoingComm: totalOngoing,
+    totalInitialComm: spUpfrontComm + ofvUpfrontComm + rpUpfrontComm, totalOngoingComm: totalOngoing,
     clawback: (spUpRate > 0 || rpUpRate > 0),
     mix: mix, portfolioSri: portfolioSri
   };

@@ -32,7 +32,7 @@ h1 { margin:8px 0; font-size:32px; line-height:1.15; color:var(--navy); letter-s
 <main>
   <div class="eyebrow">Risk profile</div>
   <h1>Find your risk profile</h1>
-  <p class="lead">Answer the questions in each of the five parts. Your answers show how much investment risk suits you, and how well you could cope with a fall in value. Nothing is stored or sent anywhere.</p>
+  <p class="lead">Answer the questions in each part. Your answers give a risk rating from 1 (very low risk) to 6 (high risk), and show how well you could cope with a fall in value. Nothing is stored or sent anywhere.</p>
   <div id="rp-host"></div>
 </main>
 <script src="js/risk_profiler_data.js"></script>
@@ -40,7 +40,7 @@ h1 { margin:8px 0; font-size:32px; line-height:1.15; color:var(--navy); letter-s
 <script src="js/risk_profiler_ui.js"></script>
 <script>
   var profiler = RiskProfilerUI.mount(document.getElementById('rp-host'), {
-    onChange: function(state) { /* state.answers and state.result: send them wherever you need */ }
+    onChange: function(state) { /* state.answers, state.seen and state.result: send them wherever you need */ }
   });
 </script>
 </body>
