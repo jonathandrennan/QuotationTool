@@ -199,10 +199,13 @@ while i < len(lines):
               keep=not (client_table or len(body) > 10), keep_last=(len(head) == 2 and head[0] == 'Answer'))
         continue
     if l.startswith('>'):
-        text = re.sub(r'^>\s*', '', l)
-        m2 = re.match(r'\*\*([^*:]+):\*\*\s*(.*)', text)
-        box([(m2.group(1), m2.group(2)) if m2 else ('', text)], BLUE, size=10)
-        i += 1
+        quote = []
+        while i < len(lines) and lines[i].startswith('>'):
+            text = re.sub(r'^>\s*', '', lines[i])
+            m2 = re.match(r'\*\*([^*:]+):\*\*\s*(.*)', text)
+            quote.append((m2.group(1), m2.group(2)) if m2 else ('', text))
+            i += 1
+        box(quote, BLUE, size=10)
         continue
     m = re.match(r'\*\*(Q\d+|S\d+|DOB) ([^*]+)\*\* – (.*)', l)
     if m:
@@ -236,6 +239,11 @@ while i < len(lines):
     # plain paragraph (intro, footnote, notes under a question)
     p = d.add_paragraph()
     runs(p, l.strip())
+    if l.startswith('**Versus competitors'):
+        p.paragraph_format.keep_with_next = True
+        p.paragraph_format.space_before = Pt(4)
+        for r in p.runs:
+            r.font.color.rgb = RGBColor.from_string(NAVY)
     if l.startswith('_*') or l.startswith('_To be built') or l.startswith('_Built as'):
         for r in p.runs:
             r.italic = True

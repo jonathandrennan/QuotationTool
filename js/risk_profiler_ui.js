@@ -162,7 +162,19 @@ var RiskProfilerUI = (function() {
     '.rp-link:hover { color:var(--rp-navy); text-decoration:underline; }',
 
     // result
+    '.rp-disc .rp-dpts { margin:0 0 28px; }',
+    '.rp-disc .rp-dlead { margin-bottom:8px; font-weight:600; color:var(--rp-ink); }',
     '.rp-res { padding-bottom:28px; }',
+    '.rp-imp { margin-top:20px; border-left:3px solid var(--rp-navy); border-radius:0 10px 10px 0; } .rp-imp p { margin:6px 0 0; }',
+    '.rp-cap { margin-top:16px; }',
+    '.rp-cap .rp-xl { display:inline-block; margin:0 14px 0 0; vertical-align:middle; }',
+    '.rp-cap .rp-pips { display:inline-flex; width:120px; margin:0; vertical-align:middle; }',
+    '.rp-cap p { margin:10px 0 0; font-size:15px; line-height:1.55; color:var(--rp-body); }',
+    '.rp-ans { margin-top:24px; }',
+    '.rp-ans h3 { margin:0 0 10px; font-size:20px; color:var(--rp-navy); }',
+    '.rp-ans h4 { margin:18px 0 6px; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--rp-body); }',
+    '.rp-ans dl { margin:0; } .rp-ans .r { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:6px 24px; padding:10px 0; border-top:1px solid var(--rp-line); font-size:15px; line-height:1.5; }',
+    '.rp-ans dt { color:var(--rp-body); } .rp-ans dd { margin:0; color:var(--rp-ink); font-weight:600; }',
     '.rp-hero { display:grid; grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr); gap:16px; margin-top:24px; }',
     '.rp-tile { padding:22px 24px; border:1px solid var(--rp-line); border-radius:12px; background:#fff; }',
     '.rp-tile.main { border:none; background:linear-gradient(135deg, var(--rp-navy) 0%, #0A4AA0 100%); color:#fff; box-shadow:0 10px 28px rgba(0,55,129,.18); }',
@@ -204,7 +216,7 @@ var RiskProfilerUI = (function() {
 
     // narrow hosts
     '@container (max-width: 860px) { .rp-hero { grid-template-columns:minmax(0, 1fr); } .rp-mr { flex-direction:column; align-items:flex-start; } }',
-    '@container (max-width: 760px) { .rp-nav { gap:6px; padding:14px 20px; } .rp-tab:not(.on) .rp-tl { display:none; } .rp-sep { max-width:20px; }',
+    '@container (max-width: 760px) { .rp-ans .r { grid-template-columns:minmax(0, 1fr); } .rp-nav { gap:6px; padding:14px 20px; } .rp-tab:not(.on) .rp-tl { display:none; } .rp-sep { max-width:20px; }',
     '  .rp-panel { padding:24px 20px 4px; } .rp-q.flag { margin:6px -10px; padding-left:10px; padding-right:10px; } .rp-foot { padding:14px 20px; }',
     '  .rp-qb { padding-left:0; } .rp-opts { --rp-c:1; } .rp-ph { flex-direction:column; align-items:flex-start; } }',
     '@container (max-width: 520px) { .rp-seg { flex-wrap:wrap; height:auto; } .rp-seg button { height:32px; } .rp-big b { font-size:40px; } .rp-grip { display:none; }',
@@ -244,6 +256,8 @@ var RiskProfilerUI = (function() {
     var uid = 'rp' + Math.random().toString(36).slice(2, 7);
     var cur = null;              // the part on screen: a section id, or 'result'
     var msg = '';                // footer message
+    var accepted = opts.accepted || null;   // when the important information was accepted (ISO time), or null
+    var declined = false;        // the important information was declined: show the stop message
     var dragId = null;           // the Q8 item being dragged
     var drawn = '';              // the questions on the page when it was last drawn (see visibleKey)
     function evalCtx() { var c = {}; for (var k in ctx) c[k] = ctx[k]; c.seen = seen; return c; }
@@ -263,9 +277,10 @@ var RiskProfilerUI = (function() {
     function secs() { return CFG.sections.filter(function(s) { return qs().some(function(q) { return q.section === s.id; }); }); }
     function secQs(id) { return qs().filter(function(q) { return q.section === id; }); }
     function secLeft(id) { return secQs(id).filter(function(q) { return !done(q); }).length; }
-    function order() { return (CFG.intro ? ['intro'] : []).concat(secs().map(function(s) { return s.id; }), 'result'); }
+    function order() { return (CFG.intro ? ['intro'] : []).concat(CFG.disclaimer ? ['disclaimer'] : []).concat(secs().map(function(s) { return s.id; }), 'result'); }
     function firstOpen() {
-      if (CFG.intro && !result.answered) return 'intro';
+      // The introduction comes first, then the important information; once that is accepted the questions start
+      if (!result.answered && !(CFG.disclaimer && accepted)) { if (CFG.intro) return 'intro'; if (CFG.disclaimer) return 'disclaimer'; }
       var q = qs().filter(function(x) { return !done(x); })[0];
       return q ? q.section : 'result';
     }
@@ -275,10 +290,12 @@ var RiskProfilerUI = (function() {
     // ── Question bodies ──
     function sliderReadout(q, a) {
       if (typeof a !== 'number') return '<b>–</b><span>Not answered yet. Move the slider to choose.</span>';
+      if (q.unit === 'years') return '<b>' + esc(cap1(RP.yearsText(a))) + '</b><span>' + esc(RP.band(q.id, a).shown) + '</span>';
       if (a <= 0) return '<b>' + esc(q.minLabel) + '</b><span>You would want to keep the full ' + eur(q.amount) + '.</span>';
       var top = a >= q.max, more = top ? ' or more' : '';
       return '<b>' + (Math.round(a * 10) / 10) + '%' + more + '</b><span>A fall of ' + eur(q.amount * a / 100) + more + ', leaving ' + (top ? eur(q.amount * (1 - a / 100)) + ' or less' : eur(q.amount * (1 - a / 100))) + '.</span>';
     }
+    function sliderText(q, v) { return q.unit === 'years' ? cap1(RP.yearsText(v)) : v <= 0 ? q.minLabel : v + '%'; }
     function rankOrder(q, a) { return a && a.order ? a.order : q.start; }
     function bodyHtml(q) {
       var a = answers[q.id], h = '', k = 'data-q="' + q.id + '"';
@@ -298,10 +315,10 @@ var RiskProfilerUI = (function() {
       if (q.type === 'slider') {
         var set = typeof a === 'number', v = set ? a : q.min, pct = (v - q.min) / (q.max - q.min) * 100;
         var marks = '';
-        for (var m = 0; m <= 4; m++) { var mv = q.min + (q.max - q.min) * m / 4; marks += '<span>' + (m === 0 ? esc(q.minLabel) : m === 4 ? esc(q.maxLabel) : mv + '%') + '</span>'; }
+        q.marks.forEach(function(mv, m) { marks += '<span>' + (m === 0 ? esc(q.minLabel) : m === q.marks.length - 1 ? esc(q.maxLabel) : mv + (q.unit === 'years' ? ' years' : '%')) + '</span>'; });
         return '<div class="rp-sld' + (set ? '' : ' unset') + '" data-sld="' + q.id + '"><div class="rp-sv" aria-hidden="true">' + sliderReadout(q, a) + '</div>' +
           '<input type="range" class="rp-range" ' + k + ' data-fk="' + q.id + '-range" min="' + q.min + '" max="' + q.max + '" step="' + q.step + '" value="' + v + '" style="--rp-p:' + pct + '%"' +
-          ' aria-label="' + esc(q.text) + '" aria-valuetext="' + esc(set ? (a <= 0 ? q.minLabel : a + '%') : 'Not answered') + '">' +
+          ' aria-label="' + esc(q.text) + '" aria-valuetext="' + esc(set ? sliderText(q, a) : 'Not answered') + '">' +
           '<div class="rp-sl-l" aria-hidden="true">' + marks + '</div></div>';
       }
       if (q.type === 'rank') {
@@ -346,6 +363,15 @@ var RiskProfilerUI = (function() {
     function renderBody() {
       var focusKey = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-fk');
       var h = '', S = secs();
+      if (CFG.disclaimer) {
+        var D = CFG.disclaimer;
+        h += '<section class="rp-panel rp-intro-p rp-disc" data-panel="disclaimer" aria-labelledby="' + uid + '-h-disclaimer"' + (cur === 'disclaimer' ? '' : ' hidden') + '>' +
+          (declined
+            ? '<h2 id="' + uid + '-h-disclaimer" tabindex="-1">' + esc(D.declinedTitle) + '</h2><p>' + esc(D.declinedText) + '</p>'
+            : '<h2 id="' + uid + '-h-disclaimer" tabindex="-1">' + esc(D.title) + '</h2>' + D.paragraphs.map(function(p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+              '<p class="rp-dlead">' + esc(D.confirmLead) + '</p><ul class="rp-dpts">' + D.points.map(function(p) { return '<li>' + esc(p) + '</li>'; }).join('') + '</ul>') +
+          '</section>';
+      }
       if (CFG.intro) {
         h += '<section class="rp-panel rp-intro-p" data-panel="intro" aria-labelledby="' + uid + '-h-intro"' + (cur === 'intro' ? '' : ' hidden') + '>' +
           '<h2 id="' + uid + '-h-intro" tabindex="-1">' + esc(CFG.introTitle || 'Before you begin') + '</h2>' +
@@ -383,7 +409,7 @@ var RiskProfilerUI = (function() {
     // ── Step strip, counts, footer and the result ──
     function renderNav() {
       var h = '', S = secs();
-      nav.classList.toggle('hide', cur === 'intro');
+      nav.classList.toggle('hide', cur === 'intro' || cur === 'disclaimer');
       S.forEach(function(s, i) {
         var n = secQs(s.id).length, left = secLeft(s.id);
         var st = cur === s.id ? ' on' : !left ? ' done' : left < n ? ' part' : '';
@@ -412,12 +438,18 @@ var RiskProfilerUI = (function() {
     }
     function renderFoot() {
       var O = order(), i = O.indexOf(cur), next = O[i + 1], h = '';
+      if (cur === 'disclaimer') {
+        var D = CFG.disclaimer;
+        foot.innerHTML = declined ? '<button type="button" class="rp-btn" data-act="undecline">' + esc(D.back) + '</button>'
+          : '<span class="sp"></span><button type="button" class="rp-btn" data-act="decline">' + esc(D.decline) + '</button><button type="button" class="rp-btn pri" data-act="accept">' + esc(D.accept) + '</button>';
+        return;
+      }
       if (i > 0) h += '<button type="button" class="rp-btn" data-act="back">← Back</button>';
       if (result.answered) h += '<button type="button" class="rp-link" data-act="reset">Clear all answers</button>';
       h += '<span class="sp"></span><span class="rp-msg' + (msg ? ' warn' : '') + '" role="status">' + esc(msg) + '</span>';
       if (next) {
         var ns = CFG.sections.filter(function(s) { return s.id === next; })[0];
-        var label = cur === 'intro' ? 'Start the questions' : next === 'result' ? 'See the result' : 'Continue to ' + (ns.short || ns.title).toLowerCase();
+        var label = cur === 'intro' ? (next === 'disclaimer' ? 'Continue' : 'Start the questions') : next === 'result' ? 'See the result' : 'Continue to ' + (ns.short || ns.title).toLowerCase();
         h += '<button type="button" class="rp-btn pri" data-act="fwd">' + esc(label) + ' →</button>';
       } else if (!result.complete) {
         h += '<button type="button" class="rp-btn pri" data-act="next">Go to the next question →</button>';
@@ -452,17 +484,28 @@ var RiskProfilerUI = (function() {
           '<div class="rp-scale" style="--rp-n:' + top + '" aria-hidden="true">' + scale + '</div><div class="rp-scale-l"><span>Lower risk</span><span>Higher risk</span></div>' +
           (top > max ? '<div class="rp-scale-l"><span>The profiler gives a rating from 1 to ' + max + '.</span></div>' : '') + '</div>' +
         '<div class="rp-tile rp-side">' +
-          '<div><div class="rp-k">Capacity for loss</div><div class="rp-xl" data-cap>' + esc(r.capacity.label) + '</div>' + pips(L.indexOf(r.capacity.level) + 1, 3) + '</div>' +
           '<div><div class="rp-k">Knowledge and experience</div><div class="rp-xl" data-kn>' + esc(r.knowledge.label) + '</div>' + pips(L.indexOf(r.knowledge.level) + 1, 3) + '</div>' +
         '</div></div>';
+      // Capacity for loss, straight after the rating
+      h += '<div class="rp-tile rp-cap" data-capbox><div class="rp-k">Capacity for loss</div>' +
+        '<div><span class="rp-xl" data-cap>' + esc(r.capacity.label) + '</span>' + pips(L.indexOf(r.capacity.level) + 1, 3) + '</div>' +
+        '<p>' + esc(T.capacitySummary[r.capacity.level]) + '</p>' +
+        '<p>' + esc(T.capacityBasis) + '</p></div>';
       var notes = [], lim = r.limits;
       if (lim.timeApplied && lim.time === lim.ceiling) notes.push('<div class="rp-note">' + esc(fill(T.limitTime, { horizon: r.horizon.term, cap: lim.time })) + '</div>');
       if (lim.capacityApplied && lim.capacity === lim.ceiling) notes.push('<div class="rp-note">' + esc(fill(T.limitCapacity, { cap: lim.capacity })) + '</div>');
+      if (notes.length) h += '<div class="rp-notes">' + notes.join('') + '</div>';
+      // The answers, then the adviser's flags
+      h += '<div class="rp-ans" data-answers><h3>Your answers</h3>' + RP.summary(answers, ctx).map(function(sec) {
+        return '<h4>' + esc(sec.title) + '</h4><dl>' + sec.rows.map(function(rw) {
+          return '<div class="r"><dt>' + esc((rw.num ? 'Q' + rw.num + '. ' : '') + rw.q) + '</dt><dd>' + rw.a.map(esc).join('<br>') + '</dd></div>';
+        }).join('') + '</dl>';
+      }).join('') + '</div>';
       if (opts.showFlags !== false && r.flags.length) {
-        notes.push('<div class="rp-note warn" data-flags><b>For the adviser: ' + r.flags.length + ' flag' + (r.flags.length > 1 ? 's' : '') + '</b><ul>' +
-          r.flags.map(function(f) { return '<li data-flag="' + f.id + '"><b>' + esc(f.title) + ':</b> ' + esc(f.text) + '</li>'; }).join('') + '</ul></div>');
+        h += '<div class="rp-notes"><div class="rp-note warn" data-flags><b>For the adviser: ' + r.flags.length + ' flag' + (r.flags.length > 1 ? 's' : '') + '</b><ul>' +
+          r.flags.map(function(f) { return '<li data-flag="' + f.id + '"><b>' + esc(f.title) + ':</b> ' + esc(f.text) + '</li>'; }).join('') + '</ul></div></div>';
       }
-      h += '<div class="rp-notes">' + notes.join('') + '</div>';
+      h += '<div class="rp-note rp-imp" data-important><b>' + esc(T.resultNotice.title) + '</b><p>' + esc(T.resultNotice.text) + '</p></div>';
       el.innerHTML = h;
     }
 
@@ -537,6 +580,8 @@ var RiskProfilerUI = (function() {
       if (act) {
         var a = act.getAttribute('data-act');
         if (a === 'fwd') forward();
+        else if (a === 'accept') { accepted = new Date().toISOString(); declined = false; notify(); show(secs().length ? secs()[0].id : 'result', true); }
+        else if (a === 'decline' || a === 'undecline') { declined = a === 'decline'; renderBody(); var dh = body.querySelector('#' + uid + '-h-disclaimer'); if (dh) dh.focus({ preventScroll: true }); }
         else if (a === 'back') { var O = order(); show(O[Math.max(0, O.indexOf(cur) - 1)], true); }
         else if (a === 'next') api.goToNext();
         else if (a === 'reset') api.reset();
@@ -571,7 +616,7 @@ var RiskProfilerUI = (function() {
       wrap.classList.remove('unset');
       wrap.querySelector('.rp-sv').innerHTML = sliderReadout(q, v);
       el.style.setProperty('--rp-p', ((v - q.min) / (q.max - q.min) * 100) + '%');
-      el.setAttribute('aria-valuetext', v <= 0 ? q.minLabel : v + '%');
+      el.setAttribute('aria-valuetext', sliderText(q, v));
       if (qw) { qw.classList.add('done'); qw.classList.remove('flag'); qw.querySelector('.rp-qn').textContent = '✓'; }
       if (msg && !secQs(cur).some(function(x) { return !done(x) && flagged[x.id]; })) msg = '';
       renderChrome();
@@ -631,7 +676,7 @@ var RiskProfilerUI = (function() {
     });
 
     var api = {
-      getState: function() { return { answers: clone(answers), seen: clone(seen), result: result }; },
+      getState: function() { return { answers: clone(answers), seen: clone(seen), accepted: accepted, result: result }; },
       setAnswers: function(a, s) { answers = clone(a || {}); seen = clone(s || null); flagged = {}; recompute(); cur = firstOpen(); msg = ''; renderBody(); },
       setContext: function(c) {
         ctx = c || {};

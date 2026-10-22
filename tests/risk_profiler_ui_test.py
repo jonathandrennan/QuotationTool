@@ -1,11 +1,12 @@
 """UI check for the Risk Profiler: the standalone page, and its integration in quotation_tool.html.
 
 Standalone (risk_profiler.html): steps through the six parts and the result screen, checks Continue, the
-introduction, the Q4 slider (no starting value), the Q8 ranking (arrows, drag, "I don't know"), the conditional
-sustainability questions, the limits and flags on the result, the changed-answers flag and "Clear all answers".
+important information (accept / do not accept), the introduction, the Q3 and Q4 sliders (no starting value), the Q8
+ranking (arrows, drag, "I don't know"), the order of the result (rating, capacity for loss, answers, then flags), the
+limits and flags on the result, the changed-answers flag and "Clear all answers". Part E (sustainability) is switched off.
 
 Quotation tool: chooses the risk profiler in Step 3, completes it in its dialog, checks that nothing changes on the
-page until "Use this result", that the result sets the risk rating and the sustainability preference, that the
+page until "Use this result", that the result sets the risk rating (the adviser still records the sustainability preference), that the
 adviser can only lower the rating and must give a reason, that the answers fill the Statement of Suitability,
 and that the "Risk profile" section reaches the pack (saved as tests/out/rp_pack.pdf).
 Fails on any JS console error, unfilled {token}, 'undefined' or 'NaN' in the pack.
@@ -42,8 +43,8 @@ def setv(d, id_, v):
 def type_dob(d, v):
     # real typing bubbles; the component listens on its container
     js(d, "var e=document.querySelector('[data-q=dob]'); e.value=arguments[0]; e.dispatchEvent(new Event('input', {bubbles:true}));", v)
-def slide(d, v):
-    js(d, "var e=document.querySelector('.rp-range'); e.value=arguments[0]; e.dispatchEvent(new Event('input', {bubbles:true}));", v)
+def slide(d, v, q='loss'):
+    js(d, "var e=document.querySelector('.rp-range[data-q='+arguments[1]+']'); e.value=arguments[0]; e.dispatchEvent(new Event('input', {bubbles:true}));", v, q)
 def click(d, el):
     d.execute_script("arguments[0].scrollIntoView({block:'center'})", el); el.click()
 def css(d, sel): return d.find_element(By.CSS_SELECTOR, sel)
@@ -54,12 +55,13 @@ def errors(d):
     except Exception: return []
 
 # Capacity High (3 + 3), no time limit, ratings 5 (loss 25%), 6 and 5: attitude 5, so the risk rating is 5.
-# Knowledge stated High and the check right. Sustainability: C ticked, so S4 is asked.
-ANSWERS = [('cushion', '12plus'), ('impact', 'little'), ('horizon', '5plus'), ('loss', 25), ('reaction', 'investmore'), ('objective', 'strong'),
-           ('experience', 'regular'), ('check', 'right'), ('s1', 'yes'), ('s2', ['pai']), ('s4', ['ghg'])]
+# Knowledge stated High and the check right. A horizon of 10 years has no limit.
+ANSWERS = [('cushion', '12plus'), ('impact', 'little'), ('horizon', 10), ('loss', 25), ('reaction', 'investmore'), ('objective', 'strong'),
+           ('experience', 'regular'), ('check', 'right')]
 RIGHT = ['deposit', 'govbonds', 'fund', 'share']
 def goto(d, sec):
     if section(d) == 'intro': click(d, css(d, '[data-act=fwd]'))   # the introduction has no step strip
+    if section(d) == 'disclaimer': click(d, css(d, '[data-act=accept]'))   # the important information, then part 1
     click(d, css(d, '.rp-nav [data-tab="%s"]' % sec)); time.sleep(0.05)
 def section(d): return js(d, "var p=[].filter.call(document.querySelectorAll('.rp [data-panel]'), function(p){ return !p.hidden; })[0]; return p ? p.getAttribute('data-panel') : null")
 def sec_of(d, q): return js(d, "return RiskProfiler.question(arguments[0]).section", q)
@@ -75,13 +77,14 @@ def rank_right(d):
         while rank_order(d).index(it) > i:
             click(d, css(d, '[data-q=check][data-mv="-1"][data-v="%s"]' % it))
 def answered(d): return int(css(d, '.rp-prog').get_attribute('aria-valuenow'))
+def before(d, a, b): return js(d, "var x=document.querySelector(arguments[0]), y=document.querySelector(arguments[1]); return !!x && !!y && !!(x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING)", a, b)
 def result_text(d): return js(d, "return document.querySelector('.rp [data-panel=result]').textContent")
 def flags(d): return js(d, "return [].map.call(document.querySelectorAll('.rp [data-flag]'), function(e){ return e.getAttribute('data-flag'); })")
 def answer_all(d, overrides=None):
     ov = dict(overrides or {})
     for q, v in ANSWERS:
         v = ov.get(q, v)
-        if q == 'loss': to_sec(d, q); slide(d, v)
+        if q in ('loss', 'horizon'): to_sec(d, q); slide(d, v, q)
         elif q == 'check':
             if v == 'right': rank_right(d)
             else: answer(d, '[data-q=check][data-dk]', q)
@@ -93,25 +96,57 @@ def standalone(d):
     print('Standalone page')
     d.get(STANDALONE)
     n = len(d.find_elements(By.CSS_SELECTOR, '.rp-q'))
-    check(n == 10, 'standalone asks 10 questions to start with (Q1-Q8, date of birth, S1): %d' % n)
-    check(answered(d) == 0 and css(d, '.rp-prog').get_attribute('aria-valuemax') == '10', 'progress starts at 0 of 10')
-    check(section(d) == 'intro' and 'about 5 minutes' in css(d, '[data-panel=intro]').text.lower() and not css(d, '.rp-nav').is_displayed(), 'opens on a full-screen introduction before Q1, with no step strip')
+    check(n == 9, 'standalone asks 9 questions (Q1-Q8, date of birth; no sustainability): %d' % n)
+    check(answered(d) == 0 and css(d, '.rp-prog').get_attribute('aria-valuemax') == '9', 'progress starts at 0 of 9')
+    check(section(d) == 'intro' and 'about 5 minutes' in css(d, '[data-panel=intro]').text.lower() and 'at least once a year' in css(d, '[data-panel=intro]').text and not css(d, '.rp-nav').is_displayed(),
+          'opens on a full-screen introduction (with the yearly review), no step strip')
+    check('Continue' in css(d, '[data-act=fwd]').text, 'the introduction continues to the important information')
     click(d, css(d, '[data-act=fwd]'))
-    check(section(d) == 'finances' and len(d.find_elements(By.CSS_SELECTOR, '.rp-tab')) == 7, 'Start opens part 1 with seven steps in the strip')
+    dis = css(d, '[data-panel=disclaimer]')
+    check(section(d) == 'disclaimer' and 'Important information' in dis.text and 'I accept' in css(d, '[data-act=accept]').text and 'I do not accept' in css(d, '[data-act=decline]').text and not css(d, '.rp-nav').is_displayed(),
+          'opens on the important information, with I accept / I do not accept and no step strip')
+    check('Zurich' not in dis.text and 'not received any advice' not in dis.text.lower(), 'the important information is in our own words')
+    d.save_screenshot(str(OUT / 'rp_standalone_disclaimer.png'))
+    click(d, css(d, '[data-act=decline]'))
+    check(section(d) == 'disclaimer' and 'You have not accepted' in css(d, '[data-panel=disclaimer]').text and not d.find_elements(By.CSS_SELECTOR, '[data-act=accept]') and d.find_elements(By.CSS_SELECTOR, '[data-act=undecline]'),
+          'I do not accept stops the questionnaire and offers a way back')
+    d.save_screenshot(str(OUT / 'rp_standalone_declined.png'))
+    click(d, css(d, '[data-act=undecline]'))
+    check('Important information' in css(d, '[data-panel=disclaimer]').text and css(d, '[data-act=accept]').is_displayed() and js(d, 'return !profiler.getState().accepted'), 'going back shows the important information again, not accepted')
+    click(d, css(d, '[data-act=accept]'))
+    check(section(d) == 'finances' and js(d, 'return !!profiler.getState().accepted'), 'I accept records the time and opens part 1')
+    click(d, css(d, '[data-act=back]'))
+    check(section(d) == 'disclaimer', 'Back from part 1 returns to the important information')
+    click(d, css(d, '[data-act=accept]'))
+    check(section(d) == 'finances' and len(d.find_elements(By.CSS_SELECTOR, '.rp-tab')) == 6, 'Start opens part 1 with six steps in the strip (five parts and the result, no sustainability)')
     check('appears here once every question is answered' in result_text(d), 'no result until complete')
     d.save_screenshot(str(OUT / 'rp_standalone_empty.png'))
     # Continue is held back until the part is answered, and highlights what is missing
     click(d, css(d, '[data-act=fwd]'))
     check(section(d) == 'finances' and len(d.find_elements(By.CSS_SELECTOR, '.rp-q.flag')) == 2 and 'highlighted' in css(d, '.rp-msg').text, 'Continue flags the 2 unanswered questions in part 1')
 
+    # Q3: a slider in whole years, with no starting value
+    goto(d, 'timing')
+    check('unset' in css(d, '.rp-sld').get_attribute('class') and 'Not answered' in css(d, '.rp-sv').text, 'Q3 slider starts with no value')
+    slide(d, 2, 'horizon')
+    check('2 years' in css(d, '.rp-sv').text and 'Under 3 years' in css(d, '.rp-sv').text, 'Q3 slider shows the years and the band: %r' % css(d, '.rp-sv').text)
+    slide(d, 5, 'horizon')
+    check('3 to under 7 years' in css(d, '.rp-sv').text, 'Q3 5 years is in the 3 to under 7 band')
+    slide(d, 12, 'horizon')
+    check('12 years or more' in css(d, '.rp-sv').text and '7 years or more' in css(d, '.rp-sv').text, 'top of the Q3 slider: 12 years or more')
+    slide(d, 0, 'horizon')
+    check('Less than 1 year' in css(d, '.rp-sv').text, 'bottom of the Q3 slider: less than 1 year')
+
     # Q4: the slider starts with no value; moving it shows the amount
     goto(d, 'attitude')
-    check('unset' in css(d, '.rp-sld').get_attribute('class') and 'Not answered' in css(d, '.rp-sv').text, 'Q4 slider starts with no value')
+    check('unset' in css(d, '[data-sld=loss]').get_attribute('class') and 'Not answered' in css(d, '[data-sld=loss] .rp-sv').text, 'Q4 slider starts with no value')
     slide(d, 15)
-    check('15%' in css(d, '.rp-sv').text and '€1,500' in css(d, '.rp-sv').text and '€8,500' in css(d, '.rp-sv').text, 'slider shows the € fall: %r' % css(d, '.rp-sv').text)
-    check('unset' not in css(d, '.rp-sld').get_attribute('class') and js(d, "return RiskProfiler.lossBand(15).rating") == 4, 'slider answered; 15% is band 4')
+    sv = css(d, '[data-sld=loss] .rp-sv').text
+    check('15%' in sv and '€1,500' in sv and '€8,500' in sv, 'slider shows the € fall: %r' % sv)
+    check('unset' not in css(d, '[data-sld=loss]').get_attribute('class') and js(d, "return RiskProfiler.lossBand(15).rating") == 4, 'slider answered; 15% is band 4')
     slide(d, 40)
-    check('40% or more' in css(d, '.rp-sv').text, 'top of the slider: 40% or more')
+    check('40% or more' in css(d, '[data-sld=loss] .rp-sv').text, 'top of the slider: 40% or more')
+    check('Imagine' not in css(d, '[data-qwrap=loss]').text and 'maximum drop you would be willing to accept' in css(d, '[data-qwrap=loss]').text, 'Q4 has the new wording')
     d.save_screenshot(str(OUT / 'rp_standalone_slider.png'))
 
     # Q8: starts in a mixed order and is not answered until the client acts
@@ -133,58 +168,53 @@ def standalone(d):
     check('off' not in css(d, '.rp-rank').get_attribute('class') and rank_order(d)[0] == 'deposit', 'unticking keeps the order')
     d.save_screenshot(str(OUT / 'rp_standalone_rank.png'))
 
-    # Sustainability: S2 only after Yes; S3 for A or B, S4 for C; the general preference is exclusive
-    goto(d, 'sustainability')
-    check(not d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s2]'), 'S2 hidden until S1 is Yes')
-    check('set from your answers' in tx(d, '[data-set]'), 'sustainability part says the rating is set elsewhere: %r' % tx(d, '[data-set]'))
-    click(d, css(d, '[data-q=s1][data-v=yes]'))
-    check(d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s2]') and not d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s3]'), 'S1 Yes asks S2')
-    click(d, css(d, '[data-q=s2][data-v=taxonomy]')); click(d, css(d, '[data-q=s2][data-v=pai]'))
-    check(d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s3]') and d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s4]'), 'A asks S3 and C asks S4')
-    check(len(d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s3] .rp-mr')) == 1, 'S3 has one row, for A')
-    click(d, css(d, '[data-q=s2][data-v=general]'))
-    on = js(d, "return [].map.call(document.querySelectorAll('[data-q=s2].on'), function(b){ return b.getAttribute('data-v'); })")
-    check(on == ['general'] and not d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s3]'), '"a preference but not for any of these" clears the others: %s' % on)
-    click(d, css(d, '[data-q=s1][data-v=no]'))
-    check(not d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s2]'), 'S1 No ends the sustainability questions')
+    # Part E (sustainability) is switched off
+    check(not d.find_elements(By.CSS_SELECTOR, '[data-tab=sustainability]') and not d.find_elements(By.CSS_SELECTOR, '[data-qwrap=s1]'), 'no sustainability part or questions')
 
     # Everything else
     click(d, css(d, '[data-act=reset]'))
     check(answered(d) == 0 and section(d) == 'finances', 'Clear all answers resets and returns to part 1')
     answer_all(d)
-    check(answered(d) == 11, 'progress counts answers: %d' % answered(d))
+    check(answered(d) == 8, 'progress counts answers: %d' % answered(d))
     goto(d, 'result')
     check('still to answer' in result_text(d), 'result screen lists what is left (the date of birth)')
     click(d, css(d, '[data-act=next]'))
     check(section(d) == 'about' and js(d, "return document.activeElement.getAttribute('data-q')") == 'dob', 'go-to-next opens About you and focuses the date of birth')
     type_dob(d, '1985-06-15')
-    check(answered(d) == 12, 'all 12 answered: %d' % answered(d))
-    click(d, css(d, '[data-act=fwd]'))
-    check(section(d) == 'sustainability' and 'set at 5 (Medium to High)' in tx(d, '[data-set]'), 'the sustainability part shows the rating already set: %r' % tx(d, '[data-set]'))
+    check(answered(d) == 9, 'all 9 answered: %d' % answered(d))
     click(d, css(d, '[data-act=fwd]'))
     check(section(d) == 'result', 'Continue moves on to the result')
     res = result_text(d)
     check(tx(d, '.rp-big b') == '5' and 'Medium to High' in tx(d, '.rp-big span') and 'scale of 1 to 7' in tx(d, '.rp-big'), 'capacity High and attitude 5 give 5 out of 6: %r' % tx(d, '.rp-big'))
     check(len(d.find_elements(By.CSS_SELECTOR, '.rp-scale span')) == 7 and len(d.find_elements(By.CSS_SELECTOR, '.rp-scale span.off')) == 1, 'the scale on the result runs 1 to 7, with 7 greyed')
     check(tx(d, '[data-cap]') == 'High' and tx(d, '[data-kn]') == 'High', 'capacity and knowledge shown')
+    check(before(d, '[data-flags]', '[data-important]') or not d.find_elements(By.CSS_SELECTOR, '[data-flags]'), 'the important information box is last')
+    check('not advice' in tx(d, '[data-important]') and 'at least once a year' in tx(d, '[data-important]'), 'the result ends with an important information box')
+    check(before(d, '.rp-big', '[data-capbox]') and before(d, '[data-capbox]', '[data-answers]'), 'capacity for loss comes straight after the rating, then the answers')
+    check('Your answers' in tx(d, '[data-answers]') and 'Q1. If your income stopped' in tx(d, '[data-answers]') and '10 years' in tx(d, '[data-answers]') and '25% (€2,500 on €10,000)' in tx(d, '[data-answers]'),
+          'the result lists the answers: %r' % tx(d, '[data-answers]')[:200])
     check(not d.find_elements(By.CSS_SELECTOR, '[data-check]'), 'the answer to the knowledge check is not shown')
     check(flags(d) == [], 'no flags: %s' % flags(d))
     check('not a recommendation' not in res, 'no disclaimer on the result')
     check(not d.find_elements(By.CSS_SELECTOR, '[data-act=finish]'), 'no "Use this result" button on the standalone page')
     d.save_screenshot(str(OUT / 'rp_standalone_done.png'))
     # A short horizon limits the rating and the client is told; changing an answer after seeing the result is flagged
-    answer(d, '[data-q=horizon][data-v="1to3"]', 'horizon')
+    to_sec(d, 'horizon'); slide(d, 2, 'horizon')
     goto(d, 'result')
-    check(tx(d, '.rp-big b') == '2' and 'limited to 2' in result_text(d), 'horizon 1 to 3 years limits the rating to 2, and says so')
+    check(tx(d, '.rp-big b') == '3' and 'limited to 3' in result_text(d), 'a horizon of 2 years limits the rating to 3, and says so')
     check(flags(d) == ['F4', 'F6'], 'short horizon and changed-answer flags: %s' % flags(d))
+    check(before(d, '[data-answers]', '[data-flags]'), 'the flags come after the answers')
     check('Q3 investment horizon' in tx(d, '[data-flag=F6]'), 'F6 names the changed question')
-    answer(d, '[data-q=horizon][data-v="5plus"]', 'horizon')
+    to_sec(d, 'horizon'); slide(d, 5, 'horizon')
+    goto(d, 'result')
+    check(tx(d, '.rp-big b') == '5' and flags(d) == ['F6'], 'a horizon of 5 years allows 5; only the changed-answer flag: %s' % flags(d))
+    to_sec(d, 'horizon'); slide(d, 10, 'horizon')
     goto(d, 'result')
     check(flags(d) == [], 'changing it back clears F6: %s' % flags(d))
     # Low capacity limits the rating to 4
     answer(d, '[data-q=cushion][data-v=under3]', 'cushion'); answer(d, '[data-q=impact][data-v=big]', 'impact')
     goto(d, 'result')
-    check(tx(d, '.rp-big b') == '4' and tx(d, '[data-cap]') == 'Low' and 'hard for you to bear' in result_text(d), 'low capacity limits the rating to 4')
+    check(tx(d, '.rp-big b') == '4' and tx(d, '[data-cap]') == 'Low' and 'hard for you to bear' in result_text(d) and 'hard to absorb' in tx(d, '[data-capbox]'), 'low capacity limits the rating to 4, with the capacity summary')
     check(flags(d) == ['F3', 'F6'], 'capacity-limit flag: %s' % flags(d))
     d.save_screenshot(str(OUT / 'rp_standalone_flags.png'))
     check(not errors(d), 'standalone console errors: %s' % errors(d))
@@ -215,14 +245,15 @@ def tool(d):
     click(d, css(d, '#rp-method [data-m=profiler]'))
     check(dlg_open(d), 'choosing the risk profiler opens it in a dialog')
     n = len(d.find_elements(By.CSS_SELECTOR, '#rp-host .rp-q'))
-    check(n == 9, 'tool asks 9 questions to start with (date of birth is already known): %d' % n)
-    check(len(d.find_elements(By.CSS_SELECTOR, '#rp-host .rp-tab')) == 6, 'no About you part in the tool')
+    check(n == 8, 'tool asks 8 questions (date of birth is already known; no sustainability): %d' % n)
+    check(len(d.find_elements(By.CSS_SELECTOR, '#rp-host .rp-tab')) == 5, 'no About you or sustainability part in the tool')
+    check(section(d) == 'intro' and js(d, 'return !S.risk.pAccepted'), 'the dialog opens on the introduction, not yet accepted')
     d.save_screenshot(str(OUT / 'rp_tool_dialog.png'))
     # Closing part-way keeps the answers but sets nothing
     answer(d, '[data-q="cushion"][data-v="12plus"]', 'cushion')
-    check('1 of 9' in css(d, '#rpm-d').text, 'dialog counts answers: %r' % css(d, '#rpm-d').text)
+    check('1 of 8' in css(d, '#rpm-d').text and js(d, 'return !!S.risk.pAccepted'), 'dialog counts answers: %r, and the acceptance is kept' % css(d, '#rpm-d').text)
     click(d, css(d, '#rpm .rpm-x'))
-    check(not dlg_open(d) and 'In progress' in css(d, '#rp-sum').text and '1 of 9' in css(d, '#rp-sum').text, 'closed part-way: in progress: %r' % css(d, '#rp-sum').text)
+    check(not dlg_open(d) and 'In progress' in css(d, '#rp-sum').text and '1 of 8' in css(d, '#rp-sum').text, 'closed part-way: in progress: %r' % css(d, '#rp-sum').text)
     check(js(d, 'return S.risk.sri') is None and not css(d, '#sri-card').is_displayed(), 'partial answers do not set a rating')
     nxt(d)
     check(step(d) == 3 and 'complete the risk profiler' in msg(d), 'step 3 needs the profiler finished (%s)' % msg(d))
@@ -236,8 +267,8 @@ def tool(d):
     click(d, css(d, '[data-act=finish]'))
     check(not dlg_open(d), '"Use this result" closes the dialog')
     check(js(d, 'return S.risk.sri') == 5 and js(d, 'return S.risk.pSuggested') == 5, 'the applied result sets the risk rating to 5 (%s)' % js(d, 'return S.risk.sri'))
-    check(js(d, 'return S.risk.esg') is True and js(d, "return document.querySelector('#esg-seg [data-v=yes]').disabled") and css(d, '#esg-src').is_displayed(),
-          'the sustainability answer sets the preference, and the Yes/No is locked')
+    check(js(d, 'return S.risk.esg') is None and not js(d, "return document.querySelector('#esg-seg [data-v=yes]').disabled") and not css(d, '#esg-src').is_displayed(),
+          'the profiler does not set the sustainability preference: the adviser records it')
     check('Risk rating 5' in css(d, '#rp-sum').text and 'Review answers' in css(d, '#rp-sum').text and 'Knowledge high' in css(d, '#rp-sum').text, 'summary shows the result: %r' % css(d, '#rp-sum').text)
     check('on' in d.find_elements(By.CSS_SELECTOR, '.sri-t')[4].get_attribute('class'), 'rating 5 tile is selected')
     check('Set by the Allianz Risk Profiler' in css(d, '#rp-apply-msg').text and 'lower rating' in css(d, '#rp-apply-msg').text, 'note says the rating came from the profiler and can be lowered: %r' % css(d, '#rp-apply-msg').text)
@@ -255,6 +286,9 @@ def tool(d):
     nxt(d)
     check(step(d) == 3 and 'reason for choosing a lower rating' in msg(d), 'a lower rating needs a reason (%s)' % msg(d))
     setv(d, 'rp-reason', 'Wants a more cautious approach for now.')
+    nxt(d)
+    check(step(d) == 3 and 'sustainability preferences' in msg(d), 'the sustainability preference is recorded by the adviser (%s)' % msg(d))
+    click(d, css(d, '#esg-seg [data-v=yes]'))
     d.save_screenshot(str(OUT / 'rp_tool_step3_lowered.png'))
     nxt(d)
     check(step(d) == 4, 'step 3 -> 4 with a reason (%s)' % msg(d))
@@ -323,13 +357,13 @@ def pack(d):
     nxt(d)                                  # SoS
     sos = js(d, "return stripMarks(S.text.sos)")
     check('Allianz Global Life Risk Profiler' in sos, 'SoS names the built-in profiler')
-    check('12 months or more' in sos and 'little or no impact' in sos and '5 years or more' in sos, 'SoS circumstances come from Q1 to Q3')
+    check('12 months or more' in sos and 'little or no impact' in sos and 'for 10 years' in sos, 'SoS circumstances come from Q1 to Q3')
     check('25% (€2,500 on €10,000)' in sos and 'keep it and invest more' in sos and 'strong growth over the long term' in sos, 'SoS quotes the attitude answers')
     check('This gives a risk rating of 5 (Medium to High).' in sos, 'SoS gives the profiler\'s rating')
     check('lower risk rating of 4 because: Wants a more cautious approach for now.' in sos, 'SoS records the lower rating and the reason')
     check('knowledge and experience was assessed as high' in sos, 'SoS gives the knowledge level')
-    check('take account of their main negative effects' in sos and 'greenhouse gas emissions' in sos, 'SoS sustainability passage comes from the profiler')
-    check(len(d.find_elements(By.CSS_SELECTOR, '#ed-sos .auto')) >= 4, 'profiler sentences appear as auto-filled grey boxes')
+    check('You told us that you have sustainability preferences' in sos, 'SoS sustainability passage comes from the adviser\'s answer')
+    check(len(d.find_elements(By.CSS_SELECTOR, '#ed-sos .auto')) >= 3, 'profiler sentences appear as auto-filled grey boxes')
     d.save_screenshot(str(OUT / 'rp_tool_sos.png'))
     js(d, "S.text.sos = S.text.sos + '\\n\\nDiscussed in our meeting.'; renderReport();")
     nxt(d)                                  # review
@@ -355,9 +389,9 @@ def pack(d):
     check('Risk profiler rating' not in page and 'Your answers to the questions on the largest fall' not in page, 'no duplicate rating or calculation explanation')
     check('worked out' not in page and 'Largest fall you could accept (Q4)' not in page, 'no calculation workings')
     for needle in ['Your risk rating', 'Lowered by your adviser', 'Capacity for loss', 'Your answers', 'Your finances', 'Your timing',
-                   'Q1. If your income stopped', '12 months or more', 'Q4. Imagine you invest', '25% (€2,500 on €10,000)',
-                   '1. A savings deposit', 'S2. Which of these',
-                   'Knowledge check (Q8)', 'Points for your adviser', 'No flags were raised', 'Questionnaire version 3.0']:
+                   'Q1. If your income stopped', '12 months or more', 'Q4. If you invested', '25% (€2,500 on €10,000)', 'Q3. How long', '10 years',
+                   '1. A savings deposit',
+                   'Knowledge check (Q8)', 'Points for your adviser', 'No flags were raised', 'Questionnaire version 4.0', 'accepted the important information', 'Important information', 'It is not advice']:
         check(needle in page, 'Risk profile page contains %r' % needle)
     check('not a recommendation' not in page, 'no "not a recommendation" disclaimer')
     grp = js(d, "var p=[].slice.call(document.querySelectorAll('#pages .page')).filter(function(p){ return p.querySelector('.blk[data-sec=riskprofile]'); })[0]; return p ? p.getAttribute('data-grp') : ''")
@@ -397,10 +431,8 @@ def responsive(d):
     d.get(STANDALONE)
     for w in (900, 420):
         d.set_window_rect(width=w, height=1000); time.sleep(0.3)
-        for sec in ('attitude', 'knowledge', 'sustainability'):
+        for sec in ('timing', 'attitude', 'knowledge'):
             goto(d, sec)
-            if sec == 'sustainability':
-                click(d, css(d, '[data-q=s1][data-v=yes]')); click(d, css(d, '[data-q=s2][data-v=taxonomy]'))
             over = js(d, "return Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth)")
             check(over == 0, 'no sideways scroll at %dpx on the standalone %s part (overflow %dpx)' % (w, sec, over))
         if w == 420: d.save_screenshot(str(OUT / 'rp_standalone_narrow.png'))

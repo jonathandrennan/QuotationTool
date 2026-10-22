@@ -86,25 +86,21 @@ var QT_CONTENT = {
   },
 
   // ─── What the 1–7 ratings mean (Step 3 info dialog) ─────────────────────────
-  // Regulatory wording is quoted from Commission Delegated Regulation (EU) 2017/653 (the PRIIPs KID RTS):
-  // `explain` is Annex III point 7 Element A; riskClass / losses / market fill Element B and its example
-  // explanation; vev is the Annex II Part 1 point 2 market-risk band. Annex III gives no "poor market
-  // conditions" wording for class 7, so none is shown for it. The rest is our own explanatory copy (DRAFT).
+  // Our own plain-language wording (DRAFT, for Compliance). It deliberately quotes no volatility figures: the
+  // funds' own ratings are set in their Key Information Documents.
   riskScale: {
-    explain: 'The ESMA risk rating is a guide to the level of risk of this product compared to other products. It shows how likely it is that the product will lose money because of movements in the markets or because we are not able to pay you.',
-    howUsed: 'Every fund in the Allianz Vantage range has a published ESMA risk rating on this 1 to 7 scale, shown in its Key Information Document. The client\'s risk rating is recorded on the same scale, so it can be compared directly with the funds and with the indicative risk of the portfolio you build.',
-    howSet: 'The ESMA risk rating combines a market risk class, set by the fund\'s volatility over the recommended holding period, with a credit risk class. The market risk class bands are shown below. Even the lowest class, 1, does not mean a risk-free investment.',
+    explain: 'The risk rating shows how much the value of an investment may move up and down. A higher rating means bigger ups and downs, and a greater chance of losing money, in return for the chance of higher growth.',
+    howUsed: 'The client\'s risk rating is on the same 1 to 7 scale as the rating of each fund in its Key Information Document, so the two can be compared directly. Even the lowest rating does not mean a risk-free investment.',
     levels: [
       null,
-      { riskClass: 'the lowest',         losses: 'very low',    market: 'are very unlikely to', vev: 'Below 0.5%' },
-      { riskClass: 'a low',              losses: 'low',         market: 'are very unlikely to', vev: '0.5% to 5%' },
-      { riskClass: 'a medium-low',       losses: 'medium-low',  market: 'are unlikely to',      vev: '5% to 12%' },
-      { riskClass: 'a medium',           losses: 'medium',      market: 'could',                vev: '12% to 20%' },
-      { riskClass: 'a medium-high',      losses: 'medium-high', market: 'will likely',          vev: '20% to 30%' },
-      { riskClass: 'the second-highest', losses: 'high',        market: 'are very likely to',   vev: '30% to 80%' },
-      { riskClass: 'the highest',        losses: 'very high',   market: null,                   vev: 'Above 80%' }
-    ],
-    source: 'Source: Commission Delegated Regulation (EU) 2017/653 (PRIIPs key information documents), Annex II Part 1 and Annex III. Volatility is the VaR-equivalent volatility used to set the market risk class.'
+      'The value is expected to move very little. Suits a client who cannot accept any real fall in value.',
+      'Small ups and downs. Suits a client who can accept only small falls in value.',
+      'Modest ups and downs. Suits a client who can accept some falls in value for a little more growth.',
+      'Noticeable ups and downs. Suits a client who accepts that the value will go up and down for steady growth over the long term.',
+      'Large ups and downs. Suits a client who accepts big falls in value for strong growth over the long term.',
+      'Very large ups and downs. Suits a client who accepts very big falls in value for the highest growth.',
+      'The largest ups and downs, with a real chance of losing most of the money. The risk profiler does not give this rating.'
+    ]
   },
 
   // ─── Fund info popovers (brochure pp.31–38) ──────────────────────────────────

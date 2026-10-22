@@ -107,15 +107,15 @@ def pick_sri(d, sri, esg=True):
     click(d, d.find_elements(By.CSS_SELECTOR, '.sri-t')[sri - 1])
     check('on' in d.find_elements(By.CSS_SELECTOR, '.sri-t')[sri - 1].get_attribute('class'), 'SRI tile selected')
     check(not d.find_elements(By.ID, 'sri-panel') and 'Risk profiling' not in css(d, '#step-3').text, 'no "suited to" panel or method caption')
-    # What the ratings mean: the PRIIPs wording for each class
+    # What the ratings mean: our own plain wording for each rating, with no volatility figures or regulation source
     click(d, css(d, '#sri-info-btn'))
     # wait for focus and for the .18s fade-in to finish (Selenium treats a near-transparent dialog as hidden)
     for _ in range(20):
-        if js(d, "return document.activeElement.id") == 'sri-info-x' and css(d, '#sri-info').is_displayed() and 'medium-low level' in css(d, '#sri-info').text: break
+        if js(d, "return document.activeElement.id") == 'sri-info-x' and css(d, '#sri-info').is_displayed() and 'Modest ups and downs' in css(d, '#sri-info').text: break
         time.sleep(0.1)
     info = css(d, '#sri-info').text
     check(css(d, '#sri-info').is_displayed() and len(d.find_elements(By.CSS_SELECTOR, '#sri-info .rs-tbl tbody tr')) == 7 and
-          'medium-low level' in info and '2017/653' in info and js(d, 'return document.activeElement.id') == 'sri-info-x', 'ratings dialog with the 7 PRIIPs classes')
+          'Modest ups and downs' in info and '2017/653' not in info and 'volatility' not in info.lower() and '%' not in info and js(d, 'return document.activeElement.id') == 'sri-info-x', 'ratings dialog with the 7 ratings, no volatilities or source')
     check('cl' in d.find_elements(By.CSS_SELECTOR, '#sri-info .rs-tbl tbody tr')[sri - 1].get_attribute('class'), "client's rating highlighted in the dialog")
     d.save_screenshot(str(OUT / 'sri_info.png'))
     js(d, "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape'}))")

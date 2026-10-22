@@ -409,13 +409,14 @@ function qtBuildPack(Q) {
     add(qtFactBlock('KNOWLEDGE AND EXPERIENCE', [
       ['Stated (Q7)', escHtml(pcfg.levels.knowledge[kn.stated].label)],
       ['Knowledge check (Q8)', kn.check === 'right' ? 'Right' : kn.check === 'dontknow' ? 'Did not know' : 'Not right'],
-      ['Knowledge level', escHtml(kn.label) + (kn.level !== kn.stated ? ' (one level lower after the check)' : ''), true]
+      ['Knowledge level', escHtml(kn.label) + (kn.level !== kn.stated ? (pcfg.levels.order.indexOf(kn.level) > pcfg.levels.order.indexOf(kn.stated) ? ' (one level higher after the check)' : ' (one level lower after the check)') : ''), true]
     ]), { hdr: 'broker' });
     if (pnarr.sustainability) add('<p>' + escHtml(pnarr.sustainability) + '</p>', { hdr: 'broker' });
     add('<h3 class="kwn">Points for your adviser</h3>', { hdr: 'broker' });
     add(pr.flags.length ? '<ul>' + pr.flags.map(function(f) { return '<li><b>' + escHtml(f.title) + ':</b> ' + escHtml(f.text) + '</li>'; }).join('') + '</ul>'
       : '<p>No flags were raised.</p>', { hdr: 'broker' });
-    add('<p class="tiny">' + escHtml(pcfg.text.recordNote) + ' Questionnaire version ' + escHtml(pcfg.version) + '.</p>', { hdr: 'broker' });
+    add('<div class="imp"><b>' + escHtml(pcfg.text.resultNotice.title) + '</b><p>' + escHtml(pcfg.text.resultNotice.text) + '</p></div>', { hdr: 'broker' });
+    add('<p class="tiny">' + escHtml(pcfg.text.recordNote) + ' Questionnaire version ' + escHtml(pcfg.version) + '.' + (pf.accepted ? ' The client accepted the important information on ' + escHtml(fmtDateLong(pf.accepted.slice(0, 10))) + '.' : '') + '</p>', { hdr: 'broker' });
   }
 
   // ── Allianz quotation: cover / divider ──

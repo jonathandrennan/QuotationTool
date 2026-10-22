@@ -317,7 +317,6 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .rs-tbl td.n { width:44px; }
 .rs-tbl td b { color:var(--ink); }
 .rs-tbl tr.cl td { background:var(--tint); }
-.rs-src { font-size:12px; color:var(--muted); }
 .rpm-b > div, .rpm .rp, .rpm .rp-shell { height:100%; }
 .rpm .rp-shell { display:flex; flex-direction:column; border:none; border-radius:0; }
 .rpm .rp-body { flex:1; min-height:0; overflow-y:auto; }
@@ -328,6 +327,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .rp-apply .alert { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 16px; }
 .rp-apply b { color:var(--navy); }
 .rp-apply .alert.warn ul { margin:4px 0 0 18px; padding:0; }
+.rp-apply .alert.warn ul.plain { margin-left:0; list-style:none; } .rp-apply .alert.warn .sub { margin-top:2px; font-size:13px; }
 .rp-reason { max-width:640px; margin-top:20px; }
 .esg-row .seg button:disabled { cursor:default; opacity:.6; }
 .esg-row { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; }
@@ -1286,7 +1286,7 @@ var S = {
   // complete); pReason = why the adviser chose a lower rating; pDate = when it was completed (YYYY-MM-DD).
   // method: how the attitude to risk was assessed, 'profiler' | 'own' | null (not chosen yet).
   // pAnswers only changes when the adviser applies a finished questionnaire; work in progress stays in rpUI.
-  risk: { sri: null, reason: '', override: null, esg: null, profiler: '', method: null, pAnswers: {}, pSeen: null, pSuggested: null, pReason: '', pDate: '' },
+  risk: { sri: null, reason: '', override: null, esg: null, profiler: '', method: null, pAnswers: {}, pSeen: null, pAccepted: null, pSuggested: null, pReason: '', pDate: '' },
   // ctype: contribution type, e.g. 'sp', 'rp', 'sp_rp', 'ofv_rp' ('' = none chosen), from the Plan step chips
   // diySel: funds ticked in the fund builder; diyAllocs / diyGmab only ever hold ticked funds
   prsa: { nra: 65, prsaType: 'nonstandard', code: 'A5', ctype: '', sp: 0, ofv: 0, rp: 0, freq: 'monthly', esc: 0,
@@ -1341,7 +1341,7 @@ function init() {
   $('q-nra').addEventListener('input', function() { S.prsa.nra = parseInt(this.value, 10); this.classList.remove('invalid'); onClientChange(); });
   $('r-profiler').addEventListener('input', function() { S.risk.profiler = this.value; });
   $('rp-reason').addEventListener('input', function() { S.risk.pReason = this.value; this.classList.remove('invalid'); setFootMsg(''); });
-  rpUI = RiskProfilerUI.mount($('rp-host'), { answers: S.risk.pAnswers, seen: S.risk.pSeen, context: rpContext(), sri: { labels: ESMA_LABELS, colors: ESMA_COLORS },
+  rpUI = RiskProfilerUI.mount($('rp-host'), { answers: S.risk.pAnswers, seen: S.risk.pSeen, accepted: S.risk.pAccepted, context: rpContext(), sri: { labels: ESMA_LABELS, colors: ESMA_COLORS },
     onChange: onProfilerChange, onFinish: finishProfiler, finishLabel: 'Use this result' });
 
   document.querySelectorAll('[data-p]').forEach(function(el) {
@@ -1769,8 +1769,10 @@ function applyProfilerResult() {
       if (S.risk.sri !== r.sri) invalidate(3);
       S.risk.sri = r.sri; S.risk.pReason = '';
     }
-    var esg = r.sustainability.preference === 'yes';
-    if (S.risk.esg !== esg) { invalidate(3); S.risk.esg = esg; }
+    if (r.sustainability) {   // Part E of the profiler is off for now: the adviser records the preference
+      var esg = r.sustainability.preference === 'yes';
+      if (S.risk.esg !== esg) { invalidate(3); S.risk.esg = esg; }
+    }
   } else S.risk.pReason = '';
   S.risk.pSuggested = r ? r.sri : null;
 }
@@ -1785,7 +1787,7 @@ function setRpMethod(m) {
 // ── The questionnaire dialog ──
 // Nothing on the page changes while it is open: the result is applied by "Use this result" (finishProfiler).
 var rpReturnFocus = null;
-function onProfilerChange() { renderProfilerDialogNote(); }
+function onProfilerChange(state) { S.risk.pAccepted = state.accepted; renderProfilerDialogNote(); }
 function renderProfilerDialogNote() {
   var r = rpUI.getState().result;
   $('rpm-d').textContent = (S.client.first ? 'For ' + [S.client.first, S.client.last].filter(Boolean).join(' ') + ' · ' : '') +
@@ -1874,8 +1876,8 @@ function renderSriApply() {
   $('rp-apply-msg').innerHTML = '<span>Set by the Allianz Risk Profiler: <b>' + r.sri + ' · ' + escHtml(ESMA_LABELS[r.sri]) + '</b>. ' +
     'You can choose a lower rating, with a reason. To use a higher rating, choose "Use my own risk profiling".</span>';
   $('rp-flags').hidden = !r.flags.length;
-  $('rp-flags').innerHTML = r.flags.length ? '<b>' + (r.flags.length > 1 ? r.flags.length + ' flags' : '1 flag') + ' from the risk profiler</b> · recorded in the Risk profile record' +
-    '<ul>' + r.flags.map(function(f) { return '<li><b>' + escHtml(f.title) + ':</b> ' + escHtml(f.text) + '</li>'; }).join('') + '</ul>' : '';
+  $('rp-flags').innerHTML = r.flags.length ? '<b>' + (r.flags.length > 1 ? r.flags.length + ' flags' : '1 flag') + ' from the risk profiler</b><div class="sub">Recorded in the Risk profile record.</div>' +
+    '<ul class="plain">' + r.flags.map(function(f) { return '<li><b>' + escHtml(f.title) + ':</b> ' + escHtml(f.text) + '</li>'; }).join('') + '</ul>' : '';
 }
 function renderSriCards() {
   var h = '', prof = profilerDone(), locked = !!prof;
@@ -1888,9 +1890,9 @@ function renderSriCards() {
   document.querySelectorAll('#esg-seg button').forEach(function(b) {
     var on = (b.getAttribute('data-v') === 'yes') === S.risk.esg && S.risk.esg != null;
     b.classList.toggle('on', on); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', on ? 'true' : 'false');
-    b.disabled = locked;   // set by the profiler's sustainability questions
+    b.disabled = locked && !!prof.sustainability;   // set by the profiler's sustainability questions (when asked)
   });
-  $('esg-src').hidden = !locked;
+  $('esg-src').hidden = !(locked && prof.sustainability);
   $('r-profiler').value = S.risk.profiler;
   $('sri-card').hidden = !(S.risk.method === 'own' || profilerDone());
   $('sri-cap').textContent = S.risk.method === 'own' ? 'Select the rating from your risk profiling.' : '';
@@ -1904,21 +1906,16 @@ function setSri(i) {
   renderSriCards();
   setFootMsg('');
 }
-// ── What the 1–7 ratings mean (copy and regulatory wording: QT_CONTENT.riskScale) ──
+// ── What the 1–7 ratings mean (copy: QT_CONTENT.riskScale) ──
 var sriInfoReturn = null;
 function openSriInfo() {
   var R = QT_CONTENT.riskScale, rows = '';
   for (var i = 1; i <= 7; i++) {
-    var L = R.levels[i];
     rows += '<tr' + (S.risk.sri === i ? ' class="cl"' : '') + '><td class="n">' + sriBadge(i) + '</td>' +
-      '<td><b>' + escHtml(ESMA_LABELS[i]) + '</b><br>' + escHtml(L.riskClass.replace(/^(a|the) /, '').replace(/^./, function(c) { return c.toUpperCase(); })) + ' risk class</td>' +
-      '<td>Potential losses from future performance at a ' + escHtml(L.losses) + ' level' +
-      (L.market ? ', and poor market conditions ' + escHtml(L.market) + ' impact the capacity to pay you.' : '.') + '</td>' +
-      '<td>' + escHtml(L.vev) + '</td></tr>';
+      '<td><b>' + escHtml(ESMA_LABELS[i]) + '</b></td><td>' + escHtml(R.levels[i]) + '</td></tr>';
   }
-  $('sri-info-b').innerHTML = '<p>' + escHtml(R.explain) + '</p><p>' + escHtml(R.howUsed) + '</p><p>' + escHtml(R.howSet) + '</p>' +
-    '<table class="rs-tbl"><thead><tr><th>Rating</th><th></th><th>What it means</th><th>Market risk: annual volatility</th></tr></thead><tbody>' + rows + '</tbody></table>' +
-    '<p class="rs-src">' + escHtml(R.source) + '</p>';
+  $('sri-info-b').innerHTML = '<p>' + escHtml(R.explain) + '</p><p>' + escHtml(R.howUsed) + '</p>' +
+    '<table class="rs-tbl"><thead><tr><th>Rating</th><th></th><th>What it means</th></tr></thead><tbody>' + rows + '</tbody></table>';
   sriInfoReturn = document.activeElement;
   $('sri-info').hidden = false;
   document.body.style.overflow = 'hidden';
@@ -1936,7 +1933,7 @@ document.addEventListener('keydown', function(e) {
   else if (e.key === 'Tab') { e.preventDefault(); $('sri-info-x').focus(); }   // one control in the dialog
 });
 function setEsg(v) {
-  if (profilerDone()) return;   // set by the risk profiler
+  if (profilerDone() && profilerDone().sustainability) return;   // set by the risk profiler's sustainability questions (when asked)
   S.risk.esg = v;
   $('esg-seg').classList.remove('invalid');
   renderSriCards(); renderStepNav(); setFootMsg('');
@@ -3977,7 +3974,7 @@ function profilePackData() {
   var res = profilerDone();
   if (!res) return null;
   var c = rpContext(), narr = RiskProfiler.narrative(S.risk.pAnswers, c, res, { suggestedSri: res.sri, chosenSri: S.risk.sri, overrideReason: S.risk.pReason });
-  return { result: res, summary: RiskProfiler.summary(S.risk.pAnswers, c), narrative: narr, name: RP_CONFIG.name, date: S.risk.pDate || todayStr(), config: RP_CONFIG };
+  return { result: res, summary: RiskProfiler.summary(S.risk.pAnswers, c), narrative: narr, accepted: S.risk.pAccepted, name: RP_CONFIG.name, date: S.risk.pDate || todayStr(), config: RP_CONFIG };
 }
 function packData(noAutoPrint) {
   return {
