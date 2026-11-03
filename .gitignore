@@ -1,0 +1,11 @@
+# Material kept locally but not part of the app (reference docs, workbooks, tests, one-offs)
+_archive/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+~$*
+
+# Python
+__pycache__/
+*.pyc

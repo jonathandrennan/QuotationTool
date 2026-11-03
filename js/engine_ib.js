@@ -1,27 +1,20 @@
-// engine_ib.js — pure Investment Bond (IB) projection engine for the Quotation Tool.
+// engine_ib.js — Investment Bond (IB) projection engine. Pure functions of their inputs; no DOM.
 //
-// Derived from "InvBond\IB Illustration Generator_v0.12.xlsx" (itself a fork of the
-// ARF workbook — same funds, same 6% growth cap, same 50-year/milestone-year
-// convention as engine_arf.js, which this file reuses directly: arfBlendedMetrics,
-// arfMonthlyDecrementRate, arfSolveIRR, ARF_MILESTONES, ARF_FUNDS_MAP).
+// Follows the actuarial IB Illustration Generator workbook (v0.12, sheet Projections). Cell and column
+// references in the comments (e.g. Projections AX:BB, Parameters col F) point to that workbook.
+// The IB shares the ARF fund range, 6% growth cap and milestone-year convention, so it reuses
+// arfBlendedMetrics, arfMonthlyDecrementRate, arfSolveIRR, ARF_MILESTONES and ARF_FUNDS from engine_arf.js.
 //
-// Two things are genuinely new vs ARF/PRSA and are implemented from first principles
-// below rather than ported line-for-line from the Excel's three-column SP/RP layout:
+// Two features have no ARF or PRSA equivalent:
 //
-//  1. Irish exit tax with 8-year deemed disposal. The SP and RP sub-books in the
-//     Excel always share the same growth/charge rates, so the COMBINED fund value
-//     is provably independent of how tax is apportioned between the two books —
-//     only the Excel's own internal SP-book/RP-book display columns depend on that
-//     apportionment. This engine therefore tracks one combined fund for the real
-//     maths, plus a lightweight derived SP/RP split (fundSP, with RP implied as
-//     fund-fundSP) used only to drive the "value if fully encashed now" display
-//     figure on the RP-enabled codes (where SP and RP get different exit treatment).
-//  2. The government levy (1% of every premium) and the tiered large-case
-//     allocation bonus, neither of which exist in ARF or PRSA.
+//  1. Irish exit tax with 8-year deemed disposal. The workbook keeps separate single (SP) and regular (RP)
+//     contribution books, but they always share the same growth and charge rates, so the combined fund value
+//     does not depend on how tax is split between them. The engine therefore tracks one combined fund, plus
+//     an SP-only shadow pool (fundSP) used for the exit charge, which applies to the SP-sourced value only.
+//  2. The government levy (1% of every contribution) and the tiered large-case allocation bonus
+//     (switched off: see IB_TIERED_BONUS_ON in ib_data.js).
 //
-// Depends on ib_data.js (IB_CODES, IB_* constants) and arf_data.js (ARF_FUNDS_MAP,
-// via arfBlendedMetrics) having been loaded first, and on engine_arf.js for the
-// shared helpers listed above.
+// Load after ib_data.js, arf_data.js, quote_common.js and engine_arf.js.
 
 // inp = {
 //   dobStr, startStr        'YYYY-MM-DD'
@@ -37,9 +30,6 @@
 //   specialDeal             null or decimal: company-funded uplift on the standard initial commission
 //   spUpOverride            null or decimal
 //   rateOverride            null or decimal
-//   gteeLevel               optional, decimal (e.g. 0.85): apply the Annual Guarantee floor at each policy
-//                           anniversary. Only used by ibRunProjection; assumes the whole policy is in the
-//                           guaranteed fund. Absent in every standard quote.
 // }
 
 // Base initial commission: standard rate plus any special deal (Parameters col F,
@@ -66,19 +56,8 @@ function ibRpAllocationRate(inp) {
   return ibCodeAllowsRp(inp.code) ? cc.rpAllocBonus : 1;
 }
 
-// annualGrossRate is one rate for every year, or an array with a rate for each policy year (the last rate
-// carries on if the array is shorter than the projection). A single rate behaves exactly as before.
+// Full projection (50 years, month by month) at one gross growth rate.
 function ibRunProjection(inp, annualGrossRate) {
-  var ratesByYear = Array.isArray(annualGrossRate) ? annualGrossRate : null;
-  function grossForYear(yr) { return ratesByYear ? ratesByYear[Math.min(yr, ratesByYear.length) - 1] : annualGrossRate; }
-  function monthlyOf(gross) { return Math.pow(1 + gross, 1 / 12) - 1; }
-  // Single figure standing in for the whole run where one is needed (reduction in yield, display)
-  var avgGross = annualGrossRate;
-  if (ratesByYear) {
-    var lg = 0;
-    ratesByYear.forEach(function(r) { lg += Math.log(1 + r); });
-    avgGross = Math.exp(lg / ratesByYear.length) - 1;
-  }
   var cc = IB_CODES[inp.code];
   var bm = arfBlendedMetrics(inp);
   var spUpRate = ibSpUpRate(inp);
@@ -92,9 +71,7 @@ function ibRunProjection(inp, annualGrossRate) {
   var gteeM    = arfMonthlyDecrementRate(bm.gtee);
   var ongoingM = arfMonthlyDecrementRate(cc.ongoing);
   var totalMonthlyCharge = adminM + extM + gteeM;
-  var monthlyGrowRate = monthlyOf(grossForYear(1));
-  var gteeLevel = inp.gteeLevel > 0 ? inp.gteeLevel : 0;
-  var protBase = 0, cumTopUp = 0, yrTopUp = 0;   // Annual Guarantee: value the floor is struck on, top-ups paid
+  var monthlyGrowRate = Math.pow(1 + annualGrossRate, 1 / 12) - 1;
 
   var dob = new Date(inp.dobStr), startDate = new Date(inp.startStr);
   var startAge = (startDate - dob) / (365.25 * 24 * 3600 * 1000);
@@ -139,7 +116,6 @@ function ibRunProjection(inp, annualGrossRate) {
   for (var month = 1; month <= MAX_MONTHS; month++) {
     var yr = Math.ceil(month / 12);
     var ageNow = startAge + month / 12;
-    if (ratesByYear) monthlyGrowRate = monthlyOf(grossForYear(yr));
 
     var premiumSP = (month === 1) ? contrib : 0;
     var premiumRP = rpSchedule[month - 1] || 0;
@@ -157,23 +133,12 @@ function ibRunProjection(inp, annualGrossRate) {
     var chargesSP = (fundSP + allocatedSP + growthSP / 2) * totalMonthlyCharge + premiumSP * IB_GOVT_LEVY;
     var fundSPAvail = fundSP + allocatedSP + growthSP - chargesSP;
 
-    // Annual Guarantee: at each anniversary, units are added if the value is below gteeLevel x the value at the
-    // last anniversary (plus contributions since). Counts as growth for tax; does not raise the cost basis.
-    protBase += allocated - premiumRaw * IB_GOVT_LEVY;
-    var topUp = 0;
-    if (gteeLevel && month % 12 === 0 && fundAvail < gteeLevel * protBase) {
-      topUp = gteeLevel * protBase - fundAvail;
-      if (fundAvail > 0) fundSPAvail += topUp * (fundSPAvail / fundAvail);
-      fundAvail += topUp;
-    }
-
     var incomeActive = incomeStartMonth != null && month >= incomeStartMonth;
     var escF = Math.pow(1 + incEsc, yr - 1);
     var desired = incomeType === 'custom_amount' ? (fixedAnnual / 12 * escF)
                 : incomeType === 'custom_pct' ? (pctAnnual / 12 * fundAvail) : 0;
     var income = incomeActive ? Math.min(desired, fundAvail) : 0;
     var AA = fundAvail > 0 ? income / fundAvail : 0;
-    protBase *= (1 - AA);
 
     // Exit cost if fully encashed this month, after this month's income (which the mutually
     // exclusive RP/income rule means always comes from the SP share): surrender penalty on
@@ -230,7 +195,7 @@ function ibRunProjection(inp, annualGrossRate) {
     fund = fundClose;
     prevAA = AA; prevIsDisposal = isDisposal; prevTaxDue = taxDue;
 
-    cumPremium += premiumRaw; cumGrowth += growth; cumCharges += charges; cumTopUp += topUp; yrTopUp += topUp;
+    cumPremium += premiumRaw; cumGrowth += growth; cumCharges += charges;
     cumAllocBonus += (allocatedSP - premiumSP) + (allocatedRP - premiumRP);
     cumRealizedTax += taxDue; cumIncome += income; cumNetIncome += netCash;
     yrPremium += premiumRaw; yrGrowth += growth; yrCharges += charges; yrIncome += income; yrComm += commM; yrRealizedTax += taxDue;
@@ -247,8 +212,7 @@ function ibRunProjection(inp, annualGrossRate) {
       // reading the internal `fund` variable directly, so the two can never drift apart.
       var taxToDate = cumRealizedTax + hypotheticalTax;
       var chargesToDate = cumCharges + exitCost - cumAllocBonus;
-      var displayFund = Math.max(0, cumPremium + cumGrowth + cumTopUp - chargesToDate - taxToDate - cumNetIncome);
-      if (gteeLevel) protBase = fund;   // the protected value is reset on the policy anniversary
+      var displayFund = Math.max(0, cumPremium + cumGrowth - chargesToDate - taxToDate - cumNetIncome);
 
       if (yr <= 40) fundByYear.push(Math.round(fund));
 
@@ -262,13 +226,9 @@ function ibRunProjection(inp, annualGrossRate) {
         });
       }
       if (ARF_MILESTONES[yr]) commRows.push({ year: yr, contrib: yr === 1 ? contrib + firstYearRpTotal : (rpAllowed ? rpSchedule[month - 1] * 12 : 0), comm: Math.round(yrComm) });
-      if (yr <= 40) yearly.push({ year: yr, income: yrIncome, comm: yrComm, charges: yrCharges, tax: yrRealizedTax, fund: fund, displayFund: displayFund,
-                                 growth: yrGrowth, topUp: yrTopUp, gross: grossForYear(yr), protectedNext: gteeLevel ? gteeLevel * fund : null,
-                                 // the A-E figures to date, unrounded, for every year (rows only has the key years)
-                                 premToDate: cumPremium, growthToDate: cumGrowth, chargesToDate: chargesToDate, taxToDate: taxToDate,
-                                 incomeToDate: cumNetIncome, topUpToDate: cumTopUp, exitCharge: exitCost, taxPaidToDate: cumRealizedTax });
+      if (yr <= 40) yearly.push({ year: yr, income: yrIncome, comm: yrComm, charges: yrCharges, tax: yrRealizedTax, fund: fund, displayFund: displayFund });
 
-      yrPremium = 0; yrGrowth = 0; yrCharges = 0; yrIncome = 0; yrComm = 0; yrRealizedTax = 0; yrTopUp = 0;
+      yrPremium = 0; yrGrowth = 0; yrCharges = 0; yrIncome = 0; yrComm = 0; yrRealizedTax = 0;
     }
   }
 
@@ -290,9 +250,8 @@ function ibRunProjection(inp, annualGrossRate) {
     cfNoCharge.push(ax - inc - (cash ? riy.bhOpen[t - 1] : 0));
     cfChargeNoTax.push(ax - inc - (cash ? open : 0));
   }
-  var avgMonthly = monthlyOf(avgGross);
-  var irrNoChargeM = arfSolveIRR(cfNoCharge, avgMonthly);
-  var irrChargeM = arfSolveIRR(cfChargeNoTax, avgMonthly - totalMonthlyCharge);
+  var irrNoChargeM = arfSolveIRR(cfNoCharge, monthlyGrowRate);
+  var irrChargeM = arfSolveIRR(cfChargeNoTax, monthlyGrowRate - totalMonthlyCharge);
   var irrNoChargeA = Math.pow(1 + irrNoChargeM, 12) - 1;
   var irrChargeA = Math.pow(1 + irrChargeM, 12) - 1;
 
@@ -303,7 +262,7 @@ function ibRunProjection(inp, annualGrossRate) {
     rows: rows, commRows: commRows, yearly: yearly, fundByYear: fundByYear,
     fundZeroYear: fundZeroYear, fundZeroMonth: fundZeroMonth,
     depletionAge: fundZeroMonth != null ? Math.floor(startAge + fundZeroMonth / 12) : null,
-    effectiveGross: avgGross, ratesByYear: ratesByYear, gteeLevel: gteeLevel, gteeTopUp: cumTopUp, netRate: irrChargeA, riy: irrNoChargeA - irrChargeA,
+    effectiveGross: annualGrossRate, netRate: irrChargeA, riy: irrNoChargeA - irrChargeA,
     chargeRate: cc.admin + bm.ext + bm.gtee,
     spUpRate: spUpRate, spUpOverridden: inp.spUpOverride != null,
     spAllocRate: spAllocRate, rpAllocRate: rpAllowed ? rpAllocRate : 1,
@@ -362,7 +321,7 @@ function runIbQuote(inp) {
   if (errs.length) return { errors: errs };
   var bm = arfBlendedMetrics(inp);
   var rate = inp.rateOverride != null ? inp.rateOverride : ibDefaultRate(inp);
-  var pFull = ibRunProjection(inp, rate), p = ibCapProjection(pFull, IB_PROJECTION_YEARS);
+  var p = ibCapProjection(ibRunProjection(inp, rate), IB_PROJECTION_YEARS);
   var cc = IB_CODES[inp.code];
   var mix = [];
   ARF_FUNDS.forEach(function(f) {
@@ -371,7 +330,7 @@ function runIbQuote(inp) {
   });
   return {
     product: 'ib', inputs: inp, code: inp.code, cc: cc,
-    p: p, pFull: pFull, years: IB_PROJECTION_YEARS, rate: rate, rateOverridden: inp.rateOverride != null, bm: bm,
+    p: p, years: IB_PROJECTION_YEARS, rate: rate, rateOverridden: inp.rateOverride != null, bm: bm,
     startAge: p.startAge, contribution: inp.contribution, rp: inp.rp,
     spUpRate: p.spUpRate, spUpOverridden: p.spUpOverridden,
     specialDeal: inp.specialDeal || 0, baseSpUp: ibBaseSpUp(inp),

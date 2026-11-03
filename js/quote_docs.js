@@ -1,4 +1,4 @@
-// quote_docs.js — fund factsheets and KIDs attached to the quotation pack.
+// quote_docs.js — product brochures, fund factsheets and KIDs attached to the quotation pack.
 //
 // The pack is HTML, so to append these PDFs its pages are rendered to images (see qtRasterSrc in quote_pdf.js)
 // and built into one PDF with the factsheets / KIDs after them.
@@ -52,7 +52,7 @@ function qtGlidepathFunds(gpKey, termMonths) {
 //   o.product    'prsa' | 'arf' | 'ib'
 //   o.fundIds    ids of the chosen funds (PRSA, ARF or IB ids) — including glidepath funds
 //   o.single, o.regular   (IB) which contribution types are in the quote
-// Returns { kids: [doc], factsheets: [doc], all: [doc] } where doc = { key, kind, title, path, fund?, asOf? }
+// Returns { product: [doc], kids: [doc], factsheets: [doc] } where doc = { key, kind, title, path, fund?, asOf? }
 function qtSupportingDocs(o) {
   var seen = {}, ids = [];
   (o.fundIds || []).forEach(function(raw) { var id = qtDocFundId(raw); if (!seen[id]) { seen[id] = 1; ids.push(id); } });

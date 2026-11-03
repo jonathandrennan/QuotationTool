@@ -1,7 +1,7 @@
 // risk_profiler.js — scoring engine and summaries for the Risk Profiler. No DOM, no dependencies
 // except risk_profiler_data.js (RP_CONFIG), so it runs in a browser or in Node.
 //
-// The rules are those of docs/risk-profiler-design-draft.md (draft 22/10/2026):
+// The rules are those of the Risk Profiler design draft for Compliance review (22/10/2026):
 //   0. The client first accepts the important information (a UI step; nothing here depends on it).
 //   1. Attitude: the middle value of the Q4, Q5 and Q6 ratings, and no more than one level above Q4.
 //   2. Limits: the time limit from Q3; low capacity for loss (Q1 + Q2 points) allows no more than 4.

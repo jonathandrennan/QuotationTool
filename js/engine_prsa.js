@@ -1,9 +1,7 @@
-// engine_prsa.js — pure PRSA projection engine for the Quotation Tool.
+// engine_prsa.js — PRSA projection engine. Pure functions of their inputs; no DOM.
 //
-// The maths is a line-by-line extraction of runQuotation() in prsa_tool.html (itself a
-// duplicate of runIllustration()), turned into a pure function of its inputs so the
-// numbers stay identical to the SRP/Quotation outputs of the existing tool. Do not
-// change the projection logic here without making the same change in prsa_tool.html.
+// Follows the actuarial PRSA Illustration Generator workbook (V5, sheet SRP). Cell and column
+// references in the comments (e.g. SRP!D85, SRP!AD) point to that workbook.
 //
 // Depends on prsa_data.js (FUNDS, FUNDS_MAP, CODES, GP_DATA, getGP, STRATS_*, constants).
 

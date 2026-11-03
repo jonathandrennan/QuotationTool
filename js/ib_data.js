@@ -1,16 +1,11 @@
-// ib_data.js — Allianz Vantage Investment Bond data
+// ib_data.js — Allianz Vantage Investment Bond data: product codes and product constants.
 //
-// Figures are a line-by-line extraction of the Parameters sheet in
-// "InvBond\IB Illustration Generator_v0.12.xlsx" (named ranges Product_Parameters,
-// Fund_Rates_Table), cross-checked against the appendix tables in
-// "InvBond\AGL Retirement Income Foundation Product Spec - Allianz Vantage
-// Investment Bond v0.3.docx" (SP-only codes A-J and RP-enabled codes K/L/M match
-// exactly on admin charge, commission base and allocation range across both sources).
+// Figures come from the Parameters sheet of the IB Illustration Generator workbook (v0.12; named ranges
+// Product_Parameters and Fund_Rates_Table) and agree with the appendix tables of the product specification
+// (v0.3) on admin charge, commission and allocation for every code.
 //
-// The Investment Bond reuses the fund universe from arf_data.js (ARF_FUNDS /
-// ARF_FUNDS_MAP) unchanged — same 13 funds, same growth rates, same ESMA ratings,
-// same GMAB charges, confirmed identical fund-for-fund against the IB workbook's
-// Fund_Rates_Table.
+// The Investment Bond uses the ARF fund range (ARF_FUNDS / ARF_FUNDS_MAP in arf_data.js) unchanged: the
+// same 13 funds, growth rates, ESMA ratings and guarantee charges as the workbook's Fund_Rates_Table.
 
 // ── Regulatory / product constants ────────────────────────────────────────────
 var IB_MAX_RATE = 0.06;              // ASP LA-8 cap on gross growth rate (same basis as ARF_MAX_RATE)
@@ -39,7 +34,7 @@ function ibTieredBonus(singleContribution) {
   return b;
 }
 
-// Product limits (from the product spec — not defined in the Excel engine)
+// Product limits (from the product spec; the workbook does not hold them)
 var IB_MIN_SP = 10000;
 var IB_MIN_AGE = 18;
 var IB_MAX_AGE = 80; // exclusive — "maximum age at entry is 79, defined as 80th birthday"

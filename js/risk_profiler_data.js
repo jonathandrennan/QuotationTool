@@ -4,8 +4,7 @@
 // risk_profiler_ui.js). Nothing here depends on the Quotation Tool, so the module can be reused
 // on a website.
 //
-// Source: docs/risk-profiler-design-draft.md ("Risk profiler – proposed questions and scoring", draft for
-// Compliance review, 22/10/2026). The questions, answers, scores, limits and flags are the draft's. Every
+// Source: "Risk profiler – proposed questions and scoring" (design draft for Compliance review, 22/10/2026). The questions, answers, scores, limits and flags are the draft's. Every
 // cut-off is a proposal: change the numbers only with Compliance. "num" is the question's number in the draft.
 //
 // What each option's number means depends on the question:

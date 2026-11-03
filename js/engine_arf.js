@@ -1,9 +1,7 @@
-// engine_arf.js — pure ARF projection engine for the Quotation Tool.
+// engine_arf.js — ARF projection engine. Pure functions of their inputs; no DOM.
 //
-// The maths is a line-by-line extraction of runProjection()/recomputeResults() in
-// arf_tool.html, turned into pure functions of their inputs so the numbers stay
-// identical to the POI produced by the existing tool. Do not change the projection
-// logic here without making the same change in arf_tool.html.
+// Follows the actuarial ARF Illustration Generator workbook (v13, sheet ARF Projections). Cell and
+// column references in the comments (e.g. ARF Projections C75, Parameters col F) point to that workbook.
 //
 // Depends on arf_data.js (ARF_CODES, ARF_FUNDS, ARF_FUNDS_MAP, ARF_* constants).
 

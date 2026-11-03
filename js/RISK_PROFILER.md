@@ -5,8 +5,7 @@ offered), works out the client's capacity for loss and knowledge level, raises f
 the client's sustainability preferences. It is used by the Quotation Tool (Step 3) and also runs on its own: open
 `risk_profiler.html`.
 
-Source: `docs/risk-profiler-design-draft.md` ("Risk profiler – proposed questions and scoring", draft for
-Compliance review, 22/10/2026). The questions, answers, scores, limits and flags are the draft's. Every cut-off
+Source: "Risk profiler – proposed questions and scoring" (design draft for Compliance review, 22/10/2026). The questions, answers, scores, limits and flags are the draft's. Every cut-off
 in it is a proposal, so change the numbers in `risk_profiler_data.js` only with Compliance.
 
 ## How the answers become a rating
@@ -115,16 +114,3 @@ Answers are `{ questionId: optionId }`, except `horizon` (a number, whole years)
 - **Pack.** A "Risk profile" section (after the Statement of Suitability, on the adviser's letterhead) lists the
   answers, how the result was worked out, the knowledge check, the sustainability preferences, the flags and the
   questionnaire version. It is offered once the questionnaire is complete.
-
-## Tests
-
-- `node tests/risk_profiler_test.js` compares the engine with an independent transcription of the draft's rules on
-  every combination of the scored answers (with Q4 at each band's edges, at two ages), then checks knowledge, flags,
-  completeness, the conditional sustainability questions, the written outputs and the draft's test clients
-  (Appendix A) whose answers can be read from their descriptions (P1, P7, P8, P10, P13, P17, P18), and the ten worked
-  test cases in `tests/risk_profiler_cases.js`.
-- `node tests/build_risk_profiler_cases.js` runs those ten cases through the engine and writes
-  `docs/risk-profiler-test-cases.md` and `Risk-Profiler-Test-Cases.docx`: each client's answers, the working, the
-  rating and why it suits them. It stops if a case's result no longer matches the reasoning written for it.
-- `python tests/risk_profiler_ui_test.py` drives the standalone page and the tool end to end (headless Edge), and
-  saves screenshots and `rp_pack.pdf` in `tests/out`.

@@ -108,7 +108,7 @@ h1:focus { outline:none; }
 
 /* ─── Inputs ────────────────────────────────────────────────────────────────── */
 label.f { display:block; margin-bottom:6px; font-size:13px; font-weight:600; color:var(--ink); }
-label.f .opt, .f-opt { font-weight:400; color:var(--muted); }
+label.f .opt { font-weight:400; color:var(--muted); }
 input[type=text], input[type=email], input[type=tel], input[type=date], input[type=number], input[type=search], select, textarea {
   width:100%; height:44px; padding:0 14px; border:1px solid var(--inp); border-radius:8px; background:#fff; color:var(--ink); font:inherit; font-size:15px; }
 textarea { height:auto; padding:10px 14px; line-height:1.5; resize:vertical; }
@@ -133,7 +133,6 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 /* Segmented control */
 .seg { display:inline-flex; gap:3px; height:44px; padding:3px; border:1px solid var(--inp); border-radius:8px; background:#fff; }
 .seg.full { display:flex; width:100%; }
-.seg.compact { height:40px; }
 .seg button { flex:1; padding:0 18px; border:none; border-radius:6px; background:none; color:var(--body); font:inherit; font-size:14px; font-weight:500; white-space:nowrap; cursor:pointer; }
 .seg button:hover:not(.on) { background:var(--hdr); }
 .seg button.on { background:var(--navy); color:#fff; font-weight:600; }
@@ -531,7 +530,6 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .mm-reason { margin:6px 0 8px; padding:8px 12px; border-left:3px solid var(--amb-ring); background:#fff; font-style:italic; white-space:pre-wrap; }
 
 /* ─── Step 6: results ───────────────────────────────────────────────────────── */
-.kband { display:grid; grid-template-columns:1.25fr 1fr 1fr 1fr; border:1px solid var(--line); border-radius:14px; background:#fff; overflow:hidden; }
 .kc { padding:24px 26px; border-left:1px solid var(--line); }
 .kc:first-child { border-left:none; }
 .kc .k { font-size:13px; color:var(--muted); }
@@ -563,33 +561,13 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .legend i.fill { width:12px; height:12px; border:none; border-radius:2px; background:#E3EAF2; }
 .legend i.sq { width:10px; height:10px; border:none; border-radius:2px; }
 .foot-note { margin:12px 0 0; font-size:12px; line-height:1.5; color:var(--muted); }
-.fchoice-h { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px; }
-.fchoice-sub { margin:-6px 0 10px; font-size:12px; color:var(--muted); }
-.fc-row { display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid var(--div); font-size:13px; }
-.fc-row:last-of-type { border-bottom:none; }
-.fc-row .g { color:var(--grn); }
 .riskrow { display:flex; justify-content:space-between; margin-top:14px; padding:10px 12px; border-radius:8px; background:var(--bg); font-size:13px; color:var(--body); }
 .riskrow b { color:var(--navy); }
 .tcard-h { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; }
 .tcard-h .lnk { font-size:13px; }
-.stats3 { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:16px; padding:20px 24px; border-top:1px solid var(--line); }
-.stats3 .k { font-size:13px; color:var(--muted); }
-.stats3 .v { margin-top:2px; font-size:17px; font-weight:700; color:var(--navy); }
-.stats3 .s { font-size:13px; color:var(--muted); }
 .chg-notes { padding:16px 24px 20px; border-top:1px solid var(--line); }
 .chg-notes p { margin:0; font-size:13px; line-height:1.55; color:var(--muted); }
 .chg-notes p + p { margin-top:6px; }
-.vbar { margin-top:14px; }
-.vbar-h { display:flex; justify-content:space-between; font-size:14px; color:var(--body); }
-.vbar-h b { color:var(--ink); }
-.vbar-h b.navy { color:var(--navy); }
-.vbar-b { height:12px; margin-top:6px; border-radius:3px; }
-.vbar-b.before { background:repeating-linear-gradient(135deg, #7fb2d9 0 6px, #A9CBE6 6px 12px); }
-.vbar-b.after { background:var(--navy); }
-.mk-bar { display:flex; gap:2px; height:12px; margin:10px 0; border-radius:3px; overflow:hidden; }
-.mk-leg { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--body); }
-.mk-leg span { display:flex; align-items:center; gap:8px; }
-.mk-leg span em { margin-left:auto; font-style:normal; }
 .rates .f-row { margin-bottom:14px; }
 .kcards { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:16px; }
 .kcard .k { font-size:13px; color:var(--muted); }
@@ -598,7 +576,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .kcard .s { font-size:13px; line-height:1.5; color:var(--body); }
 .remchart { margin-top:6px; }
 .rc-foot { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
-.rc-foot .lnk, .fchoice-h .lnk { font-size:13px; }
+.rc-foot .lnk { font-size:13px; }
 
 /* ─── Step 7: quotation pack ────────────────────────────────────────────────── */
 .stage { display:flex; flex-direction:column; gap:20px; }
@@ -674,7 +652,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .thumb .bx { height:28px; border-radius:3px; background:linear-gradient(180deg, #E4ECF6, #D6E2F0); }
 .thumb .lbl { font-size:12px; color:var(--muted); }
 .ready { display:flex; flex-direction:column; gap:18px; padding:24px; }
-/* Results: quote summary card, projection panel and warnings (handoff §6, 9 Oct 2026) */
+/* Results: quote summary card, projection panel and warnings */
 .qsum { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line); border-radius:14px; background:#fff; }
 .qs-col { display:flex; flex-direction:column; gap:14px; padding:22px 24px; min-width:0; }
 .qs-col + .qs-col { border-left:1px solid var(--div); }
@@ -3137,7 +3115,7 @@ function projTable(head, rows, totIdx) {
       return '<tr' + (tot ? ' class="tot"' : '') + '>' + rw.c.map(function(x, i) { return '<td class="' + (i === 0 ? 'l' : '') + (i === rw.c.length - 1 ? ' em' : '') + '">' + x + '</td>'; }).join('') + '</tr>';
     }).join('') + '</tbody></table>';
 }
-// ── Projection tab (design handoff §6, 9 Oct 2026) ──
+// ── Projection tab ──
 // Figures panel beside the chart; the fund list now lives in the quote summary card above.
 function projPanel(head, rows, assume) {
   return '<div class="pj-side"><div class="pj-hero"><span>' + head[0] + '</span><b>' + head[1] + '</b><span>' + head[2] + '</span></div>' +
@@ -3550,7 +3528,7 @@ function attachItems() {
   if (inc.factsheets && d.factsheets.length) out.push('Fund factsheets (' + d.factsheets.length + ')');
   return out;
 }
-// Documents that apply to the current quotation: { kids: [...], factsheets: [...] }
+// Documents that apply to the current quotation: { product: [...], kids: [...], factsheets: [...] }
 function attachDocs() {
   var r = S.result;
   if (!r || r.errors) return { product: [], kids: [], factsheets: [] };
@@ -3559,7 +3537,7 @@ function attachDocs() {
   var ct = S.ib.ctype || '';
   return qtSupportingDocs({ product: S.product, fundIds: ids, single: ctHas(ct, 'sp'), regular: ctHas(ct, 'rp') });
 }
-// What the adviser has switched on: { kids: bool, factsheets: bool }
+// What the adviser has switched on: { product: bool, kids: bool, factsheets: bool }
 function attachInclude() { return { product: !!S.sections.product, kids: !!S.sections.kids && !sectionNA('kids'), factsheets: !!S.sections.factsheets }; }
 function attachedList() {
   var d = attachDocs(), inc = attachInclude();
@@ -3652,7 +3630,7 @@ function promptsIn(text) {
 }
 
 // ── Document editor (Use the Allianz template) ──
-// The text is stored as before: "## " heading, "- " bullet, blank line = new paragraph, [[prompts]].
+// The text is stored as plain markup: "## " heading, "- " bullet, blank line = new paragraph, [[prompts]].
 // It is shown as a document the adviser can type anywhere in: auto-filled values in grey boxes, and
 // [[guidance]] as ordinary editable text under a soft amber highlight. The highlight is a marker, not
 // a control -- it clears itself as soon as the text differs from the guidance it started as.

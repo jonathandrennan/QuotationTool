@@ -1,4 +1,5 @@
-// arf_data.js — Allianz Vantage ARF data
+// arf_data.js — Allianz Vantage ARF data: product codes, funds and regulatory constants. The Investment Bond
+// uses the same fund range (see ib_data.js).
 
 // ── Regulatory constants ──────────────────────────────────────────────────────
 var ARF_MAX_RATE   = 0.06;   // regulatory cap on gross growth rate
@@ -45,8 +46,9 @@ var ARF_CODES = {
 // assets:     nominal equity / fixed income / cash split (PDC "typical equity content"; matches the brochure
 //             lifecycle tables pp.24–26). Look-through exposure from the factsheets is in FUND_FACTSHEET (prsa_data.js).
 // targetVol:  DMAS funds only — the brochure gives no target range for Strategy Select.
-// NOTE (2026-10-09): esma ratings updated to the Aug-26 brochure p.31 (afie 3, ss30 4, dm15 4, ss75 5), matching prsa_data.js.
-//   extFund remains the current quoted FMC: the ARF Point of Sale and IB Point of Issue documents illustrate at the current level.
+// esma ratings follow the Aug 2026 brochure (p.31), as in prsa_data.js. extFund is the currently quoted fund
+// charge (not the PDC maximum used for the PRSA): the ARF Point of Sale and IB Point of Issue documents
+// illustrate at the current level.
 var ARF_FUNDS = [
   { id:'cash', color:'#6b7280', name:'Allianz Euro Cash',                            shortName:'Euro Cash',                grossRate:0.032,    extFund:0.0016, gteeCharge:0,      gmab:false, esma:1, isin:'LU2575878199', assets:{eq:0,    fi:0,    cash:1}, desc:'Aims for a money market-related return, with security of capital, value stability and liquidity, by investing in assets with ecological or social characteristics under the sustainable and responsible investment (SRI) strategy.' },
   { id:'afsd', color:'#1a9e5c', name:'Allianz Advanced Fixed Income Short Duration',shortName:'Fixed Income Short Dur.',  grossRate:0.0425,   extFund:0.0022, gteeCharge:0,      gmab:false, esma:2, isin:'LU1328247389', assets:{eq:0,    fi:1,    cash:0}, desc:'Invests mainly in interest-bearing securities, aiming for an above-average long-term return compared with the European short duration bond market, and promotes environmental, social and governance criteria. Up to 25% may be held in high-yield bonds and up to 20% in emerging market bonds.' },

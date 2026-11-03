@@ -1,9 +1,8 @@
 // quote_pdf.js — charts (vector SVG) and the printable quotation pack.
 //
-// The pack is an HTML document opened in a new window and printed to PDF. Charts are
-// drawn as inline SVG (not canvas bitmaps), so text and lines stay sharp at any zoom in
-// the saved PDF — this is the fix for the blurry text seen in the existing PRSA tool's
-// PDFs, whose charts were low-resolution canvas images stretched onto the page.
+// The pack is an HTML document opened in a new window, paginated into A4 pages and printed to PDF
+// (or rasterised and merged with the attached documents, see quote_docs.js). Charts are inline SVG
+// rather than canvas bitmaps, so text and lines stay sharp at any zoom in the saved PDF.
 //
 // Depends on quote_common.js, quote_text.js and the data/engine files.
 
@@ -114,7 +113,6 @@ function qtEuroAxis(v) {
 // Charts run on a calendar-date axis from the policy start date: points sit at their real
 // dates (so a short final period to retirement is drawn short) and ticks are calendar years.
 var QT_YEAR_MS = 365.25 * 24 * 3600 * 1000;
-var QT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function qtYearsFrom(start, d) { return (d - start) / QT_YEAR_MS; }
 // 1 January ticks across [0, span] years from start, thinned for long projections
 function qtYearTicks(start, span) {
@@ -185,29 +183,7 @@ function qtIbChart(r, width, height, o) {
   });
 }
 
-// ─── SRI scale (HTML, prints with exact colours) ──────────────────────────────
-// The portfolio marker uses the rounded indicative figure (decimals are footnoted, not plotted).
-function qtSriScale(clientSri, portfolioSri, portfolioLabel, cls) {
-  var pr = portfolioSri == null ? null : Math.round(portfolioSri);
-  var h = '<div class="sricol' + (cls ? ' ' + cls : '') + '"><table class="sri"><tr>';
-  for (var i = 1; i <= 7; i++) {
-    h += '<td style="background:' + ESMA_COLORS[i] + '"' + (i === clientSri || i === pr ? ' class="on"' : '') + '>' + i + '</td>';
-  }
-  h += '</tr><tr class="mk">';
-  for (var j = 1; j <= 7; j++) {
-    var m = [];
-    if (j === clientSri) m.push('You');
-    if (j === pr) m.push(portfolioLabel || 'Portfolio');
-    h += '<td>' + (m.length ? '&#9650;<br>' + m.join(' &amp; ') : '') + '</td>';
-  }
-  h += '</tr></table><div class="sri-ends"><span>Lower risk</span><span>Higher risk</span></div></div>';
-  return h;
-}
-// Published fund SRI (PRIIPs): always a whole number.
-function qtSriBadge(sri) {
-  var r = Math.round(sri);
-  return '<span class="badge" style="background:' + ESMA_COLORS[r] + ';color:' + (r === 4 ? '#222' : '#fff') + '">ESMA ' + r + '</span>';
-}
+// ─── Portfolio risk ───────────────────────────────────────────────────────────
 // Indicative risk lines and footnote for the client-facing pack (rounded figures).
 function qtPortfolioRisk(Q) {
   var T = QT_TEXT, r = Q.r;
@@ -278,12 +254,11 @@ function qtGuaranteeNote(rows) {
     : qtFill(T.guaranteeFundNoteMixed, { levels: qtNameList(uniq) });
 }
 
-// The redesigned Charges page drops the effect-of-charges / reduction-in-yield disclosure
-// (handoff §8, 9 Oct 2026). The handoff lists that as still open for Compliance, so it sits behind
-// this flag: set it to true to put the disclosure back without reworking the page.
+// The Charges page leaves out the effect-of-charges (reduction in yield) disclosure while it is open with
+// Compliance. Set this to true to put it back without reworking the page.
 var QT_SHOW_EFFECT_OF_CHARGES = false;
 
-// ─── Quotation-pack page furniture (design handoff, 9 Oct 2026) ───────────────
+// ─── Quotation-pack page furniture ────────────────────────────────────────────
 // A titled block of label/value rows, as used on "Your quotation at a glance".
 // Rows are [label, value, isTotal]; a falsy row is dropped, so each product can pass
 // only the rows that apply to it.
@@ -357,7 +332,7 @@ function qtBuildPack(Q) {
   var wAll = [T.packWarnings.value, T.packWarnings.currency, T.packWarnings.lose, T.packWarnings.past, T.packWarnings.income]
     .concat(isPrsa ? [T.packWarnings.access] : [], [T.packWarnings.estimates]);
 
-  // ── 1. Cover letter (adviser letterhead) ──
+  // ── Adviser documents: cover letter ──
   if (Q.sections.cover) {
     sec = 'cover';
     var addr = (Q.client.address || '').split('\n').filter(function(x){ return x.trim(); });
@@ -370,7 +345,7 @@ function qtBuildPack(Q) {
         (Q.broker.title ? escHtml(Q.broker.title) + '<br>' : '') + escHtml(Q.broker.firm) + (Q.broker.email ? '<br>' + escHtml(Q.broker.email) : '') + '</div>', { hdr: 'broker' });
   }
 
-  // ── 2. Statement of Suitability ──
+  // ── Adviser documents: Statement of Suitability ──
   if (Q.sections.sos) {
     sec = 'sos';
     add('<h1>' + escHtml(T.sections.sos) + '</h1>', { hdr: 'broker', cls: 'kwn newpage' });
@@ -384,7 +359,7 @@ function qtBuildPack(Q) {
         '<div class="sigline short"></div>Date</div></div>', { hdr: 'broker' });
   }
 
-  // ── 2b. Risk profile: the client's questionnaire answers and the result (adviser letterhead) ──
+  // ── Adviser documents: risk profile (the client's questionnaire answers and the result) ──
   // Q.profile comes from the risk profiler module (js/risk_profiler*.js); it is null until the profiler is complete.
   if (Q.sections.riskprofile && Q.profile) {
     sec = 'riskprofile';
@@ -422,7 +397,7 @@ function qtBuildPack(Q) {
     add('<p class="tiny">' + escHtml(pcfg.text.recordNote) + ' Questionnaire version ' + escHtml(pcfg.version) + '.' + (pf.accepted ? ' The client accepted the important information on ' + escHtml(fmtDateLong(pf.accepted.slice(0, 10))) + '.' : '') + '</p>', { hdr: 'broker' });
   }
 
-  // ── Allianz quotation: cover / divider ──
+  // ── Allianz quotation: cover ──
   // Separates the adviser's documents from the Allianz pages, which are numbered from 1 again.
   // Products without a cover image fall back to the plain navy cover.
   var aglSections = ['summary', 'projection', 'charges', 'funds', 'remun', 'important', 'glossary'];
@@ -451,7 +426,7 @@ function qtBuildPack(Q) {
     tocAt = B.length;   // the contents page goes here once every section is known
   }
 
-  // ── Allianz 2. Your quotation at a glance ──
+  // ── Allianz quotation: at a glance ──
   // Factual only: the details the quotation is based on. Projections live on their own page.
   if (Q.sections.summary) {
     sec = 'summary';
@@ -541,7 +516,7 @@ function qtBuildPack(Q) {
     if (gRisk.footnote) p(gRisk.glide ? T.packRiskFootnoteGlide : qtFill(T.packRiskFootnote, { exact: fmtRisk(r.portfolioSri, 1) }), 'tiny');
   }
 
-  // ── Allianz 3. Your investment and risk: fund split → asset split → portfolio risk → the funds ──
+  // ── Allianz quotation: investment and risk (fund split → asset split → portfolio risk → the funds) ──
   if (Q.sections.funds) {
     sec = 'funds';
     pageTitle(T.sections.funds, Q.lite ? T.packLeads.fundsLite : T.packLeads.funds);
@@ -610,7 +585,7 @@ function qtBuildPack(Q) {
     add(qtWarnBox([T.packWarnings.past, T.packWarnings.currency]));
   }
 
-  // ── Allianz 4. Projected benefits ──
+  // ── Allianz quotation: projected benefits ──
   if (Q.sections.projection) {
     sec = 'projection';
     pageTitle(T.sections.projection, qtFill(T.packProjectionLead[Q.product] || '', { nra: r.nra }));
@@ -676,7 +651,7 @@ function qtBuildPack(Q) {
     }
   }
 
-  // ── 5. Charges ──
+  // ── Allianz quotation: charges ──
   if (Q.sections.charges) {
     sec = 'charges';
     pageTitle(T.sections.charges, T.packLeads.charges);
@@ -752,7 +727,7 @@ function qtBuildPack(Q) {
     add(qtWarnBox([T.packWarnings.lose]));
   }
 
-  // ── 6. Remuneration ──
+  // ── Allianz quotation: remuneration ──
   if (Q.sections.remun) {
     sec = 'remun';
     pageTitle(T.sections.remun, qtFill(T.packLeads.remun, { company: cs.name, brokerFirm: Q.broker.firm || 'your adviser' }));
@@ -817,7 +792,7 @@ function qtBuildPack(Q) {
     if (r.spUpOverridden || (isPrsa ? r.rpUpOverridden : r.specialDeal > 0)) p(T.overrideNote);
   }
 
-  // ── 8. Important ──
+  // ── Allianz quotation: important information ──
   if (Q.sections.important) {
     sec = 'important';
     pageTitle(T.sections.important, T.packLeads.important);
@@ -834,6 +809,7 @@ function qtBuildPack(Q) {
     }
     p(T.coolingOff, 'tiny');
   }
+  // ── Allianz quotation: glossary ──
   if (Q.sections.glossary) {
     sec = 'glossary';
     pageTitle(T.sections.glossary, T.packLeads.glossary);
@@ -850,7 +826,7 @@ function qtBuildPack(Q) {
     add(gt + '</tbody></table>', { cls: 'split' });
   }
 
-  // ── Allianz 9. Back page: navy, as in the brochures (contact, warnings, small print) ──
+  // ── Allianz quotation: back page (navy, as in the brochures: contact, warnings, small print) ──
   if (hasAgl) {
     sec = 'glossary';
     var BP = T.packBack;
@@ -866,7 +842,7 @@ function qtBuildPack(Q) {
         '<span>' + escHtml(cs.regulatory) + '</span></div></div>', { full: true });
   }
 
-  // ── Allianz 1b. Contents, after the cover (page numbers are filled in by the paginator) ──
+  // ── Allianz quotation: contents, placed after the cover (the paginator fills in the page numbers) ──
   if (tocAt >= 0) {
     var tocKeys = [];
     B.forEach(function(b) {
@@ -928,6 +904,8 @@ function qtAttachedPreview(Q) {
 function qtPrsaRows(r) {
   return r.snapshots.filter(function(s) { return s.isMat || s.year <= 5 || s.year % 5 === 0; });
 }
+
+// Income escalation and income wording for the ARF and Investment Bond
 function qtArfEsc(r) {
   var i = r.inputs;
   return (i.incomeType === 'custom_amount' && i.incomeEscalationPct != null) ? i.incomeEscalationPct / 100 : ARF_INCOME_ESC;
@@ -950,12 +928,6 @@ function qtIbEsc(r) {
   var i = r.inputs;
   return (i.incomeType === 'custom_amount' && i.incomeEscalationPct != null) ? i.incomeEscalationPct / 100 : 0;
 }
-function qtIbIncomeShort(r) {
-  var i = r.inputs;
-  if (i.incomeType === 'none') return 'No income — the policy is left to grow';
-  if (i.incomeType === 'custom_amount') return 'Income ' + fEUR(i.incomeValue) + ' a year, increasing ' + pct(qtIbEsc(r)) + ' a year';
-  return 'Income ' + i.incomeValue + '% of fund a year';
-}
 function qtIbIncomeSentence(r) {
   var T = QT_TEXT, i = r.inputs, s;
   if (i.incomeType === 'none') s = T.ibIncomeNone;
@@ -963,16 +935,6 @@ function qtIbIncomeSentence(r) {
   else s = qtFill(T.ibIncomePct, { incomePct: (+i.incomeValue).toFixed(2) + '%', income: fEUR(r.contribution * i.incomeValue / 100) });
   if (i.incomeType !== 'none' && i.incomeStartAge > Math.ceil(r.startAge)) s += ' ' + qtFill(T.ibDeferNote, { incomeAge: i.incomeStartAge });
   return s;
-}
-function qtArfLastsShort(pp, rate) {
-  return pp.fundZeroYear ? 'At ' + pct(rate) + ': lasts until around age <b>' + pp.depletionAge + '</b>' : 'At ' + pct(rate) + ': lasts beyond 40 years';
-}
-function qtStrategyDescription(Q) {
-  var T = QT_TEXT, r = Q.r;
-  if (Q.product !== 'prsa' || r.strat === 'diy') return T.diyDescription;
-  if (r.strat === 'dis') return T.disDescription;
-  var prof = strategyProfile(r.stratObj);
-  return (prof ? T.strategyProfiles[prof] : '') + (r.stratObj && r.stratObj.gmab ? ' ' + T.guaranteeFundNoteGeneric : '');
 }
 
 // Allianz Neo, as loaded by a1-elements.css in the tool itself
@@ -1018,8 +980,6 @@ function qtPackCss() {
     '.muted { color: #5E6B78; font-size: 7.8pt; }',
     'b { font-weight: 700; }',
     '.eyebrow { font-size: 7.6pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0377A8; margin-bottom: 1.5mm; }',
-    'h1.prep { font-size: 22pt; margin-bottom: 1mm; }',
-    '.byline { font-size: 9pt; color: #5E6B78; }',
     '.hero { display: grid; grid-template-columns: 1.1fr 1fr; border: 0.75pt solid #E2E8EF; border-radius: 2.5mm; overflow: hidden; }',
     '.hero .hl { background: #003680; color: #fff; padding: 5mm 5.5mm; }',
     '.hero .k, .hero .s { font-size: 8pt; color: #DCE6F4; line-height: 1.45; }',
@@ -1028,21 +988,7 @@ function qtPackCss() {
     'table.facts td { font-size: 8.4pt; padding: 0.9mm 0; color: #5E6B78; }',
     'table.facts td + td { text-align: right; color: #0E1E33; font-weight: 700; }',
     '.chart { margin: 1mm 0; }',
-    '.cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }',
-    '.pcard { border: 0.75pt solid #E2E8EF; border-radius: 2.5mm; padding: 4mm 4.5mm; }',
-    '.pcard .pt { font-size: 9pt; font-weight: 700; color: #003680; margin-bottom: 1.5mm; }',
-    '.pcard p { font-size: 8.4pt; }',
-    'table.kv2 td { font-size: 8.4pt; padding: 0.9mm 0; color: #5E6B78; }',
-    'table.kv2 td + td { text-align: right; color: #0E1E33; font-weight: 700; }',
-    '.warnbox { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; font-size: 7.8pt; line-height: 1.5; color: #1E2B3B; }',
-    '.tiles3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }',
-    '.tiles3 > div { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; }',
-    '.tiles3 span { display: block; font-size: 7.6pt; color: #5E6B78; }',
-    '.tiles3 b { display: block; font-size: 12pt; color: #003680; margin-top: 0.5mm; }',
     '.g { color: #0B7A3E; font-weight: 700; }',
-    '.splitrow { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }',
-    '.splitrow.one { grid-template-columns: 1fr; }',
-    '.splitrow .bt { font-size: 8.8pt; font-weight: 700; color: #003680; margin-bottom: 1.5mm; }',
     '.gnote { background: #E6F4EC; border-radius: 2mm; padding: 3mm 3.5mm; font-size: 7.8pt; line-height: 1.45; color: #1E2B3B; }',
     '.gnote b { display: block; color: #0B7A3E; margin-bottom: 0.8mm; }',
     'table { width: 100%; border-collapse: collapse; }',
@@ -1063,21 +1009,9 @@ function qtPackCss() {
     '.imp p { font-size: 8.4pt; font-weight: 700; margin-top: 1.2mm; }',
     '.warn { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; }',
     '.warn p { font-weight: 700; font-size: 8.6pt; }',
-    '.badge { display: inline-block; padding: 0.3mm 1.6mm; border-radius: 1mm; font-size: 7.4pt; font-weight: 700; }',
-    '.sricol { flex: 1; max-width: 95mm; }',
-    'table.sri { width: 100%; table-layout: fixed; }',
-    'table.sri td { text-align: center; font-size: 8.6pt; font-weight: 700; color: #fff; padding: 1.4mm 0; border: 1.5pt solid #fff; }',
-    'table.sri td.on { outline: 1.5pt solid #0E1E33; outline-offset: -1.5pt; }',
-    'table.sri tr.mk td { background: none; color: #0E1E33; font-size: 7pt; font-weight: 700; padding-top: 0.5mm; line-height: 1.2; }',
-    '.sri-ends { width: 100%; margin-top: -1mm; display: flex; justify-content: space-between; font-size: 7pt; color: #5E6B78; }',
-    '.sricol.sm { max-width: none; margin-top: 2mm; }',
-    '.sricol.sm table.sri td { font-size: 7.2pt; padding: 0.8mm 0; }',
-    '.sricol.sm table.sri tr.mk td { font-size: 6.4pt; }',
-    '.sricol.sm .sri-ends { display: none; }',
     '.catbar { display: flex; height: 3.5mm; border-radius: 1mm; overflow: hidden; background: #EEF2F6; }',
     '.catleg { display: flex; flex-wrap: wrap; gap: 1mm 5mm; font-size: 7.8pt; color: #5E6B78; margin-top: 1.5mm; }',
     '.catleg i { display: inline-block; width: 2.6mm; height: 2.6mm; border-radius: 0.6mm; margin-right: 1.4mm; vertical-align: -0.3mm; }',
-    'p.fdesc { font-size: 8.2pt; color: #3A4756; }',
     '.letter-top { font-size: 9.2pt; line-height: 1.5; margin-bottom: 4mm; }',
     '.letter-top .ldate { margin-top: 5mm; }',
     '.re { margin-bottom: 1mm; }',
@@ -1086,7 +1020,7 @@ function qtPackCss() {
     '.sigline.short { width: 35mm; height: 9mm; }',
     '.sigs { display: flex; gap: 10mm; margin-top: 4mm; font-size: 8.6pt; }',
     '.sigs > div { flex: 1; } .sigs p { font-size: 8.6pt; }',
-    // ── Redesigned quotation pack (handoff §8, 9 Oct 2026) ──
+    // ── Quotation pack page styles ──
     // Full-bleed pages: the block is the page, with no header, footer or page number.
     '.page.full { padding: 0; }',
     // Label/value blocks on "At a glance"
