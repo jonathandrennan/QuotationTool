@@ -116,15 +116,15 @@ var RP_CONFIG = {
 
     // Part B – Your timing
     // A slider in whole years, starting with no value. A value takes the band it reaches: under 3 years allows no more
-    // than 3, 3 to under 7 years no more than 5, 7 years or more no limit. The top mark means "or more".
+    // than 3, 3 to under 5 years no more than 4, 5 years or more no limit. The top mark means "or more".
     { id: 'horizon', num: '3', section: 'timing', type: 'slider', unit: 'years', scored: true, short: 'Investment horizon',
       text: 'How long do you plan to hold this investment?',
       help: 'Move the slider to the number of years.',
       min: 0, max: 12, step: 1, marks: [0, 3, 6, 9, 12], minLabel: 'Less than 1 year', maxLabel: '12 years or more',
       bands: [
         { from: 0, cap: 3,    shown: 'Under 3 years' },
-        { from: 3, cap: 5,    shown: '3 to under 7 years' },
-        { from: 7, cap: null, shown: '7 years or more' }
+        { from: 3, cap: 4,    shown: '3 to under 5 years' },
+        { from: 5, cap: null, shown: '5 years or more' }
       ] },
 
     // Part C – Your attitude to risk
@@ -236,6 +236,7 @@ var RP_CONFIG = {
     ratingSentence: 'This gives a risk rating of {sri} ({sriLabel}).',
     knowledgeSentence: 'Your investment knowledge and experience was assessed as {level}.',
     overrideSentence: 'The risk profiler gave a risk rating of {suggested}. Following our discussion, we have agreed a lower risk rating of {chosen} because: {reason}',
+    overrideHigherSentence: 'The risk profiler gave a risk rating of {suggested}. Following our discussion, we have agreed a higher risk rating of {chosen} because: {reason}',
     sustainNo: 'You told us that you do not have sustainability preferences for this investment, so they were not a factor in our recommendation.',
     sustainGeneral: 'You told us that you have sustainability preferences, but not for any particular type of sustainable investment.',
     sustainTypes: 'You told us that you would like your investment to include {types}.',

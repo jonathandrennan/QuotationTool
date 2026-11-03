@@ -1,0 +1,105 @@
+  Zurich  1/50: profile 1, capacity Low
+  Zurich  2/50: profile 7, capacity High
+  Zurich  3/50: profile 4, capacity Medium
+  Zurich  4/50: profile 6, capacity Low
+  Zurich  5/50: profile 2, capacity High
+  Zurich  6/50: profile 5, capacity High
+  Zurich  7/50: profile 5, capacity High
+  Zurich  8/50: profile 5, capacity Medium
+  Zurich  9/50: profile 3, capacity High
+  Zurich 10/50: profile 4, capacity Medium
+  Zurich 11/50: profile 2, capacity High
+  Zurich 12/50: profile 4, capacity High
+  Zurich 13/50: profile 3, capacity Medium
+  Zurich 14/50: profile 3, capacity Low
+  Zurich 15/50: profile 5, capacity Medium
+  Zurich 16/50: profile 5, capacity Low
+  Zurich 17/50: profile 2, capacity High
+  Zurich 18/50: profile 1, capacity Medium
+  Zurich 19/50: profile 5, capacity Medium
+  Zurich 20/50: profile 1, capacity Low
+  Zurich 21/50: profile 1, capacity Low
+  Zurich 22/50: profile 3, capacity Medium
+  Zurich 23/50: profile 3, capacity Medium
+  Zurich 24/50: profile 4, capacity Low
+  Zurich 25/50: profile 4, capacity Low
+  Zurich 26/50: profile 1, capacity High
+  Zurich 27/50: profile 5, capacity Medium
+  Zurich 28/50: profile 2, capacity Medium
+  Zurich case 29 attempt 1: Message: element click intercepted: Element <button type="submit" class="btn btn-primary custom-btn full pleaseWait" name="navButton" value="Next" aria-label="next page">...</button> is not clickable at point (1045, 882). Other element would receive the click: <div class="onetrust-pc-dark-filter ot-fade-in" style="z-index:2147483645;"></div>
+  Zurich 29/50: profile 4, capacity High
+  Zurich 30/50: profile 4, capacity Low
+  Zurich 31/50: profile 2, capacity Medium
+  Zurich 32/50: profile 5, capacity Medium
+  Zurich 33/50: profile 3, capacity Medium
+  Zurich 34/50: profile 4, capacity Low
+  Zurich 35/50: profile 3, capacity Medium
+  Zurich 36/50: profile 2, capacity Medium
+  Zurich 37/50: profile 3, capacity Medium
+  Zurich 38/50: profile 4, capacity Medium
+  Zurich 39/50: profile 3, capacity High
+  Zurich 40/50: profile 3, capacity Medium
+  Zurich 41/50: profile 4, capacity Medium
+  Zurich 42/50: profile 3, capacity Medium
+  Zurich 43/50: profile 2, capacity High
+  Zurich 44/50: profile 3, capacity High
+  Zurich 45/50: profile 2, capacity Medium
+  Zurich 46/50: profile 2, capacity Medium
+  Zurich 47/50: profile 3, capacity Low
+  Zurich 48/50: profile 4, capacity Low
+  Zurich 49/50: profile 3, capacity High
+  Zurich 50/50: profile 3, capacity Medium
+
+ id client                         age yrs loss | ours | zurich | aviva
+  1 Corner: most cautious           80   1    0 |  1   |  1  |  0
+  2 Corner: most adventurous        25  12   40 |  6   |  7  |  6
+  3 Mid-range                       40  10   15 |  4   |  4  |  4
+  4 Keen but no cushion             30  10   40 |  4   |  6  |  6
+  5 Cautious but wealthy            60  12    2 |  1   |  2  |  0
+  6 Adventurous, short horizon      50   2   40 |  3   |  5  |  6
+  7 Age 70 adventurous              70  10   30 |  5   |  5  |  5
+  8 Loss 2.5 but wants max return   45  10  2.5 |  3   |  5  |  3
+  9 Random 01                       61  11 37.0 |  5   |  3  |  6
+ 10 Random 02                       53   4  0.0 |  2   |  4  |  0
+ 11 Random 03                       59  12  2.0 |  2   |  2  |  0
+ 12 Random 04                       44   3 13.5 |  3   |  4  |  3
+ 13 Random 05                       74   1 12.5 |  3   |  3  |  3
+ 14 Random 06                       31  12 25.0 |  3   |  3  |  4
+ 15 Random 07                       37  10 26.5 |  5   |  5  |  5
+ 16 Random 08                       36   5 31.0 |  4   |  5  |  6
+ 17 Random 09                       53   4  8.5 |  3   |  2  |  4
+ 18 Random 10                       33   2 19.0 |  2   |  1  |  3
+ 19 Random 11                       68  11 36.0 |  5   |  5  |  6
+ 20 Random 12                       70   9  9.5 |  3   |  1  |  3
+ 21 Random 13                       69   4 37.5 |  2   |  1  |  3
+ 22 Random 14                       26  10 24.0 |  3   |  3  |  4
+ 23 Random 15                       39   4  8.0 |  3   |  3  |  3
+ 24 Random 16                       36   8 34.5 |  4   |  4  |  6
+ 25 Random 17                       41   1 17.0 |  3   |  4  |  5
+ 26 Random 18                       73   8  0.0 |  1   |  1  |  0
+ 27 Random 19                       70   9 30.5 |  5   |  5  |  5
+ 28 Random 20                       62   3  5.0 |  3   |  2  |  3
+ 29 Random 21                       69   8 28.5 |  5   |  4  |  4
+ 30 Random 22                       32   7 28.5 |  4   |  4  |  6
+ 31 Random 23                       51   0 30.0 |  3   |  2  |  6
+ 32 Random 24                       25  12 22.0 |  4   |  5  |  3
+ 33 Random 25                       54   7  4.0 |  2   |  3  |  0
+ 34 Random 26                       27   2  4.5 |  3   |  4  |  3
+ 35 Random 27                       47   1  2.5 |  3   |  3  |  3
+ 36 Random 28                       63   5 29.5 |  3   |  2  |  4
+ 37 Random 29                       56  11 35.0 |  5   |  3  |  6
+ 38 Random 30                       44   9 21.0 |  4   |  4  |  4
+ 39 Random 31                       30   2 32.5 |  3   |  3  |  3
+ 40 Random 32                       38  11 14.0 |  3   |  3  |  4
+ 41 Random 33                       44   2 36.0 |  3   |  4  |  4
+ 42 Random 34                       22   9 20.5 |  4   |  3  |  5
+ 43 Random 35                       29   8 26.0 |  4   |  2  |  5
+ 44 Random 36                       59   4 17.5 |  4   |  3  |  3
+ 45 Random 37                       56   5  0.5 |  2   |  2  |  0
+ 46 Random 38                       46   0 19.0 |  3   |  2  |  4
+ 47 Random 39                       42   7 34.5 |  4   |  3  |  5
+ 48 Random 40                       33   6 24.0 |  4   |  4  |  4
+ 49 Random 41                       30  12  8.0 |  3   |  3  |  3
+ 50 Random 42                       36  11 11.5 |  3   |  3  |  4
+
+Wrote tests/out/compare_profilers.csv and .json

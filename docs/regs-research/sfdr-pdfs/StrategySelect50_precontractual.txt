@@ -1,0 +1,555 @@
+                               Template pre-contractual disclosure for the financial products referred to in Article 8, paragraphs 1, 2 and 2a, of Regulation
+                               (EU) 2019/2088 and Article 6, first paragraph, of Regulation (EU) 2020/852
+
+                               Product name:
+
+                               Allianz Strategy Select 50
+
+                               Legal entity identifier: 549300SO8FOHM33Y9L46
+
+                               Environmental and/or social characteristics
+
+Sustainable investment         Does this financial product have a sustainable investment objective?
+means an investment in an
+economic activity that           Yes                                                 No
+contributes to an               It will make a minimum of sustainable investments
+environmental or social                                                             It promotes Environmental/Social (E/S)
+objective, provided that the          with an environmental objective: __%
+investment does not                                                                       characteristics and while it does not have as its
+significantly harm any                                                                    objective a sustainable investment, it will have a
+environmental or social                                                                   minimum proportion of 3.00% of sustainable
+objective and that the                                                                    investments
+investee companies follow
+good governance practices.      in economic activities that qualify as                                with an environmental objective in economic
+
+The EU Taxonomy is a                 environmentally sustainable under the EU                              activities that qualify as environmentally
+classification system laid           Taxonomy                                                              sustainable under the EU Taxonomy
+down in Regulation (EU)
+2020/852, establishing a list   in economic activities that do not qualify as                         with an environmental objective in economic activities that do not qualify as environmentally
+of environmentally
+sustainable economic                 environmentally sustainable under the EU                              sustainable under the EU Taxonomy
+activities. That Regulation          Taxonomy
+does not include a list of
+socially sustainable            It will make a minimum of sustainable investments       with a social objective
+economic activities.                                                                It promotes E/S characteristics, but will not make any
+Sustainable investments              with a social objective __%
+with an environmental                                                                    sustainable investments
+objective might be aligned
+with the Taxonomy or not.
+
+Sustainability indicators      What environmental and/or social characteristics are promoted by this financial product?
+measure how the
+environmental or social        Allianz Strategy Select 50 (the "Sub-Fund") promotes a broad range of environmental, human rights, governance,
+characteristics promoted by    and/or business behaviour characteristics (the last characteristic does not apply for financial instruments issued by a
+the financial product are      sovereign entity). The Sub-Fund does so by:
+attained.
+                               � As a first step promoting environmental and social characteristics, by excluding direct investments in certain
+                                   issuers which are involved in controversial environmental or social business activities from the investment universe
+                                   of the Sub-Fund by applying exclusion criteria. Within this process the Investment Manager excludes investee
+                                   companies that severely violate good governance practices and principles and guidelines such as the Principles of
+                                   the United Nations Global Compact, the OECD Guidelines for Multinational Enterprises, and the United Nations
+                                   Guiding Principles for Business and Human Rights.
+
+                               � In a second step, the Investment Manager selects from the remaining investment universe those corporate issuers
+                                   that perform better within their sector with respect to sustainability aspects. With respect to sovereign issuers
+                                   those issuers that generally perform better with respect to sustainability aspects. The issuers are assigned an
+                                   individual score by the investment manager. The score starts at 0 (lowest) and ends at 4 (highest). The score is
+                                   based on environmental, social, governance and business behaviour factors (business behaviour does not apply
+                                   to sovereign issuers) and represents an internal assessment assigned to a corporate or sovereign issuer by the
+                                   Investment Manager.
+
+                               � Further, the Investment Manager will adhere to a minimum percentage of 3.00% of Sustainable Investments and
+                                   a minimum percentage of 0.01% investments that are aligned with the EU Taxonomy.
+
+                               No reference benchmark has been designated for the purpose of attaining the environmental and/or social
+                               characteristics promoted by the Sub-Fund.
+
+                               Details and methods of each step are described within the section "What investment strategy does this financial
+                               product follow?".
+
+                               � What sustainability indicators are used to measure the attainment of each of the environmental or social
+                                     characteristics promoted by this financial product?
+
+                                     To measure the attainment of the environmental and/or social characteristics the following sustainability
+                                     indicators are used and reported on, at the end of the financial year:
+
+                                    - Confirmation that the exclusion criteria have been adhered to throughout the Sub-Fund's financial year.
+                             - Percentage of the portfolio with a proprietary score of 1 or more. The scoring process is described within the
+                                   section "What investment strategy does this financial product follow?". The basis for the calculation is the
+                                   Sub-Fund's net asset value except instruments that are not scored by nature, e.g., cash and deposits.
+                                   Derivatives are generally not scored. Derivatives (other than credit default swaps), whose underlying is a
+                                   single rated corporate issuer are, however, generally scored. The size of the not scored part of the portfolio
+                                   varies subject to the Sub-Fund's general investment strategy described in the prospectus.
+
+                             - Percentage of Sustainable Investments at the end of the financial year.
+
+                             - Percentage of taxonomy-aligned investments at the end of the financial year.
+
+                             � What are the objectives of the sustainable investments that the financial product partially intends to make and
+                                   how does the sustainable investment contribute to such objectives?
+
+                             The objectives of the Sustainable Investments that the financial product partially intends to make include a
+                             broad range of environmental and social topics, for which the Investment Manager uses as reference, among
+                             others, the UN Sustainable Development Goals (SDGs)1 , as well as the EU Taxonomy objectives which are:
+                             Climate Change Mitigation, Climate Change Adaptation, Sustainable Use and Protection of Water and Marine
+                             Resources, Transition to a Circular Economy, Pollution Prevention and Control as well as Protection and
+                             Restoration of Biodiversity and Ecosystems.
+
+                             The Investment Manager measures how the Sustainable Investments contribute to the objectives based on a
+                             proprietary methodology as follows:
+
+                             - Business activities of an issuer are broken down into revenues generated by the various business activities
+                                   based on external data. In cases where the split of business activities received is not granular enough, it is
+                                   determined by the Investment Manager. The business activities are internally assessed as to whether they
+                                   contribute positively to an environmental or a social objective. The revenue share of each business activity
+                                   that contributes positively to an environmental or social objective is allocated to the Sustainable Investment
+                                   share, provided the issuer passes the Do No Significant Harm ("DNSH") assessment and is satisfying the
+                                   Good Governance principles.
+
+                             - For issuers whose business activities amount to a Sustainable Investment share of at least 20% and who are
+                                   transitioning or are already aligned with a Net Zero pathway, the Investment Manager increases the
+                                   calculated Sustainable Investment share allocated to the issuer in question by 20 percentage points. The
+                                   issuers are considered transitioning to Net Zero if they are (1) achieving Net Zero, (2) aligned to Net Zero or
+                                   (3) aligning to Net Zero. Issuer (4) committed to Net Zero or (5) not aligned to Net Zero are not considered
+                                   to be transitioning or aligned with a Net Zero pathway.
+
+                             - For securities, which finance specific projects ("Project Bonds") contributing to environmental or social
+                                   objectives, the overall investment is considered to contribute to environmental and/or social objectives, but
+                                   also for these a DNSH as well as a Good Governance check for issuers (or in some cases at project level) is
+                                   performed.
+
+                             - The Sustainable Investment share of each issuer and each Project Bond is weighted based on the
+                                   percentage of the portfolio invested in such issuer or Project Bonds, respectively. The individual weighted
+                                   Sustainable Investment shares of all issuers and Project Bonds are aggregated in order to compute the
+                                   Sustainable Investment share of the Sub-Fund.
+
+                             � How do the sustainable investments that the financial product partially intends to make, not cause significant
+                                   harm to any environmental or social sustainable investment objective?
+
+                             To assess that Sustainable Investments do not significantly harm any other environmental and/or social
+                             objective, the Investment Manager is using the indicators regarding principal adverse impacts ("PAI") on
+                             sustainability factors.
+
+Principal adverse impacts    � How have the indicators for adverse impacts on sustainability factors been taken into account?
+are the most significant
+negative impacts of                All mandatory PAI indicators are taken into account as follows:
+investment decisions on
+sustainability factors            - Investments in issuers violating the exclusion criteria for controversial weapons, severely violating
+relating to environmental,             principles, and guidelines such as the Principles of the United Nations Global Compact, the OECD
+social and employee                    Guidelines for Multinational Enterprises, and the United Nations Guiding Principles for Business and
+matters, respect for human             Human Rights or sovereign issuer with an insufficient Freedom House Index score are excluded and do
+rights, anti-corruption and            not pass the DNSH assessment. The exclusion criteria are described in the section "What are the binding
+anti-bribery matters.                  elements of the investment strategy used to select the investments to attain each of the environmental
+                                       or social characteristics promoted by this financial product?".
+
+                             - Thresholds are determined for all PAI indicators except for the "share of non-renewable energy
+                                 consumption and production" which is indirectly reflected in other PAI indicators.
+
+                             1 https://sdgs.un.org/goals
+            In detail, the Investment Manager has taken the following steps:
+
+           - Defined significance thresholds to identify significantly harmful issuers. Issuers are measured against the
+                significance thresholds at least bi-annually. Depending on the respective indicator, the thresholds are
+                determined either relative to the sector, absolute or based on events or situations in which companies
+                allegedly have a negative environmental, social or governance impact (controversies). The Investment
+                Manager can engage with issuers not meeting the significance thresholds in order to allow the issuer to
+                remediate the adverse impact.
+
+           - Weighing the PAI indicator according to the level of confidence in the quality of data available which
+                are computed to an overall DNSH score relevant for the issuer. The overall DNSH score is determined
+                based on the threshold for each PAI and the confidence weight. A company is considered to not pass the
+                DNSH assessment if the overall DNSH score is one or more. If the issuer does not meet the overall DNSH
+                score twice subsequently or in case of a failed engagement, it does not pass the DNSH assessment.
+                Investments in securities of issuers which do not pass the DNSH assessment are not counted as
+                Sustainable Investments.
+
+           - In certain circumstances where backward-looking or forward-looking information is inconsistent with the
+                DNSH assessment, the Investment Manager may override the DNSH assessment. The override decision is
+                made by an internal decision-making body which is composed of functions including Investments,
+                Compliance and Legal.
+
+            There is a lack of data coverage for PAI indicators. Equivalent data points are used to assess PAI indicators
+            when applying the DNSH assessment, when relevant, for the following indicators for corporates: share of
+            non-renewable energy consumption and production, activities negatively affecting biodiversity-sensitive
+            areas, emissions to water, lack of processes and compliance mechanisms to monitor compliance with UNGC
+            principles and OECD Guidelines for Multinational Enterprises; for sovereigns: GHG Intensity and investee
+            countries subject to social violations. In the case of Project Bonds equivalent data at project level might be
+            used to ensure that Sustainable Investments do not significantly harm any other environmental and/or
+            social objective. The Investment Manager will strive to increase data coverage for PAI indicators with low
+            data coverage by engaging with issuers and data providers. The Investment Manager will regularly
+            evaluate whether the availability of data has increased sufficiently to potentially include assessment of such
+            data in the investment process.
+
+     � How are the sustainable investments aligned with the OECD Guidelines for Multinational Enterprises and
+            the UN Guiding Principles on Business and Human Rights? Details:
+
+            The Investment Manager큦 exclusions as described in the section "What investment strategy does this
+            financial product follow?" exclude companies severely violating one of the following frameworks: Principles
+            of the UN Global Compact, the OECD Guidelines for Multinational Enterprises and the UN Guiding Principles
+            for Business and Human Rights.
+
+          The EU Taxonomy sets out a "do not significant harm" principle by which Taxonomy-aligned investments should not significantly harm EU
+          Taxonomy objectives and is accompanied by specific EU criteria.
+          The "do not significant harm" principle applies only to those investments underlying the financial product that take into account the EU criteria for
+          environmentally sustainable economic activities. The investments underlying the remaining portion of this financial product do not take into
+          account the EU criteria for environmentally sustainable economic activities.
+          Any other sustainable investments must also not significantly harm any environmental or social objectives.
+
+Does this financial product consider principal adverse impacts on sustainability factors?
+
+ Yes
+ No
+
+The Investment Manager considers PAIs through measures directly impacting the investment strategy such as
+applying exclusion criteria and indirect measures such as engagement with corporate issuers and joining relevant
+industry initiatives. Considering PAIs does not mean avoiding PAIs but aiming to mitigate such PAIs. The overall
+mitigation aim is also dependent on the management of the portfolio according to the general investment strategy.
+
+The following PAI indicators are considered through the direct measures set out in the table below:
+PAI indicator applicable to              Direct measure
+corporate issuers:                       (as described in the section: "What investment strategy does this financial product
+                                         follow?")
+- GHG Emissions                          - Application of exclusion criteria relating to coal extraction and utility
+- Carbon footprint
+- GHG Intensity of investee                 companies generating revenues from coal
+                                         - Use of information on PAI indicator in internal score
+   companies
+- Exposure to companies
+
+   active in the fossil fuel
+   sector
+
+- Activities negatively                  - Application of exclusion criteria relating to severe violation of international
+   affecting biodiversity-                  norms such as the UN Global Compact (UN GC). The following principles of the
+   sensitive areas                          UN GC are related to the other environmental PAIs:
+                                            � Principle 7: Businesses should support a precautionary approach to
+- Emissions to water                          environmental challenges
+- Hazardous waste ratio                     � Principle 8: Businesses should undertake initiatives to promote greater
+                                              environmental responsibility
+- Violation of UN Global                    � Principle 9: Businesses should encourage the development and diffusion of
+   compact principles                         environmentally friendly technologies
+
+- Lack of processes and                  - Use of information on PAI indicator in internal score
+   compliance mechanisms to              - Application of exclusion criteria relating to severe violation of international
+   monitor compliance with
+   UN Global Compact                        norms such as the UN Global Compact (UN GC)
+   principles
+                                         - Use of voting rights to promote board gender diversity
+- Board gender diversity                 - Use of information on PAI indicator in internal score
+                                         - Application of exclusion criteria relating to controversial weapons
+- Exposure to controversial
+   weapons                               - Application of exclusion criteria related to sovereign issuers identified as "not
+                                            free" from the Freedom House Index
+PAI indicator applicable to
+sovereign and supranational
+issuers
+- Investee countries subject
+
+   to social violation
+
+The data coverage for the data required for the PAI indicators is heterogenous. The Investment Manager will strive to
+increase data coverage for PAI indicators with low data coverage through engagement with data providers and/or
+issuers. The Investment Manager will regularly evaluate whether the availability of data has increased sufficiently to
+potentially include assessment of such data in the investment process.
+
+The principal adverse impact indicators are also considered through the following indirect measures:
+
+- The Investment Manager actively encourages and conducts dialogues with investee companies on broader
+    sustainability issues which include PAI indicators such as Gender Diversity, also to prepare voting decisions in
+    advance of shareholder meetings (regularly for direct investments in shares). In deciding how to exercise voting
+    rights, the Investment Manager also considers broader sustainability issues. Further details on the Investment
+    Manager's approach to the exercise of voting rights and company engagement is set out in the Investment
+    Manager's Stewardship Statement.
+
+- The Investment Manager has joined the Net Zero Asset Manager Initiative1. This is an international group of asset
+    managers committed to reduce GHG emissions in partnership with institutional investors.
+
+The information on the PAI indicators will be available in the end-year report of the Sub-Fund.
+
+What investment strategy does this financial product follow?
+
+The Sub-Fund's investment objective is to generate long-term capital growth by investing in global Equity Markets
+and European Bond Markets in order to achieve over the medium to long -term a performance within a volatility
+range of 5% - 11% per annum in accordance with the environmental and social characteristics promoted by the Sub-
+Fund. The Sub-Fund's general investment strategy is described in the prospectus.
+
+1 https://www.netzeroassetmanagers.org/
+The investment strategy      With respect to environmental and social characteristics of the Investment Strategy, the following applies:
+guides investment decisions
+based on factors such as     � What are the binding elements of the investment strategy used to select the investments to attain each of the
+investment objectives and          environmental or social characteristics promoted by this financial product?
+risk tolerance.
+                                   As a first step, the Investment Manager applies the following exclusion criteria, i.e., does not directly invest in
+                                   securities issued by companies:
+
+                                  - severely violating principles and guidelines such as the Principles of the United Nations Global Compact, the
+                                         OECD Guidelines for Multinational Enterprises, and the United Nations Guiding Principles for Business and
+                                         Human Rights,
+
+                                  - developing, producing, using, maintaining, offering for sale, distributing, storing, or transporting
+                                         controversial weapons (anti-personnel mines, cluster munitions, chemical weapons, biological weapons,
+                                         depleted uranium, white phosphorus, and nuclear weapons outside of the non-proliferation treaty),
+
+                                  - deriving more than 10% of their revenue from thermal coal extraction,
+
+                                  - active within the utility sector and generating more than 20% of their revenues from coal,
+
+                                  - involved in the production of tobacco, or deriving more than 5% of their revenues from the distribution of
+                                         tobacco.
+
+                                   Direct investments in securities issued by sovereign issuers qualified with a score as "not free" by the Freedom
+                                   House Index1 are excluded.
+
+                                   The Investment Manager applies the exclusion criteria to a specific issuer based on information provided by
+                                   external data providers and in certain circumstances internal research. The assessment of issuers against the
+                                   exclusion criteria is performed at least half yearly. In certain circumstances, the Investment Manager may
+                                   override the information received. The override decision is made by an internal decision-making body which is
+                                   composed of functions including Investments, Compliance and Legal. Further information on external data
+                                   providers and the override process are available on the respective SFDR Website Product Disclosure.
+
+                                   As a second step, the Investment Manager selects from the remaining investment universe those corporate
+                                   issuers that perform better within their sector based on a score for environmental, social, governance, and
+                                   business behaviour factors ("Sustainability Factors"). With respect to sovereign issuers, the ones that generally
+                                   perform better with respect to sustainability aspects. The issuers are assigned an individual score by the
+                                   investment manager. The score starts at 0 (lowest) and ends at 4 (highest). The score represents an internal
+                                   assessment assigned to a corporate or sovereign issuer by the Investment Manager. Scores are reviewed at least
+                                   twice a year.
+
+                                   At least 90% of the Sub-Fund's portfolio is internally scored on a scale from 0-4. The basis for the calculation of
+                                   the 90% threshold is the Sub-Fund's net asset value except instruments that are not scored by nature, e.g., cash
+                                   and deposits. Derivatives are generally not scored. Derivatives (other than credit default swaps), whose
+                                   underlying is a single rated corporate issuer are, however, generally scored. The size of the not scored part of the
+                                   portfolio varies subject to the Sub-Fund's general investment strategy described in the prospectus.
+
+                                   The scoring process comprises the following:
+
+                                  - The Investment Manager receives quantitative and qualitative information on a regular basis related to
+                                         indicators on Sustainability Factors for specific issuers from external data providers.
+
+                                  - The Investment Manager supplements information on Sustainability Factors with internal quantitative and
+                                         qualitative analysis for instance where information from external data providers is not available,
+                                         incomplete, outdated or does not match the Investment Manager's assessment.
+
+                                  - The Investment Manager computes a score for each of the Sustainability Factors for each issuer on the basis
+                                         of a set of indicators. Within this process, the Investment Manager determines a specific weight for
+                                         Sustainability Factors based on sector materiality. Based on those Sustainability Factors, the Investment
+                                         Manager determines an overall score for each issuer reflecting its sustainability profile.
+
+                                  - In addition, the score is set at zero if the Investment Manager sets a human rights flag based on a
+                                         methodology which leverages external data providers and internal research. For corporate issuers, setting
+                                         of the flag is triggered by the issuer's lack of respect for human rights in its business conduct, including lack
+                                         of (i) integration of the Universal Declaration of Human Rights principles, (ii) respect for major International
+                                         Labour Organization conventions and/or (iii) signature of the United Nations Global Compact. This
+                                         prospective tool both monitors human rights controversies (breaches & violations of human rights) as well as
+                                         the management of human rights controversies (adequacy between prevention mechanisms like policies,
+                                         commitments, systems or grievance mechanisms and risk exposure). For sovereigns, the Investment
+                                         Manager assesses the political rights conferred to citizens (Electoral Process, Political Pluralism and
+                                         Participation, Functioning of Government), civil liberties (Freedom of Expression and belief, Associational
+
+                             1 The country in question may be found on the Freedom House Index (https://freedomhouse.org/countries/freedom-world/scores) in the column "Total Score and Status" of the
+                             section "Global Freedom Scores".
+                             and Organizational Rights, Rule of Law & Personal Autonomy and Individual Rights) and freedom of the
+                             press. For this purpose, the Investment Manager also uses the work of Freedom House Organisation which
+                             captures the principles defined in 1948's Universal Declaration of Human Rights.
+
+                             - For certain issuers, the Investment Manager conducts additional qualitative research. Based on such
+                                   research, the Investment Manager may determine an upward or downward adjustment of the internal score
+                                   and the human rights flag.
+
+                             With respect to scored issuers, the Investment Manager will invest only issuers with an internal score of 1 or more.
+
+                             Further, the Investment Manager commits to a minimum proportion of 3.00% of Sub-Fund's net asset value in
+                             Sustainable Investments. It also commits that a minimum proportion 0.01% of Sub-Fund's net asset value is
+                             aligned with the EU Taxonomy.
+
+                             � What is the committed minimum rate to reduce the scope of the investments considered prior to the application
+                                   of that investment strategy?
+
+                             The Sub-Fund does not commit to reduce the scope of the investments considered prior to the application of the
+                             Investment Strategy by a certain minimum rate.
+
+Good governance practices �  What is the policy to assess good governance practices of the investee companies?
+
+include sound management     Companies are excluded based on verified failure to respect established norms corresponding to four good
+structures, employee         governance practices: sound management structures, employee relations, remuneration of staff and tax
+relations, remuneration of   compliance. The excluded companies are based on information provided by external data providers and in
+staff and tax compliance.    certain circumstances internal research. In certain circumstances, the Investment Manager may override the
+                             information received. The override decision is made by an internal decision-making body which is composed of
+                             functions including Investments, Compliance and Legal.
+
+                             Further, the Investment Manager actively encourages and conducts dialogues with investee companies on
+                             governance issues, also to prepare voting decisions in advance of shareholder meetings (regularly for direct
+                             investments in shares). Decisions on how to exercise voting rights also consider broader sustainability issues.
+                             Further details on the Investment Manager's approach to the exercise of voting rights and company engagement
+                             is set out in the Management Company's Stewardship Statement.
+
+                             What is the asset allocation planned for this financial product?
+
+Asset allocation describes   The asset allocation section describes which assets of the portfolio the Investment Manager commits to use to
+the share of investments in  promote environmental or social characteristics:
+specific assets.
+                             - The Investment Manager commits to employ the internal score described in the section "What are the binding
+                                 elements of the investment strategy used to select the investments to attain each of the environmental or social
+                                 characteristics promoted by this financial product?" for at least 90% (#1 Aligned with E/S characteristics) of the
+                                 Sub-Fund's portfolio. The basis for the calculation of the 90% threshold is the Sub-Fund's net asset value except
+                                 instruments that are not scored by nature as described in the section "What investment strategy does this
+                                 financial product follow?".
+
+                             - Min. 3.00% (#1A Sustainable) of Sub-Fund's net asset value will be invested in Sustainable Investments.
+
+                             - Min. 0.01% of Sub-Fund's net asset value will be invested in investments that are aligned with the EU Taxonomy.
+
+                             The Investment Manager does not commit to a minimum share of environmentally Sustainable Investments that are
+                             not aligned with the EU Taxonomy. The Investment Manager does not commit to a minimum share of socially
+                             Sustainable Investments. Sustainable Investments will be included in the Sustainable Investment proportion the
+                             Investment Manager has committed to (min. 3.00%) irrespective of their contribution to environmental and/or social
+                             objectives.
+
+                             Investments  #1 Aligned with E/S  #1A Sustainable                  Taxonomy-aligned
+                                             characteristics                                   Other environmental
+                                                                #1B Other E/S
+                                                #2 Other        characteristics                         Social
+
+                             #1 Aligned with E/S characteristics includes the investments of the financial product used to attain the environmental or social characteristics
+                             promoted by the financial product.
+                                   #2 Other includes the remaining investments of the financial product which are neither aligned with the environmental or social characteristics, nor are
+                                   qualified as sustainable investments.
+                                   The category #1 Aligned with E/S characteristics covers:
+                                   - The sub-category #1A Sustainable covers sustainable investments with environmental or social objectives.
+                                   - The sub-category #1B Other E/S characteristics covers investments aligned with the environmental or social characteristics that do not qualify as
+
+                                        sustainable investments.
+
+                                 � How does the use of derivatives attain the environmental or social characteristics promoted by the financial
+                                       product?
+
+                                       Derivatives are not used to attain the environmental or social characteristics promoted by the Sub-Fund.
+
+Taxonomy-aligned activities      To what minimum extent are sustainable investments with an environmental objective aligned with the EU
+are expressed as a share of:     Taxonomy?
+- turnover reflecting the
+                                 The Investment Manager commits to a minimum percentage of 0.01% of investments that are aligned with the
+    share of revenue from        EU Taxonomy.
+    green activities of
+    investee companies,          Taxonomy-aligned investments include debt and/or equity investments in environmentally sustainable economic
+- capital expenditure            activities aligned with the EU-Taxonomy. The Taxonomy-aligned data is provided by an external data provider.
+    (CapEx) showing the          The Investment Manager has assessed the quality of such data. The data will not be subject to an assurance
+    green investments made       provided by auditors or a review by third parties. The data will not extend to government bonds. As of today,
+    by investee companies,       there is no recognized methodology available to determine the proportion of Taxonomy-aligned activities when
+    e.g., for a transition to a  investing in government bonds.
+    green economy.
+- operational expenditure        Taxonomy-aligned activities in this disclosure are based on share of revenues. Taxonomy-aligned data is only in
+    (OpEx) reflecting green      some cases data reported by companies in accordance with the EU Taxonomy. In case data is not reported by
+    operational activities of    companies, the data provider derives Taxonomy-aligned data from other available equivalent public data.
+    investee companies.
+                                 � Does the financial product invest in fossil gas and/or nuclear energy related activities that comply with the
+                                       EU Taxonomy1?
+
+                                  Yes                 In nuclear energy
+                                      In fossil gas
+
+                                  No
+
+                                 The Investment Manager does not pursue any investments in fossil gas and/or nuclear energy related
+                                 activities that comply with the EU Taxonomy. Nevertheless, the Investment Manager may invest in
+                                 corporates which are also active in these activities. Further information will be provided as part of the
+                                 annual reporting, if relevant.
+
+                                 The two graphs below show in green the minimum percentage of investments that are aligned with the EU Taxonomy. As there is no
+                                 appropriate methodology to determine the Taxonomy-alignment of sovereign bonds*, the first graph shows the Taxonomy-alignment in
+                                 relation to all the investments of the financial product including sovereign bonds, while the second graph shows the Taxonomy-alignment
+                                 only in relation to the investments of the financial product other than sovereign bonds.
+
+                                 1. Taxonomy-alignment of investments including  2. Taxonomy-alignment of investments excluding
+                                                     sovereign bonds *                               sovereign bonds *
+
+                                                     0.01%                                           0.01%
+
+                                 Taxonomy-                                       Taxonomy-
+                                 aligned (no fossil                              aligned (no fossil
+                                 gas and nuclear)                                gas and nuclear)
+
+                                 Non Taxonomy-                                   Non Taxonomy-
+                                 aligned                                         aligned
+
+                                                     99.99%                                          99.99%
+
+                                                                                                                                               This graph represents X% of the total investments.
+
+                                                                                                                                               It is noted that this Sub-Fund does not provide for a binding
+                                                                                                                                               minimum quota for investments in sovereign bonds. Therefore, this
+                                                                                                                                               Sub-Fund may have (but must not have) an exposure to sovereign
+                                                                                                                                               bonds. In the absence of a binding minimum quota for investments
+                                                                                                                                               in sovereign bonds, this graph does not generate any additional
+                                                                                                                                               added value compared to the left-hand graph.
+
+                                                  * For the purpose of these graphs, `sovereign bonds' consist of all sovereign exposures
+
+                                 1 Fossil gas and/or nuclear related activities will only comply with the EU Taxonomy where they contribute to limiting climate change ("climate change
+                                 mitigation") and do not significantly harm any EU Taxonomy objective - see explanatory note in the left hand margin. The full criteria for fossil gas and
+                                 nuclear energy economic activities that comply with the EU Taxonomy are laid down in Commission Delegated Regulation (EU) 2022/1214.
+Enabling activities directly                       � What is the minimum share of investments in transitional and enabling activities?
+eTnraanbsleitiootnhaelraaccttiivviittiieess taore        The Investment Manager does not commit to a split of minimum taxonomy alignment into transitional,
+macatikveitiaessufobrstwahnitciahllow-                   enabling activities and own performance.
+ccoanrbtroibnuatliotenrntoataivnes are not
+eyentvairvoanimlaebnletaal nodbjaemctoivneg.       What is the minimum share of sustainable investments with an environmental objective that are not aligned
+others have greenhouse gas                         with the EU Taxonomy?
+emission levels                                    The Investment Manager does not commit to a minimum share of environmentally Sustainable Investments that
+corresponding to the best                          are not aligned with the EU Taxonomy. Taxonomy-aligned investments are considered a sub-category of
+performance.                                       Sustainable Investments. If an investment is not Taxonomy-aligned since the activity is not yet covered under the
+                                                   EU Taxonomy or the positive contribution is not substantial enough to comply with the Taxonomy technical
+are sustainable investments                        screening criteria, the investment can still be considered an environmentally Sustainable Investment provided it
+with an environmental                              complies with all criteria. The overall Sustainable Investment share (min. 3.00%) may also include investments
+objective that do not take                         with an environmental objective in economic activities that do not qualify as environmentally sustainable under
+into account the criteria for                      the EU Taxonomy.
+environmentally sustainable
+economic activities under
+the EU Taxonomy.
+
+                                                   What is the minimum share of socially sustainable investments?
+
+                                                   The Investment Manager does not commit to a minimum share of socially Sustainable Investments. Sustainable
+                                                   Investments may also include investments with a social objective. Any socially Sustainable Investments will be
+                                                   included in the Sustainable Investment proportion the Investment Manager has committed to (min. 3.00%)
+                                                   irrespective of their contribution to environmental and/or social objectives.
+
+                                                   What investments are included under "#2 Other", what is their purpose and are there any minimum
+                                                   environmental or social safeguards?
+
+                                                   The type of instruments included under "#2 Other" are eligible assets according to the prospectus. They include
+                                                   cash, cash equivalents as well as Target Funds, eligible asset classes and derivatives which do not specifically
+                                                   promote environmental or social characteristics. The Sub-Fund may make use of derivatives, which always fall
+                                                   under category "#2 Other" for hedging liquidity management and efficient portfolio management as well as
+                                                   investment purposes. For those investments no environmental or social safeguards are applied.
+
+Reference benchmarks are                           Is a specific index designated as a reference benchmark to determine whether this financial product is
+indexes to measure whether                         aligned with the environmental and/or social characteristics that it promotes?
+the financial product attains
+the environmental or social                        No, the Investment Manager has not assigned a reference benchmark to determine alignment with the
+characteristics that they                          environmental and/or social characteristics that the Sub-Fund promotes.
+promote.
+                                                   � How is the reference benchmark continuously aligned with each of the environmental or social characteristics
+                                                         promoted by the financial product?
+
+                                                   � A reference benchmark is not used to determine alignment with the environmental or social characteristics
+                                                         promoted by the financial product.
+
+                                                   � How is the alignment of the investment strategy with the methodology of the index ensured on a continuous basis?
+
+                                                   � A reference benchmark is not used to determine alignment with the environmental or social characteristics
+                                                         promoted by the financial product.
+
+                                                   � How does the designated index differ from a relevant broad market index?
+
+                                                   � A reference benchmark is not used to determine alignment with the environmental or social characteristics
+                                                         promoted by the financial product.
+
+                                                   � Where can the methodology used for the calculation of the designated index be found?
+
+                                                   � A reference benchmark is not used to determine alignment with the environmental or social characteristics
+                                                         promoted by the financial product.
+
+                                                   Where can I find more product specific information online?
+
+                                                   More product-specific information can be found on the website: https://regulatory.allianzgi.com/SFDR.
+

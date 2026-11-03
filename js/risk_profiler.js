@@ -228,7 +228,7 @@
     var q = question(qid), o = q && answers ? option(q, answers[qid]) : null;
     return o && o.phrase ? o.phrase : '';
   }
-  // opts: { suggestedSri, chosenSri, overrideReason } to add the adviser's lower rating
+  // opts: { suggestedSri, chosenSri, overrideReason } to add the adviser's lower or higher rating
   function narrative(answers, ctx, result, opts) {
     answers = answers || {}; opts = opts || {};
     var T = CFG.text;
@@ -246,8 +246,8 @@
     risk.push(fill(T.ratingSentence, { sri: r.sri, sriLabel: r.sriLabel }));
     out.risk = risk.join(' ');
     if (r.knowledge) out.experience = fill(T.knowledgeSentence, { level: r.knowledge.label.toLowerCase() });
-    if (opts.suggestedSri && opts.chosenSri && opts.chosenSri < opts.suggestedSri) {
-      out.override = fill(T.overrideSentence, { suggested: opts.suggestedSri, chosen: opts.chosenSri, reason: String(opts.overrideReason || '').trim() });
+    if (opts.suggestedSri && opts.chosenSri && opts.chosenSri !== opts.suggestedSri) {
+      out.override = fill(opts.chosenSri < opts.suggestedSri ? T.overrideSentence : T.overrideHigherSentence, { suggested: opts.suggestedSri, chosen: opts.chosenSri, reason: String(opts.overrideReason || '').trim() });
     }
     var s = r.sustainability;
     if (s) {

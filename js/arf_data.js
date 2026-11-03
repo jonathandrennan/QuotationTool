@@ -4,6 +4,7 @@
 var ARF_MAX_RATE   = 0.06;   // regulatory cap on gross growth rate
 var ARF_RATE_2     = 0.032;  // lower scenario (Allianz Euro Cash rate) — adjust here if needed
 var ARF_INCOME_ESC = 0.02;   // income escalation assumption pa
+var ARF_MAX_SP_COMM = 0.06;  // initial commission max, incl. any special deal (ARF workbook Parameters D78:E78)
 
 // Revenue deemed distribution rates
 var ARF_DEEMED = { age61: 0.04, age71: 0.05, over2m: 0.06 };

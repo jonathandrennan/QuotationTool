@@ -145,8 +145,14 @@ def ib_flow(d):
     # commission override stepper next to the code picker
     stepper_before = js(d, "return S.ib.spUpOverride")
     click(d, d.find_element(By.CSS_SELECTOR, '#i-codeinfo .comm-h'))
-    click(d, d.find_elements(By.CSS_SELECTOR, '#i-codeinfo .cstep button')[0])
+    click(d, d.find_element(By.CSS_SELECTOR, '#i-codeinfo button[onclick^="stepComm(\'sp\',-1"]'))
     check(js(d, 'return S.ib.spUpOverride') != stepper_before, 'SP initial commission stepper overrides')
+    # special deal: raises the commission, clears the manual change, keeps the version's allocation
+    click(d, d.find_element(By.CSS_SELECTOR, '#i-codeinfo button[onclick^="stepComm(\'sd\',1"]'))
+    check(js(d, 'return S.ib.specialDeal') == 0.005 and js(d, 'return S.ib.spUpOverride') is None
+          and abs(js(d, 'return ibSpUpRate(S.ib)') - 0.03) < 1e-9 and abs(js(d, 'return ibSpAllocationRate(S.ib)') - 1.01) < 1e-9,
+          'special deal stepper adds company-funded commission')
+    js(d, "resetComm('sd')")
     # regular contributions only, so the summary must not list "Single contribution €0"
     chip('sp')
     check(js(d, 'return S.ib.contribution') == 0 and js(d, 'return S.ib.rp') == 500, 'switching to regular only clears the single contribution')

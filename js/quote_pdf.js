@@ -17,6 +17,7 @@ function qtLogoSvg(height, color) {
 // ─── SVG line chart ───────────────────────────────────────────────────────────
 // opts = { width, height, xLabels:[...], series:[{label,color,values:[...],dash,width,area,fill,endDot}],
 //          yFormat:function(v){}, xTitle,
+//          yMin:'auto'         start the axis just below the lowest value instead of at 0
 //          legend:false        leave the legend out (the screen draws its own above the chart)
 //          xs:[...]            optional x position of each point (e.g. years since start), for uneven spacing
 //          xTicks:[{x,label}]  optional axis labels at x positions (replaces xLabels)
@@ -28,28 +29,30 @@ function qtSvgLineChart(opts) {
   var W = opts.width || 640, H = opts.height || 260, legend = opts.legend !== false;
   var padL = 50, padR = 14, padT = opts.markers && opts.markers.length ? 30 : 12, padB = legend ? (opts.xTitle ? 56 : 44) : 26;
   var n = opts.xs ? opts.xs.length : opts.xLabels.length;
-  var maxV = 0;
-  opts.series.forEach(function(s) { s.values.forEach(function(v) { if (v > maxV) maxV = v; }); });
+  var maxV = 0, minV = Infinity;
+  opts.series.forEach(function(s) { s.values.forEach(function(v) { if (v > maxV) maxV = v; if (v != null && v < minV) minV = v; }); });
   if (maxV <= 0) maxV = 1;
-  // nice axis max
-  var mag = Math.pow(10, Math.floor(Math.log(maxV) / Math.LN10));
+  // nice axis max; the axis starts at 0 unless yMin: 'auto' (then it starts just below the lowest value)
+  var auto = opts.yMin === 'auto' && minV > 0 && minV < maxV, spanV = auto ? maxV - minV : maxV;
+  var mag = Math.pow(10, Math.floor(Math.log(spanV) / Math.LN10));
   var steps = [1, 2, 2.5, 5, 10], niceMax = maxV, step = mag;
   for (var i = 0; i < steps.length; i++) {
     step = steps[i] * mag / 2;
-    if (maxV / step <= 6) break;
+    if (spanV / step <= 6) break;
   }
   niceMax = Math.ceil(maxV / step) * step;
+  var niceMin = auto ? Math.floor(minV / step) * step : 0;
   var plotW = W - padL - padR, plotH = H - padT - padB;
   var xs = opts.xs, x0 = xs ? xs[0] : 0, x1 = xs ? xs[n - 1] : n - 1;
   function xAt(v) { return padL + (x1 <= x0 ? 0 : (v - x0) * plotW / (x1 - x0)); }
   function x(i) { return xAt(xs ? xs[i] : i); }
-  function y(v) { return padT + plotH - (v / niceMax) * plotH; }
+  function y(v) { return padT + plotH - ((v - niceMin) / (niceMax - niceMin)) * plotH; }
   var fmt = opts.yFormat || function(v) { return fNum(v); };
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;font-family:' + QT_CHART_FONT.replace(/"/g, '') + '">';
   // grid + y labels
-  for (var g = 0; g <= niceMax + 1e-9; g += step) {
+  for (var g = niceMin; g <= niceMax + 1e-9; g += step) {
     var gy = y(g).toFixed(1);
-    if (g > 0) svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + gy + '" y2="' + gy + '" stroke="#EEF2F6" stroke-width="1"/>';
+    if (g > niceMin) svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + gy + '" y2="' + gy + '" stroke="#EEF2F6" stroke-width="1"/>';
     svg += '<text x="' + (padL - 8) + '" y="' + (+gy + 3.5) + '" font-size="10.5" fill="#8A96A3" text-anchor="end">' + escHtml(fmt(g)) + '</text>';
   }
   if (opts.xTicks) {
@@ -68,7 +71,7 @@ function qtSvgLineChart(opts) {
   if (opts.xTitle) svg += '<text x="' + (padL + plotW / 2) + '" y="' + (padT + plotH + 31) + '" font-size="10" fill="#5E6B78" text-anchor="middle">' + escHtml(opts.xTitle) + '</text>';
   svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + (padT + plotH) + '" y2="' + (padT + plotH) + '" stroke="#D5DDE6" stroke-width="1"/>';
   // series: filled areas first, then lines on top
-  function poly(s) { return x(0).toFixed(1) + ',' + y(0).toFixed(1) + ' ' + s.values.map(function(v, i) { return x(i).toFixed(1) + ',' + y(v).toFixed(1); }).join(' ') + ' ' + x(s.values.length - 1).toFixed(1) + ',' + y(0).toFixed(1); }
+  function poly(s) { return x(0).toFixed(1) + ',' + y(niceMin).toFixed(1) + ' ' + s.values.map(function(v, i) { return x(i).toFixed(1) + ',' + y(v).toFixed(1); }).join(' ') + ' ' + x(s.values.length - 1).toFixed(1) + ',' + y(niceMin).toFixed(1); }
   opts.series.forEach(function(s) {
     if (s.fill) svg += '<polygon points="' + poly(s) + '" fill="' + s.fill + '" stroke="none"/>';
     else if (s.area) svg += '<polygon points="' + poly(s) + '" fill="' + s.color + '" fill-opacity="' + (s.areaOpacity || 0.07) + '" stroke="none"/>';
@@ -389,9 +392,9 @@ function qtBuildPack(Q) {
     add('<h1>' + escHtml(T.sections.riskprofile) + '</h1>', { hdr: 'broker', cls: 'kwn newpage' });
     add('<table class="kv"><tr><td>Client</td><td>' + escHtml(clientName) + '</td><td>Adviser</td><td>' + escHtml(Q.broker.name) + '</td></tr>' +
         '<tr><td>Completed</td><td>' + escHtml(fmtDateLong(pf.date)) + '</td><td>Questionnaire</td><td>' + escHtml(pf.name) + '</td></tr></table>', { hdr: 'broker' });
-    var lowered = Q.risk.sri < pr.sri;
+    var changed = Q.risk.sri === pr.sri ? '' : (Q.risk.sri < pr.sri ? 'Lowered' : 'Raised') + ' by your adviser from ' + pr.sri;
     add(qtStat3([
-      ['Your risk rating', Q.risk.sri + ' &ndash; ' + escHtml(ESMA_LABELS[Q.risk.sri]), lowered ? 'Lowered by your adviser from ' + pr.sri : ''],
+      ['Your risk rating', Q.risk.sri + ' &ndash; ' + escHtml(ESMA_LABELS[Q.risk.sri]), changed],
       ['Capacity for loss', escHtml(pr.capacity.label)]
     ]), { hdr: 'broker' });
     add(qtRiskStrip(Q.risk.sri), { hdr: 'broker' });
@@ -507,7 +510,7 @@ function qtBuildPack(Q) {
       [(isPrsa ? 'Annual management charge' : 'Policy charge') + ' (incl. trail commission)', pct(mix.admin) + ' a year'],
       ['Fund charges, weighted', pct(mix.fmc) + ' a year'],
       mix.gtee > 0 ? ['Guarantee charge, weighted', pct(mix.gtee) + ' a year'] : null,
-      ['Contribution charge', (r.spContribCharge > 0 || r.rpContribCharge > 0) ? 'Applies, see Charges' : 'None'],
+      ['Contribution charge', (isPrsa ? (r.spContribCharge > 0 || r.rpContribCharge > 0) : qtAllocation(r).charge > 0) ? 'Applies, see Charges' : 'None'],
       ['Total annual charge', pct(mix.total) + ' a year', true]
     ];
     add('<div class="fgrid">' + qtFactBlock('YOU', youRows) + qtFactBlock('YOUR PLAN', planRows) +
@@ -665,7 +668,7 @@ function qtBuildPack(Q) {
       add(ti + '</tbody></table>', { cls: 'split' });
       imp([qtFill(T.ibImportant, { rate: ibRt })]);
       p(qtFill(T.ibRiy, { rate: ibRt, netRate: pct(r.p.netRate) }));
-      p(r.p.fundZeroYear ? qtFill(T.ibDepletes, { rate: ibRt, year: r.p.fundZeroYear, age: r.p.depletionAge }) : qtFill(T.ibLasts, { rate: ibRt }));
+      p(r.p.fundZeroYear ? qtFill(T.ibDepletes, { rate: ibRt, year: r.p.fundZeroYear, age: r.p.depletionAge }) : qtFill(T.ibLasts, { rate: ibRt, years: r.years }));
       p(qtIbIncomeSentence(r));
       p(qtFill(T.ibTaxNote, { rate: pct(r.taxRate), ptype: r.policyholderType }));
       p(T.ibDepletionWarning);
@@ -732,10 +735,15 @@ function qtBuildPack(Q) {
       if (QT_SHOW_EFFECT_OF_CHARGES) add('<h3 class="kwn">Effect of charges</h3>');
       if (QT_SHOW_EFFECT_OF_CHARGES) p(qtFill(T.ibRiyCharges, { rate: pct(r.rate), netRate: pct(r.p.netRate) }) + ' ' + qtRiyWhy('ib', r));
     }
-    // ARF / Bond: no contribution charges (the PRSA has its own table above). Then plain-English definitions of each charge.
-    if (!isPrsa) add('<div class="pair">' +
-        '<div class="fbr"><span>Contribution charge</span><b>None</b></div>' +
+    // ARF / Bond: a contribution charge only where the agreed commission is above the base rate (the PRSA has
+    // its own table above), plus any additional allocation. Then plain-English definitions of each charge.
+    if (!isPrsa) {
+      var al = qtAllocation(r);
+      add('<div class="pair">' +
+        '<div class="fbr"><span>Contribution charge</span><b>' + (al.charge > 0 ? pct(al.charge) + ' of single contribution' : 'None') + '</b></div>' +
         '<div class="fbr"><span>Transfer charge</span><b>Not applicable</b></div></div>');
+      if (al.sentences.length) p(al.sentences.join(' '));
+    }
     add('<div class="defs">' + T.chargeDefs.map(function(d) {
       return '<div><b>' + escHtml(d[0]) + '</b><span>' + escHtml(d[1]) + '</span></div>';
     }).join('') + '</div>');
@@ -751,7 +759,7 @@ function qtBuildPack(Q) {
     var initComm = r.totalInitialComm != null ? r.totalInitialComm : r.initialComm;
     var trailComm = r.totalOngoingComm != null ? r.totalOngoingComm
       : (r.p1 || r.p) ? ((r.p1 || r.p).yearly.reduce(function(a, y) { return a + y.comm; }, 0) - (r.initialComm || 0)) : null;
-    var toWhen = isPrsa ? 'to age ' + r.nra : 'over the life of your plan';
+    var toWhen = isPrsa ? 'to age ' + r.nra : isIb ? 'over ' + r.years + ' years' : 'over the life of your plan';
     add(qtStat3([
       ['Initial commission', fEUR(initComm), 'paid in year 1'],
       ['Trail commission', pct(r.cc.ongoing) + ' a year', trailComm != null ? 'of fund value, est. ' + fEUR(trailComm) + ' ' + toWhen : 'of fund value'],
@@ -773,7 +781,7 @@ function qtBuildPack(Q) {
       var trailIb = r.p.yearly.reduce(function(a, y){ return a + y.comm; }, 0) - r.initialComm;
       if (r.contribution > 0) rt2 += '<tr><td class="l">Initial &ndash; single contribution</td><td class="l">' + pct(r.spUpRate) + ' of single contribution</td><td>' + fEUR(r.spUpRate * r.contribution) + '</td></tr>';
       if (r.rpInitialComm > 0) rt2 += '<tr><td class="l">Initial &ndash; regular contribution</td><td class="l">' + pct(IB_CODES[r.code].rpUp) + ' of first year\'s regular contributions</td><td>' + fEUR(r.rpInitialComm) + '</td></tr>';
-      rt2 += '<tr><td class="l">Trail</td><td class="l">' + pct(r.cc.ongoing) + ' a year of fund value</td><td>' + fEUR(trailIb) + ' at ' + pct(r.rate) + '<br><span class="muted">projected total over the life of your Investment Bond</span></td></tr>';
+      rt2 += '<tr><td class="l">Trail</td><td class="l">' + pct(r.cc.ongoing) + ' a year of fund value</td><td>' + fEUR(trailIb) + '<br><span class="muted">projected total over ' + r.years + ' years</span></td></tr>';
     }
     add(rt2 + '</tbody></table>');
     p(T.remunInitial + ' ' + T.remunTrail);
@@ -797,7 +805,7 @@ function qtBuildPack(Q) {
         yt += '<tr><td>' + c1.year + '</td><td>' + (c1.contrib > 0 ? fEUR(c1.contrib) : '&ndash;') + '</td><td>' + fEUR(c1.comm) + '</td><td>' + fEUR(c2.comm) + '</td></tr>';
       });
     } else {
-      yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Contributions payable in that year</th><th>Projected remuneration at ' + pct(r.rate) + '</th></tr></thead><tbody>';
+      yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Contributions payable in that year</th><th>Projected remuneration</th></tr></thead><tbody>';
       r.p.commRows.forEach(function(c1) {
         yt += '<tr><td>' + c1.year + '</td><td>' + (c1.contrib > 0 ? fEUR(c1.contrib) : '&ndash;') + '</td><td>' + fEUR(c1.comm) + '</td></tr>';
       });
@@ -806,7 +814,7 @@ function qtBuildPack(Q) {
     p(T.remunTableNote, 'small');
     add('<h3 class="kwn">Clawback</h3>');
     p(r.clawback ? (isPrsa ? T.prsaClawback : isArf ? T.arfClawback : T.ibClawback) : T.noClawback);
-    if (r.spUpOverridden || (isPrsa && r.rpUpOverridden)) p(T.overrideNote);
+    if (r.spUpOverridden || (isPrsa ? r.rpUpOverridden : r.specialDeal > 0)) p(T.overrideNote);
   }
 
   // ── 8. Important ──

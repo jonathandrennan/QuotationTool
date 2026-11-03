@@ -97,7 +97,7 @@ var QT_TEXT = {
   ibIncomePct: 'You have chosen an initial income of {incomePct} of the fund per annum ({income}).',
   ibDeferNote: 'Income is deferred until age {incomeAge}.',
   ibDepletes: 'At {rate} growth, your fund is projected to run out in year {year} (around age {age}), at which point your policy will end.',
-  ibLasts: 'At {rate} growth, your fund is not projected to run out within 40 years.',
+  ibLasts: 'At {rate} growth, your fund is not projected to run out within {years} years.',
   ibTaxNote: 'This illustration assumes a {ptype} policyholder, with exit tax of {rate} applying to chargeable events, including the Revenue "deemed disposal" rule which taxes the gain on your policy every 8 years whether or not you make a withdrawal.',
   ibDepletionWarning: 'Where amounts are withdrawn from your Investment Bond, its value will reduce and could run out, particularly if a high level of income is taken, investment returns are poor or you live a long time.',
   ibSurrenderNote: 'The charges shown in column C for the early years assume that the policy is fully encashed and an exit charge is incurred. No exit charge applies to the regular, scheduled withdrawals described in this quotation. If the policy is not fully encashed during the exit charge period, no exit charge is payable and the charges actually deducted are lower than shown.',
@@ -106,6 +106,11 @@ var QT_TEXT = {
   chargesIntro: 'The charges below are deducted on a monthly basis, either directly from your policy or indirectly from the funds in which it invests.',
   prsaFundCharges: 'An Annual Management Charge (AMC) of {admin} and a Fund Management Charge (FMC), which varies by fund, apply to your PRSA. Where you have chosen a fund guarantee, a guarantee charge also applies.',
   arfFundCharges: 'An annual policy charge of {admin} and a fund management charge, which varies by fund, apply to your ARF. Where you have chosen the optional rolling guarantee, a guarantee charge also applies.',
+  // ARF / Bond allocation of the single contribution. A manual commission change moves it off 100%
+  // (a special deal doesn't); K/L/M Bond versions add 1%. DRAFT: needs Compliance sign-off.
+  allocCharge: 'A contribution charge of {pct} ({amount}) applies to your single contribution, because the initial remuneration agreed with your adviser is above the standard rate for this product.',
+  allocExtra: 'An additional allocation of {pct} ({amount}) is added to your single contribution by Allianz Global Life.',
+  allocExtraRp: 'An additional allocation of {pct} is added to each regular contribution by Allianz Global Life.',
   // Contribution charges table on the Charges page: when each charge applies
   prsaContribRule: { sp: '{charge} on single contributions below {threshold}', rp: '{charge} on regular contributions below {threshold}', ofv: 'No charge on transfers' },
   prsaRiy: 'For your plan, the total effect of these charges on the projected benefits at retirement is equivalent to a single charge of {riy} per annum. In other words, charges reduce the assumed growth rate from {gross} to {net}.',
@@ -553,6 +558,18 @@ function qtAssetNote(mix, short) {
   if (!b.factsheet && !b.target) return short ? '' : T.assetSplitNote;
   return [N.lead, b.factsheet ? qtFill(N.factsheet, { asOf: asOf }) : '', b.target ? N.target : '', N.tail]
     .filter(Boolean).join(' ');
+}
+
+// ARF / Bond: allocation of the single (and Bond regular) contributions, as the spreadsheet's point-of-issue
+// inputs show it: below 100% is a contribution charge, above 100% an additional allocation.
+// Returns { charge, extra, sentences } where charge/extra are the single-contribution rates (0 if none).
+function qtAllocation(r) {
+  var T = QT_TEXT, sp = r.spAllocRate == null ? 1 : r.spAllocRate, rp = r.rpAllocRate == null ? 1 : r.rpAllocRate;
+  var contrib = r.contribution || 0, d = Math.round((sp - 1) * 1e6) / 1e6, out = { charge: 0, extra: 0, sentences: [] };
+  if (contrib > 0 && d < 0) { out.charge = -d; out.sentences.push(qtFill(T.allocCharge, { pct: pct(-d), amount: fEUR(-d * contrib) })); }
+  if (contrib > 0 && d > 0) { out.extra = d; out.sentences.push(qtFill(T.allocExtra, { pct: pct(d), amount: fEUR(d * contrib) })); }
+  if ((r.rp || 0) > 0 && rp > 1 + 1e-9) out.sentences.push(qtFill(T.allocExtraRp, { pct: pct(rp - 1) }));
+  return out;
 }
 
 // Explains why the Reduction in Yield (effect of charges) differs from the total annual charge.

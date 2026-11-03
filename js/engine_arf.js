@@ -16,14 +16,25 @@
 //   incomeValue             € p.a. (custom_amount) or % of fund p.a. (custom_pct)
 //   incomeStartAge          integer age
 //   incomeEscalationPct     percent p.a. (custom_amount only; others use ARF_INCOME_ESC)
+//   specialDeal             null or decimal: company-funded uplift on the standard initial commission
 //   spUpOverride            null or decimal
 //   rate1Override, rate2Override   null or decimal
 // }
 
 var ARF_MILESTONES = {1:1,2:1,3:1,4:1,5:1,10:1,15:1,20:1,25:1,30:1,35:1,40:1};
 
+// Base initial commission: standard rate plus any special deal (Parameters col F,
+// "SP Upfront Special Deal"). Paid by the company, so it doesn't change the allocation.
+function arfBaseSpUp(inp) {
+  return ARF_CODES[inp.code].spUp + (inp.specialDeal || 0);
+}
 function arfSpUpRate(inp) {
-  return inp.spUpOverride != null ? inp.spUpOverride : ARF_CODES[inp.code].spUp;
+  return inp.spUpOverride != null ? inp.spUpOverride : arfBaseSpUp(inp);
+}
+// Allocation: 1 + (base commission - commission used), so a manual change trades off
+// against the amount invested (ARF Projections C75)
+function arfAllocationRate(inp) {
+  return 1 + (arfBaseSpUp(inp) - arfSpUpRate(inp));
 }
 
 function arfBlendedMetrics(inp) {
@@ -107,8 +118,7 @@ function arfRunProjection(inp, annualGrossRate) {
 
   var incomeStartMonth = inp.incomeStartAge ? Math.max(1, Math.round((inp.incomeStartAge - startAge) * 12) + 1) : 1;
 
-  // Allocation: 1 + (standard commission - commission used), so an override changes the amount invested
-  var allocation = 1 + (cc.spUp - spUpRate);
+  var allocation = arfAllocationRate(inp);
   var fund = contrib * allocation;
   var noChargeFund = contrib * allocation;
   var cumGrowth = 0, cumCharges = 0, cumIncome = 0, cumComm = 0;
@@ -234,7 +244,7 @@ function arfRunProjection(inp, annualGrossRate) {
     depletionAge: fundZeroMonth != null ? Math.floor(startAge + fundZeroMonth / 12) : null,
     effectiveGross: annualGrossRate, netRate: irrChargeA, riy: irrNoChargeA - irrChargeA,
     chargeRate: cc.admin + bm.ext + bm.gtee, fundByYear: fundByYear,
-    spUpRate: spUpRate, spUpOverridden: inp.spUpOverride != null,
+    spUpRate: spUpRate, spUpOverridden: inp.spUpOverride != null, spAllocRate: allocation,
     initialComm: spUpRate * contrib,
     firstIncome: firstIncomeYear ? firstIncomeYear.income : 0,
     firstIncomeYear: firstIncomeYear ? firstIncomeYear.year : null,
@@ -285,6 +295,7 @@ function runArfQuote(inp) {
     rate1Overridden: inp.rate1Override != null, rate2Overridden: inp.rate2Override != null,
     startAge: p1.startAge, contribution: inp.contribution,
     spUpRate: p1.spUpRate, spUpOverridden: p1.spUpOverridden,
+    specialDeal: inp.specialDeal || 0, baseSpUp: arfBaseSpUp(inp), spAllocRate: p1.spAllocRate,
     initialComm: p1.initialComm,
     clawback: p1.spUpRate > 0,
     hasSurrender: cc.surrender.some(function(x){ return x > 0; }),

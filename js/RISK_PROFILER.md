@@ -15,7 +15,7 @@ in it is a proposal, so change the numbers in `risk_profiler_data.js` only with 
 |---|---|---|---|
 | Your finances | Q1 | Financial cushion | Capacity for loss (3, 2 or 1 points) |
 |  | Q2 | Impact of a loss | Capacity for loss (1, 2 or 3 points) |
-| Your timing | Q3 | Investment horizon (slider, whole years 0–12) | Time limit: under 3 years 3, 3 to under 7 years 5, 7 or more none |
+| Your timing | Q3 | Investment horizon (slider, whole years 0–12) | Time limit: under 3 years 3, 3 to under 5 years 4, 5 or more none |
 | Your attitude to risk | Q4 | Largest 12-month fall you could accept (slider, 0–40% in 0.5% steps) | Rating 1–6 by band |
 |  | Q5 | What you would do after a 20% fall | Rating 2, 3, 5 or 6 |
 |  | Q6 | What you want from the investment | Rating 1–6 |
@@ -32,7 +32,7 @@ in it is a proposal, so change the numbers in `risk_profiler_data.js` only with 
 4. **Knowledge level:** from Q7, one level higher if Q8 is right (High stays High), one level lower if Q8 is wrong or "I don't know". It does not change the rating.
 5. **Important information:** after the introduction and before Q1 the client must choose "I accept". "I do not accept" shows a stop message with a way back. The time of acceptance is in `state.accepted` (pass it back as `accepted` when mounting) and in the pack's Risk profile section.
 
-Q3 bands: under 3 years is capped at 3, 3 to under 7 years at 5, 7 or more has no cap.
+Q3 bands: under 3 years is capped at 3, 3 to under 5 years at 4, 5 or more has no cap.
 
 Q4 bands: under 2.5% is 1, under 7% is 2, under 15% is 3, under 25% is 4, under 40% is 5, 40% or more is 6. A value
 between two marks scores the lower band.
@@ -104,12 +104,12 @@ Answers are `{ questionId: optionId }`, except `horizon` (a number, whole years)
   risk profiling. The profiler runs in a dialog. Nothing on the page changes until the adviser chooses "Use this
   result", which sets the risk rating (and the sustainability Yes/No when Part E is on).
   The sustainability Yes/No is recorded by the adviser while Part E is off. Closing part-way keeps the answers (and the acceptance) for later. Closing after editing a finished profile undoes the edits. The
-  adviser may choose a lower rating, but must give a reason, which is recorded in the Statement of Suitability;
-  higher ratings are locked (an adviser whose assessment is higher uses their own risk profiling). Applying changed
+  adviser may choose a lower or a higher rating (up to 6; level 7 stays locked), but must give a reason, which is
+  recorded in the Statement of Suitability and the Risk profile record ("Lowered" or "Raised by your adviser"). Applying changed
   answers that give a new result replaces the rating and clears the reason. The flags are listed above the rating
   picker. The date of birth comes from Step 2.
 - **Statement of Suitability.** "Your personal and financial circumstances" (Q1–Q3), "Your attitude to risk" (the
-  attitude answers, capacity, any limit, the rating, knowledge, and any lower rating with its reason) and "Your
+  attitude answers, capacity, any limit, the rating, knowledge, and any lower or higher rating with its reason) and "Your
   sustainability preferences" (the S1–S4 answers, then the SFDR split of the funds) are filled from the profiler.
   Wording in `risk_profiler_data.js` and `quote_text.js`.
 - **Pack.** A "Risk profile" section (after the Statement of Suitability, on the adviser's letterhead) lists the
@@ -121,6 +121,10 @@ Answers are `{ questionId: optionId }`, except `horizon` (a number, whole years)
 - `node tests/risk_profiler_test.js` compares the engine with an independent transcription of the draft's rules on
   every combination of the scored answers (with Q4 at each band's edges, at two ages), then checks knowledge, flags,
   completeness, the conditional sustainability questions, the written outputs and the draft's test clients
-  (Appendix A) whose answers can be read from their descriptions (P1, P7, P8, P10, P13, P17, P18).
+  (Appendix A) whose answers can be read from their descriptions (P1, P7, P8, P10, P13, P17, P18), and the ten worked
+  test cases in `tests/risk_profiler_cases.js`.
+- `node tests/build_risk_profiler_cases.js` runs those ten cases through the engine and writes
+  `docs/risk-profiler-test-cases.md` and `Risk-Profiler-Test-Cases.docx`: each client's answers, the working, the
+  rating and why it suits them. It stops if a case's result no longer matches the reasoning written for it.
 - `python tests/risk_profiler_ui_test.py` drives the standalone page and the tool end to end (headless Edge), and
   saves screenshots and `rp_pack.pdf` in `tests/out`.

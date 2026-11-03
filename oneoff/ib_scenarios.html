@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Investment Bond: return scenarios with the Annual Guarantee</title>
+<!--
+  One-off page, outside the Quotation Tool. It loads the tool's own files from ../js/ and changes none of them
+  at run time:
+    - numbers      engine_ib.js (ibRunProjection takes a return for each policy year and an optional Annual
+                   Guarantee floor; runIbQuote gives the standard quotation figures)
+    - quote pages  quote_pdf.js (qtBuildPack builds the real quotation pack; the pages below are added into it)
+    - wording      quote_text.js / quote_content.js
+  So anything changed in those files shows up here. See oneoff/README.md.
+-->
+<style>
+:root { --ink:#0E1E33; --muted:#5E6B78; --line:#D5DDE6; --bg:#F4F6F9; --blue:#003781; --warn:#9A3412; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:'Allianz Neo', Arial, Helvetica, sans-serif; font-size:13px; line-height:1.45; font-variant-numeric:tabular-nums; }
+h1 { font-size:22px; margin:0; color:var(--blue); font-weight:600; }
+h2 { font-size:16px; margin:0 0 10px; color:var(--blue); font-weight:600; }
+.wrap { max-width:1180px; margin:0 auto; padding:20px; }
+.card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-bottom:14px; }
+.grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px 14px; }
+label.f { display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--muted); }
+label.f input, label.f select, label.f textarea { font:inherit; color:var(--ink); padding:6px 8px; border:1px solid var(--line); border-radius:5px; background:#fff; }
+label.c { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+.derived { margin-top:10px; font-size:12px; color:var(--muted); }
+.derived b { color:var(--ink); }
+.scen-h { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+.scen-h input.t { font:inherit; font-weight:600; font-size:14px; border:1px solid var(--line); border-radius:5px; padding:4px 8px; min-width:200px; }
+.rates { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+.rates label { display:flex; flex-direction:column; align-items:center; font-size:11px; color:var(--muted); }
+.rates input { width:64px; font:inherit; text-align:right; padding:5px 6px; border:1px solid var(--line); border-radius:5px; }
+.rates input.neg { color:var(--warn); }
+.presets { display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+.presets input { width:56px; font:inherit; padding:4px 6px; border:1px solid var(--line); border-radius:5px; text-align:right; }
+.secs { display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:6px; }
+button { font:inherit; font-size:12px; padding:5px 10px; border:1px solid var(--blue); background:#fff; color:var(--blue); border-radius:5px; cursor:pointer; }
+button.pri { background:var(--blue); color:#fff; }
+button:hover { filter:brightness(0.95); }
+.bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.bar .sp { flex:1; }
+.err { color:var(--warn); font-weight:600; font-size:12px; }
+#prev { width:100%; height:1100px; border:1px solid var(--line); border-radius:8px; background:#dfe3e8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="bar"><h1>Investment Bond: return scenarios</h1><span class="sp"></span>
+      <button type="button" onclick="exportCsv()">Download CSV</button>
+      <button type="button" class="pri" onclick="openPack()">Open to print / save as PDF</button></div>
+    <p class="derived" style="margin-top:6px">One-off illustration of example returns, year by year, with the Annual Guarantee. It builds the tool's own pack, worded as an illustration, and adds the example pages. Inputs are saved in this browser.</p>
+  </div>
+
+  <div class="card">
+    <h2>Client and adviser</h2>
+    <div class="grid">
+      <label class="f">Title<select id="salutation"><option>Mr</option><option>Mrs</option><option>Ms</option><option>Miss</option><option>Dr</option><option></option></select></label>
+      <label class="f">First name<input id="first"></label>
+      <label class="f">Surname<input id="last"></label>
+      <label class="f">Policy start date<input id="startStr" type="date"></label>
+      <label class="f">Adviser<input id="bname"></label>
+      <label class="f">Firm<input id="bfirm"></label>
+      <label class="f">Phone / email<input id="bphone"></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Plan</h2>
+    <div class="grid">
+      <label class="f">Policyholder<select id="ph"></select></label>
+      <label class="f">Version<select id="code"></select></label>
+      <label class="f">Single contribution (€)<input id="sp" inputmode="decimal"></label>
+      <label class="f">Fund<select id="fund"></select></label>
+      <label class="f">Special deal, paid by Allianz (%)<input id="sd" inputmode="decimal"></label>
+      <label class="f">Initial commission (%)<input id="comm" inputmode="decimal"></label>
+      <label class="c" style="margin-top:18px"><input type="checkbox" id="gtee"> Annual Guarantee</label>
+      <label class="f">Guarantee level (%)<input id="level" inputmode="decimal"></label>
+    </div>
+    <div class="derived" id="derived"></div>
+  </div>
+
+  <div id="scen-inputs"></div>
+  <div style="margin:0 0 14px"><button type="button" onclick="addScen()">+ Add another example</button></div>
+
+  <div class="card">
+    <h2>Pages to include</h2>
+    <p class="derived" style="margin:0">These pages come straight from the tool's pack, at the standard growth rate. The example pages are added after the fund information.</p>
+    <div class="secs" id="secs"></div>
+  </div>
+
+  <h2 style="margin-top:6px">Preview</h2>
+  <iframe id="prev" title="Illustration preview"></iframe>
+</div>
+
+<script src="../js/prsa_data.js"></script>
+<script src="../js/arf_data.js"></script>
+<script src="../js/ib_data.js"></script>
+<script src="../js/quote_common.js"></script>
+<script src="../js/engine_prsa.js"></script>
+<script src="../js/engine_arf.js"></script>
+<script src="../js/engine_ib.js"></script>
+<script src="../js/quote_text.js"></script>
+<script src="../js/quote_content.js"></script>
+<script src="../js/quote_assets.js"></script>
+<script src="../js/quote_pdf.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+// This is an illustration, not a quotation (requested by the broker). The tool's pack wording says "quotation" in
+// many places, so it is re-worded here, on this page only, without changing the tool's own text file.
+function illustrate(v) {
+  if (typeof v === 'string') return v.replace(/\ba quotation\b/g, 'an illustration').replace(/\bA quotation\b/g, 'An illustration')
+    .replace(/\bquotation\b/g, 'illustration').replace(/\bQuotation\b/g, 'Illustration').replace(/illustrations only and are not guaranteed/g, 'examples only and are not guaranteed');
+  if (Array.isArray(v)) return v.map(illustrate);
+  if (v && typeof v === 'object') { Object.keys(v).forEach(function(k) { v[k] = illustrate(v[k]); }); return v; }
+  return v;
+}
+illustrate(QT_TEXT);
+QT_TEXT.packValidity = 'Illustration produced {date}. Charges and assumptions may change.';
+QT_TEXT.quoteValidity = 'This illustration is based on charges, fund options and assumptions in place on {date}.';
+QT_TEXT.packImportant[0] = ['What this illustration is', 'Figures are based on the details shown in this illustration, the example returns used and current Revenue rules. It is not a quotation or an offer. Nothing is binding until you apply and Allianz accepts your application.'];
+QT_TEXT.packImportant.splice(1, 0, ['Example returns', 'The returns used are examples chosen for illustration. They are not forecasts and do not predict what the fund will return.']);
+QT_TEXT.packImportant.forEach(function(d) { if (d[0] === 'Policy conditions') d[1] = 'This illustration is not part of your contract. If there is any conflict, the policy conditions will prevail.'; });
+QT_TEXT.packCoverLines = ['Illustration', 'for'];
+QT_TEXT.packCoverKickers.ib = 'ILLUSTRATION ONLY · NOT A QUOTATION';
+QT_TEXT.packContents.title = ['In this', 'illustration'];
+QT_TEXT.packContents.intro = QT_TEXT.packContents.introKid = 'This illustration shows how the {productBrand} plan could work, using example returns. It is not a quotation or an offer. Read it together with the product brochure and the Key Information Document.';
+QT_TEXT.packProjectionLead.ib ='How your investment could grow at an example growth rate, based on the assumptions below.';
+// The Charges page's own allocation sentence and the fund-guide note are replaced or dropped below
+QT_TEXT.allocExtra = QT_TEXT.allocCharge = '[[alloc]]';
+QT_TEXT.packFundsSourceNote = '[[drop]]';
+QT_TEXT.disclaimerShort = 'This illustration is for illustration purposes only and does not form part of a contract. Figures are not guaranteed.';
+// Every chart in this pack starts its axis just below the lowest value, not at €0
+var qtSvgLineChartTool = qtSvgLineChart;
+qtSvgLineChart = function(opts) { opts.yMin = 'auto'; return qtSvgLineChartTool(opts); };
+
+function pctTrim(v) { return +(v * 100).toFixed(2) + '%'; }
+// Fix-ups on the finished pack HTML: things built in quote_pdf.js that this page words or lays out differently
+function illustrateHtml(html) {
+  var inp = planInp(guaranteeOn()), al = ibSpAllocationRate(inp), allocated = S.sp * al, levy = S.sp * IB_GOVT_LEVY;
+  // fund split columns are called "Share of plan", so they are not mistaken for the allocation rate
+  html = html.replace(/>Allocation<\/th>/g, '>Share of plan</th>')
+    .replace(/<span>Policyholder<\/span><b>([a-z])/g, function(m, c) { return '<span>Policyholder</span><b>' + c.toUpperCase(); })
+    .replace(/\ba (individual|exempt)\b/g, 'an $1')
+    .replace(/<p class="tiny">\[\[drop\]\][^<]*<\/p>/g, '')
+    // no age: the date of birth row on the summary, and the Age column of the standard projection table
+    .replace(/<div class="fbr"><span>Date of birth<\/span><b>.*?<\/b><\/div>/, '')
+    .replace(/<table class="num split"><thead><tr class="ltr"><th><\/th><th><\/th>([\s\S]*?)<\/table>/, function(t, rest) {
+      return ('<table class="num split"><thead><tr class="ltr"><th></th>' + rest + '</table>')
+        .replace('<th>Year</th><th>Age</th>', '<th>Year</th>').replace(/(<tr[^>]*><td>\d+<\/td>)<td>\d+<\/td>/g, '$1');
+    });
+  // Summary page: allocation rate, levy and the amount invested, under the single contribution
+  var fr = function(a, b) { return '<div class="fbr"><span>' + a + '</span><b>' + b + '</b></div>'; };
+  html = html.replace(/(<div class="fbh">CONTRIBUTIONS<\/div><div class="fbr"><span>Single contribution<\/span><b>[^<]*<\/b><\/div>)/,
+    '$1' + fr('Allocation rate', pctTrim(al) + ' &middot; ' + fEUR(allocated)) + fr('Less government levy (' + pctTrim(IB_GOVT_LEVY) + ')', '&minus;' + fEUR(levy)) +
+    fr('Amount invested', fEUR(allocated - levy)));
+  // Charges page: the contribution charge and allocation get their own section straight after the charges table
+  // (ahead of the government levy), in place of the one-line pair further down
+  html = html.replace(/<div class="pair"><div class="fbr"><span>Contribution charge<\/span>.*?Not applicable<\/b><\/div><\/div>/, '')
+    .replace(/<p>\[\[alloc\]\]<\/p>/g, '');
+  var gl = html.indexOf('<h3 class="kwn">Government levy</h3>'), at = gl < 0 ? -1 : html.lastIndexOf('<div class="blk', gl);
+  if (at >= 0) html = html.slice(0, at) + '<div class="blk" data-hdr="agl" data-grp="agl" data-sec="charges">' + allocationCharges(al) + '</div>' + html.slice(at);
+  html = html.replace('</head>', CHARGES_CSS + '</head>');
+  return html.replace(/Quotation for /g, 'Illustration for ').replace(/&ndash; Quotation &ndash;/g, '&ndash; Illustration &ndash;');
+}
+function allocationCharges(al) {
+  var allocated = S.sp * al, levy = S.sp * IB_GOVT_LEVY, d = al - 1;
+  var txt = Math.abs(d) < 1e-9 ? 'The allocation rate is 100%: all of your single contribution is allocated to your policy. There is no contribution charge.'
+    : d > 0 ? 'The allocation rate is ' + pctTrim(al) + ': for every €100 you pay in, €' + (100 * al).toFixed(2) + ' is allocated to your policy. There is no contribution charge.'
+    : 'The allocation rate is ' + pctTrim(al) + ': for every €100 you pay in, €' + (100 * al).toFixed(2) + ' is allocated to your policy. This is a contribution charge of ' + pctTrim(-d) + ' (' + fEUR(-d * S.sp) + '), because the initial commission agreed with your adviser is above the standard rate.';
+  return '<div class="allocbox"><h3 class="kwn">Allocation rate and contribution charge</h3>' +
+    '<table class="dt"><thead><tr><th class="l">Single contribution</th><th class="em">Allocation rate</th><th>Amount allocated</th><th>Government levy</th><th>Amount invested</th><th>Contribution charge</th></tr></thead>' +
+    '<tbody><tr><td class="l">' + fEUR(S.sp) + '</td><td class="em"><b>' + pctTrim(al) + '</b></td><td>' + fEUR(allocated) + '</td><td>&minus;' + fEUR(levy) + '</td><td><b>' + fEUR(allocated - levy) + '</b></td><td>' +
+    (d < -1e-9 ? pctTrim(-d) : 'None') + '</td></tr></tbody></table><p>' + txt + '</p></div>';
+}
+// More room on the Charges page: space above each heading and between a table and its note,
+// and the allocation section in its own tinted panel
+var CHARGES_CSS = '<style>' +
+  '.blk[data-sec=charges] { margin-bottom: 4.5mm; }' +
+  '.blk[data-sec=charges] h3 { margin-top: 4mm; margin-bottom: 2mm; }' +
+  '.blk[data-sec=charges] table + p, .blk[data-sec=charges] p + table { margin-top: 3mm; }' +
+  '.blk[data-sec=charges] .defs { gap: 4mm; margin-top: 2mm; }' +
+
+  '.allocbox table.dt thead th { white-space: nowrap; }' +
+  '.allocbox table.dt tbody td { border-bottom: none; padding-top: 3mm; padding-bottom: 3mm; font-size: 9.5pt; }' +
+  '.allocbox p { margin-top: 2.5mm; line-height: 1.6; }' +
+  '</style>';
+
+var STORE = 'qt_oneoff_ib_scenarios_v2';
+// SS75 WT2 annual returns, 12 months to 30 September, oldest first (factsheet 30/09/2026, after the fund's 0.25% TER)
+var FACTSHEET = { ss75: { asOf: '30/09/2026', end: 2026, returns: [16.71, 8.58, -0.05, 2.01, 22.64, -15.97, 11.89, 19.68, 5.80, 14.49] } };
+var PACK_SECS = [['summary', 'Summary'], ['funds', 'Fund information'], ['projection', 'Standard projection'], ['charges', 'Charges'], ['remun', 'Remuneration'], ['important', 'Important information'], ['glossary', 'Glossary']];
+function isoDate(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function defaults() {
+  return {
+    salutation: 'Mr', first: '', last: 'Client', startStr: isoDate(new Date()), bname: '', bfirm: '', bphone: '',
+    ph: 'individual', code: 'B3', sp: 750000, fund: 'ss75', sd: 1, comm: 2, gtee: true, level: 85,
+    secs: { summary: true, funds: true, projection: true, charges: true, remun: false, important: true, glossary: false },
+    scen: [
+      { title: '5-year example', desc: '', years: 5, rates: [6, 6, 6, 6, 6], src: 'flat' },
+      { title: '10-year example', desc: '', years: 10, rates: [6, 6, 6, 6, 6, 6, 6, 6, 6, 6], src: 'flat' }
+    ]
+  };
+}
+var S;
+try { S = JSON.parse(localStorage.getItem(STORE)) || defaults(); } catch (e) { S = defaults(); }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+var $ = function(id) { return document.getElementById(id); };
+function num(v) { var n = parseFloat(String(v).replace(/[€,%\s]/g, '')); return isNaN(n) ? 0 : n; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Engine input and scenario runs (all numbers come from engine_ib.js)
+// ─────────────────────────────────────────────────────────────────────────────
+function guaranteeOn() { return !!(S.gtee && ARF_FUNDS_MAP[S.fund] && ARF_FUNDS_MAP[S.fund].gmab); }
+// No date of birth is asked for: nothing on this page depends on age (no income, exit tax is not age-based).
+// The engine still needs one, so a placeholder age of 50 at the start date is used, and every place the pack
+// would show the age or date of birth is taken out (illustrateHtml).
+var PLACEHOLDER_AGE = 50;
+function placeholderDob() {
+  var d = new Date(S.startStr || isoDate(new Date()));
+  return (d.getFullYear() - PLACEHOLDER_AGE) + S.startStr.slice(4, 10).replace('-02-29', '-02-28');
+}
+function planInp(withGtee) {
+  var inp = { dobStr: placeholderDob(), startStr: S.startStr, code: S.code, policyholderType: S.ph, contribution: S.sp, rp: 0, freq: 'monthly', esc: 0,
+              diyAllocs: {}, diyGmab: {}, incomeType: 'none', incomeValue: 0, incomeStartAge: null, incomeEscalationPct: 0,
+              specialDeal: S.sd > 0 ? S.sd / 100 : null, spUpOverride: null, rateOverride: null };
+  inp.diyAllocs[S.fund] = 100;
+  inp.diyGmab[S.fund] = !!withGtee;
+  if (Math.abs(S.comm / 100 - ibBaseSpUp(inp)) > 1e-9) inp.spUpOverride = S.comm / 100;
+  return inp;
+}
+// The example returns are entered before the fund charge, which is how the engine takes them
+function grossRates(rates) {
+  return rates.map(function(r) { return r / 100; });
+}
+// One scenario: with the guarantee (if on) and without, for comparison
+function runScen(sc) {
+  var useG = guaranteeOn(), inp = planInp(useG);
+  if (useG) inp.gteeLevel = S.level / 100;
+  var withG = ibRunProjection(inp, grossRates(sc.rates));
+  var noG = null;
+  if (useG) { var i2 = planInp(false); noG = ibRunProjection(i2, grossRates(sc.rates)); }
+  // The same run with no exit tax, for the return before tax
+  var i3 = planInp(useG); i3.policyholderType = 'exempt'; if (useG) i3.gteeLevel = inp.gteeLevel;
+  return { p: withG, base: noG, preTax: ibRunProjection(i3, grossRates(sc.rates)), useG: useG, inp: inp };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inputs
+// ─────────────────────────────────────────────────────────────────────────────
+function baseCommPct() { return +((IB_CODES[S.code].spUp * 100) + (S.sd || 0)).toFixed(4); }
+function clampSd() { S.sd = Math.max(0, Math.min(S.sd, +((IB_MAX_SP_COMM - IB_CODES[S.code].spUp) * 100).toFixed(4))); }
+function initInputs() {
+  $('ph').innerHTML = IB_POLICYHOLDER_TYPES.map(function(t) { return '<option value="' + t.id + '">' + t.label + '</option>'; }).join('');
+  $('code').innerHTML = Object.keys(IB_CODES).map(function(c) { return '<option>' + c + '</option>'; }).join('');
+  $('fund').innerHTML = ARF_FUNDS.map(function(f) { return '<option value="' + f.id + '">' + escHtml(f.name) + (f.gmab ? ' (guarantee available)' : '') + '</option>'; }).join('');
+  ['salutation', 'first', 'last', 'startStr', 'bname', 'bfirm', 'bphone', 'ph', 'code', 'fund'].forEach(function(id) {
+    $(id).value = S[id];
+    $(id).addEventListener('input', function() {
+      S[id] = this.value;
+      if (id === 'code') { clampSd(); S.comm = baseCommPct(); syncInputs(); }
+      if (id === 'fund') onFundChange();
+      refresh();
+    });
+  });
+  ['sp', 'sd', 'comm', 'level'].forEach(function(id) {
+    $(id).addEventListener('change', function() {
+      S[id] = num(this.value);
+      if (id === 'sd') { clampSd(); S.comm = baseCommPct(); }
+      if (id === 'comm') S.comm = Math.max(0, Math.min(S.comm, IB_MAX_SP_COMM * 100));
+      if (id === 'level') S.level = Math.max(0, Math.min(S.level, 100));
+      syncInputs(); refresh();
+    });
+  });
+  $('gtee').addEventListener('change', function() { S.gtee = this.checked; syncInputs(); refresh(); });
+  $('secs').innerHTML = PACK_SECS.map(function(s) {
+    return '<label class="c"><input type="checkbox" data-sec="' + s[0] + '"' + (S.secs[s[0]] ? ' checked' : '') + '> ' + s[1] + '</label>';
+  }).join('');
+  document.querySelectorAll('[data-sec]').forEach(function(el) {
+    el.addEventListener('change', function() { S.secs[el.dataset.sec] = el.checked; refresh(); });
+  });
+}
+function onFundChange() {
+  var f = ARF_FUNDS_MAP[S.fund], lv = QT_CONTENT.guarantee.levels[S.fund];
+  if (!f.gmab) S.gtee = false;
+  if (lv) S.level = Math.round(lv.protected * 100);
+  syncInputs();
+}
+function syncInputs() {
+  $('sp').value = fNum(S.sp); $('sd').value = S.sd; $('comm').value = S.comm; $('level').value = S.level;
+  var f = ARF_FUNDS_MAP[S.fund];
+  $('gtee').disabled = !f.gmab; $('gtee').checked = S.gtee && f.gmab; $('level').disabled = !(S.gtee && f.gmab);
+}
+function renderScenInputs() {
+  $('scen-inputs').innerHTML = S.scen.map(function(sc, si) {
+    var fs = FACTSHEET[S.fund];
+    var rates = sc.rates.map(function(v, i) {
+      return '<label>Year ' + (i + 1) + '<input data-s="' + si + '" data-i="' + i + '" value="' + v + '" class="' + (v < 0 ? 'neg' : '') + '" inputmode="decimal" aria-label="' + escHtml(sc.title) + ' year ' + (i + 1) + ' return %"></label>';
+    }).join('');
+    return '<div class="card"><div class="scen-h">' +
+      '<input class="t" data-title="' + si + '" value="' + escHtml(sc.title) + '" aria-label="Example label" placeholder="Label, e.g. Example A: steady growth">' +
+      '<label class="presets">Years <input type="number" min="1" max="20" data-years="' + si + '" value="' + sc.years + '"></label>' +
+      (S.scen.length > 1 ? '<button type="button" style="margin-left:auto" onclick="removeScen(' + si + ')" aria-label="Remove ' + escHtml(sc.title) + '">Remove</button>' : '') + '</div>' +
+      '<input class="t" style="width:100%;margin:6px 0;font-weight:400" data-desc="' + si + '" value="' + escHtml(sc.desc || '') + '" aria-label="Example description" placeholder="Description shown under the label (optional)">' +
+      '<div class="presets">Annual return (%) for each policy year · fill: <input data-flat="' + si + '" value="6" aria-label="Flat rate">' +
+      '<button type="button" onclick="presetFlat(' + si + ')">All years</button>' +
+      (fs ? '<button type="button" onclick="presetFactsheet(' + si + ')">Factsheet history</button>' : '') +
+      '<button type="button" onclick="presetFall(' + si + ')">Market fall in year 2</button></div>' +
+      '<div class="rates">' + rates + '</div></div>';
+  }).join('');
+  document.querySelectorAll('[data-i]').forEach(function(el) {
+    el.addEventListener('change', function() {
+      // update in place (no re-render) so tabbing on to the next year keeps focus
+      var sc = S.scen[+el.dataset.s], v = Math.max(-99, num(el.value));
+      sc.rates[+el.dataset.i] = v; sc.src = 'custom'; el.value = v; el.classList.toggle('neg', v < 0);
+      refresh();
+    });
+  });
+  document.querySelectorAll('[data-title]').forEach(function(el) {
+    el.addEventListener('input', function() { S.scen[+el.dataset.title].title = el.value; refresh(); });
+  });
+  document.querySelectorAll('[data-desc]').forEach(function(el) {
+    el.addEventListener('input', function() { S.scen[+el.dataset.desc].desc = el.value; refresh(); });
+  });
+  document.querySelectorAll('[data-years]').forEach(function(el) {
+    el.addEventListener('change', function() {
+      var sc = S.scen[+el.dataset.years], n = Math.max(1, Math.min(20, Math.round(num(el.value)) || 1));
+      while (sc.rates.length < n) sc.rates.push(sc.rates.length ? sc.rates[sc.rates.length - 1] : 6);
+      sc.rates.length = n; sc.years = n; renderScenInputs(); refresh();
+    });
+  });
+}
+// A new example copies the length of the last one, at a flat 6%
+function addScen() {
+  var n = S.scen.length ? S.scen[S.scen.length - 1].years : 10, rates = [];
+  for (var i = 0; i < n; i++) rates.push(6);
+  S.scen.push({ title: 'Example ' + (S.scen.length + 1), desc: '', years: n, rates: rates, src: 'flat' });
+  renderScenInputs(); refresh();
+}
+function removeScen(si) {
+  if (S.scen.length < 2 || !confirm('Remove "' + (S.scen[si].title || 'this example') + '"?')) return;
+  S.scen.splice(si, 1); renderScenInputs(); refresh();
+}
+function presetFlat(si) {
+  var v = num(document.querySelector('[data-flat="' + si + '"]').value), sc = S.scen[si];
+  sc.rates = sc.rates.map(function() { return v; }); sc.src = 'flat'; renderScenInputs(); refresh();
+}
+// The fund's own latest annual returns, oldest first, so year 1 of the plan replays the earliest year. The factsheet
+// figures are after the fund charge, so they are grossed up to before it: (1 + r) / (1 - fund charge) - 1
+function presetFactsheet(si) {
+  var fs = FACTSHEET[S.fund], sc = S.scen[si], n = Math.min(sc.years, fs.returns.length), ext = arfBlendedMetrics(planInp(false)).ext;
+  sc.rates = fs.returns.slice(fs.returns.length - n).map(function(r) { return +(((1 + r / 100) / (1 - ext) - 1) * 100).toFixed(2); });
+  sc.years = n; sc.src = 'factsheet'; renderScenInputs(); refresh();
+}
+function presetFall(si) {
+  var sc = S.scen[si];
+  sc.rates = sc.rates.map(function(_, i) { return i === 1 ? -25 : 6; }); sc.src = 'fall'; renderScenInputs(); refresh();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The example pages, added into the tool's quotation pack (same blocks, classes and helpers as qtBuildPack)
+// ─────────────────────────────────────────────────────────────────────────────
+function pctS(v, d) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d == null ? 2 : d) + '%'; }
+function eur(v) { return (v < -0.5 ? '−' : '') + fEUR(Math.abs(v)); }
+function blk(html, cls) { return '<div class="blk ' + (cls || '') + '" data-hdr="agl" data-grp="agl" data-sec="examples">' + html + '</div>'; }
+function pBlk(txt, cls) { return blk('<p' + (cls ? ' class="' + cls + '"' : '') + '>' + escHtml(txt) + '</p>'); }
+
+function scenRateText(sc) {
+  var basis = 'return before the fund charge', fs = FACTSHEET[S.fund];
+  if (sc.src === 'factsheet' && fs) {
+    var y1 = fs.end - sc.rates.length + 1;
+    return 'The returns replay the fund\'s actual performance in the 12 months to 30 September ' + y1 + ' to ' + fs.end + ' (factsheet ' + fs.asOf + '), in that order, before the fund charge. Past performance does not predict future returns.';
+  }
+  if (sc.rates.every(function(v) { return v === sc.rates[0]; })) return 'This example assumes a ' + basis + ' of ' + pctS(sc.rates[0]) + ' every year.';
+  return 'This example assumes the ' + basis + ' shown for each year in the table.';
+}
+
+// The policy value and the guarantee in force each year (a step line). Same figures and names as the table.
+function scenChart(R, n) {
+  var xs = [0], v1 = [R.p.fundByYear[0]], pr = [R.useG ? R.inp.gteeLevel * R.p.fundByYear[0] : null];
+  for (var k = 1; k <= n; k++) {
+    var y = R.p.yearly[k - 1], prevP = R.useG ? (k === 1 ? R.inp.gteeLevel * R.p.fundByYear[0] : R.p.yearly[k - 2].protectedNext) : null;
+    xs.push(k, k); v1.push(y.fund, y.fund);
+    if (R.useG) pr.push(prevP, y.protectedNext);
+  }
+  var xTicks = []; for (var i = 0; i <= n; i++) xTicks.push({ x: i, label: i === 0 ? 'Start' : 'Yr ' + i });
+  var series = [];
+  if (R.useG) series.push({ label: 'Guarantee (' + S.level + '% of the policy value at the last anniversary)', color: '#8A96A3', values: pr, dash: '5,4', width: 1.6 });
+  series.push({ label: 'Policy value', color: '#003781', values: v1, width: 2.5, endDot: true });
+  return qtSvgLineChart({ width: 640, height: 185, xs: xs, xTicks: xTicks, yFormat: qtEuroAxis, series: series });
+}
+
+// With the guarantee on, each row shows the floor that applied during the year, whether Allianz had to top up,
+// and the new floor set at the anniversary (up arrow = floor raised, down arrow = floor lowered after a fall).
+function floorsFor(R, n) {
+  var f = [], prev = R.inp.gteeLevel * R.p.fundByYear[0];
+  for (var k = 0; k < n; k++) { var y = R.p.yearly[k]; f.push({ was: prev, now: y.protectedNext }); prev = y.protectedNext; }
+  return f;
+}
+// One row per policy year, from the workbook's A-F table (IB workbook, Projections B5:M16): contributions (A),
+// growth to date (B), charges to date (C: policy, fund and guarantee charges and the government levy, less any
+// additional allocation, plus the exit charge if encashed), tax to date (D: tax paid at deemed disposals plus exit
+// tax if encashed), value if encashed (F) = A + B - C - D (+ guarantee top-ups).
+// The table shows C without the exit charge (chargesExExit), so that A + B - charges - tax paid (+ top-ups) is the
+// policy value in the chart, and gives the exit charge in its own column before the value if encashed.
+// Also used by tests/ib_scenarios_excel_test.py, which checks these figures against the workbook.
+function scenRows(R, n) {
+  var fl = R.useG ? floorsFor(R, n) : null;
+  return R.p.yearly.slice(0, n).map(function(y, k) {
+    return { year: y.year, rate: S.scenRates ? S.scenRates[k] : null, contrib: y.premToDate, growth: y.growthToDate, charges: y.chargesToDate,
+             chargesExExit: y.chargesToDate - y.exitCharge, exitCharge: y.exitCharge, tax: y.taxToDate, taxPaid: y.taxPaidToDate,
+             income: y.incomeToDate, topUps: y.topUpToDate, topUp: y.topUp, encash: y.displayFund, fund: y.fund,
+             floorWas: fl ? fl[k].was : null, floorNow: fl ? fl[k].now : null, encashNoG: R.base ? R.base.yearly[k].displayFund : null };
+  });
+}
+function scenTable(R, n) {
+  var rows = scenRows(R, n), taxRate = IB_TAX_RATES[S.ph] || 0, ddYears = [];
+  // deemed-disposal years (every 8th anniversary) are marked with a dagger and explained under the table
+  rows.forEach(function(r) { if (taxRate > 0 && r.year % (IB_DEEMED_DISPOSAL_MONTHS / 12) === 0) ddYears.push(r.year); });
+  var h = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Fund return before the fund charge</th><th>Total amount of premiums paid into the policy to date</th>' +
+    '<th>Projected investment growth to date</th><th>Projected expenses and charges to date</th><th class="em">Policy value</th>' +
+    (R.useG ? '<th>Guarantee at start of year</th><th>Guarantee at end of year</th>' : '') +
+    '<th>Taxation to date</th><th>Exit charge</th><th class="em">Value if encashed</th></tr></thead><tbody>';
+  rows.forEach(function(r) {
+    var topped = R.useG && r.topUp > 0.5, arrow = '';
+    if (R.useG) arrow = r.floorNow > r.floorWas + 0.5 ? ' <span style="color:#2E7D32">&#9650;</span>' : r.floorNow < r.floorWas - 0.5 ? ' <span style="color:#B3261E">&#9660;</span>' : '';
+    h += '<tr' + (topped ? ' style="background:#FFF3E0"' : '') + '><td class="l">' + r.year + (ddYears.indexOf(r.year) >= 0 ? ' &dagger;' : '') + '</td><td>' + pctS(r.rate) + '</td><td>' + eur(r.contrib) + '</td><td>' + eur(r.growth) + '</td>' +
+      '<td>' + eur(r.chargesExExit) + '</td><td class="em"><b>' + eur(r.fund) + '</b></td>' +
+      (R.useG ? '<td>' + eur(r.floorWas) + '</td><td style="white-space:nowrap">' + eur(r.floorNow) + arrow + '</td>' : '') +
+      '<td>' + eur(r.tax) + '</td><td>' + (r.exitCharge > 0.5 ? eur(r.exitCharge) : '&ndash;') + '</td><td class="em"><b>' + eur(r.encash) + '</b></td></tr>';
+  });
+  var ddNote = !ddYears.length ? '' : '<p style="font-size:8pt;margin:1.5mm 0 0">&dagger; <b>Deemed disposal:</b> every 8 years (in this example, year ' +
+    ddYears.join(' and year ') + '), exit tax of ' + pctTrim(taxRate) + ' on the gain to that date is deducted from the policy value, whether or not you encash. ' +
+    'This is why the policy value falls in that year. The tax paid is allowed against the exit tax due when you later encash, so the same gain is not taxed twice.</p>';
+  return h + '</tbody></table>' + ddNote +
+    (R.useG ? '<p style="font-size:8pt;margin:1.5mm 0 0">&#9650; guarantee raised &nbsp; &#9660; guarantee lowered (after a fall, or after deemed-disposal tax) &nbsp; Shaded row: the policy fell below the guarantee and Allianz added units to bring it back up (included in the policy value).</p>' : '');
+}
+
+// Guarantee box shown at the top of each example: the level and how the floor moves
+function guaranteeBox() {
+  var lv = S.level + '%';
+  return '<div style="border-left:3pt solid #003680;background:#F2F6FA;padding:3mm 4mm;margin:2mm 0;font-size:9pt;line-height:1.45">' +
+    '<b style="color:#003680">Annual Guarantee: ' + lv + ' level</b><br>' +
+    'On each policy anniversary the guarantee floor is set at <b>' + lv + '</b> of your policy value. If, a year later, your policy is worth less than that floor, Allianz adds units to bring it back up to the floor. ' +
+    'The floor is then reset to ' + lv + ' of the new policy value, so gains are locked in each year (a ratchet).</div>';
+}
+
+function exampleBlocks() {
+  var T = QT_TEXT, G = QT_CONTENT.guarantee, out = [], useG = guaranteeOn();
+  var inp0 = planInp(useG), cc = IB_CODES[S.code], bm = arfBlendedMetrics(inp0);
+  S.scen.forEach(function(sc) {
+    var n = sc.rates.length, R = runScen(sc); S.scenRates = sc.rates;
+    var last = R.p.yearly[n - 1], annE = last.displayFund > 0 ? Math.pow(last.displayFund / S.sp, 1 / n) - 1 : 0;
+    var preT = R.preTax.yearly[n - 1].displayFund, annP = preT > 0 ? Math.pow(preT / S.sp, 1 / n) - 1 : 0;
+    out.push(blk('<div class="ptitle"><h2>' + escHtml(sc.title) + '</h2><span class="lead">' + (useG ? 'Example returns with the Annual Guarantee' : 'Example returns') + '</span></div>', 'newpage kwn'));
+    // description and the returns used in one paragraph, then the warning box, so the table stays on the page
+    out.push(pBlk((sc.desc ? sc.desc.replace(/\s*$/, '') + (/[.!?]$/.test(sc.desc.trim()) ? ' ' : '. ') : '') + scenRateText(sc)));
+    out.push(blk(qtWarnBox(['Warning: These figures are examples only and are not a forecast. The actual return on your fund will be different.',
+      T.packWarnings.value])));
+    if (useG) out.push(blk(guaranteeBox()));
+    out.push(blk(qtStat3([
+      ['Value if encashed after ' + n + ' year' + (n === 1 ? '' : 's'), eur(last.displayFund), 'after exit charge and exit tax'],
+      ['Return a year, after all charges', pctS(annP * 100) + ' before tax', pctS(annE * 100) + ' a year after exit tax of ' + pctTrim(IB_TAX_RATES[S.ph] || 0)],
+      useG ? ['Guarantee top-ups (' + S.level + '% level)', eur(R.p.gteeTopUp), R.p.gteeTopUp > 0.5 ? 'added by Allianz over ' + n + ' years' : 'none needed in this example']
+           : ['Exit tax if encashed', eur(Math.max(0, last.fund - last.displayFund)), 'and any exit charge']
+    ])));
+    out.push(blk('<div class="chart">' + scenChart(R, n) + '</div>'));
+    out.push(blk(scenTable(R, n), 'split'));
+  });
+  // How the figures are worked out
+  var li = [
+    'Returns are applied evenly through each policy year. The returns shown are before all charges; the fund charge of ' + pct(bm.ext) + ' a year, the policy charge' + (useG ? ' and the guarantee charge are' : ' are') + ' then deducted monthly.',
+    'The government levy of ' + pct(IB_GOVT_LEVY) + ' (' + fEUR(S.sp * IB_GOVT_LEVY) + ') is deducted when the contribution is invested and is included in the charges to date.',
+    '"Value if encashed" is the value on the policy anniversary after any exit charge and after exit tax of ' + pct(IB_TAX_RATES[S.ph] || 0) + ' on the gain, as if the policy were fully encashed on that date.',
+    'Exit tax is also due every 8 years under the Revenue "deemed disposal" rule, whether or not you encash. It is deducted from the policy and allowed for against tax due on later encashment.',
+    '"Taxation to date" is the tax paid at deemed disposals plus the exit tax that would be due if the policy were encashed on that anniversary. Only the deemed-disposal tax is actually taken from the policy, so the policy value is after that tax but before any exit tax or exit charge.'
+  ];
+  var g = !useG ? [] : [
+    'At each policy anniversary a protected value is set at ' + S.level + '% of the value of your units in the fund. If, at the next anniversary, they are worth less than the protected value, Allianz adds units to bring them back up to it. ' + G.marketsUp,
+    'The guarantee applies at policy anniversaries only. ' + G.whileActive[0] + '.',
+    G.deathBenefit
+  ];
+  var notes = '<h3 class="kwn">How these figures are worked out</h3><ul class="nl">' + li.map(function(x) { return '<li>' + escHtml(x) + '</li>'; }).join('') + '</ul>' +
+    (g.length ? '<h3 class="kwn">The Annual Guarantee</h3><ul class="nl">' + g.map(function(x) { return '<li>' + escHtml(x) + '</li>'; }).join('') + '</ul>' : '');
+  out.push(blk(notes, 'newpage'));
+  out.push(blk(qtWarnBox(['These figures are examples only. The returns are chosen for illustration, are not a forecast, and are not the standard growth rate used on the projection pages. The actual return on your fund will be different.',
+    T.packWarnings.estimates, T.packWarnings.value, T.packWarnings.past])));
+  return out.join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Build the pack: the tool's own quotation pack, with the example pages added
+// ─────────────────────────────────────────────────────────────────────────────
+function buildQ(embed) {
+  var inp = planInp(guaranteeOn()), r = runIbQuote(inp);
+  if (r.errors) return { errors: r.errors };
+  var sections = {}, adv = [S.bname, S.bfirm].filter(Boolean).join(', ');
+  QT_TEXT.packCoverFor = adv ? 'Prepared at the request of ' + adv : 'Prepared for {clientName}';
+  SECTION_KEYS_LOCAL.forEach(function(k) { sections[k] = !!S.secs[k]; });
+  var name = [S.first, S.last].filter(Boolean).join(' ');
+  return { q: {
+    product: 'ib', r: r, lite: true, embed: !!embed, noAutoPrint: true,
+    broker: { firm: S.bfirm, name: S.bname, title: '', email: '', phone: S.bphone, address: '', regStatement: '' },
+    client: { salutation: S.salutation, first: S.first, last: S.last, address: '', dobStr: placeholderDob(), gender: 'M' },
+    risk: { sri: null, reason: '' }, profile: null, coverText: '', sosText: '',
+    productName: qtFill(QT_TEXT.productNames.ib, { version: S.code }), strategyName: 'Your own fund selection',
+    sections: sections, docTitle: 'Illustration - ' + name
+  } };
+}
+var SECTION_KEYS_LOCAL = ['cover', 'sos', 'riskprofile', 'summary', 'funds', 'projection', 'charges', 'remun', 'important', 'glossary', 'product', 'factsheets', 'kids', 'appform'];
+function packHtml(embed) {
+  var b = buildQ(embed);
+  if (b.errors) return '<!DOCTYPE html><html><body style="font-family:Arial;padding:20px"><b>Cannot build the pack.</b><ul>' + b.errors.map(function(e) { return '<li>' + escHtml(e) + '</li>'; }).join('') + '</ul></body></html>';
+  var html = illustrateHtml(qtBuildPack(b.q)), ex = exampleBlocks();
+  // Add the examples ahead of the Charges pages (or Important information, or at the end of the pages)
+  var at = -1;
+  ['data-sec="charges"', 'data-sec="remun"', 'data-sec="important"', 'data-sec="glossary"'].some(function(m) {
+    var i = html.indexOf(m); if (i < 0) return false;
+    at = html.lastIndexOf('<div class="blk', i); return at >= 0;
+  });
+  if (at < 0) at = html.indexOf('</div><div id="pages">');
+  return html.slice(0, at) + ex + html.slice(at);
+}
+
+function refresh() {
+  save();
+  var inp = planInp(guaranteeOn()), cc = IB_CODES[S.code], bm = arfBlendedMetrics(inp), alloc = ibSpAllocationRate(inp), comm = ibSpUpRate(inp);
+  $('derived').innerHTML = 'Allocation <b>' + pct(alloc) + '</b> (' + fEUR(S.sp * alloc) + ' before the levy) · base commission <b>' + pct(ibBaseSpUp(inp)) +
+    '</b> (standard ' + pct(cc.spUp) + (S.sd ? ' + ' + pct(S.sd / 100) + ' special deal' : '') + ') · commission paid <b>' + pct(comm) + '</b> (' + fEUR(comm * S.sp) + ') · total annual charge <b>' + pct(cc.admin + bm.ext + bm.gtee) + '</b>';
+  var frame = $('prev'), y = 0;
+  try { y = frame.contentWindow.scrollY || 0; } catch (e) {}
+  frame.srcdoc = packHtml(true);
+}
+function openPack() {
+  var w = window.open('', '_blank');
+  if (!w) { alert('Pop-up blocked. Allow pop-ups for this page and try again.'); return; }
+  w.document.open(); w.document.write(packHtml(false)); w.document.close();
+}
+
+function exportCsv() {
+  var useG = guaranteeOn(), lines = [];
+  S.scen.forEach(function(sc) {
+    var R = runScen(sc);
+    lines.push(sc.title);
+    lines.push(['Year', 'Fund return %', 'Investment growth in year', 'Charges in year (incl. levy)', 'Guarantee top-up', 'Tax paid in year',
+      'Contributions to date (A)', 'Growth to date (B)', 'Charges to date (C)', 'Tax to date (D)', 'Guarantee top-ups to date', 'Value if encashed (F)',
+      'Policy value', 'Protected value', 'Without guarantee: policy value', 'Without guarantee: if encashed'].join(','));
+    S.scenRates = sc.rates;
+    scenRows(R, sc.rates.length).forEach(function(r, i) {
+      var y = R.p.yearly[i], b = R.base ? R.base.yearly[i] : null;
+      lines.push([r.year, sc.rates[i], rd(y.growth), rd(y.charges), rd(y.topUp), rd(y.tax), rd(r.contrib), rd(r.growth), rd(r.charges), rd(r.tax), rd(r.topUps), rd(r.encash),
+        rd(r.fund), r.floorNow == null ? '' : rd(r.floorNow), b ? rd(b.fund) : '', b ? rd(b.displayFund) : ''].join(','));
+    });
+    lines.push('');
+  });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+  a.download = 'IB_illustration_' + (S.last || 'client').replace(/\W+/g, '_') + '.csv'; a.click();
+}
+function rd(v) { return v == null ? '' : Math.round(v * 100) / 100; }
+
+initInputs(); syncInputs(); renderScenInputs(); refresh();
+</script>
+</body>
+</html>

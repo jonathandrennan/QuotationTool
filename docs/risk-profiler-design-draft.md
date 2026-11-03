@@ -1,6 +1,8 @@
 # Risk profiler – proposed questions and scoring
 
-This is the suitability section of the advised sale. The adviser uses it with the client to set a risk rating from 1 to 6 on the ESMA scale. It has 8 scored questions and a date of birth. The sustainability questions (Part E) are left out for now. After the introduction, the client sees an "Important information" screen and must accept it. The result ends with a similar box. Draft for Compliance review, 22/10/2026. Every cut-off in it is a proposal.
+This is the suitability section of the advised sale. The adviser uses it with the client to set a risk rating from 1 to 6 on the ESMA scale. It has 8 scored questions and a date of birth. The sustainability questions (Part E) are left out for now. After the introduction, the client sees an "Important information" screen and must accept it. The result ends with a similar box. Draft for Compliance review, 22/10/2026, updated 27/10/2026. Every cut-off in it is a proposal.
+
+The tool is used by brokers (advisers) only. The broker gives the advice and signs the Statement of Suitability, so the legal duty to assess suitability is theirs. AGL's part is to give brokers a clear, accurate and tested tool. Who is responsible for what, and which regulations apply to whom, is in the *Allianz Risk Profiler: regulatory summary* (section 4 gives the short version).
 
 _Generated alongside `Risk-Profiler-Proposal.docx` by `build_risk_profiler_docx.py`; edit this file, then rebuild._
 
@@ -25,7 +27,7 @@ _Generated alongside `Risk-Profiler-Proposal.docx` by `build_risk_profiler_docx.
 |---|---|---|
 | 1. Attitude | The middle value of the Q4, Q5 and Q6 ratings, and no more than one level above Q4 | 1 to 6 |
 | 2. Limits | Time limit from Q3. Capacity limit: Low capacity (Q1 + Q2) allows no more than 4 | A ceiling, or none |
-| 3. Risk rating | The lower of steps 1 and 2. The adviser may lower it, with a recorded reason. The client is told when a limit applies | 1 to 6 |
+| 3. Risk rating | The lower of steps 1 and 2. The adviser may lower or raise it (up to 6), with a recorded reason. The client is told when a limit applies | 1 to 6 |
 
 Knowledge and age do not change the rating. They raise flags for the adviser (section 3).
 
@@ -41,12 +43,12 @@ Knowledge and age do not change the rating. They raise flags for the adviser (se
 - **Highest rating 6:** Level 7 is not offered, as at Aviva.
 - **The loss answer anchors the rating:** The attitude rating can be at most one level above the Q4 answer, so a client who will accept only a small loss cannot be rated high on objectives alone.
 - **Capacity limits the rating:** Low capacity for loss caps the rating at 4. Aviva and Zurich only report it. We limit it because the client must be able to bear the losses.
-- **Short horizons limit the rating:** Under 3 years allows no more than 3, and 3 to under 7 years no more than 5. A horizon under 3 years also raises a warning for the adviser.
+- **Short horizons limit the rating:** Under 3 years allows no more than 3, and 3 to under 5 years no more than 4. A horizon under 3 years also raises a warning for the adviser.
 - **Sustainability preferences do not change the rating:** They are left out of the tool for now. When they are asked, it is after the rating and they only narrow the fund list.
 - **Important information after the introduction:** The client accepts a short notice before the questions. A similar box ends the result and the Risk profile record. If they do not accept, the questions are not shown.
 - **Volatility bands:** Checked against the UCITS synthetic risk and reward bands (0.5%, 2%, 5%, 10%, 15%, 25%).
 - **Knowledge and age raise flags only:** They don't change the rating. The adviser decides what to do.
-- **Scope:** This tool is the suitability section only. The application form collects personal and financial details, and the adviser handles updates, vulnerability and joint applicants (section 4).
+- **Scope:** This tool supports the broker's suitability assessment; it does not replace it. The broker's fact find collects personal and financial details, and the broker handles updates, vulnerability and joint applicants (section 4).
 
 ## 2. The questions
 
@@ -58,7 +60,7 @@ Knowledge and age do not change the rating. They raise flags for the adviser (se
 > • How you feel about risk, and what you would do if your investment fell in value
 > • Your knowledge and experience of investing
 > Please answer as honestly and fully as you can. If your answers are not accurate and complete, we cannot recommend an investment.
-> Your answers give a risk rating from 1 (very low risk) to 6 (high risk). Your adviser will go through it with you, and will review your risk profile with you at least once a year, and sooner if your circumstances change. If they do, tell your adviser.
+> Your answers give a risk rating from 1 (very low risk) to 6 (high risk). Your adviser will go through it with you. Your adviser will review your risk profile with you at least once a year, and sooner if your circumstances change. If they do, tell your adviser.
 
 - *Regulation:* Explains why the questions are asked and that the firm decides suitability (ESMA 11–12). States how the answers are used and that an adviser is involved (ESMA 17). The introduction itself contains no disclaimer (see Important information above). The tool shows it on a "Before you begin" screen with a "Start the questions" button.
 
@@ -130,8 +132,8 @@ _Built as a slider_ in whole years (help text: "Move the slider to the number of
 | Slider value | Highest rating allowed |
 |---|---|
 | Under 3 years | 3 |
-| 3 years to under 7 years | 5 |
-| 7 years or more | No limit |
+| 3 years to under 5 years | 4 |
+| 5 years or more | No limit |
 
 - *Why:* Higher-risk funds need time to recover from falls. The ESMA scale assumes 5 years or more.
 - *Regulation:* Holding period (ESMA 24, 37, 80). Zurich also lowers the profile for short terms.
@@ -346,15 +348,35 @@ Flags do not block the client. They are shown to the adviser and recorded.
 
 ## 4. How the design meets the regulations
 
+### Who is responsible
+
+All AGL business is advised broker business, and the tool is not offered to clients directly. The law puts the suitability duty on whoever gives the advice, which is the broker. AGL is the insurer, with duties of product governance and of giving brokers clear, accurate information.
+
+| | AGL (insurer) | Broker (adviser) |
+|---|---|---|
+| Gives the advice | No | Yes |
+| Full fact find (income, assets, debts, health, dependants) | No | Yes |
+| Assesses suitability and signs the Statement of Suitability | No | Yes |
+| Decides the final risk rating | No (the tool suggests one) | Yes |
+| Provides a clear, accurate, tested tool | Yes | No |
+| Sets the target market for each product and fund | Yes | No |
+| Keeps records of the advice | Supports this (the tool's record) | Yes |
+
+Delegated Regulation 2017/2358, Article 8(4) confirms the split: the insurer's duty to monitor brokers does not extend to the general requirements brokers must meet when dealing with individual customers.
+
 ### Which rules apply
 
-- **Insurance-based investment products (such as investment bonds):** Suitability is governed by the Insurance Distribution Directive (IDD), Article 30, transposed in Ireland by the European Union (Insurance Distribution) Regulations 2018, and by Delegated Regulation (EU) 2017/2359. The Consumer Protection Code 2025 switches off its own suitability chapter for advice on these products (Reg 11(3)).
-- **PRSAs and ARFs:** These may fall outside the definition of an insurance-based investment product, as pension products. If so, the Code's suitability chapter (Regs 16–19) applies. Compliance to confirm.
-- **All products:** The Code's rules on digital tools (Regs 38–39), plain language (Regs 47, 64) and vulnerable consumers (Regs 34–37) apply.
-- **The ESMA suitability guidelines (ESMA35-43-3172):** These are written for MiFID firms. They are used here as the detailed benchmark, because neither the IDD nor the Code sets out how a questionnaire should be built. Paragraph numbers below are ESMA's.
-- **Sources:** The Code was read on the Central Bank website on 19/10/2026. The IDD and Delegated Regulation references are from memory and have not been checked against the texts.
+- **Investment bond (an insurance-based investment product):** The broker must meet the Insurance Distribution Directive (IDD), Article 30, transposed by S.I. 229/2018 (Reg 42), and Delegated Regulation (EU) 2017/2359 (Articles 9–14 and 19). The Consumer Protection Code 2025 switches off its own suitability chapter for advice on these products (Reg 11(3)).
+- **PRSA and ARF:** These are pension products and may fall outside the definition of an insurance-based investment product. If so, the Code's suitability chapter (Regs 16–18) applies to the broker. Compliance to confirm.
+- **For AGL as insurer:** Product oversight and governance (IDD Article 25; Delegated Regulation 2017/2358) and the Code's rules on information passed to clients (Regs 64–65). Reg 39 (nothing pre-ticked) is built in.
+- **For the broker when using the tool with a client:** Code Reg 38 (a digital tool must be easy to use, tested, and its logic documented and consistent).
+- **The ESMA suitability guidelines (ESMA35-43-3172):** These are written for MiFID firms and do not bind insurers or insurance brokers. They are used here as the detailed good-practice benchmark, because neither the IDD nor the Code sets out how a questionnaire should be built. Paragraph numbers below are ESMA's.
+- **Rules that do not apply:** Code Regs 16–19 for the investment bond (switched off by Reg 11(3)); PRIIPs for the PRSA and ARF (outside PRIIPs, so no KID); the appropriateness test for sales without advice (IDD Article 30(2)), because all business is advised. The Code's direct-to-consumer digital rules (Regs 38–41) do not fall on AGL for the same reason, **but this changes if the profiler is put on the public website for clients to use alone**.
+- **Sources:** The Code was read on the Central Bank website on 19/10/2026. The IDD and Delegated Regulation references were checked against the legal texts for the regulatory summary (23/10/2026). Compliance has not yet signed off.
 
 ### Requirement by requirement
+
+These are the requirements the tool helps the broker meet, measured against the ESMA benchmark. "Met" means the design meets the benchmark, not that AGL carries the legal duty.
 
 | Requirement | Source | How the design meets it | Status |
 |---|---|---|---|
@@ -362,7 +384,7 @@ Flags do not block the client. They are shown to the adviser and recorded.
 | Knowledge and experience | IDD Art 30; ESMA 30, 46–47, 52 | Q7 asks what the client has done and how recently. Q8 checks it with a question that has a right answer, and a wrong answer lowers the level. Low knowledge with a high rating is flagged | Met |
 | Financial situation, including ability to bear losses | IDD Art 30; ESMA 12, 80; Code Reg 17 | Q1 and Q2 give capacity for loss. Low capacity limits the rating to 4, so a client who cannot bear losses cannot be given a high rating, whatever their attitude | Met |
 | Objectives, including risk tolerance | IDD Art 30; ESMA 46, 48 | Q4 asks the largest € loss over 12 months the client would accept, which is ESMA's own example. Q5 asks what they would do after a 20% fall, and Q6 asks the objective. The loss answer anchors the rating | Met |
-| Holding period | ESMA 24, 37, 80 | Q3. Horizons under 3 years cap the rating at 3 and under 7 years at 5. Under 3 years also raises a warning | Met |
+| Holding period | ESMA 24, 37, 80 | Q3. Horizons under 3 years cap the rating at 3 and under 5 years at 4. Under 3 years also raises a warning | Met |
 | Objective questions, not self-assessment | ESMA 44–48 | Every scored question asks for a fact, an amount, an action or past experience. None asks the client to rate themselves | Met |
 | Clear questions, one topic each | ESMA 21–22; Code Regs 47, 64 | Plain language, one topic per question. Q8 is one ordering task with one right answer, not the grid of self-ratings that ESMA 22 warns against. Not yet tested with clients | Met |
 | Layout must not steer; nothing preselected | ESMA 22; Code Reg 39 | Build rules: no answer preselected, the Q4 slider starts empty, Q8 starts in a mixed order | Met |
@@ -371,49 +393,59 @@ Flags do not block the client. They are shown to the adviser and recorded.
 | Answers changed to reach a product | ESMA 50, 58 | F6 flags answers changed after the result was shown | Met |
 | Records | ESMA 109–111 | The record holds the answers, ratings, limits applied, flags, any adviser override and its reason, the questionnaire version and the date | Met |
 | Understanding of risk and return | ESMA 23, 31, 80 | Q4 and Q5 show what losses look like in €. Q8 tests the order of risk and concentration. Nothing tests that a higher return needs more risk | Partly met |
-| Tool documented and tested | ESMA 78–79, 90; Code Reg 38 | This document sets out every rule, and 18 test clients were compared with Aviva and Zurich (section 5). Still needed: a test plan, version control, error handling and a named sign-off | Partly met |
-| Sustainability preferences | Delegated Reg 2017/2359 as amended (from memory); Code Reg 16(3); ESMA 26–28, 81–83 | Part E asks whether the client has preferences, which of the three types, a minimum share for the first two, and which negative effects matter. It is asked after the rating, in a neutral way, and only narrows the fund list. The minimum-share bands are to be set against the funds offered | Met |
+| Tool documented and tested | ESMA 78–79, 90; Code Reg 38 | This document sets out every rule, the scoring is automatically tested, and 50 test clients were compared with Aviva and Zurich (section 5). Still needed: client testing, a test plan, version control, error handling and a named sign-off | Partly met |
+| Sustainability preferences | Delegated Reg 2017/2359 Arts 2(4), 9(4), 9(6) as amended by 2021/1257; Code Reg 16(3)(e); ESMA 26–28, 81–83 | The broker asks about preferences (investment bond) or gathers them in the fact find (PRSA and ARF). The tool's Part E, which asks the full questions, is built but switched off. The tool records the broker's Yes / No, which should be described as a record of the broker's finding, not as the assessment. Gaps for AGL: the funds' Taxonomy %, sustainable investment % and principal adverse impacts are not in the fund information, and the Statement of Suitability wording must not imply that an Article 8 fund meets the client's preferences | Partly met |
 | Illiquid products | ESMA 36–37, 80 | No complex products are offered. Whether PRSA lock-in, ARF terms or bond exit charges make a product illiquid is not settled. If they do, Q3 must be checked against them | Open |
 
 ### Covered outside this tool
 
-| Requirement | Source | Where it is covered |
+These are the broker's job, or AGL's through guidance. A one-page broker guidance note from AGL, saying what the tool does and does not do, would close most of the rows below.
+
+| Requirement | Source | Whose job, and where it is covered |
 |---|---|---|
-| Income and its source, assets, debts, employment, dependants, health, marital status | Code Reg 16(4)–(7); ESMA 24, 37 | The application form. Aviva, Zurich, Standard Life and Irish Life do not ask these in their risk tools either |
-| Other investments and the portfolio as a whole | ESMA 39, 43 | The application form and the adviser |
-| Identifying and helping clients in vulnerable circumstances | Code Regs 34–37; ESMA 40 | The adviser. The tool adds the age and knowledge flags |
-| Updating the profile and re-profiling | ESMA 53–59 | The adviser. The tool records the date and version of each profile |
-| Joint applicants and legal entities | ESMA 60–70 | A firm policy is needed if joint policies are sold |
-| Staff training | ESMA 104–108; Code Reg 35 | The firm |
+| Income and its source, assets, debts, employment, dependants, health, marital status | Code Reg 16(4)–(7); ESMA 24, 37 | Broker, in the fact find. The two capacity questions are not a substitute. Aviva, Zurich, Standard Life and Irish Life do not ask these in their risk tools either |
+| Other investments and the portfolio as a whole | ESMA 39, 43 | Broker |
+| Demands and needs test | IDD Art 20 | Broker. Nothing in the tool; the guidance note should say so |
+| Client confirming their answers are accurate | Code Reg 16(13) | Broker. Confirm the fact find declaration covers the profiler, or add a confirmation the client ticks at the end (not pre-ticked) |
+| Importance of capital security (PRSA and ARF) | Code Reg 16(7) | Broker. Covered in part by Q4 and Q6; the guidance note should say the fact find covers it |
+| Identifying and helping clients in vulnerable circumstances | Code Regs 34–37; ESMA 40 | Broker. The tool adds the age and knowledge flags |
+| Updating the profile and re-profiling | ESMA 53–59 | Broker. The tool records the date and version of each profile |
+| Joint applicants and legal entities | ESMA 60–70 | Broker. The tool profiles one person; brokers need guidance for joint policies |
+| Keeping the record of the advice | Delegated Reg 2017/2359 Art 19 | Broker keeps the pack as their record. The tool does not store profiles centrally |
+| Staff competence and training | Minimum Competency Code; ESMA 104–108 | Broker. Not affected by the tool |
+| Version control and sign-off of the scoring | ESMA 78–79 | AGL. Name an owner, and keep each version and its test results |
 
 ### Open points for Compliance
 
-1. **Sustainability preferences (Part E):** Left out of the tool for now. When it is switched back on: approve the wording, and set the minimum-share bands (S3) against the funds offered. Check that the application form does not ask them again.
-2. **Which rules apply to PRSA and ARF,** and whether any product counts as illiquid.
-3. **Capacity limit of 4:** This makes us stricter than Aviva and Zurich, which both give 6 to client P7.
+1. **Sustainability preferences:** Part E is switched off, and the broker records a Yes / No. AGL must give brokers each fund's Taxonomy %, sustainable investment % and principal adverse impacts, and the Statement of Suitability wording must not imply that an Article 8 fund meets the preferences (2359 Art 9(6)). If Part E is switched back on: approve the wording and set the minimum-share bands (S3) against the funds offered.
+2. **Which rules apply to PRSA and ARF:** Confirm the ARF is a pension product and so outside the IDD investment-product rules. Also whether any product counts as illiquid.
+3. **Capacity limit of 4:** This makes us stricter than Aviva and Zurich, which both give 6 to client 4 (a keen client with no savings who relies on the money).
 4. **Loss figures (Q4):** Test them against our funds' worst 12-month falls and KID stress scenarios, and confirm the slider step and rounding.
-5. **Time limits (Q3), 3 / 5 / none at 3 and 7 years:** Check them against the recommended holding periods of the funds offered.
-6. **Introduction wording:** Approve it.
-7. **Application form:** Confirm it covers the Code Reg 16 items listed above.
-8. **Governance:** Add a test plan, version control, error handling and a named sign-off.
-9. **Legal texts:** Check the IDD and Delegated Regulation references against the texts.
+5. **Time limits (Q3), 3 / 4 / none at 3 and 5 years:** Check them against the recommended holding periods of the funds offered.
+6. **Fund ratings:** Check that the tool's 1 to 6 bands line up with the fund risk ratings in the KIDs.
+7. **Introduction and result wording:** Approve it. Change "your adviser will review your risk profile … at least once a year" to "should be reviewed", because AGL cannot promise what the broker will do. This is in the introduction, the result notice and the pack.
+8. **Client testing:** Test the questions with a small group of clients and keep the results (Code Regs 38 and 65).
+9. **Data Protection:** Confirm who is controller and who is processor. The answers are probably stored in the Allvest portal, so the roles may sit with Allvest.
+10. **Public website:** Do not publish the profiler for direct client use without a separate review (Code Regs 38–41).
+11. **Governance:** Add a test plan, version control, error handling and a named sign-off.
+12. **Broker guidance note:** Write the one-page note described above.
 
 ## 5. Testing against Aviva and Zurich
 
-18 example clients were run through the proposed questions, Aviva's tool and Zurich's tool. Aviva's results come from its published scoring code. Zurich's come from its live tool, run on 15/10/2026. The proposal was last re-run on 19/10/2026, with the Q1, Q2 and Q6 changes.
+50 example clients were run through the proposed questions, Aviva's tool and Zurich's tool. The first 8 test the edges (the most cautious, the most adventurous, a keen client with no savings, a short horizon and so on) and the other 42 are random answer sets. Aviva's results come from its decision table, read from the tool's own script. Zurich's come from its live tool, run on 28/10/2026. The proposal is as at 28/10/2026, with Q3 limits of 3 (under 3 years), 4 (3 to under 5 years) and none from 5 years.
 
-|  | Same rating | Within one level |
-|---|---|---|
-| Proposed and Aviva | 11 of 18 | 15 of 18 |
-| Proposed and Zurich | 8 of 18 | 17 of 18 |
-| Aviva and Zurich (for reference) | 7 of 18 | 16 of 18 |
+| Pair | Same rating | Within one level | Average gap | Higher or lower | Largest gap |
+|---|---|---|---|---|---|
+| Proposed and Zurich | 22 of 50 | 42 of 50 | 0.72 | -0.04 | 2 |
+| Proposed and Aviva | 17 of 50 | 39 of 50 | 0.92 | +0.36 | 3 |
+| Aviva and Zurich (for reference) | 15 of 50 | 29 of 50 | 1.28 | -0.40 | 4 |
 
-- **Overall:** The proposal agrees with each competitor more often than the two agree with each other.
-- **Where we are stricter:** P7 (temporary job, no savings, relies on the money) gets 4 from us and 6 from both competitors, because of the capacity limit. P17 has a 4-year horizon: we now give 5 (the same as Zurich) and Aviva 6, because Aviva ignores the horizon.
-- **Where Zurich is lower:** Six clients (P2, P10, P11, P13, P14, P16). Zurich deducts points for age over 50, terms under 10 years and little knowledge; we use limits and flags instead.
-- **Changes on 19/10/2026:** The new Q1 and Q2 wording does not change any test client's answers. Q6 now has a level-3 answer. No test client was described with that objective, so no result changed. P10 (first-time investor who would accept 7%) could plausibly choose it: P10 would then get 3, the same as Aviva and Zurich, instead of 4.
-- **Changes on 22/10/2026:** The Q3 limits are now 3 (under 3 years) and 5 (3 to under 7 years), Q5 "keep it and wait" is now 5, and a right Q8 answer now raises knowledge. The rows for P8, P13 and P17 are re-run below. P8 (3 years) now gets 5, the same as Aviva. P13 (2 years) now gets 3, the same as Aviva. P17 now gets 5, the same as Zurich. **The other clients' answers to Q5 and the knowledge questions are not recorded here, so their rows and the counts above still need a full re-run.**
-- **Translation caveat:** Each client's description was translated into each tool's answers by us, so a one-level difference can come from that translation.
+Higher or lower is the second tool minus the first (Zurich minus Aviva in the last row): a positive number means the second tool rates higher.
+
+- **Overall:** The proposal agrees with each competitor more often than the two agree with each other. Aviva is the outlier: it rates on the objective and maximum loss alone, so it runs higher than both of us. It also gives 0 (deposit-type only) to 7 clients. Leaving those out, the proposal and Aviva agree on 17 of 43 and are within one level on 36.
+- **Where we are stricter:** Clients 4 and 6 (a keen client with no savings, and an adventurous client who needs the money in 2 years). Our capacity and horizon limits hold us to 4 and 3; Zurich gives 6 and 5, and Aviva 6.
+- **Where Zurich is lower:** Clients 9, 20, 37 and 43 would sell everything after a 20% fall but gave aggressive answers to the loss and objective questions. We take the middle of the three attitude answers and rate them 3 to 5; Zurich adds up points and gives 1 to 3.
+- **Translation caveat:** Each client was set by our answers and translated into the other two tools' answers by us (the mapping is in `tests/compare_profilers.py`), so a one-level difference can come from that translation.
 
 Results for each client are in Appendix A.
 
@@ -421,24 +453,56 @@ Results for each client are in Appendix A.
 
 | Client | Proposed | Aviva | Zurich | What it shows |
 |---|---|---|---|---|
-| P1. Retired, 72; needs the money in 4 years; would accept about 2% | 1<br>Capacity High | 0 (no-risk) | 1<br>Capacity High | Consistent. Aviva's 0 means deposit-type only. |
-| P2. Retired, 66; 7 years; about 8% | 3<br>Capacity High | 3 | 2<br>Capacity Medium | Zurich one lower: it deducts for age. |
-| P3. 45, balanced; 15 years; about 15% | 4<br>Capacity Medium | 4 | 4<br>Capacity Medium | Same. |
-| P4. 32, growth; 15 years; about 25% | 5<br>Capacity High | 5 | 5<br>Capacity Medium | Same. |
-| P5. 50, adventurous, wealthy; about 40% | 6<br>Capacity High | 6 | 6<br>Capacity High | Same. |
-| P6. 40, wealthy expert; would accept more than 50% | 6<br>Capacity High | 6 | 7<br>Capacity High | Zurich gives 7; we and Aviva stop at 6. |
-| P7. 25, very keen; temporary job, no savings, relies on the money | 4<br>Capacity Low<br>Flags: capacity limit | 6<br>Prompts: reliance, expectations | 6<br>Capacity Low | Ours two lower: the capacity limit. The others report the problem but still give 6. |
-| P8. 55, growth attitude; needs the money in 3 years | 5<br>Capacity High | 5 | 4<br>Capacity High<br>short-horizon warning | Same as Aviva; Zurich one lower (it deducts for age and term). |
-| P9. 40, wants strong growth but accepts only 7% and would sell | 3<br>Capacity Medium<br>Flags: mixed attitude | 3<br>Prompts: loss | 3<br>Capacity Medium<br>3 conflict warnings | Same; all three flag the contradiction. |
-| P10. 28, first-time investor; 20 years; about 7% | 4<br>Capacity Medium | 3 | 3<br>Capacity Medium<br>1 conflict warning | Ours one higher: the reaction and objective answers lift it one level above the loss answer. |
-| P11. 60, near retirement, balanced; 6 years; about 15% | 4<br>Capacity High | 4 | 3<br>Capacity Medium | Zurich one lower: it deducts for age 60 and a 6-year term. |
-| P12. 42, self-employed, growth; 15 years; about 25% | 5<br>Capacity Medium | 5 | 5<br>Capacity Medium | Same. |
-| P13. 67, drawing income in 2 years, relies on it; about 7% | 3<br>Capacity Medium<br>Flags: mixed attitude, short horizon | 3 | 1<br>Capacity Medium | Same as Aviva. |
-| P14. 35, inheritance, no experience but keen; 10 years; about 25% | 5<br>Capacity High<br>Flags: knowledge | 5 | 4<br>Capacity High | Zurich deducts for no knowledge; we flag it. |
-| P15. 30, very cautious despite 25 years; about 2.5% | 2<br>Capacity High | 0 (no-risk) | 2<br>Capacity Medium | Same as Zurich. Aviva's 0 means deposit-type only. |
-| P16. 38, balanced, but heavy commitments and little savings; 12 years; about 15% | 4<br>Capacity Low | 4 | 3<br>Capacity Low | Zurich one lower. Both rate capacity Low. |
-| P17. 48, adventurous, but needs the money in 4 years; about 40% | 5<br>Capacity High<br>Flags: short horizon | 6 | 5<br>Capacity High<br>short-horizon warning | Same as Zurich; Aviva ignores the horizon. |
-| P18. 33, accepts only 2.5% but would invest more and wants maximum return | 3<br>Capacity High<br>Flags: mixed attitude | 3<br>Prompts: loss | 4<br>Capacity Medium<br>4 conflict warnings | Same as Aviva: the loss answer anchors the rating. |
+| **1. Corner: most cautious.** Age 80; 1 year; accepts no fall; would sell all after a 20% fall; wants safety; savings under 3 months; a loss would hit hard; no experience | 1<br>Capacity Low<br>Flags: short horizon | 0 (no-risk) | 1<br>Capacity Low | Same as Zurich. Aviva's 0 means deposit-type only. |
+| **2. Corner: most adventurous.** Age 25; 12 years; accepts 40% fall; would invest more; highest return; savings 12 months or more; a loss would hardly matter; professional | 6<br>Capacity High | 6 | 7<br>Capacity High | Zurich 1 higher. Same as Aviva. |
+| **3. Mid-range.** Age 40; 10 years; accepts 15% fall; would wait; steady growth; savings 3 to 11 months; a loss would have some effect; some recent experience | 4<br>Capacity Medium | 4 | 4<br>Capacity Medium | Same in all three. |
+| **4. Keen but no cushion.** Age 30; 10 years; accepts 40% fall; would invest more; highest return; savings under 3 months; a loss would hit hard; regular investor | 4<br>Capacity Low<br>Flags: capacity limit | 6<br>Prompts: reliance, expectations | 6<br>Capacity Low | Zurich 2 higher. Aviva 2 higher. Our capacity limit applies; Aviva ignores it. |
+| **5. Cautious but wealthy.** Age 60; 12 years; accepts 2% fall; would sell all after a 20% fall; wants safety; savings 12 months or more; a loss would hardly matter; regular investor | 1<br>Capacity High | 0 (no-risk) | 2<br>Capacity High | Zurich 1 higher. Aviva's 0 means deposit-type only. |
+| **6. Adventurous, short horizon.** Age 50; 2 years; accepts 40% fall; would invest more; highest return; savings 12 months or more; a loss would hardly matter; regular investor | 3<br>Capacity High<br>Flags: short horizon | 6 | 5<br>Capacity High | Zurich 2 higher. Aviva 3 higher. Our horizon limit applies; Aviva ignores it. |
+| **7. Age 70 adventurous.** Age 70; 10 years; accepts 30% fall; would invest more; strong growth; savings 12 months or more; a loss would hardly matter; regular investor | 5<br>Capacity High<br>Flags: age | 5 | 5<br>Capacity High | Same in all three. |
+| **8. Loss 2.5 but wants max return.** Age 45; 10 years; accepts 2.5% fall; would invest more; highest return; savings 3 to 11 months; a loss would have some effect; some recent experience | 3<br>Capacity Medium<br>Flags: mixed attitude | 3<br>Prompts: reliance, expectations, loss | 5<br>Capacity Medium | Zurich 2 higher. Same as Aviva. Mixed answers: we anchor on the loss answer, Zurich adds up points. |
+| **9.** Age 61; 11 years; accepts 37% fall; would sell all after a 20% fall; strong growth; savings 12 months or more; a loss would hardly matter; passive holder | 5<br>Capacity High<br>Flags: mixed attitude | 6 | 3<br>Capacity High | Zurich 2 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **10.** Age 53; 4 years; accepts no fall; would invest more; a little above a deposit; savings 12 months or more; a loss would hit hard; professional | 2<br>Capacity Medium<br>Flags: mixed attitude | 0 (no-risk) | 4<br>Capacity Medium | Zurich 2 higher. Aviva's 0 means deposit-type only. Mixed answers: we anchor on the loss answer, Zurich adds up points. |
+| **11.** Age 59; 12 years; accepts 2% fall; would sell all after a 20% fall; a little above a deposit; savings 12 months or more; a loss would hardly matter; regular investor | 2<br>Capacity High | 0 (no-risk) | 2<br>Capacity High | Same as Zurich. Aviva's 0 means deposit-type only. |
+| **12.** Age 44; 3 years; accepts 13.5% fall; would invest more; wants safety; savings 12 months or more; a loss would hardly matter; professional | 3<br>Capacity High<br>Flags: mixed attitude | 3<br>Prompts: loss | 4<br>Capacity High | Zurich 1 higher. Same as Aviva. Mixed answers: we anchor on the loss answer, Zurich adds up points. |
+| **13.** Age 74; 1 year; accepts 12.5% fall; would invest more; wants safety; savings under 3 months; a loss would hardly matter; professional | 3<br>Capacity Medium<br>Flags: mixed attitude, short horizon | 3<br>Prompts: loss | 3<br>Capacity Medium | Same in all three. |
+| **14.** Age 31; 12 years; accepts 25% fall; would sell some; a little above a deposit; savings under 3 months; a loss would hit hard; regular investor | 3<br>Capacity Low<br>Flags: mixed attitude | 4<br>Prompts: loss | 3<br>Capacity Low | Same as Zurich. Aviva 1 higher. |
+| **15.** Age 37; 10 years; accepts 26.5% fall; would wait; highest return; savings 3 to 11 months; a loss would have some effect; some recent experience | 5<br>Capacity Medium | 5<br>Prompts: reliance, expectations | 5<br>Capacity Medium | Same in all three. |
+| **16.** Age 36; 5 years; accepts 31% fall; would invest more; highest return; savings 3 to 11 months; a loss would hit hard; no experience | 4<br>Capacity Low<br>Flags: capacity limit | 6<br>Prompts: reliance, expectations | 5<br>Capacity Low | Zurich 1 higher. Aviva 2 higher. Our capacity limit applies; Aviva ignores it. |
+| **17.** Age 53; 4 years; accepts 8.5% fall; would sell all after a 20% fall; highest return; savings 12 months or more; a loss would hardly matter; no experience | 3<br>Capacity High<br>Flags: mixed attitude | 4<br>Prompts: expectations, loss | 2<br>Capacity High | Zurich 1 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **18.** Age 33; 2 years; accepts 19% fall; would sell all after a 20% fall; wants safety; savings 12 months or more; a loss would have some effect; some recent experience | 2<br>Capacity High<br>Flags: mixed attitude, short horizon | 3<br>Prompts: loss | 1<br>Capacity Medium | Zurich 1 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **19.** Age 68; 11 years; accepts 36% fall; would invest more; strong growth; savings 3 to 11 months; a loss would have some effect; some recent experience | 5<br>Capacity Medium<br>Flags: knowledge, age | 6 | 5<br>Capacity Medium | Same as Zurich. Aviva 1 higher. |
+| **20.** Age 70; 9 years; accepts 9.5% fall; would sell all after a 20% fall; growth above inflation; savings under 3 months; a loss would have some effect; passive holder | 3<br>Capacity Low | 3 | 1<br>Capacity Low | Zurich 2 lower. Same as Aviva. Zurich deducts for age, term or knowledge. |
+| **21.** Age 69; 4 years; accepts 37.5% fall; would sell all after a 20% fall; wants safety; savings 3 to 11 months; a loss would hit hard; no experience | 2<br>Capacity Low<br>Flags: mixed attitude | 3<br>Prompts: loss | 1<br>Capacity Low | Zurich 1 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **22.** Age 26; 10 years; accepts 24% fall; would sell some; growth above inflation; savings under 3 months; a loss would hardly matter; some recent experience | 3<br>Capacity Medium | 4<br>Prompts: loss | 3<br>Capacity Medium | Same as Zurich. Aviva 1 higher. |
+| **23.** Age 39; 4 years; accepts 8% fall; would invest more; a little above a deposit; savings 3 to 11 months; a loss would hardly matter; passive holder | 3<br>Capacity High<br>Flags: mixed attitude | 3 | 3<br>Capacity Medium | Same in all three. |
+| **24.** Age 36; 8 years; accepts 34.5% fall; would sell all after a 20% fall; highest return; savings 3 to 11 months; a loss would hit hard; regular investor | 4<br>Capacity Low<br>Flags: mixed attitude, capacity limit | 6<br>Prompts: reliance, expectations | 4<br>Capacity Low | Same as Zurich. Aviva 2 higher. Our capacity limit applies; Aviva ignores it. |
+| **25.** Age 41; 1 year; accepts 17% fall; would invest more; highest return; savings under 3 months; a loss would hit hard; passive holder | 3<br>Capacity Low<br>Flags: capacity limit, short horizon | 5<br>Prompts: reliance, expectations, loss | 4<br>Capacity Low | Zurich 1 higher. Aviva 2 higher. Our capacity limit and horizon limit applies; Aviva ignores it. |
+| **26.** Age 73; 8 years; accepts no fall; would sell all after a 20% fall; wants safety; savings 12 months or more; a loss would hardly matter; some recent experience | 1<br>Capacity High | 0 (no-risk) | 1<br>Capacity High | Same as Zurich. Aviva's 0 means deposit-type only. |
+| **27.** Age 70; 9 years; accepts 30.5% fall; would invest more; strong growth; savings 12 months or more; a loss would hit hard; some recent experience | 5<br>Capacity Medium<br>Flags: knowledge, age | 5<br>Prompts: reliance | 5<br>Capacity Medium | Same in all three. |
+| **28.** Age 62; 3 years; accepts 5% fall; would sell some; strong growth; savings under 3 months; a loss would hardly matter; some recent experience | 3<br>Capacity Medium<br>Flags: mixed attitude | 3<br>Prompts: loss | 2<br>Capacity Medium | Zurich 1 lower. Same as Aviva. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **29.** Age 69; 8 years; accepts 28.5% fall; would invest more; a little above a deposit; savings 12 months or more; a loss would hardly matter; no experience | 5<br>Capacity High<br>Flags: mixed attitude, knowledge, age | 4<br>Prompts: loss | 4<br>Capacity High | Zurich 1 lower. Aviva 1 lower. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **30.** Age 32; 7 years; accepts 28.5% fall; would sell some; highest return; savings under 3 months; a loss would have some effect; regular investor | 4<br>Capacity Low<br>Flags: mixed attitude, capacity limit | 6<br>Prompts: reliance, expectations | 4<br>Capacity Low | Same as Zurich. Aviva 2 higher. Our capacity limit applies; Aviva ignores it. |
+| **31.** Age 51; under 1 year; accepts 30% fall; would sell all after a 20% fall; highest return; savings 12 months or more; a loss would have some effect; passive holder | 3<br>Capacity High<br>Flags: mixed attitude, short horizon | 6<br>Prompts: reliance, expectations | 2<br>Capacity Medium | Zurich 1 lower. Aviva 3 higher. Our horizon limit applies; Aviva ignores it. |
+| **32.** Age 25; 12 years; accepts 22% fall; would invest more; wants safety; savings 3 to 11 months; a loss would have some effect; regular investor | 4<br>Capacity Medium<br>Flags: mixed attitude | 3<br>Prompts: loss | 5<br>Capacity Medium | Zurich 1 higher. Aviva 1 lower. Mixed answers: we anchor on the loss answer, Zurich adds up points. |
+| **33.** Age 54; 7 years; accepts 4% fall; would invest more; wants safety; savings 3 to 11 months; a loss would have some effect; some recent experience | 2<br>Capacity Medium<br>Flags: mixed attitude | 0 (no-risk) | 3<br>Capacity Medium | Zurich 1 higher. Aviva's 0 means deposit-type only. Mixed answers: we anchor on the loss answer, Zurich adds up points. |
+| **34.** Age 27; 2 years; accepts 4.5% fall; would invest more; steady growth; savings under 3 months; a loss would hit hard; regular investor | 3<br>Capacity Low<br>Flags: mixed attitude, short horizon | 3<br>Prompts: loss | 4<br>Capacity Low | Zurich 1 higher. Same as Aviva. Mixed answers: we anchor on the loss answer, Zurich adds up points. |
+| **35.** Age 47; 1 year; accepts 2.5% fall; would wait; strong growth; savings 12 months or more; a loss would hit hard; passive holder | 3<br>Capacity Medium<br>Flags: mixed attitude, short horizon | 3<br>Prompts: reliance, loss | 3<br>Capacity Medium | Same in all three. |
+| **36.** Age 63; 5 years; accepts 29.5% fall; would sell all after a 20% fall; growth above inflation; savings 3 to 11 months; a loss would have some effect; regular investor | 3<br>Capacity Medium<br>Flags: mixed attitude | 4<br>Prompts: loss | 2<br>Capacity Medium | Zurich 1 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **37.** Age 56; 11 years; accepts 35% fall; would sell all after a 20% fall; strong growth; savings 12 months or more; a loss would have some effect; professional | 5<br>Capacity High<br>Flags: mixed attitude | 6 | 3<br>Capacity Medium | Zurich 2 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **38.** Age 44; 9 years; accepts 21% fall; would wait; a little above a deposit; savings 3 to 11 months; a loss would have some effect; regular investor | 4<br>Capacity Medium<br>Flags: mixed attitude | 4<br>Prompts: loss | 4<br>Capacity Medium | Same in all three. |
+| **39.** Age 30; 2 years; accepts 32.5% fall; would wait; wants safety; savings 12 months or more; a loss would hardly matter; regular investor | 3<br>Capacity High<br>Flags: mixed attitude, short horizon | 3<br>Prompts: loss | 3<br>Capacity High | Same in all three. |
+| **40.** Age 38; 11 years; accepts 14% fall; would sell some; steady growth; savings 3 to 11 months; a loss would hardly matter; professional | 3<br>Capacity High | 4 | 3<br>Capacity Medium | Same as Zurich. Aviva 1 higher. |
+| **41.** Age 44; 2 years; accepts 36% fall; would invest more; growth above inflation; savings under 3 months; a loss would hardly matter; regular investor | 3<br>Capacity Medium<br>Flags: mixed attitude, short horizon | 4<br>Prompts: loss | 4<br>Capacity Medium | Zurich 1 higher. Aviva 1 higher. Our horizon limit applies; Aviva ignores it. |
+| **42.** Age 22; 9 years; accepts 20.5% fall; would sell some; highest return; savings 12 months or more; a loss would have some effect; no experience | 4<br>Capacity High<br>Flags: mixed attitude | 5<br>Prompts: reliance, expectations | 3<br>Capacity Medium | Zurich 1 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **43.** Age 29; 8 years; accepts 26% fall; would sell all after a 20% fall; steady growth; savings 12 months or more; a loss would hardly matter; passive holder | 4<br>Capacity High<br>Flags: mixed attitude | 5 | 2<br>Capacity High | Zurich 2 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **44.** Age 59; 4 years; accepts 17.5% fall; would invest more; wants safety; savings 12 months or more; a loss would hardly matter; regular investor | 4<br>Capacity High<br>Flags: mixed attitude | 3<br>Prompts: loss | 3<br>Capacity High | Zurich 1 lower. Aviva 1 lower. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **45.** Age 56; 5 years; accepts 0.5% fall; would wait; growth above inflation; savings 12 months or more; a loss would hit hard; no experience | 2<br>Capacity Medium<br>Flags: mixed attitude | 0 (no-risk) | 2<br>Capacity Medium | Same as Zurich. Aviva's 0 means deposit-type only. |
+| **46.** Age 46; under 1 year; accepts 19% fall; would sell some; growth above inflation; savings 12 months or more; a loss would have some effect; regular investor | 3<br>Capacity High<br>Flags: short horizon | 4<br>Prompts: loss | 2<br>Capacity Medium | Zurich 1 lower. Aviva 1 higher. Zurich deducts for age, term or knowledge. |
+| **47.** Age 42; 7 years; accepts 34.5% fall; would sell all after a 20% fall; steady growth; savings under 3 months; a loss would hit hard; professional | 4<br>Capacity Low<br>Flags: mixed attitude | 5 | 3<br>Capacity Low | Zurich 1 lower. Aviva 1 higher. Mixed answers: we take the middle answer, Zurich is pulled down by the cautious one. |
+| **48.** Age 33; 6 years; accepts 24% fall; would wait; a little above a deposit; savings under 3 months; a loss would hit hard; regular investor | 4<br>Capacity Low<br>Flags: mixed attitude | 4<br>Prompts: loss | 4<br>Capacity Low | Same in all three. |
+| **49.** Age 30; 12 years; accepts 8% fall; would sell some; growth above inflation; savings 12 months or more; a loss would hardly matter; some recent experience | 3<br>Capacity High | 3 | 3<br>Capacity High | Same in all three. |
+| **50.** Age 36; 11 years; accepts 11.5% fall; would sell some; steady growth; savings 3 to 11 months; a loss would hardly matter; some recent experience | 3<br>Capacity High | 4 | 3<br>Capacity Medium | Same as Zurich. Aviva 1 higher. |
 
 ## Appendix B. Where the Q4 loss figures come from
 

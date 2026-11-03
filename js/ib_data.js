@@ -17,6 +17,8 @@ var IB_MAX_RATE = 0.06;              // ASP LA-8 cap on gross growth rate (same 
 var IB_GOVT_LEVY = 0.01;             // 1% government levy on every premium in (SP and RP)
 var IB_DEEMED_DISPOSAL_MONTHS = 96;  // Irish life-assurance deemed disposal: every 8 years
 var IB_RIY_YEARS = 20;               // RIY cashflow window used when the fund never depletes
+var IB_PROJECTION_YEARS = 20;        // years shown in quotes (table, chart, remuneration); the engine still runs 40
+var IB_MAX_SP_COMM = 0.045;          // SP initial commission max, incl. any special deal (Parameters D100:E100)
 
 // Exit tax rate by policyholder type
 var IB_TAX_RATES = { individual: 0.38, corporate: 0.25, exempt: 0 };

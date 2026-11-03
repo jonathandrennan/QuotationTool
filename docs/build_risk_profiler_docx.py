@@ -85,7 +85,7 @@ def widths_for(rows, head):
     n = len(head)
     if n == 2 and head[0] == 'Answer':
         return [12.5, 4.5]
-    if head[-1] == 'Status':
+    if head[-1] == 'Status' and n == 4:
         return [3.6, 2.9, 8.3, 2.2]
     weight = []
     for c in range(n):
@@ -239,6 +239,8 @@ while i < len(lines):
     # plain paragraph (intro, footnote, notes under a question)
     p = d.add_paragraph()
     runs(p, l.strip())
+    if l.startswith('_') and not l.startswith('_*'):
+        p.paragraph_format.keep_with_next = True   # a note under a question stays with its answers
     if l.startswith('**Versus competitors'):
         p.paragraph_format.keep_with_next = True
         p.paragraph_format.space_before = Pt(4)

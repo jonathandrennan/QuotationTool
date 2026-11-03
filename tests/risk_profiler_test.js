@@ -19,7 +19,7 @@ function eq(actual, expected, msg) {
 // ─── The draft's rules, transcribed ──────────────────────────────────────────────────
 const Q1 = { '12plus': 3, '3to11': 2, under3: 1 };                          // points
 const Q2 = { big: 1, some: 2, little: 3 };                                   // points
-const Q3 = (y) => (y < 3 ? 3 : y < 7 ? 5 : null);                             // highest rating allowed, by whole years
+const Q3 = (y) => (y < 3 ? 3 : y < 5 ? 4 : null);                             // highest rating allowed, by whole years
 const Q4 = (v) => (v < 2.5 ? 1 : v < 7 ? 2 : v < 15 ? 3 : v < 25 ? 4 : v < 40 ? 5 : 6);
 const Q5 = { sellall: 2, sellpart: 3, wait: 5, investmore: 6 };
 const Q6 = { safe: 1, deposit: 2, inflation: 3, steady: 4, strong: 5, highest: 6 };
@@ -49,7 +49,7 @@ const NOSUS = {};   // Part E (sustainability) is switched off for now
 // 1. Every combination of the scored answers
 const lossValues = [0, 2, 2.5, 6.5, 7, 14.5, 15, 24.5, 25, 39.5, 40];
 let n = 0;
-for (const cushion of Object.keys(Q1)) for (const impact of Object.keys(Q2)) for (const horizon of [0, 1, 2, 3, 4, 6, 7, 12])
+for (const cushion of Object.keys(Q1)) for (const impact of Object.keys(Q2)) for (const horizon of [0, 1, 2, 3, 4, 5, 6, 12])
 for (const loss of lossValues) for (const reaction of Object.keys(Q5)) for (const objective of Object.keys(Q6)) {
   const a = Object.assign({ cushion, impact, horizon, loss, reaction, objective }, KNOW, NOSUS);
   for (const [c, age] of [[ctx40, 40], [{ dob: '1956-01-01', atDate: AT }, 70]]) {
@@ -72,11 +72,11 @@ eq(ev({ loss: 0, reaction: 'sellall', objective: 'safe' }).sri, 1, 'the lowest a
 // 3. Q4 bands: a value between two marks scores the lower band
 eq([0, 2.4, 2.5, 6.9, 7, 14.9, 15, 24.9, 25, 39.9, 40].map((v) => RP.lossBand(v).rating), [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6], 'Q4 bands');
 
-// 3b. Q3 bands: under 3 years allows 3, 3 to under 7 years allows 5, 7 or more has no limit
-eq([0, 1, 2, 3, 6, 7, 12].map((v) => RP.band('horizon', v).cap), [3, 3, 3, 5, 5, null, null], 'Q3 bands');
+// 3b. Q3 bands: under 3 years allows 3, 3 to under 5 years allows 4, 5 or more has no limit
+eq([0, 1, 2, 3, 4, 5, 12].map((v) => RP.band('horizon', v).cap), [3, 3, 3, 4, 4, null, null], 'Q3 bands');
 eq([0, 1, 4, 12].map((v) => RP.yearsText(v)), ['less than 1 year', '1 year', '4 years', '12 years or more'], 'Q3 in words');
 const top = { loss: 40, reaction: 'investmore', objective: 'highest' };
-eq([2, 3, 7].map((h) => ev(Object.assign({ horizon: h }, top)).sri), [3, 5, 6], 'Q3 limits the rating');
+eq([2, 3, 5].map((h) => ev(Object.assign({ horizon: h }, top)).sri), [3, 4, 6], 'Q3 limits the rating');
 // F4 is also raised for any horizon under 3 years, even when the attitude is already low
 eq(ev({ horizon: 2, loss: 0, reaction: 'sellall', objective: 'safe' }).flags.map((f) => f.id), ['F4'], 'F4 for a horizon under 3 years');
 eq(ev({ horizon: 3, loss: 0, reaction: 'sellall', objective: 'safe' }).flags.map((f) => f.id), [], 'no F4 at 3 years when the limit does not bite');
@@ -145,7 +145,7 @@ eq([r.sri, r.capacity.label], [1, 'High'], 'P1 retired, 72, 4 years, about 2%: 1
 r = P({ cushion: 'under3', impact: 'big', horizon: 10, loss: 40, reaction: 'investmore', objective: 'highest' }, { dob: '2001-05-01', atDate: AT });
 eq([r.sri, r.capacity.label, r.flags.map((f) => f.id)], [4, 'Low', ['F3']], 'P7 keen, no savings, relies on the money: 4, capacity Low, capacity limit');
 r = P({ horizon: 3, loss: 25, reaction: 'wait', objective: 'strong' }, { dob: '1971-01-01', atDate: AT });
-eq([r.sri, r.flags.map((f) => f.id)], [5, []], 'P8 growth attitude, needs the money in 3 years: 5 (the limit for 3 to 7 years), no flag');
+eq([r.sri, r.flags.map((f) => f.id)], [4, ['F4']], 'P8 growth attitude, needs the money in 3 years: 4 (the limit for 3 to under 5 years), short horizon');
 r = P({ cushion: '3to11', impact: 'some', loss: 7, reaction: 'wait', objective: 'steady' });
 eq([r.sri, r.capacity.label], [4, 'Medium'], 'P10 first-time investor, 20 years, about 7%: 4 (one above the loss answer)');
 r = P({ cushion: '3to11', impact: 'some', loss: 7, reaction: 'wait', objective: 'inflation' });
@@ -153,9 +153,16 @@ eq(r.sri, 3, 'P10 choosing the new level-3 objective: 3, as the draft notes');
 r = P({ cushion: '3to11', impact: 'some', horizon: 2, loss: 7, reaction: 'wait', objective: 'deposit' }, { dob: '1959-01-01', atDate: AT });
 eq([r.sri, r.flags.map((f) => f.id)], [3, ['F1', 'F4']], 'P13 drawing income in 2 years, about 7%: 3 (the limit for under 3 years), mixed attitude, short horizon');
 r = P({ horizon: 4, loss: 40, reaction: 'investmore', objective: 'highest' });
-eq([r.sri, r.flags.map((f) => f.id)], [5, ['F4']], 'P17 adventurous, needs the money in 4 years: 5, short horizon');
+eq([r.sri, r.flags.map((f) => f.id)], [4, ['F4']], 'P17 adventurous, needs the money in 4 years: 4, short horizon');
 r = P({ loss: 2.5, reaction: 'investmore', objective: 'highest' });
 eq([r.sri, r.flags.map((f) => f.id)], [3, ['F1']], 'P18 accepts only 2.5% but wants maximum return: 3 (anchored on the loss answer), mixed attitude');
+
+// 8b. The ten worked test cases (tests/risk_profiler_cases.js, written up in docs/risk-profiler-test-cases.md)
+const { CASES, AT: CASES_AT } = require('./risk_profiler_cases.js');
+CASES.forEach((k) => {
+  r = RP.evaluate(k.answers, { dob: k.dob, atDate: CASES_AT });
+  eq({ sri: r.sri, attitude: r.attitude.rating, capacity: r.capacity.level, knowledge: r.knowledge.level, flags: r.flags.map((f) => f.id) }, k.expect, 'worked case ' + k.id + ' ' + k.name);
+});
 
 // 9. Written outputs (the sustainability sentences need Part E switched on)
 RP.config.sustainability = true;
@@ -164,10 +171,11 @@ r = RP.evaluate(full, ctx40);
 const nr = RP.narrative(full, ctx40, r, { suggestedSri: 5, chosenSri: 3, overrideReason: 'Wants to keep part in cash.' });
 eq(/12 months or more/.test(nr.circumstances) && /for 4 years\./.test(nr.circumstances), true, 'circumstances come from Q1 to Q3');
 eq(/40% or more \(€4,000 or more on €10,000\)/.test(nr.risk) && /keep it and invest more/.test(nr.risk) && /attitude to risk of 6 \(High\)/.test(nr.risk), true, 'risk sentence quotes the attitude answers');
-eq(/limited to 5\. This gives a risk rating of 5 \(Medium to High\)\./.test(nr.risk), true, 'risk sentence tells the client the limit');
+eq(/limited to 4\. This gives a risk rating of 4 \(Medium\)\./.test(nr.risk), true, 'risk sentence tells the client the limit');
 eq(nr.experience, 'Your investment knowledge and experience was assessed as high.', 'knowledge sentence');
 eq(/lower risk rating of 3 because: Wants to keep part in cash\./.test(nr.override), true, 'override sentence');
-eq(RP.narrative(full, ctx40, r, { suggestedSri: 5, chosenSri: 6 }).override, '', 'no override sentence for a higher rating');
+eq(/higher risk rating of 6 because: Long horizon and other assets\./.test(RP.narrative(full, ctx40, r, { suggestedSri: 5, chosenSri: 6, overrideReason: 'Long horizon and other assets.' }).override), true, 'override sentence for a higher rating');
+eq(RP.narrative(full, ctx40, r, { suggestedSri: 5, chosenSri: 5 }).override, '', 'no override sentence when the rating is kept');
 eq(/sustainable investments as defined in EU rules \(at least 20% of your investment\)/.test(nr.sustainability) && /greenhouse gas/.test(nr.sustainability), true, 'sustainability sentence');
 eq(/could not accept any fall/.test(RP.narrative(Object.assign({}, base, { loss: 0 }), ctx40, ev({ loss: 0 })).risk), true, 'no fall accepted');
 eq(RP.narrative(Object.assign({}, base, { s1: 'no' }), ctx40, RP.evaluate(Object.assign({}, base, { s1: 'no' }), ctx40)).sustainability, RP.config.text.sustainNo, 'no sustainability preferences');

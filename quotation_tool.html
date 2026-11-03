@@ -891,7 +891,7 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
     <div class="sri-pick" id="sri-cards" role="radiogroup" aria-label="Client risk rating"></div>
     <div class="sri-scale"><span>← Lower risk, typically lower rewards</span><span>Higher risk, typically higher rewards →</span></div>
     <div class="rp-reason" id="rp-reason-wrap" hidden>
-      <label class="f" for="rp-reason">Reason for the lower rating</label>
+      <label class="f" for="rp-reason" id="rp-reason-lbl">Reason for the lower rating</label>
       <textarea id="rp-reason" rows="3" placeholder="Required – this is recorded and included in the Statement of Suitability"></textarea>
     </div>
   </div>
@@ -1283,7 +1283,7 @@ var S = {
   // esg: sustainability preferences (true | false | null = not answered); profiler: risk profiler used
   // Risk profiler (js/risk_profiler*.js): pAnswers = the questionnaire answers; pSeen = the scored answers when
   // its result was first shown (changes after that raise flag F6); pSuggested = the rating it gave (null until
-  // complete); pReason = why the adviser chose a lower rating; pDate = when it was completed (YYYY-MM-DD).
+  // complete); pReason = why the adviser chose a lower or higher rating; pDate = when it was completed (YYYY-MM-DD).
   // method: how the attitude to risk was assessed, 'profiler' | 'own' | null (not chosen yet).
   // pAnswers only changes when the adviser applies a finished questionnaire; work in progress stays in rpUI.
   risk: { sri: null, reason: '', override: null, esg: null, profiler: '', method: null, pAnswers: {}, pSeen: null, pAccepted: null, pSuggested: null, pReason: '', pDate: '' },
@@ -1292,10 +1292,10 @@ var S = {
   prsa: { nra: 65, prsaType: 'nonstandard', code: 'A5', ctype: '', sp: 0, ofv: 0, rp: 0, freq: 'monthly', esc: 0,
           spUpOverride: null, rpUpOverride: null, strat: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
   arf:  { code: 'A5', contribution: 0, incomeType: 'default', incomeValue: 0, incomeStartAge: null, incomeEscalationPct: 2,
-          spUpOverride: null, rate1Override: null, rate2Override: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
+          specialDeal: null, spUpOverride: null, rate1Override: null, rate2Override: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
   ib:   { code: 'D1', policyholderType: 'individual', ctype: '', contribution: 0, rp: 0, freq: 'monthly', esc: 0,
           incomeType: 'none', incomeValue: 0, incomeStartAge: null, incomeEscalationPct: 0,
-          spUpOverride: null, rateOverride: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
+          specialDeal: null, spUpOverride: null, rateOverride: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
   result: null, resTab: 'proj', resSeen: {}, resAllYears: false, remTable: false,
   sections: {}, packStage: 'contents', coverMode: 'template', sosMode: 'template',
   text: { cover: null, sos: null }, basis: { cover: null, sos: null }, stale: { cover: false, sos: false },
@@ -1655,7 +1655,7 @@ function validateStep(s) {
     if (!S.risk.method) { errs.push('Please choose how the client\'s attitude to risk has been assessed.'); bad.push('rp-method'); }
     else if (S.risk.method === 'profiler' && !prof) errs.push('Please complete the risk profiler, or choose to use your own risk profiling.');
     else if (!S.risk.sri) errs.push('Please select the client\'s risk rating.');
-    else if (prof && S.risk.sri < prof.sri && !S.risk.pReason.trim()) { errs.push('Please give the reason for choosing a lower rating than the risk profiler\'s.'); bad.push('rp-reason'); }
+    else if (prof && S.risk.sri !== prof.sri && !S.risk.pReason.trim()) { errs.push('Please give the reason for choosing a ' + (S.risk.sri < prof.sri ? 'lower' : 'higher') + ' rating than the risk profiler\'s.'); bad.push('rp-reason'); }
     else if (S.risk.esg == null) { errs.push('Please record whether the client has sustainability preferences.'); bad.push('esg-seg'); }
   } else if (s === 4) {
     errs = planErrors(bad);
@@ -1759,13 +1759,13 @@ function profilerDone() {
   if (S.risk.method !== 'profiler') return null;
   var r = profilerResult(); return r.complete ? r : null;
 }
-// The profiler's result sets the client's rating. The adviser may lower it, with a reason; a new result
-// replaces the rating and clears the reason. Its sustainability answer sets the client's preference.
-// An adviser whose assessment is higher uses their own risk profiling instead.
+// The profiler's result sets the client's rating. The adviser may lower or raise it (up to RP_MAX_SRI), with a
+// reason; a new result replaces the rating and clears the reason. Its sustainability answer sets the client's preference.
+var RP_MAX_SRI = 6;   // the profiler's scale stops at 6: level 7 is not offered
 function applyProfilerResult() {
   var r = profilerDone();
   if (r) {
-    if (S.risk.pSuggested !== r.sri || !S.risk.sri || S.risk.sri > r.sri) {
+    if (S.risk.pSuggested !== r.sri || !S.risk.sri || S.risk.sri > RP_MAX_SRI) {
       if (S.risk.sri !== r.sri) invalidate(3);
       S.risk.sri = r.sri; S.risk.pReason = '';
     }
@@ -1866,15 +1866,16 @@ function renderProfilerSummary() {
   }
   el.innerHTML = badge + '<div class="txt"><div class="st">' + st + '</div><div class="sub">' + sub + '</div></div><div class="acts">' + acts + '</div>';
 }
-// Above the rating picker: the rating comes from the profiler, which the adviser may only lower; and its flags
+// Above the rating picker: the rating comes from the profiler, which the adviser may lower or raise with a reason; and its flags
 function renderSriApply() {
   var r = profilerDone(), el = $('rp-apply');
   el.hidden = !r;
-  $('rp-reason-wrap').hidden = !(r && S.risk.sri < r.sri);
+  $('rp-reason-wrap').hidden = !(r && S.risk.sri && S.risk.sri !== r.sri);
   if (!r) return;
+  $('rp-reason-lbl').textContent = 'Reason for the ' + (S.risk.sri > r.sri ? 'higher' : 'lower') + ' rating';
   if ($('rp-reason').value !== S.risk.pReason) $('rp-reason').value = S.risk.pReason;
   $('rp-apply-msg').innerHTML = '<span>Set by the Allianz Risk Profiler: <b>' + r.sri + ' · ' + escHtml(ESMA_LABELS[r.sri]) + '</b>. ' +
-    'You can choose a lower rating, with a reason. To use a higher rating, choose "Use my own risk profiling".</span>';
+    'You can choose a lower or higher rating (up to ' + RP_MAX_SRI + '), with a reason.</span>';
   $('rp-flags').hidden = !r.flags.length;
   $('rp-flags').innerHTML = r.flags.length ? '<b>' + (r.flags.length > 1 ? r.flags.length + ' flags' : '1 flag') + ' from the risk profiler</b><div class="sub">Recorded in the Risk profile record.</div>' +
     '<ul class="plain">' + r.flags.map(function(f) { return '<li><b>' + escHtml(f.title) + ':</b> ' + escHtml(f.text) + '</li>'; }).join('') + '</ul>' : '';
@@ -1883,7 +1884,7 @@ function renderSriCards() {
   var h = '', prof = profilerDone(), locked = !!prof;
   for (var i = 1; i <= 7; i++) {
     var on = S.risk.sri === i;
-    h += '<button type="button" class="sri-t' + (on ? ' on' : '') + '" data-n="' + i + '" role="radio" aria-checked="' + on + '"' + (prof && i > prof.sri ? ' disabled' : '') + ' onclick="setSri(' + i + ')">' +
+    h += '<button type="button" class="sri-t' + (on ? ' on' : '') + '" data-n="' + i + '" role="radio" aria-checked="' + on + '"' + (prof && i > RP_MAX_SRI ? ' disabled' : '') + ' onclick="setSri(' + i + ')">' +
          '<span class="blk" style="background:' + ESMA_COLORS[i] + '">' + i + '</span><span class="lb">' + ESMA_LABELS[i] + '</span></button>';
   }
   $('sri-cards').innerHTML = h;
@@ -1900,7 +1901,7 @@ function renderSriCards() {
 }
 function setSri(i) {
   var prof = profilerDone();
-  if (prof && i > prof.sri) return;   // the risk profiler's rating can only be lowered
+  if (prof && i > RP_MAX_SRI) return;   // level 7 is not offered with the risk profiler
   if (S.risk.sri !== i) invalidate(3);
   S.risk.sri = i;
   renderSriCards();
@@ -2002,7 +2003,7 @@ function setCode(product, code) {
     code = codes.filter(function(c) { return c.charAt(0) === ser; })[0] || codes[0];
   }
   var o = S[product];
-  if (o.code !== code) { o.spUpOverride = null; if (product === 'prsa') o.rpUpOverride = null; }
+  if (o.code !== code) { o.spUpOverride = null; if (product === 'prsa') o.rpUpOverride = null; else o.specialDeal = null; }
   o.code = code;
   renderCodeSelects();
 }
@@ -2030,14 +2031,14 @@ function commStepper(kind, val, label) {
   return '<div class="cstep"><button type="button" aria-label="Decrease ' + label + '" onclick="stepComm(\'' + kind + '\',-1)">−</button>' +
     '<span class="v" aria-live="polite">' + pct(val) + '</span><button type="button" aria-label="Increase ' + label + '" onclick="stepComm(\'' + kind + '\',1)">+</button></div>';
 }
-function ovrNote(kind, val, def, otherwise) {
+function ovrNote(kind, val, def, otherwise, defLabel) {
   return Math.abs(val - def) > 0.0001
-    ? '<span class="ovr">Edited · standard ' + pct(def) + ' · <button type="button" class="lnk" onclick="resetComm(\'' + kind + '\')">Reset</button></span>'
+    ? '<span class="ovr">Edited · ' + (defLabel || 'standard') + ' ' + pct(def) + ' · <button type="button" class="lnk" onclick="resetComm(\'' + kind + '\')">Reset</button></span>'
     : otherwise;
 }
 function renderCodeInfo() {
   var pr = S.product, pre = pr === 'prsa' ? 'p' : pr === 'arf' ? 'a' : 'i', o = S[pr], rows = '', overview;
-  var edited = o.spUpOverride != null || (pr === 'prsa' && o.rpUpOverride != null);
+  var edited = o.spUpOverride != null || (pr === 'prsa' ? o.rpUpOverride != null : o.specialDeal > 0);
   if (pr === 'prsa') {
     var cc = CODES[o.code], sp = prsaSpUpRate(o), rp = prsaRpUpRate(o);
     overview = 'AMC ' + pct(cc.admin) + ' · initial ' + pct(sp) + ' single, ' + pct(rp) + ' regular';
@@ -2046,11 +2047,22 @@ function renderCodeInfo() {
     rows += commRow('Initial commission — regular contributions', ovrNote('rp', rp, cc.rpPct, 'Per year of term, capped at ' + pct(cc.rpMax) + ' of year-1 contributions'),
                     commStepper('rp', rp, 'initial commission on regular contributions'));
   } else {
-    var tc = pr === 'arf' ? ARF_CODES[o.code] : IB_CODES[o.code], isp = pr === 'arf' ? arfSpUpRate(o) : ibSpUpRate(o);
+    var isIb = pr === 'ib', tc = isIb ? IB_CODES[o.code] : ARF_CODES[o.code], isp = isIb ? ibSpUpRate(o) : arfSpUpRate(o);
+    var base = isIb ? ibBaseSpUp(o) : arfBaseSpUp(o), sd = o.specialDeal || 0, alloc = isIb ? ibSpAllocationRate(o) : arfAllocationRate(o);
     var sv = tc.surrender.filter(function(x) { return x > 0; });
-    overview = 'Policy charge ' + pct(tc.admin) + ' · initial ' + pct(isp) + ' · exit charges ' + (sv.length ? sv.map(pct).join(' / ') : 'none');
+    overview = 'Policy charge ' + pct(tc.admin) + ' · initial ' + pct(isp) + (sd ? ' incl. special deal' : '') + ' · exit charges ' + (sv.length ? sv.map(pct).join(' / ') : 'none');
     rows += commRow('Policy charge', 'of which trail commission ' + pct(tc.ongoing), '<span class="v">' + pct(tc.admin) + '</span>');
-    rows += commRow('Initial commission' + (pr === 'ib' ? ' — single contribution' : ''), ovrNote('sp', isp, tc.spUp, 'Standard rate'), commStepper('sp', isp, 'initial commission'));
+    // Special deal: paid by Allianz on top of the standard rate, so the amount invested is unchanged
+    rows += commRow('Special deal', sd
+        ? '<span class="ovr">Standard ' + pct(tc.spUp) + ' + ' + pct(sd) + ' paid by Allianz · <button type="button" class="lnk" onclick="resetComm(\'sd\')">Remove</button></span>'
+        : 'Extra initial commission paid by Allianz. The amount invested is not reduced.',
+      commStepper('sd', sd, 'special deal'));
+    rows += commRow('Initial commission' + (isIb ? ' — single contribution' : ''),
+      ovrNote('sp', isp, base, sd ? 'Standard rate plus special deal' : 'Standard rate', sd ? 'standard plus special deal' : 'standard'), commStepper('sp', isp, 'initial commission'));
+    var allocNote = Math.abs(isp - base) < 0.0001 ? 'All of the single contribution is invested'
+      : isp > base ? 'Commission above ' + pct(base) + ' is paid from the contribution' : 'Commission below ' + pct(base) + ' is added to the contribution';
+    if (isIb && tc.rpAllocBonus > 1) allocNote += Math.abs(isp - base) < 0.0001 ? ', plus ' + pct(tc.rpAllocBonus - 1) + ' extra on this version' : '. Includes ' + pct(tc.rpAllocBonus - 1) + ' extra on this version';
+    rows += commRow('Allocation' + (isIb ? ' — single contribution' : ''), allocNote, '<span class="v">' + pct(alloc) + '</span>');
     if (pr === 'ib' && ibCodeAllowsRp(o.code)) {
       rows += commRow('Initial commission — regular contributions', 'Regular contributions allocated at +' + pct(tc.rpAllocBonus - 1), '<span class="v">' + pct(tc.rpUp) + ' a year</span>');
     }
@@ -2082,17 +2094,30 @@ function liveCommas(el, enabled) {
 function stepComm(kind, dir) {
   var o = S[S.product];
   var tbl = codeTableFor(S.product);
-  var cur, def;
-  if (kind === 'sp') { cur = S.product === 'prsa' ? prsaSpUpRate(o) : S.product === 'arf' ? arfSpUpRate(o) : ibSpUpRate(o); def = tbl[o.code].spUp; }
+  var cur, def, cap = S.product === 'arf' ? ARF_MAX_SP_COMM : S.product === 'ib' ? IB_MAX_SP_COMM : Infinity;
+  if (kind === 'sd') {
+    // the special deal moves the base rate; any manual change is cleared so commission follows it
+    var sd = Math.round(((o.specialDeal || 0) + dir * COMM_STEP) * 2000) / 2000;
+    sd = Math.max(0, Math.min(sd, Math.round((cap - tbl[o.code].spUp) * 2000) / 2000));
+    o.specialDeal = sd > 0.00001 ? sd : null;
+    o.spUpOverride = null;
+    renderCodeInfo();
+    return;
+  }
+  if (kind === 'sp') {
+    cur = S.product === 'prsa' ? prsaSpUpRate(o) : S.product === 'arf' ? arfSpUpRate(o) : ibSpUpRate(o);
+    def = S.product === 'prsa' ? tbl[o.code].spUp : S.product === 'arf' ? arfBaseSpUp(o) : ibBaseSpUp(o);
+  }
   else { cur = prsaRpUpRate(o); def = tbl[o.code].rpPct; }
-  var next = Math.max(0, Math.round((cur + dir * COMM_STEP) * 2000) / 2000);
+  var next = Math.max(0, Math.min(cap, Math.round((cur + dir * COMM_STEP) * 2000) / 2000));
   var val = Math.abs(next - def) < 0.0001 ? null : next;
   if (kind === 'sp') o.spUpOverride = val; else o.rpUpOverride = val;
   renderCodeInfo();
 }
 function resetComm(kind) {
   var o = S[S.product];
-  if (kind === 'sp') o.spUpOverride = null; else o.rpUpOverride = null;
+  if (kind === 'sd') { o.specialDeal = null; o.spUpOverride = null; }
+  else if (kind === 'sp') o.spUpOverride = null; else o.rpUpOverride = null;
   renderCodeInfo();
 }
 // The engine run with a stand-in portfolio, for the plan summary. Contribution totals and
@@ -2972,7 +2997,7 @@ function engineInput() {
              diyAllocs: a.diyAllocs, diyGmab: a.diyGmab, incomeType: a.incomeType,
              incomeValue: a.incomeType === 'default' ? 0 : a.incomeValue, incomeStartAge: a.incomeStartAge,
              incomeEscalationPct: a.incomeType === 'custom_amount' ? a.incomeEscalationPct : null,
-             spUpOverride: a.spUpOverride, rate1Override: a.rate1Override, rate2Override: a.rate2Override };
+             specialDeal: a.specialDeal, spUpOverride: a.spUpOverride, rate1Override: a.rate1Override, rate2Override: a.rate2Override };
   }
   var i = S.ib;
   return { dobStr: S.client.dobStr, startStr: S.startStr, code: i.code, policyholderType: i.policyholderType,
@@ -2980,7 +3005,7 @@ function engineInput() {
            diyAllocs: i.diyAllocs, diyGmab: i.diyGmab, incomeType: i.incomeType,
            incomeValue: i.incomeType === 'none' ? 0 : i.incomeValue, incomeStartAge: i.incomeStartAge,
            incomeEscalationPct: i.incomeType === 'custom_amount' ? i.incomeEscalationPct : null,
-           spUpOverride: i.spUpOverride, rateOverride: i.rateOverride };
+           specialDeal: i.specialDeal, spUpOverride: i.spUpOverride, rateOverride: i.rateOverride };
 }
 function compute() {
   S.result = S.product === 'prsa' ? runPrsaQuote(engineInput()) : S.product === 'arf' ? runArfQuote(engineInput()) : runIbQuote(engineInput());
@@ -3225,10 +3250,12 @@ function resCharges(r) {
     notes.push('Contribution charge — ' + cc.join('; ') + '.');
   } else if (S.product === 'arf') {
     notes.push(qtFill(T.arfRiyCharges, { rate: pct(r.rate1), netRate: pct(r.p1.netRate) }) + ' ' + qtFill(T.arfRiyCharges, { rate: pct(r.rate2), netRate: pct(r.p2.netRate) }) + ' ' + qtRiyWhy('arf', r));
-    notes.push('No contribution charge applies.' + (r.hasSurrender ? ' Exit charges on full encashment in the early years: ' + r.cc.surrender.filter(function(x){ return x > 0; }).map(pct).join(' / ') + '.' : ''));
+    var alA = qtAllocation(r);
+    notes.push((alA.sentences.length ? alA.sentences.join(' ') : 'No contribution charge applies.') + (r.hasSurrender ? ' Exit charges on full encashment in the early years: ' + r.cc.surrender.filter(function(x){ return x > 0; }).map(pct).join(' / ') + '.' : ''));
   } else {
     notes.push(qtFill(T.ibRiyCharges, { rate: pct(r.rate), netRate: pct(r.p.netRate) }) + ' ' + qtRiyWhy('ib', r));
-    notes.push('A government levy of ' + pct(IB_GOVT_LEVY) + ' applies to every contribution.' + (r.hasSurrender ? ' Exit charges on full encashment in the early years: ' + r.cc.surrender.filter(function(x){ return x > 0; }).map(pct).join(' / ') + '.' : ''));
+    var alI = qtAllocation(r);
+    notes.push((alI.sentences.length ? alI.sentences.join(' ') + ' ' : '') + 'A government levy of ' + pct(IB_GOVT_LEVY) + ' applies to every contribution.' + (r.hasSurrender ? ' Exit charges on full encashment in the early years: ' + r.cc.surrender.filter(function(x){ return x > 0; }).map(pct).join(' / ') + '.' : ''));
   }
   return '<div class="card flush"><div class="tcard-h"><h3 class="card-t">Charges by fund</h3></div>' +
     projTable(['Fund', 'Allocation', (isPrsa ? 'AMC' : 'Policy charge') + ' (incl. trail commission)', 'Fund charge', 'Guarantee', 'Total'], trs) +
@@ -3280,10 +3307,11 @@ function resRemuneration(r) {
     var yearly = S.product === 'arf' ? r.p1.yearly : r.p.yearly, rate = S.product === 'arf' ? r.rate1 : r.rate;
     var trail = yearly.reduce(function(a, y){ return a + y.comm; }, 0) - r.initialComm;
     var spPart = S.product === 'ib' ? r.spUpRate * r.contribution : r.initialComm;
-    var il2 = [fEUR(spPart) + ' · ' + pct(r.spUpRate) + ' of ' + (S.product === 'ib' ? 'single' : 'contribution') + (r.spUpOverridden ? ' <span class="ovr">Edited</span>' : '')];
+    var il2 = [fEUR(spPart) + ' · ' + pct(r.spUpRate) + ' of ' + (S.product === 'ib' ? 'single' : 'contribution') +
+      (r.specialDeal > 0 ? ' <span class="ovr">Special deal</span>' : '') + (r.spUpOverridden ? ' <span class="ovr">Edited</span>' : '')];
     if (S.product === 'ib' && r.rpInitialComm > 0) il2.push(fEUR(r.rpInitialComm) + ' · ' + pct(IB_CODES[r.code].rpUp) + ' of year-1 regular');
     h += kcard('Initial remuneration', fEUR(r.initialComm), il2.join('<br>'));
-    h += kcard('Trail remuneration', fEUR(trail), pct(r.cc.ongoing) + ' a year of fund value, over 40 years at ' + pct(rate));
+    h += kcard('Trail remuneration', fEUR(trail), pct(r.cc.ongoing) + ' a year of fund value, over ' + (S.product === 'ib' ? r.years : 40) + ' years at ' + pct(rate));
     h += kcard('Clawback', r.clawback ? 'Applies' : 'None', r.clawback ? (S.product === 'arf' ? 'on cool-off only' : 'on cool-off, and as set out in the charges') : '', r.clawback ? 'amb' : '');
     var last = 0;
     yearly.forEach(function(y, i) { if (y.comm >= 0.5) last = i; });
@@ -3451,7 +3479,7 @@ function textContext() {
     ctx.contribution = fEUR(r.contribution);
     ctx.policyholderType = r.policyholderType; ctx.exitTaxRate = pct(r.taxRate);
     ctx.rate = pct(r.rate); ctx.netRate = pct(r.p.netRate);
-    ctx.depletionSentence = (r.p.fundZeroYear ? qtFill(T.ibDepletes, { rate: pct(r.rate), year: r.p.fundZeroYear, age: r.p.depletionAge }) : qtFill(T.ibLasts, { rate: pct(r.rate) })) + ' ' + qtIbIncomeSentence(r);
+    ctx.depletionSentence = (r.p.fundZeroYear ? qtFill(T.ibDepletes, { rate: pct(r.rate), year: r.p.fundZeroYear, age: r.p.depletionAge }) : qtFill(T.ibLasts, { rate: pct(r.rate), years: r.years })) + ' ' + qtIbIncomeSentence(r);
   }
   return ctx;
 }

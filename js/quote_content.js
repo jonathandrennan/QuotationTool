@@ -113,19 +113,19 @@ var QT_CONTENT = {
   funds: {
     ss75: {
       category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Invests in international equities and euro bonds, aiming for a return comparable to a mix of 75% international stocks and 25% medium-term euro bonds. A quantitative approach lowers the equity holding when markets are volatile and raises it when they are calmer.',
+      desc: 'Invests in international equities and euro bonds, using a quantitative approach to manage volatility. When markets are volatile, equity and bond exposure are reduced; when they are calmer, exposure is increased. Aims for a return comparable to a mix of 75% international stocks and 25% medium-term euro bonds.',
       opportunities: ['High return potential of stocks in the long run', 'Steady interest income on bonds, capital gains opportunities on declining interest rates', 'Broad diversification across numerous securities'],
       risks: ['High volatility of stocks, losses possible. The fund unit price may be subject to increased volatility', 'Interest rates vary, bonds suffer price declines on rising interest rates', 'Limited participation in the yield potential of single securities']
     },
     ss50: {
       category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Invests in international equities and euro bonds, aiming for a return comparable to a mix of 50% international stocks and 50% medium-term euro bonds. A quantitative approach lowers the equity holding when markets are volatile and raises it when they are calmer.',
+      desc: 'Invests in international equities and euro bonds, using a quantitative approach to manage volatility. When markets are volatile, equity and bond exposure are reduced; when they are calmer, exposure is increased. Aims for a return comparable to a mix of 50% international stocks and 50% medium-term euro bonds.',
       opportunities: ['Steady interest income on bonds, capital gains opportunities on declining interest rates', 'High return potential of stocks in the long run', 'Broad diversification across numerous securities'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates. The fund unit price may be subject to increased volatility', 'High volatility of stocks, losses possible', 'Limited participation in the yield potential of single securities']
     },
     ss30: {
       category: 'Protected Growth — Actively Managed', sfdr: 8, availability: 'all',
-      desc: 'Invests in international equities and euro bonds, aiming for a return comparable to a mix of 30% international stocks and 70% medium-term euro bonds. A quantitative approach lowers the equity holding when markets are volatile and raises it when they are calmer.',
+      desc: 'Invests in international equities and euro bonds, using a quantitative approach to manage volatility. When markets are volatile, equity and bond exposure are reduced; when they are calmer, exposure is increased. Aims for a return comparable to a mix of 30% international stocks and 70% medium-term euro bonds.',
       opportunities: ['Steady interest income on bonds, capital gains opportunities on declining interest rates', 'High return potential of stocks in the long run', 'Broad diversification across numerous securities'],
       risks: ['Interest rates vary, bonds suffer price declines on rising interest rates. The fund unit price may be subject to increased volatility', 'High volatility of stocks, losses possible', 'Limited participation in the yield potential of single securities']
     },

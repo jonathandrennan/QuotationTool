@@ -382,6 +382,12 @@ IB_CASES = [
     dict(id='I8', desc='L1, SP 40k + RP 200/m, DMAS15 100, corporate',
          dob=D(1975, 8, 20), start=D(2026, 10, 1), code='L1', ph='corporate', sp=40000, rp=200, freq='monthly', esc=0,
          allocs={'dm15': 100}, gmab={}, income=None),
+    dict(id='I9', desc='D3, SP 100k, SS50 100, individual, special deal +1% (company-funded, 100% allocation)',
+         dob=D(1968, 5, 1), start=D(2026, 10, 1), code='D3', ph='individual', sp=100000, rp=0, freq='monthly', esc=0,
+         allocs={'ss50': 100}, gmab={}, income=None, specialDeal=0.01),
+    dict(id='I10', desc='K1, SP 60k + RP 300/m, MSCI World 100, individual, special deal +0.5% and SP comm override 4.5%',
+         dob=D(1972, 2, 14), start=D(2026, 10, 1), code='K1', ph='individual', sp=60000, rp=300, freq='monthly', esc=0,
+         allocs={'hmw': 100}, gmab={}, income=None, specialDeal=0.005, spUpOverride=0.045),
 ]
 
 # ARF cases. income = (type, value, incomeStartAge, escalation %)
@@ -407,6 +413,12 @@ ARF_CASES = [
     dict(id='R7', desc='F5, SP 60k, AFISD 50 / Cash 50, fixed 6,000 p.a. level (0% esc), age 65 (depletes)',
          dob=D(1961, 7, 15), start=D(2026, 7, 15), code='F5', sp=60000, allocs={'afsd': 50, 'cash': 50}, gmab={},
          income=('custom_amount', 6000, 65, 0)),
+    dict(id='R8', desc='B2, SP 200k, SS50 100, default income from start, special deal +1% (company-funded, 100% allocation)',
+         dob=D(1959, 11, 1), start=D(2026, 10, 1), code='B2', sp=200000, allocs={'ss50': 100}, gmab={},
+         income=('default', 0, 66, 2), specialDeal=0.01),
+    dict(id='R9', desc='A5, SP 120k, DMAS50 100, default income from start, special deal +1% and SP comm override 4% (below base)',
+         dob=D(1958, 1, 20), start=D(2026, 10, 1), code='A5', sp=120000, allocs={'dm50': 100}, gmab={},
+         income=('default', 0, 68, 2), specialDeal=0.01, spUpOverride=0.04),
 ]
 
 
@@ -426,14 +438,15 @@ def ib_engine_inp(c):
                 diyAllocs=c['allocs'], diyGmab=c['gmab'],
                 incomeType=inc[0] if inc else 'none', incomeValue=inc[1] if inc else 0,
                 incomeStartAge=inc[2] if inc else None, incomeEscalationPct=inc[3] if inc else 0,
-                spUpOverride=c.get('spUpOverride'), rateOverride=None)
+                specialDeal=c.get('specialDeal'), spUpOverride=c.get('spUpOverride'), rateOverride=None)
 
 
 def arf_engine_inp(c):
     inc = c['income']
     return dict(dobStr=iso(c['dob']), startStr=iso(c['start']), code=c['code'], contribution=c['sp'],
                 diyAllocs=c['allocs'], diyGmab=c['gmab'], incomeType=inc[0], incomeValue=inc[1],
-                incomeStartAge=inc[2], incomeEscalationPct=inc[3], spUpOverride=c.get('spUpOverride'),
+                incomeStartAge=inc[2], incomeEscalationPct=inc[3], specialDeal=c.get('specialDeal'),
+                spUpOverride=c.get('spUpOverride'),
                 rate1Override=c.get('rate1Override'), rate2Override=None)
 
 
@@ -457,7 +470,8 @@ def ib_excel_run(x, c):
     x.set(S, 'C49', 0.01)                                     # government levy
     x.set(S, 'C51', 0)
     x.set(S, 'C57', 1)
-    x.set(S, 'C61', 'No')
+    x.set(S, 'C61', 'Yes' if c.get('specialDeal') else 'No')       # special deal: company-funded commission uplift
+    x.set(S, 'C62', c.get('specialDeal') or 0)
     x.set(S, 'C65', 'No')                                     # tiered bonus off, as the engine (IB_TIERED_BONUS_ON) and the spec
     if c.get('spUpOverride') is not None:
         x.set(S, 'C63', 'Yes')
@@ -531,7 +545,7 @@ def ib_compare(cmp, c, ex, en):
     if en.get('errors'):
         cmp.add(P, cid, 'engine errors', None, '', '; '.join(en['errors']), 0)
         return
-    p = en['p']
+    p = en.get('pFull') or en['p']   # the full 40-year run (quotes show IB_PROJECTION_YEARS)
     B = ex['block']
     R = lambda m, L: num(B[m - 1][col_idx(L)])
     yrs = ib_excel_years(ex)
@@ -612,7 +626,8 @@ def arf_excel_run(x, c):
     x.set(S, 'C55', age)
     x.set(S, 'C63', 1)
     x.set(S, 'C66', 0)
-    x.set(S, 'C68', 'No')
+    x.set(S, 'C68', 'Yes' if c.get('specialDeal') else 'No')       # special deal: company-funded commission uplift
+    x.set(S, 'C69', c.get('specialDeal') or 0)
     if c.get('spUpOverride') is not None:
         x.set(S, 'C71', 'Yes')
         x.set(S, 'C72', c['spUpOverride'])
@@ -662,7 +677,7 @@ def arf_compare(cmp, c, ex, en):
     cmp.add(P, cid, 'growth rate 1 (C45)', None, ex['C45'], en['rate1'], TOL_RATE, 'rate')
     cmp.add(P, cid, 'growth rate 2 (C46)', None, ex['C46'], en['rate2'], TOL_RATE, 'rate')
     cmp.add(P, cid, 'SP upfront commission rate used (C74)', None, ex['C74'], en['spUpRate'], TOL_RATE, 'rate')
-    cmp.add(P, cid, 'SP allocation rate (C75)', None, ex['C75'], 1 + en['cc']['spUp'] - en['spUpRate'], TOL_RATE, 'rate')
+    cmp.add(P, cid, 'SP allocation rate (C75)', None, ex['C75'], en['spAllocRate'], TOL_RATE, 'rate')
     cmp.add(P, cid, 'initial commission (C42*C74)', None, c['sp'] * num(ex['C74']), en['initialComm'], TOL_EUR)
     cmp.add(P, cid, 'income start policy month (C56)', None, ex['C56'], engine_income_month(c), 0, 'int')
     for key, blk, tbl, zy, irr_nc, irr_c, lab in (('p1', 'block1', 'table1', 'C67', 'AO64', 'AP64', 'rate1'),
