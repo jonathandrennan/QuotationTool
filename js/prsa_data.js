@@ -89,6 +89,7 @@ var INFLATION             = 0.03;
 var ANN_INTEREST          = 0.0375;
 var ANN_ESC               = 0.02;
 var ANN_GUARANTEE         = 5;
+// Male basis (_M) kept for reference only: every quotation is priced on the female basis (engine_prsa.js).
 var ANN_QX_ADJ_M          = 0.42;   // ILT15 male qx adjustment factor (ASP PRSA-2, p.10)
 var ANN_QX_ADJ_F          = 0.50;   // ILT15 female qx adjustment factor (ASP PRSA-2, p.10)
 var ANN_MORT_IMPROVE_M    = 0.0044; // male annual mortality improvement rate

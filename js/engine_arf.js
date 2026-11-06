@@ -246,6 +246,7 @@ function arfRunProjection(inp, annualGrossRate) {
     initialComm: spUpRate * contrib,
     firstIncome: firstIncomeYear ? firstIncomeYear.income : 0,
     firstIncomeYear: firstIncomeYear ? firstIncomeYear.year : null,
+    incomeStartMonth: incomeStartMonth,
     startAge: startAge
   };
 }

@@ -8,7 +8,6 @@
 // inp = {
 //   dobStr, startStr        'YYYY-MM-DD'
 //   nra                     retirement age (60–75)
-//   gender                  'M' | 'F'
 //   prsaType                'standard' | 'nonstandard'
 //   code                    product code key in CODES
 //   strat                   strategy id ('dis', 'lc_ba', 'ap_dy', 'diy', ...)
@@ -103,9 +102,10 @@ function prsaSolveIrr(targetFV, ofv, sp, rpMonthly, freq, esc, termMonths) {
 }
 
 // Monthly annuity factor (ILT15 mortality), matching Excel SRP rows 697-1357.
-function prsaAnnuityFactor(retAge, gender, intRate, escRate, guaranteeYrs) {
-  var qx    = gender === 'F' ? ILT15_QX_F : ILT15_QX_M;
-  var qxAdj = gender === 'F' ? ANN_QX_ADJ_F : ANN_QX_ADJ_M;
+// Every quotation uses the female table: quotes must not distinguish on gender (workbook SRP!D69 = Female).
+function prsaAnnuityFactor(retAge, intRate, escRate, guaranteeYrs) {
+  var qx    = ILT15_QX_F;
+  var qxAdj = ANN_QX_ADJ_F;
   var factor = 0;
   var px = 1;
   var escMonth = 1/12;
@@ -280,9 +280,9 @@ function runPrsaQuote(inp) {
   var termYearsExact = inp.nra - ageAtStart;
   var annFactor = (termYearsExact <= 5)
     ? (1 / ANN_IL_QUOTE_RATE)
-    : prsaAnnuityFactor(inp.nra, inp.gender, ANN_INTEREST, ANN_ESC, ANN_GUARANTEE);
+    : prsaAnnuityFactor(inp.nra, ANN_INTEREST, ANN_ESC, ANN_GUARANTEE);
   var realMat = fundWC / Math.pow(1 + INFLATION, termYearsExact);
-  var mortImproveRate   = inp.gender === 'F' ? ANN_MORT_IMPROVE_F : ANN_MORT_IMPROVE_M;
+  var mortImproveRate   = ANN_MORT_IMPROVE_F;   // female basis for all quotations (see prsaAnnuityFactor)
   var mortImproveFactor = Math.pow(1 + mortImproveRate, (start.getFullYear() - ANN_MORT_BASE_YEAR) + termYearsExact);
   var monthlyAnn = realMat / (annFactor * mortImproveFactor * 12);
   var annualIncomeReal    = realMat / (annFactor * mortImproveFactor);

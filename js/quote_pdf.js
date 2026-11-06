@@ -433,7 +433,6 @@ function qtBuildPack(Q) {
     pageTitle(T.sections.summary, T.packLeads.summary);
     var mix = qtChargeMix(fundRows);
     var ageStart = r.ageAtStart != null ? r.ageAtStart : r.startAge;
-    var startYear = new Date(r.inputs.startStr).getFullYear();
     var cAddr = (Q.client.address || '').split('\n').filter(function(x) { return x.trim(); }).join(', ');
     var youRows = [
       ['Name', escHtml(Q.client.salutation + ' ' + clientName)],
@@ -447,7 +446,8 @@ function qtBuildPack(Q) {
         ['Product', escHtml(brand)],
         ['Type and version', escHtml((r.prsaType === 'standard' ? 'Standard PRSA' : 'Non-Standard PRSA') + ' · ' + r.code)],
         ['Start date', escHtml(fmtDate(r.inputs.startStr))],
-        ['Retirement age', r.nra + ' &middot; ' + (startYear + Math.round(r.termMonths / 12))]
+        ['Retirement age', r.nra + ' &middot; ' + (new Date(r.inputs.dobStr).getFullYear() + r.nra)],   // the year the client reaches it
+        ['Investment strategy', escHtml(r.isGlidepath ? strategyFullName(r.stratObj) : 'Your own fund selection')]
       ];
       contribRows = [
         r.ofvRaw > 0 ? ['Transfer value', fEUR(r.ofvRaw)] : null,
@@ -546,9 +546,9 @@ function qtBuildPack(Q) {
     // Portfolio risk
     add('<h3 class="kwn">' + escHtml(FH.risk) + '</h3>');
     var fRisk = qtPortfolioRisk(Q), sfs = qtSfdrSplit(r.mix);
-    var t2 = gp ? ['Strategy risk profile', escHtml(strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
+    var t2 = gp ? ['Investment strategy', escHtml(strategyFullName(r.stratObj)), 'risk profile ' + (strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
     var sus = sfs.unknown > 0.0001 ? '&ndash;' : sfs.art8 > 0.9999 ? '100% Article 8' : Math.round(sfs.art8 * 100) + '% Article 8';
-    add(qtStat3([Q.lite ? null : ['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], [t2[0], t2[1]], ['Sustainability', sus]]));
+    add(qtStat3([Q.lite ? null : ['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], t2, ['Sustainability', sus]]));
     p(Q.lite ? T.fundsIntroLite : T.fundsIntro);
     if (Q.lite) {
       if (gp && fRisk.line) add('<p>' + fRisk.line + '</p>');   // no client rating to compare with
@@ -627,7 +627,9 @@ function qtBuildPack(Q) {
         p(qtFill(T.arfRiy, { rate: rt, netRate: pct(pp.netRate) }));
         p(pp.fundZeroYear ? qtFill(T.arfDepletes, { rate: rt, year: pp.fundZeroYear, age: pp.depletionAge }) : qtFill(T.arfLasts, { rate: rt }));
       });
-      p(qtArfIncomeSentence(r));
+      var arfStart = qtIncomeStartNote(r, r.p1);
+      p(qtArfIncomeSentence(r) + (arfStart ? '*' : ''));
+      if (arfStart) p(arfStart, 'tiny');
       p(qtFill(T.arfEscNote, { esc: pct(qtArfEsc(r)) }));
       p(T.arfDepletionWarning);
       if (r.hasSurrender) p(T.arfSurrenderNote);
@@ -644,7 +646,9 @@ function qtBuildPack(Q) {
       imp([qtFill(T.ibImportant, { rate: ibRt })]);
       p(qtFill(T.ibRiy, { rate: ibRt, netRate: pct(r.p.netRate) }));
       p(r.p.fundZeroYear ? qtFill(T.ibDepletes, { rate: ibRt, year: r.p.fundZeroYear, age: r.p.depletionAge }) : qtFill(T.ibLasts, { rate: ibRt, years: r.years }));
-      p(qtIbIncomeSentence(r));
+      var ibStart = r.inputs.incomeType !== 'none' ? qtIncomeStartNote(r, r.p) : '';
+      p(qtIbIncomeSentence(r) + (ibStart ? '*' : ''));
+      if (ibStart) p(ibStart, 'tiny');
       p(qtFill(T.ibTaxNote, { rate: pct(r.taxRate), ptype: r.policyholderType }));
       p(T.ibDepletionWarning);
       if (r.hasSurrender) p(T.ibSurrenderNote);
@@ -763,11 +767,12 @@ function qtBuildPack(Q) {
     add('<h3 class="kwn">Projected remuneration by year</h3>');
     var yt;
     if (isPrsa) {
-      yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Age</th><th>Initial</th><th>Trail</th><th class="em">Total</th></tr></thead><tbody>';
-      qtKeyYears(r.snapshots).forEach(function(s) {
-        var trailY = s.ongoingInYear || 0, initY = Math.max(0, (s.commInYear || 0) - trailY);
-        yt += '<tr' + (s.isMat ? ' class="mat"' : '') + '><td class="l">' + (s.isMat ? 'At ' + r.nra : s.year) + '</td><td>' + (s.isMat ? r.nra : s.age) +
-          '</td><td>' + (initY > 0 ? fEUR(initY) : '&ndash;') + '</td><td>' + fEUR(trailY) + '</td><td class="em"><b>' + fEUR(initY + trailY) + '</b></td></tr>';
+      // As the workbook's commission table (SRP!I18:K32): years 1-5, every fifth year, then the year of retirement
+      yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Contributions payable in that year</th><th class="em">Projected remuneration payable in that year</th></tr></thead><tbody>';
+      qtPrsaRows(r).forEach(function(s) {
+        var c = qtPrsaContribInYear(r, s);
+        yt += '<tr' + (s.isMat ? ' class="mat"' : '') + '><td class="l">' + s.year + (s.isMat ? ' (retirement)' : '') + '</td><td>' + (c > 0 ? fEUR(c) : '&ndash;') +
+          '</td><td class="em"><b>' + fEUR(s.commInYear) + '</b></td></tr>';
       });
     } else if (isArf) {
       yt = '<table class="dt num split"><thead><tr><th class="l">Year</th><th>Contributions payable in that year</th><th>Projected remuneration at ' + pct(r.rate1) + '</th><th>Projected remuneration at ' + pct(r.rate2) + '</th></tr></thead><tbody>';
@@ -904,6 +909,11 @@ function qtAttachedPreview(Q) {
 function qtPrsaRows(r) {
   return r.snapshots.filter(function(s) { return s.isMat || s.year <= 5 || s.year % 5 === 0; });
 }
+// Contributions paid in a policy year: regular contributions, plus the single contribution and any transfer in year 1
+// (the workbook enters a transfer as a single premium, SRP!D86)
+function qtPrsaContribInYear(r, s) {
+  return s.rpInYear + (s.year === 1 ? r.spRaw + r.ofvRaw : 0);
+}
 
 // Income escalation and income wording for the ARF and Investment Bond
 function qtArfEsc(r) {
@@ -923,6 +933,16 @@ function qtArfIncomeSentence(r) {
   else s = qtFill(T.arfIncomePct, { incomePct: (+i.incomeValue).toFixed(2) + '%', income: fEUR(r.contribution * i.incomeValue / 100) });
   if (i.incomeStartAge > Math.ceil(r.startAge)) s += ' ' + qtFill(T.arfDeferNote, { incomeAge: i.incomeStartAge });
   return s;
+}
+// Footnote giving the exact calendar month income starts, so the figures can be reproduced. The engines start income
+// in the policy month nearest the client's birthday at the chosen age (round((age - age at start) x 12) + 1).
+function qtIncomeStartNote(r, proj) {
+  var m = proj && proj.incomeStartMonth;
+  if (!m) return '';
+  var st = new Date(r.inputs.startStr), d = new Date(st.getFullYear(), st.getMonth() + m - 1, 1);
+  var when = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][d.getMonth()] + ' ' + d.getFullYear();
+  var age = r.inputs.incomeStartAge;
+  return qtFill(age != null ? QT_TEXT.incomeStartNoteAge : QT_TEXT.incomeStartNote, { when: when, month: m, age: age });
 }
 function qtIbEsc(r) {
   var i = r.inputs;

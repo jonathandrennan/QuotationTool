@@ -826,8 +826,6 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
       <div><label class="f" for="c-first">First name</label><input type="text" id="c-first" data-c="first"></div>
       <div><label class="f" for="c-last">Last name</label><input type="text" id="c-last" data-c="last"></div>
       <div class="span2 dobwrap"><label class="f" for="c-dob">Date of birth</label><input type="date" id="c-dob" data-c="dobStr"><span class="dob-age" id="dob-age" aria-live="polite"></span></div>
-      <div class="prsa-only"><label class="f" id="gender-l">Gender <span class="opt">· for annuity estimate</span></label>
-        <div class="seg full" id="c-gender" role="radiogroup" aria-labelledby="gender-l"><button type="button" data-v="M" onclick="setGender('M')">Male</button><button type="button" data-v="F" onclick="setGender('F')">Female</button></div></div>
       <div class="spanall"><label class="f" for="c-address">Address <span class="opt">· for cover letter</span></label><textarea id="c-address" rows="2" data-c="address"></textarea></div>
     </div>
   </section>
@@ -1254,7 +1252,7 @@ var S = {
   lite: true,   // on by default (set again in init)
   broker: { firm:'', name:'', title:'', email:'', phone:'', address:'', regStatement:'' },
   consent: false,
-  client: { salutation:'Mr', first:'', last:'', address:'', dobStr:'', gender:'M' },
+  client: { salutation:'Mr', first:'', last:'', address:'', dobStr:'' },
   startStr: '',
   // override: audit record when the adviser proceeds with a portfolio that doesn't match the
   // client's rating — { key, strategy, clientSri, direction, reason, recordedAt (ISO) }
@@ -1389,7 +1387,6 @@ function init() {
 
   renderLetterhead();
   renderSriCards();
-  setGender(S.client.gender);
   setProduct('prsa');
   setLite(true);   // the tool opens in lite mode; the toggle on the first screen switches to the full flow
   goStep(1);
@@ -1690,14 +1687,6 @@ function setProduct(p) {
   document.querySelectorAll('.ib-only').forEach(function(el) { el.style.display = p === 'ib' ? '' : 'none'; });
   renderSriCards();
   onClientChange();
-}
-function setGender(g) {
-  S.client.gender = g;
-  document.querySelectorAll('#c-gender button').forEach(function(b) {
-    var on = b.getAttribute('data-v') === g;
-    b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); b.setAttribute('role', 'radio');
-  });
-  if (S.maxStep > 2) invalidate(Math.min(S.maxStep, 4));
 }
 function stepNra(d) {
   var v = isNaN(S.prsa.nra) ? 65 : S.prsa.nra;
@@ -2965,7 +2954,7 @@ function renderPfSummary() {
 function engineInput() {
   if (S.product === 'prsa') {
     var p = S.prsa;
-    return { dobStr: S.client.dobStr, startStr: S.startStr, nra: p.nra, gender: S.client.gender, prsaType: p.prsaType,
+    return { dobStr: S.client.dobStr, startStr: S.startStr, nra: p.nra, prsaType: p.prsaType,
              code: p.code, strat: p.strat, diyAllocs: p.strat === 'diy' ? p.diyAllocs : {}, diyGmab: p.strat === 'diy' ? p.diyGmab : {},
              sp: p.sp, ofv: p.ofv, rp: p.rp, freq: p.freq, esc: p.esc, spUpOverride: p.spUpOverride, rpUpOverride: p.rpUpOverride };
   }
@@ -3304,7 +3293,7 @@ function resRemuneration(r) {
     var trs = [], head;
     if (isPrsa) {
       head = ['Year', 'Contributions in year', 'Remuneration in year'];
-      qtPrsaRows(r).forEach(function(s) { var c = s.rpInYear + (s.year === 1 ? r.spRaw : 0); trs.push({ tot: s.isMat, c: [s.isMat ? 'Retirement' : s.year, c > 0 ? fEUR(c) : '–', fEUR(s.commInYear)] }); });
+      qtPrsaRows(r).forEach(function(s) { var c = qtPrsaContribInYear(r, s); trs.push({ tot: s.isMat, c: [s.isMat ? 'Retirement' : s.year, c > 0 ? fEUR(c) : '–', fEUR(s.commInYear)] }); });
     } else if (S.product === 'arf') {
       head = ['Year', 'Contributions in year', 'At ' + pct(r.rate1), 'At ' + pct(r.rate2)];
       r.p1.commRows.forEach(function(c1, i) { trs.push({ c: [c1.year, c1.contrib > 0 ? fEUR(c1.contrib) : '–', fEUR(c1.comm), fEUR((r.p2.commRows[i] || {}).comm)] }); });

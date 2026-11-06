@@ -123,6 +123,12 @@ function strategyRiskFit(strat, sri) {
   return { aligned: true, direction: null, range: rg };
 }
 function fmtRatingRange(rg) { return rg[0] === rg[1] ? String(rg[0]) : rg[0] + '–' + rg[1]; }
+// Strategy family plus profile, e.g. 'Autopilot Dynamic' or 'Life Cycle Balanced'; null for DIY.
+function strategyFullName(strat) {
+  if (!strat || !strat.gpKey) return null;
+  var prof = strategyProfile(strat);
+  return prof ? strat.label + ' ' + prof : strat.label;
+}
 function strategyProfile(strat) {
   if (!strat || !strat.sub) return null;
   if (/Balanced/.test(strat.sub)) return 'Balanced';

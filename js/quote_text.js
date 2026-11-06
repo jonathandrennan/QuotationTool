@@ -88,6 +88,9 @@ var QT_TEXT = {
   ibIncomeAmount: 'You have chosen an initial income of {income} per annum, escalating at {esc} per annum.',
   ibIncomePct: 'You have chosen an initial income of {incomePct} of the fund per annum ({income}).',
   ibDeferNote: 'Income is deferred until age {incomeAge}.',
+  // ARF and Investment Bond projection pages: the calendar month income is assumed to start (asterisked footnote)
+  incomeStartNoteAge: '* Income is assumed to start in {when} (month {month} of the policy), the policy month nearest the date you reach age {age}, and to be paid monthly from then.',
+  incomeStartNote: '* Income is assumed to start in {when} (month {month} of the policy) and to be paid monthly from then.',
   ibDepletes: 'At {rate} growth, your fund is projected to run out in year {year} (around age {age}), at which point your policy will end.',
   ibLasts: 'At {rate} growth, your fund is not projected to run out within {years} years.',
   ibTaxNote: 'This illustration assumes a {ptype} policyholder, with exit tax of {rate} applying to chargeable events, including the Revenue "deemed disposal" rule which taxes the gain on your policy every 8 years whether or not you make a withdrawal.',

@@ -225,7 +225,9 @@ function ibRunProjection(inp, annualGrossRate) {
           D: Math.round(taxToDate), E: Math.round(cumNetIncome), F: Math.round(displayFund)
         });
       }
-      if (ARF_MILESTONES[yr]) commRows.push({ year: yr, contrib: yr === 1 ? contrib + firstYearRpTotal : (rpAllowed ? rpSchedule[month - 1] * 12 : 0), comm: Math.round(yrComm) });
+      // Contributions actually paid in this policy year (single + every regular payment due), so quarterly and
+      // annual regular contributions show correctly too, not just monthly ones.
+      if (ARF_MILESTONES[yr]) commRows.push({ year: yr, contrib: yrPremium, comm: Math.round(yrComm) });
       if (yr <= 40) yearly.push({ year: yr, income: yrIncome, comm: yrComm, charges: yrCharges, tax: yrRealizedTax, fund: fund, displayFund: displayFund });
 
       yrPremium = 0; yrGrowth = 0; yrCharges = 0; yrIncome = 0; yrComm = 0; yrRealizedTax = 0;
@@ -271,6 +273,7 @@ function ibRunProjection(inp, annualGrossRate) {
     cumRealizedTax: cumRealizedTax, cumIncome: cumIncome, cumNetIncome: cumNetIncome,
     firstIncome: firstIncomeYear ? firstIncomeYear.income : 0,
     firstIncomeYear: firstIncomeYear ? firstIncomeYear.year : null,
+    incomeStartMonth: incomeStartMonth,
     startAge: startAge
   };
 }
