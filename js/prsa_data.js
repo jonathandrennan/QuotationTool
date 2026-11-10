@@ -52,6 +52,10 @@ var STD_FUND_IDS    = ['cash','afisd','afie','ss30','ss50','ss75','etfe','etfw',
 var NONSTD_FUND_IDS = ['cash','afisd','afie','ss30','dm15','ss50','ss75','dm50','dm75','bsri','etfe','etfw','etfs'];
 
 // ─── PRODUCT CODES ───────────────────────────────────────────────────────────
+// Initial commission is fixed at the code's rates (spUp, rpPct/rpMax). The only adjustment is the special
+// deal: extra commission paid by Allianz on single contributions and transfers, either off or exactly
+// PRSA_SPECIAL_DEAL. Commission never affects the fund on a PRSA (there is no allocation trade-off).
+var PRSA_SPECIAL_DEAL = 0.01;
 var CODES = {
   'A1': { type:'nonstandard', admin:0.0115, ongoing:0.0075, spUp:0, rpPct:0, rpMax:0 },
   'A2': { type:'nonstandard', admin:0.0115, ongoing:0.006, spUp:0.01, rpPct:0.004, rpMax:0.05 },

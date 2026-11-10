@@ -5,7 +5,6 @@
 var ARF_MAX_RATE   = 0.06;   // regulatory cap on gross growth rate
 var ARF_RATE_2     = 0.032;  // lower scenario (Allianz Euro Cash rate) — adjust here if needed
 var ARF_INCOME_ESC = 0.02;   // income escalation assumption pa
-var ARF_MAX_SP_COMM = 0.06;  // initial commission max, incl. any special deal (ARF workbook Parameters D78:E78)
 
 // Revenue deemed distribution rates
 var ARF_DEEMED = { age61: 0.04, age71: 0.05, over2m: 0.06 };
@@ -35,6 +34,24 @@ var ARF_CODES = {
   'F3': { version:'F', admin:0.0135, spUp:0.02, ongoing:0.0075, surrender:[0.03, 0.03, 0.02, 0.02, 0.01, 0, 0, 0] },
   'F4': { version:'F', admin:0.0135, spUp:0.03, ongoing:0.006,  surrender:[0.04, 0.03, 0.03, 0.02, 0.01, 0, 0, 0] },
   'F5': { version:'F', admin:0.0135, spUp:0.04, ongoing:0.005,  surrender:[0.05, 0.04, 0.03, 0.02, 0.01, 0, 0, 0] }
+};
+
+// ── Initial commission limits ─────────────────────────────────────────────────
+// How far the adviser may move the initial commission on each code: [min, max]. From the
+// "Init Comm Range" column of the product spec. Moving commission away from the standard rate
+// moves the allocation the other way (see arfAllocationRate). A special deal is added on top
+// of both ends (see arfSpCommLimits in engine_arf.js).
+var ARF_SPECIAL_DEAL = 0.01;   // a special deal is either off or exactly this much extra initial commission
+var ARF_SP_COMM_RANGE = {
+  'A1': [0, 0.05], 'A2': [0, 0.05], 'A3': [0, 0.05], 'A4': [0, 0.05], 'A5': [0, 0.05],
+
+  'B1': [0, 0.05], 'B2': [0, 0.05], 'B3': [0, 0.05], 'B4': [0, 0.05], 'B5': [0, 0.05],
+
+  'C1': [0, 0.05], 'C2': [0, 0.05], 'C3': [0, 0.05],
+
+  'D1': [0, 0.05],
+
+  'F1': [0, 0.05], 'F2': [0, 0.05], 'F3': [0, 0.05], 'F4': [0, 0.05], 'F5': [0, 0.05]
 };
 
 // ── Funds ─────────────────────────────────────────────────────────────────────

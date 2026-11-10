@@ -349,9 +349,16 @@ function qtBuildPack(Q) {
   if (Q.sections.sos) {
     sec = 'sos';
     add('<h1>' + escHtml(T.sections.sos) + '</h1>', { hdr: 'broker', cls: 'kwn newpage' });
-    add('<table class="kv"><tr><td>Client</td><td>' + escHtml(clientName) + '</td><td>Adviser</td><td>' + escHtml(Q.broker.name) + '</td></tr>' +
-        '<tr><td>Date</td><td>' + escHtml(dateLong) + '</td><td>Firm</td><td>' + escHtml(Q.broker.firm) + '</td></tr>' +
-        '<tr><td>Product</td><td colspan="3">' + escHtml(Q.productName) + '</td></tr></table>', { hdr: 'broker' });
+    add('<div class="imp"><b>' + escHtml(T.sosNoticeTitle.toUpperCase()) + '</b><p>' + escHtml(T.sosNotice) + '</p></div>', { hdr: 'broker' });
+    // Details: date of birth with age today; the retirement age (PRSA) or income start age (ARF, and the Bond if set)
+    var sDob = Q.client.dobStr ? fmtDate(Q.client.dobStr) + ' (age ' + Math.floor(ageBetween(Q.client.dobStr, new Date().toISOString().slice(0, 10))) + ')' : '';
+    var sAgeLbl = isPrsa ? 'Retirement age' : 'Income start age';
+    var sAge = isPrsa ? Q.r.nra : (Q.r.inputs && Q.r.inputs.incomeStartAge) || '';
+    var sAdv = escHtml(Q.broker.name) + (Q.broker.title ? ', ' + escHtml(Q.broker.title) : '');
+    add('<table class="kv"><tr><td>Client</td><td>' + escHtml(clientName) + '</td><td>Adviser</td><td>' + sAdv + '</td></tr>' +
+        '<tr><td>Date of birth</td><td>' + escHtml(sDob) + '</td><td>Firm</td><td>' + escHtml(Q.broker.firm) + '</td></tr>' +
+        '<tr><td>' + (sAge ? escHtml(sAgeLbl) : '') + '</td><td>' + escHtml(String(sAge)) + '</td><td>Date</td><td>' + escHtml(dateLong) + '</td></tr>' +
+        '<tr><td>Recommended product</td><td colspan="3">' + escHtml(Q.productName) + '</td></tr></table>', { hdr: 'broker' });
     qtMarkupBlocks(Q.sosText).forEach(function(b, i, all) { add(b, { hdr: 'broker', cls: i === all.length - 1 ? 'kwn' : '' }); });
     add('<div class="sigs"><div><p>' + escHtml(T.sosDeclaration) + '</p><div class="sigline"></div>Adviser: ' + escHtml(Q.broker.name) +
         '<div class="sigline short"></div>Date</div>' +
@@ -794,7 +801,7 @@ function qtBuildPack(Q) {
     p(T.remunTableNote, 'small');
     add('<h3 class="kwn">Clawback</h3>');
     p(r.clawback ? (isPrsa ? T.prsaClawback : isArf ? T.arfClawback : T.ibClawback) : T.noClawback);
-    if (r.spUpOverridden || (isPrsa ? r.rpUpOverridden : r.specialDeal > 0)) p(T.overrideNote);
+    if (r.spUpOverridden || r.specialDeal > 0) p(T.overrideNote);
   }
 
   // ── Allianz quotation: important information ──
@@ -870,7 +877,10 @@ function qtBuildPack(Q) {
   var hdrAgl = '<div class="hl">' + qtLogoSvg(20) + '</div><div class="hr">Quotation for ' + escHtml(clientName) +
     '<br>' + escHtml(dateLong) + '</div>';
   var bAddr = (Q.broker.address || '').split('\n').filter(function(x){ return x.trim(); }).map(escHtml);
-  var hdrBroker = '<div class="hl"><div class="firm">' + escHtml(Q.broker.firm) + '</div></div>' +
+  // The adviser's own logo, if uploaded, replaces the firm name (only a PNG/JPEG data URL is used)
+  var bLogo = /^data:image\/(png|jpeg);base64,/.test(Q.broker.logo || '') ? Q.broker.logo : '';
+  var hdrBroker = '<div class="hl">' + (bLogo ? '<img class="blogo" src="' + escHtml(bLogo) + '" alt="' + escHtml(Q.broker.firm) + '">'
+      : '<div class="firm">' + escHtml(Q.broker.firm) + '</div>') + '</div>' +
     '<div class="hr">' + bAddr.concat(Q.broker.phone ? [escHtml(Q.broker.phone)] : []).join('<br>') + '</div>';
   // Footers carry their own spans: the paginator appends only the page number.
   var footAgl = '<span class="fbrand">' + escHtml(brand.toUpperCase()) + '</span>' +
@@ -986,6 +996,7 @@ function qtPackCss() {
     '.phdr.broker { height: 16mm; align-items: flex-start; border-bottom: 1.5pt solid #0E1E33; }',
     '.phdr .hr { text-align: right; font-size: 7.6pt; color: #5E6B78; line-height: 1.45; }',
     '.phdr .firm { font-size: 13pt; font-weight: 700; color: #0E1E33; }',
+    '.phdr .blogo { display: block; max-width: 70mm; max-height: 12mm; width: auto; height: auto; }',
     '.pbody { position: absolute; top: 33mm; bottom: 18mm; left: 16mm; right: 16mm; overflow: hidden; }',
     '.pfoot { position: absolute; bottom: 8mm; left: 16mm; right: 16mm; font-size: 6.8pt; color: #8A96A3; border-top: 0.5pt solid #E2E8EF; padding-top: 2mm; display: flex; justify-content: space-between; gap: 6mm; }',
     '.pfoot .pn { white-space: nowrap; }',

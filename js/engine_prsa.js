@@ -16,7 +16,7 @@
 //   sp, ofv, rp             single premium, opening fund value (transfer), regular premium per payment
 //   freq                    'monthly' | 'quarterly' | 'annual'
 //   esc                     regular premium escalation, percent p.a.
-//   spUpOverride, rpUpOverride   null or decimal rate
+//   specialDeal             null or PRSA_SPECIAL_DEAL: Allianz-paid extra on the single/transfer rate
 // }
 
 function prsaStrategies(prsaType) {
@@ -30,11 +30,12 @@ function prsaGmabOn(s, mtr) {
   return !!s.gmab && (s.gmabMaxMtr == null || mtr <= s.gmabMaxMtr);
 }
 
+// Single/transfer initial commission: the code's rate plus any special deal. Paid by Allianz, so the fund is unchanged.
 function prsaSpUpRate(inp) {
-  return inp.spUpOverride != null ? inp.spUpOverride : CODES[inp.code].spUp;
+  return CODES[inp.code].spUp + (inp.specialDeal || 0);
 }
 function prsaRpUpRate(inp) {
-  return inp.rpUpOverride != null ? inp.rpUpOverride : CODES[inp.code].rpPct;
+  return CODES[inp.code].rpPct;
 }
 
 // Term to retirement as the workbook defines it (SRP!A91, D85): age = (start - DoB)/365.25, term in months
@@ -314,7 +315,7 @@ function runPrsaQuote(inp) {
     snapshots: snapshots,
     spUpRate: spUpRate, rpUpRate: rpUpRate, rpUpfrontPct: rpUpfrontPct,
     spUpfrontComm: spUpfrontComm, ofvUpfrontComm: ofvUpfrontComm, rpUpfrontComm: rpUpfrontComm,
-    spUpOverridden: inp.spUpOverride != null, rpUpOverridden: inp.rpUpOverride != null,
+    specialDeal: inp.specialDeal || 0,
     totalInitialComm: spUpfrontComm + ofvUpfrontComm + rpUpfrontComm, totalOngoingComm: totalOngoing,
     clawback: (spUpRate > 0 || rpUpRate > 0),
     mix: mix, portfolioSri: portfolioSri

@@ -255,6 +255,11 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .lh { padding:24px 22px 18px; border:1px solid var(--line); border-radius:10px; background:#fff; box-shadow:0 1px 2px rgba(14,30,51,.04), 0 12px 32px rgba(14,30,51,.06); color:var(--body); font-size:11px; line-height:1.5; }
 .lh-top { display:flex; justify-content:space-between; gap:12px; padding-bottom:14px; border-bottom:2px solid var(--navy); }
 .lh-firm { font-size:13px; font-weight:700; color:var(--ink); }
+.lh-logo { display:block; max-width:150px; max-height:34px; object-fit:contain; }
+.logo-up { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.logo-box { display:flex; align-items:center; justify-content:center; width:140px; height:52px; padding:6px; border:1px dashed var(--inp); border-radius:8px; background:#fff; color:var(--faint); font-size:12px; }
+.logo-box img { max-width:100%; max-height:100%; object-fit:contain; }
+.hint.err { color:var(--red); }
 .lh-addr { text-align:right; white-space:pre-line; }
 .lh-lines { padding:20px 0 22px; }
 .lh-lines i { display:block; height:5px; margin-bottom:7px; border-radius:3px; background:var(--div); }
@@ -781,6 +786,14 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
         <div class="fsec-h"><h2>Your firm</h2><p>Letterhead and regulatory footer on your pages.</p></div>
         <div class="fields">
           <div><label class="f" for="b-firm">Firm name</label><input type="text" id="b-firm" data-b="firm" autocomplete="organization"></div>
+          <div><label class="f" for="b-logo-file">Firm logo <span class="opt">· optional</span></label>
+            <div class="logo-up">
+              <div class="logo-box" id="b-logo-box"><img id="b-logo-img" alt="Your firm logo" hidden><span id="b-logo-none">No logo</span></div>
+              <button type="button" class="btn sm" id="b-logo-btn" onclick="$('b-logo-file').click()">Upload logo</button>
+              <button type="button" class="btn sm" id="b-logo-rm" onclick="removeLogo()" hidden>Remove</button>
+              <input type="file" id="b-logo-file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden onchange="uploadLogo(this)">
+            </div>
+            <div class="hint" id="b-logo-hint">PNG or JPG, ideally on a transparent or white background. Replaces the firm name at the top of your pages.</div></div>
           <div><label class="f" for="b-address">Firm address</label><textarea id="b-address" rows="2" data-b="address"></textarea></div>
           <div><label class="f" for="b-reg">Regulatory statement</label><textarea id="b-reg" rows="2" data-b="regStatement" placeholder="e.g. ABC Financial Ltd is regulated by the Central Bank of Ireland."></textarea><div class="hint">Shown in the footer of your pages in the pack.</div></div>
         </div>
@@ -1250,7 +1263,7 @@ var S = {
   step: 1, maxStep: 1, product: 'prsa',
   // lite: quick internal quote. Skips the adviser and risk steps, drops the client risk rating and asset split, and limits the pack to the core quotation.
   lite: true,   // on by default (set again in init)
-  broker: { firm:'', name:'', title:'', email:'', phone:'', address:'', regStatement:'' },
+  broker: { firm:'', name:'', title:'', email:'', phone:'', address:'', regStatement:'', logo:'' },   // logo: PNG/JPEG data URL, or ''
   consent: false,
   client: { salutation:'Mr', first:'', last:'', address:'', dobStr:'' },
   startStr: '',
@@ -1266,7 +1279,7 @@ var S = {
   // ctype: contribution type, e.g. 'sp', 'rp', 'sp_rp', 'ofv_rp' ('' = none chosen), from the Plan step chips
   // diySel: funds ticked in the fund builder; diyAllocs / diyGmab only ever hold ticked funds
   prsa: { nra: 65, prsaType: 'nonstandard', code: 'A5', ctype: '', sp: 0, ofv: 0, rp: 0, freq: 'monthly', esc: 0,
-          spUpOverride: null, rpUpOverride: null, strat: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
+          specialDeal: null, strat: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
   arf:  { code: 'A5', contribution: 0, incomeType: 'default', incomeValue: 0, incomeStartAge: null, incomeEscalationPct: 2,
           specialDeal: null, spUpOverride: null, rate1Override: null, rate2Override: null, diySel: {}, diyAllocs: {}, diyGmab: {} },
   ib:   { code: 'D1', policyholderType: 'individual', ctype: '', contribution: 0, rp: 0, freq: 'monthly', esc: 0,
@@ -1298,7 +1311,9 @@ function init() {
   try {
     var saved = JSON.parse(localStorage.getItem(BROKER_KEY) || 'null');
     if (saved) Object.keys(S.broker).forEach(function(k) { if (saved[k] != null) S.broker[k] = saved[k]; });
+    S.broker.logo = cleanLogo(S.broker.logo);
   } catch (e) {}
+  renderLogoField();
   S.startStr = todayStr();
   $('consent-text').textContent = QT_TEXT.consent;
 
@@ -1393,7 +1408,62 @@ function init() {
 }
 
 function saveBroker() {
-  try { localStorage.setItem(BROKER_KEY, JSON.stringify(S.broker)); } catch (e) {}
+  try { localStorage.setItem(BROKER_KEY, JSON.stringify(S.broker)); return true; } catch (e) { return false; }
+}
+
+// ── Firm logo: stored with the broker details as a PNG/JPEG data URL ──
+// Uploads are redrawn on a canvas, so whatever the source format (including SVG) only a plain bitmap is kept,
+// scaled down to keep the saved details small.
+var LOGO_MAX_W = 900, LOGO_MAX_H = 300, LOGO_MAX_CHARS = 600000;
+function cleanLogo(v) { return typeof v === 'string' && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+\/]+=*$/.test(v) ? v : ''; }
+function setLogoHint(msg, isErr) {
+  var h = $('b-logo-hint');
+  h.textContent = msg || 'PNG or JPG, ideally on a transparent or white background. Replaces the firm name at the top of your pages.';
+  h.classList.toggle('err', !!isErr);
+}
+function renderLogoField() {
+  var has = !!S.broker.logo, img = $('b-logo-img');
+  if (has) img.src = S.broker.logo; else img.removeAttribute('src');
+  img.hidden = !has;
+  $('b-logo-none').hidden = has;
+  $('b-logo-rm').hidden = !has;
+  $('b-logo-btn').textContent = has ? 'Replace logo' : 'Upload logo';
+}
+function uploadLogo(input) {
+  var file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  if (!/^image\/(png|jpeg|webp|gif|svg\+xml)$/.test(file.type)) { setLogoHint('Please choose a PNG or JPG image.', true); return; }
+  if (file.size > 10 * 1024 * 1024) { setLogoHint('That image is too large (over 10 MB). Please choose a smaller file.', true); return; }
+  var url = URL.createObjectURL(file), img = new Image();
+  img.onload = function() {
+    URL.revokeObjectURL(url);
+    var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+    if (!w || !h) { setLogoHint('That image could not be read. Please try a PNG or JPG.', true); return; }
+    var k = Math.min(1, LOGO_MAX_W / w, LOGO_MAX_H / h);
+    var cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(w * k)); cv.height = Math.max(1, Math.round(h * k));
+    var ctx = cv.getContext('2d');
+    ctx.drawImage(img, 0, 0, cv.width, cv.height);
+    var data = cv.toDataURL('image/png');
+    if (data.length > LOGO_MAX_CHARS) {   // a photo-like logo: JPEG on white is far smaller than PNG
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+      data = cv.toDataURL('image/jpeg', 0.88);
+    }
+    var prev = S.broker.logo;
+    S.broker.logo = cleanLogo(data);
+    if (!S.broker.logo) { S.broker.logo = prev; setLogoHint('That image could not be read. Please try a PNG or JPG.', true); return; }
+    if (!saveBroker()) setLogoHint('Logo added for this session, but the browser could not save it for next time.', true);
+    else setLogoHint('');
+    renderLogoField(); renderLetterhead();
+  };
+  img.onerror = function() { URL.revokeObjectURL(url); setLogoHint('That image could not be read. Please try a PNG or JPG.', true); };
+  img.src = url;
+}
+function removeLogo() {
+  S.broker.logo = '';
+  saveBroker(); setLogoHint(''); renderLogoField(); renderLetterhead();
 }
 function exportSettings() {
   var blob = new Blob([JSON.stringify({ tool: 'agl-quotation-tool', version: 1, broker: S.broker }, null, 2)], { type: 'application/json' });
@@ -1412,8 +1482,9 @@ function importSettings(input) {
       var d = JSON.parse(rd.result);
       if (!d || !d.broker) throw new Error('bad');
       Object.keys(S.broker).forEach(function(k) { S.broker[k] = d.broker[k] != null ? String(d.broker[k]) : ''; });
+      S.broker.logo = cleanLogo(S.broker.logo);   // only a PNG/JPEG data URL is accepted
       document.querySelectorAll('[data-b]').forEach(function(el) { el.value = S.broker[el.getAttribute('data-b')]; });
-      saveBroker(); renderLetterhead(); renderStepNav();
+      saveBroker(); setLogoHint(''); renderLogoField(); renderLetterhead(); renderStepNav();
       $('settings-msg').textContent = 'Settings imported.';
     } catch (e) { $('settings-msg').textContent = 'That file is not a Quotation Tool settings file.'; }
     input.value = '';
@@ -1644,7 +1715,7 @@ function validateStep(s) {
         if (pfView !== want) setPfView(want, true);
       }
     } else if (pf.mismatch && !S.risk.reason.trim()) {
-      bad.push('mismatch-reason'); errs.push('Please give a reason for recommending a portfolio whose risk differs from the client\'s.');
+      bad.push('mismatch-reason'); errs.push('Please give a reason for recommending a portfolio with a higher risk than the client\'s.');
       if (onStep) {
         mmPromptKey = mismatchKey();
         renderPfSummary();
@@ -1668,7 +1739,8 @@ function renderLetterhead() {
   var b = S.broker;
   function v(x, ph) { return x && String(x).trim() ? escHtml(x) : '<span class="ph-t">' + ph + '</span>'; }
   var contact = [b.email, b.phone].filter(function(x) { return x && x.trim(); }).map(escHtml).join(' · ');
-  $('lh').innerHTML = '<div class="lh-top"><div class="lh-firm">' + v(b.firm, 'Firm name') + '</div><div class="lh-addr">' + v(b.address, 'Firm address') + '</div></div>' +
+  var head = b.logo ? '<img class="lh-logo" src="' + escHtml(b.logo) + '" alt="">' : v(b.firm, 'Firm name');
+  $('lh').innerHTML = '<div class="lh-top"><div class="lh-firm">' + head + '</div><div class="lh-addr">' + v(b.address, 'Firm address') + '</div></div>' +
     '<div class="lh-lines"><i style="width:70%"></i><i style="width:94%"></i><i style="width:84%"></i><i style="width:40%"></i></div>' +
     '<div class="lh-sig">Yours sincerely,<b>' + v(b.name, 'Adviser name') + '</b>' + (b.title ? escHtml(b.title) + '<br>' : '') + (contact || '<span class="ph-t">Email · phone</span>') + '</div>' +
     '<div class="lh-reg">' + v(b.regStatement, 'Regulatory statement') + '</div>';
@@ -1970,7 +2042,7 @@ function setCode(product, code) {
     code = codes.filter(function(c) { return c.charAt(0) === ser; })[0] || codes[0];
   }
   var o = S[product];
-  if (o.code !== code) { o.spUpOverride = null; if (product === 'prsa') o.rpUpOverride = null; else o.specialDeal = null; }
+  if (o.code !== code) { o.spUpOverride = null; o.specialDeal = null; }
   o.code = code;
   renderCodeSelects();
 }
@@ -2005,14 +2077,18 @@ function ovrNote(kind, val, def, otherwise, defLabel) {
 }
 function renderCodeInfo() {
   var pr = S.product, pre = pr === 'prsa' ? 'p' : pr === 'arf' ? 'a' : 'i', o = S[pr], rows = '', overview;
-  var edited = o.spUpOverride != null || (pr === 'prsa' ? o.rpUpOverride != null : o.specialDeal > 0);
+  var edited = o.spUpOverride != null || o.specialDeal > 0;
   if (pr === 'prsa') {
-    var cc = CODES[o.code], sp = prsaSpUpRate(o), rp = prsaRpUpRate(o);
-    overview = 'AMC ' + pct(cc.admin) + ' · initial ' + pct(sp) + ' single, ' + pct(rp) + ' regular';
+    // PRSA commission is fixed by the code; the only adjustment is the special deal (PRSA_SPECIAL_DEAL)
+    var cc = CODES[o.code], sp = prsaSpUpRate(o), rp = prsaRpUpRate(o), psd = o.specialDeal || 0;
+    overview = 'AMC ' + pct(cc.admin) + ' · initial ' + pct(sp) + ' single' + (psd ? ' incl. special deal' : '') + ', ' + pct(rp) + ' regular';
     rows += commRow('Annual Management Charge', 'of which trail commission ' + pct(cc.ongoing), '<span class="v">' + pct(cc.admin) + '</span>');
-    rows += commRow('Initial commission — single contributions and transfers', ovrNote('sp', sp, cc.spUp, 'Standard rate'), commStepper('sp', sp, 'initial commission on single contributions'));
-    rows += commRow('Initial commission — regular contributions', ovrNote('rp', rp, cc.rpPct, 'Per year of term, capped at ' + pct(cc.rpMax) + ' of year-1 contributions'),
-                    commStepper('rp', rp, 'initial commission on regular contributions'));
+    rows += commRow('Special deal', psd
+        ? '<span class="ovr">' + pct(psd) + ' bonus commission paid by Allianz Global Life · <button type="button" class="lnk" onclick="resetComm(\'sd\')">Remove</button></span>'
+        : 'Extra initial commission on single contributions and transfers, paid by Allianz. The amount invested is not reduced.',
+      commStepper('sd', psd, 'special deal'));
+    rows += commRow('Initial commission — single contributions and transfers', psd ? 'Standard rate plus special deal' : 'Standard rate', '<span class="v">' + pct(sp) + '</span>');
+    rows += commRow('Initial commission — regular contributions', 'Per year of term, capped at ' + pct(cc.rpMax) + ' of year-1 contributions', '<span class="v">' + pct(rp) + '</span>');
   } else {
     var isIb = pr === 'ib', tc = isIb ? IB_CODES[o.code] : ARF_CODES[o.code], isp = isIb ? ibSpUpRate(o) : arfSpUpRate(o);
     var base = isIb ? ibBaseSpUp(o) : arfBaseSpUp(o), sd = o.specialDeal || 0, alloc = isIb ? ibSpAllocationRate(o) : arfAllocationRate(o);
@@ -2021,14 +2097,17 @@ function renderCodeInfo() {
     rows += commRow('Policy charge', 'of which trail commission ' + pct(tc.ongoing), '<span class="v">' + pct(tc.admin) + '</span>');
     // Special deal: paid by Allianz on top of the standard rate, so the amount invested is unchanged
     rows += commRow('Special deal', sd
-        ? '<span class="ovr">Standard ' + pct(tc.spUp) + ' + ' + pct(sd) + ' paid by Allianz · <button type="button" class="lnk" onclick="resetComm(\'sd\')">Remove</button></span>'
+        ? '<span class="ovr">' + pct(sd) + ' bonus commission paid by Allianz Global Life · <button type="button" class="lnk" onclick="resetComm(\'sd\')">Remove</button></span>'
         : 'Extra initial commission paid by Allianz. The amount invested is not reduced.',
       commStepper('sd', sd, 'special deal'));
+    var spLim = isIb ? ibSpCommLimits(o) : arfSpCommLimits(o), rangeNote = ' · range ' + pct(spLim.min) + ' to ' + pct(spLim.max);
     rows += commRow('Initial commission' + (isIb ? ' — single contribution' : ''),
-      ovrNote('sp', isp, base, sd ? 'Standard rate plus special deal' : 'Standard rate', sd ? 'standard plus special deal' : 'standard'), commStepper('sp', isp, 'initial commission'));
+      ovrNote('sp', isp, base, (sd ? 'Standard rate plus special deal' : 'Standard rate') + rangeNote, sd ? 'standard plus special deal' : 'standard'), commStepper('sp', isp, 'initial commission'));
     var allocNote = Math.abs(isp - base) < 0.0001 ? 'All of the single contribution is invested'
       : isp > base ? 'Commission above ' + pct(base) + ' is paid from the contribution' : 'Commission below ' + pct(base) + ' is added to the contribution';
     if (isIb && tc.rpAllocBonus > 1) allocNote += Math.abs(isp - base) < 0.0001 ? ', plus ' + pct(tc.rpAllocBonus - 1) + ' extra on this version' : '. Includes ' + pct(tc.rpAllocBonus - 1) + ' extra on this version';
+    var tier = isIb ? ibTier(o.contribution || 0) : null;   // IB_TIERED_BONUS
+    if (tier && tier.bonus > 0) allocNote += '. Includes a ' + pct(tier.bonus) + ' bonus for a single contribution of ' + fEUR(tier.min) + ' or more';
     rows += commRow('Allocation' + (isIb ? ' — single contribution' : ''), allocNote, '<span class="v">' + pct(alloc) + '</span>');
     if (pr === 'ib' && ibCodeAllowsRp(o.code)) {
       rows += commRow('Initial commission — regular contributions', 'Regular contributions allocated at +' + pct(tc.rpAllocBonus - 1), '<span class="v">' + pct(tc.rpUp) + ' a year</span>');
@@ -2037,7 +2116,7 @@ function renderCodeInfo() {
   }
   $(pre + '-codeinfo').innerHTML = '<div class="comm"><button type="button" class="comm-h" aria-expanded="' + commOpen + '" aria-controls="' + pre + '-commbody" onclick="toggleComm()">' +
     '<span class="ct"><b>Commission and charges · ' + escHtml(o.code) + '</b><span class="ov">' + overview + (edited ? ' · <span class="ovr">Edited</span>' : '') + '</span></span><span class="chev" aria-hidden="true">▾</span></button>' +
-    '<div class="comm-b" id="' + pre + '-commbody"' + (commOpen ? '' : ' hidden') + '><div class="comm-note">Initial commission adjusts in steps of ' + pct(COMM_STEP) + '.</div>' + rows + '</div></div>';
+    '<div class="comm-b" id="' + pre + '-commbody"' + (commOpen ? '' : ' hidden') + '>' + (pr === 'prsa' ? '' : '<div class="comm-note">Initial commission adjusts in steps of ' + pct(COMM_STEP) + '.</div>') + rows + '</div></div>';
   renderPlanSummary();
 }
 var commOpen = false;   // the panel starts as a one-line overview
@@ -2061,30 +2140,30 @@ function liveCommas(el, enabled) {
 function stepComm(kind, dir) {
   var o = S[S.product];
   var tbl = codeTableFor(S.product);
-  var cur, def, cap = S.product === 'arf' ? ARF_MAX_SP_COMM : S.product === 'ib' ? IB_MAX_SP_COMM : Infinity;
+  var cur, def, lo = 0, hi = Infinity;
   if (kind === 'sd') {
-    // the special deal moves the base rate; any manual change is cleared so commission follows it
-    var sd = Math.round(((o.specialDeal || 0) + dir * COMM_STEP) * 2000) / 2000;
-    sd = Math.max(0, Math.min(sd, Math.round((cap - tbl[o.code].spUp) * 2000) / 2000));
-    o.specialDeal = sd > 0.00001 ? sd : null;
+    // Special deal: either off or a fixed amount (PRSA_SPECIAL_DEAL / ARF_SPECIAL_DEAL / IB_SPECIAL_DEAL).
+    // It moves the base rate, so any manual change is cleared and commission follows it.
+    o.specialDeal = dir > 0 ? { prsa: PRSA_SPECIAL_DEAL, arf: ARF_SPECIAL_DEAL, ib: IB_SPECIAL_DEAL }[S.product] : null;
     o.spUpOverride = null;
     renderCodeInfo();
     return;
   }
-  if (kind === 'sp') {
-    cur = S.product === 'prsa' ? prsaSpUpRate(o) : S.product === 'arf' ? arfSpUpRate(o) : ibSpUpRate(o);
-    def = S.product === 'prsa' ? tbl[o.code].spUp : S.product === 'arf' ? arfBaseSpUp(o) : ibBaseSpUp(o);
-  }
-  else { cur = prsaRpUpRate(o); def = tbl[o.code].rpPct; }
-  var next = Math.max(0, Math.min(cap, Math.round((cur + dir * COMM_STEP) * 2000) / 2000));
+  // Manual initial commission (ARF/IB only; PRSA commission isn't editable): per-code range
+  // (ARF_SP_COMM_RANGE / IB_SP_COMM_RANGE), shifted up by any special deal
+  if (kind !== 'sp' || S.product === 'prsa') return;
+  cur = S.product === 'arf' ? arfSpUpRate(o) : ibSpUpRate(o);
+  def = S.product === 'arf' ? arfBaseSpUp(o) : ibBaseSpUp(o);
+  var lim = S.product === 'arf' ? arfSpCommLimits(o) : ibSpCommLimits(o); lo = lim.min; hi = lim.max;
+  var next = Math.max(lo, Math.min(hi, Math.round((cur + dir * COMM_STEP) * 2000) / 2000));
   var val = Math.abs(next - def) < 0.0001 ? null : next;
-  if (kind === 'sp') o.spUpOverride = val; else o.rpUpOverride = val;
+  o.spUpOverride = val;
   renderCodeInfo();
 }
 function resetComm(kind) {
   var o = S[S.product];
   if (kind === 'sd') { o.specialDeal = null; o.spUpOverride = null; }
-  else if (kind === 'sp') o.spUpOverride = null; else o.rpUpOverride = null;
+  else if (kind === 'sp') o.spUpOverride = null;
   renderCodeInfo();
 }
 // The engine run with a stand-in portfolio, for the plan summary. Contribution totals and
@@ -2829,8 +2908,9 @@ function portfolioState() {
   // ratings their risk profile suits (strategyRiskFit) rather than a numeric comparison.
   var profile = isGlidepath ? strategyProfile(stratObj) : null;
   var fit = isGlidepath ? strategyRiskFit(stratObj, S.risk.sri) : null, pr = Math.round(sri);
-  var mismatch = !S.lite && ready && (isGlidepath ? !fit.aligned : pr !== S.risk.sri);   // lite: no client rating to compare with
-  var direction = !mismatch ? null : isGlidepath ? fit.direction : (pr > S.risk.sri ? 'higher' : 'lower');
+  var differs = !S.lite && ready && (isGlidepath ? !fit.aligned : pr !== S.risk.sri);   // lite: no client rating to compare with
+  var direction = !differs ? null : isGlidepath ? fit.direction : (pr > S.risk.sri ? 'higher' : 'lower');
+  var mismatch = direction === 'higher';   // only a higher-risk portfolio needs a recorded reason; lower risk needs none
   var message = mix.length ? 'Fund allocations must total 100% (currently ' + (+total.toFixed(2)) + '%).'
     : diySelIds().length ? 'Please enter the allocation for the selected funds.' : 'Please choose at least one fund.';
   return { ready: ready, message: message,
@@ -2900,8 +2980,9 @@ function renderPfSummary() {
   if (pf.ready) {
     var done = pf.mismatch && overrideValid();
     al.className = 'apill ' + (pf.mismatch ? 'warn' : 'ok');
-    al.textContent = !pf.mismatch ? '✓ Aligned with the client\'s rating' : done ? 'Override recorded — differs from the client\'s rating'
-      : (pf.direction === 'higher' ? 'Higher' : 'Lower') + ' risk than the client\'s rating — a reason is needed';
+    al.textContent = pf.direction === 'lower' ? '✓ Lower risk than the client\'s rating — no reason needed'
+      : !pf.mismatch ? '✓ Aligned with the client\'s rating' : done ? 'Override recorded — higher risk than the client\'s rating'
+      : 'Higher risk than the client\'s rating — a reason is needed';
   }
   // Asset split (indicative: DMAS from rescaled factsheet exposure, Strategy Select at its target mix)
   var split = assetSplit(pf.mix);
@@ -2956,7 +3037,7 @@ function engineInput() {
     var p = S.prsa;
     return { dobStr: S.client.dobStr, startStr: S.startStr, nra: p.nra, prsaType: p.prsaType,
              code: p.code, strat: p.strat, diyAllocs: p.strat === 'diy' ? p.diyAllocs : {}, diyGmab: p.strat === 'diy' ? p.diyGmab : {},
-             sp: p.sp, ofv: p.ofv, rp: p.rp, freq: p.freq, esc: p.esc, spUpOverride: p.spUpOverride, rpUpOverride: p.rpUpOverride };
+             sp: p.sp, ofv: p.ofv, rp: p.rp, freq: p.freq, esc: p.esc, specialDeal: p.specialDeal };
   }
   if (S.product === 'arf') {
     var a = S.arf;
@@ -3260,9 +3341,10 @@ function resRemuneration(r) {
   var isPrsa = S.product === 'prsa', h = '', bars = [], note = '';
   if (isPrsa) {
     var il = [];
-    if (r.spRaw > 0) il.push(fEUR(r.spUpfrontComm) + ' · ' + pct(r.spUpRate) + ' of single' + (r.spUpOverridden ? ' <span class="ovr">Edited</span>' : ''));
-    if (r.ofvRaw > 0) il.push(fEUR(r.ofvUpfrontComm) + ' · ' + pct(r.spUpRate) + ' of transfer' + (r.spUpOverridden ? ' <span class="ovr">Edited</span>' : ''));
-    if (r.rpRaw > 0) il.push(fEUR(r.rpUpfrontComm) + ' · ' + pct(r.rpUpfrontPct) + ' of year-1 regular' + (r.rpUpOverridden ? ' <span class="ovr">Edited</span>' : ''));
+    var sdTag = r.specialDeal > 0 ? ' <span class="ovr">Special deal</span>' : '';
+    if (r.spRaw > 0) il.push(fEUR(r.spUpfrontComm) + ' · ' + pct(r.spUpRate) + ' of single' + sdTag);
+    if (r.ofvRaw > 0) il.push(fEUR(r.ofvUpfrontComm) + ' · ' + pct(r.spUpRate) + ' of transfer' + sdTag);
+    if (r.rpRaw > 0) il.push(fEUR(r.rpUpfrontComm) + ' · ' + pct(r.rpUpfrontPct) + ' of year-1 regular');
     h += kcard('Initial remuneration', fEUR(r.totalInitialComm), il.join('<br>'));
     h += kcard('Trail remuneration', fEUR(r.totalOngoingComm), pct(r.cc.ongoing) + ' a year of fund value, projected to retirement');
     h += kcard('Clawback', r.clawback ? 'Applies' : 'None', r.clawback ? 'on cool-off or transfer in the first 5 years' : '', r.clawback ? 'amb' : '');
@@ -3392,7 +3474,7 @@ function textContext() {
   var enc = ['sos', 'riskprofile'].filter(function(k) { return S.sections[k] && !sectionNA(k); });
   enc.push(S.sections.remun ? 'quotation' : 'quotationNoRemun');
   if (S.sections.product) enc.push('product');
-  var enclosedList = enc.length ? enc.map(function(k) { return '- ' + T.coverEnclosed[k]; }).join('\n') : '- Your personalised quotation';
+  var enclosedList = enc.length ? enc.map(function(k) { return '- ' + T.coverEnclosed[k]; }).join('\n') : '- Your personal quotation';
   var initial = isPrsa ? r.totalInitialComm : r.initialComm;
   var remun = initial > 0
     ? 'We will receive initial remuneration of ' + fEUR(initial) + (r.cc.ongoing > 0 ? ' and trail remuneration of ' + pct(r.cc.ongoing) + ' a year of your fund value' : '') + ', paid by Allianz Global Life from its charges.'
@@ -3422,6 +3504,10 @@ function textContext() {
     riskSentence: riskSentence, remunSentence: remun,
     remunRef: S.sections.remun ? ' and the Remuneration Statement' : ''
   };
+  // Annual Guarantee: the funds-page wording, so the statement matches the quotation. Empty if none is chosen.
+  var gNote = qtGuaranteeNote(qtFundRows({ r: r, product: S.product }));
+  ctx.guaranteeNote = gNote;
+  ctx.guaranteeClause = gNote ? T.sosGuaranteeClause : '';
   if (isPrsa) {
     var parts = [];
     if (r.ofvRaw > 0) parts.push('a transfer value of ' + fEUR(r.ofvRaw));
@@ -3430,14 +3516,10 @@ function textContext() {
     ctx.contributionSummary = parts.length > 1 ? parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1] : parts[0];
     ctx.nra = r.nra;
     ctx.riy = pct(Math.max(0, r.grossRate - r.netRate));
-    ctx.transferSection = r.ofvRaw > 0 ? qtFill(T.sosPrsaTransfer, { transferValue: AO + fEUR(r.ofvRaw) + AC }) : '';
   } else if (S.product === 'arf') {
-    ctx.incomeAge = r.inputs.incomeStartAge;
+    ctx.incomeFrom = r.inputs.incomeStartAge ? ' from age ' + r.inputs.incomeStartAge : '';
     ctx.contribution = fEUR(r.contribution);
     ctx.rate = pct(r.rate1); ctx.netRate = pct(r.p1.netRate);
-    ctx.depletionSentence = [[r.p1, r.rate1], [r.p2, r.rate2]].map(function(x) {
-      return x[0].fundZeroYear ? qtFill(T.arfDepletes, { rate: pct(x[1]), year: x[0].fundZeroYear, age: x[0].depletionAge }) : qtFill(T.arfLasts, { rate: pct(x[1]) });
-    }).join(' ') + ' ' + qtArfIncomeSentence(r);
   } else {
     var ibParts = [];
     if (r.contribution > 0) ibParts.push('a single contribution of ' + fEUR(r.contribution));
@@ -3446,12 +3528,11 @@ function textContext() {
     ctx.contribution = fEUR(r.contribution);
     ctx.policyholderType = r.policyholderType; ctx.exitTaxRate = pct(r.taxRate);
     ctx.rate = pct(r.rate); ctx.netRate = pct(r.p.netRate);
-    ctx.depletionSentence = (r.p.fundZeroYear ? qtFill(T.ibDepletes, { rate: pct(r.rate), year: r.p.fundZeroYear, age: r.p.depletionAge }) : qtFill(T.ibLasts, { rate: pct(r.rate), years: r.years })) + ' ' + qtIbIncomeSentence(r);
   }
   return ctx;
 }
 // Template filled from the quotation. Single-line values are wrapped in AO…AC so the guided
-// editor can show them as auto-filled; multi-line ones ({enclosedList}, {transferSection}) aren't.
+// editor can show them as auto-filled; multi-line ones ({enclosedList}) aren't.
 function templateText(kind) {
   var ctx = textContext();
   var tpl = kind === 'cover' ? QT_TEXT.coverLetter : S.product === 'prsa' ? QT_TEXT.sosPrsa : S.product === 'arf' ? QT_TEXT.sosArf : QT_TEXT.sosIb;
@@ -3890,7 +3971,7 @@ function reviewChecks() {
     else out.push({ ok: false, warn: true, text: nm + ': ' + n + (n === 1 ? ' passage' : ' passages') + ' not written — left out of the pack' });
   });
   out.push({ ok: allTabsSeen(), text: allTabsSeen() ? 'Results reviewed' : 'Results: review all three tabs' });
-  if (!S.lite) out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk differs from the client\'s rating, reason recorded' : 'Risk aligned, no override needed' });
+  if (!S.lite) out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk higher than the client\'s rating, reason recorded' : pf.direction === 'lower' ? 'Risk lower than the client\'s rating, no reason needed' : 'Risk aligned, no override needed' });
   return out;
 }
 // Warnings are the adviser's call to make; only hard failures hold the pack back.
@@ -3974,7 +4055,7 @@ function profilePackData() {
 function packData(noAutoPrint) {
   return {
     // Lite mode: the pack carries no adviser details, even if some were entered before lite was switched on
-    product: S.product, r: S.result, broker: S.lite ? { firm:'', name:'', title:'', email:'', phone:'', address:'', regStatement:'' } : S.broker, client: S.client, risk: S.risk, lite: S.lite,
+    product: S.product, r: S.result, broker: S.lite ? { firm:'', name:'', title:'', email:'', phone:'', address:'', regStatement:'', logo:'' } : S.broker, client: S.client, risk: S.risk, lite: S.lite,
     productName: productName(), strategyName: strategyName(),
     sections: packSectionFlags(), profile: profilePackData(), coverText: docText('cover'), sosText: docText('sos'), noAutoPrint: !!noAutoPrint,
     docTitle: packFileName().replace(/\.pdf$/, '')

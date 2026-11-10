@@ -29,6 +29,13 @@ function arfBaseSpUp(inp) {
 function arfSpUpRate(inp) {
   return inp.spUpOverride != null ? inp.spUpOverride : arfBaseSpUp(inp);
 }
+// Lowest and highest initial commission the adviser can set: the code's range (ARF_SP_COMM_RANGE)
+// shifted up by any special deal, so the special deal always sits on top and the allocation
+// stays inside the range the spec allows.
+function arfSpCommLimits(inp) {
+  var range = ARF_SP_COMM_RANGE[inp.code], sd = inp.specialDeal || 0;
+  return { min: range[0] + sd, max: range[1] + sd };
+}
 // Allocation: 1 + (base commission - commission used), so a manual change trades off
 // against the amount invested (ARF Projections C75)
 function arfAllocationRate(inp) {

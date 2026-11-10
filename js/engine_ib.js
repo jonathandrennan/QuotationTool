@@ -11,8 +11,8 @@
 //     contribution books, but they always share the same growth and charge rates, so the combined fund value
 //     does not depend on how tax is split between them. The engine therefore tracks one combined fund, plus
 //     an SP-only shadow pool (fundSP) used for the exit charge, which applies to the SP-sourced value only.
-//  2. The government levy (1% of every contribution) and the tiered large-case allocation bonus
-//     (switched off: see IB_TIERED_BONUS_ON in ib_data.js).
+//  2. The government levy (1% of every contribution) and the tiered bonus commission on large single
+//     contributions, added to the allocation (see IB_TIERED_BONUS in ib_data.js).
 //
 // Load after ib_data.js, arf_data.js, quote_common.js and engine_arf.js.
 
@@ -39,6 +39,13 @@ function ibBaseSpUp(inp) {
 }
 function ibSpUpRate(inp) {
   return inp.spUpOverride != null ? inp.spUpOverride : ibBaseSpUp(inp);
+}
+// Lowest and highest initial commission the adviser can set: the code's range (IB_SP_COMM_RANGE)
+// shifted up by any special deal, so the special deal always sits on top and the allocation
+// stays inside the range the spec allows.
+function ibSpCommLimits(inp) {
+  var range = IB_SP_COMM_RANGE[inp.code], sd = inp.specialDeal || 0;
+  return { min: range[0] + sd, max: range[1] + sd };
 }
 function ibDefaultRate(inp) { return Math.min(arfBlendedMetrics(inp).gross, IB_MAX_RATE); }
 

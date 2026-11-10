@@ -13,7 +13,6 @@ var IB_GOVT_LEVY = 0.01;             // 1% government levy on every premium in (
 var IB_DEEMED_DISPOSAL_MONTHS = 96;  // Irish life-assurance deemed disposal: every 8 years
 var IB_RIY_YEARS = 20;               // RIY cashflow window used when the fund never depletes
 var IB_PROJECTION_YEARS = 20;        // years shown in quotes (table, chart, remuneration); the engine still runs 40
-var IB_MAX_SP_COMM = 0.045;          // SP initial commission max, incl. any special deal (Parameters D100:E100)
 
 // Exit tax rate by policyholder type
 var IB_TAX_RATES = { individual: 0.38, corporate: 0.25, exempt: 0 };
@@ -23,16 +22,23 @@ var IB_POLICYHOLDER_TYPES = [
   { id: 'exempt',     label: 'Exempt' }
 ];
 
-// Large-case tiered bonus allocation on the single contribution amount. Off, as in the IB workbook
-// (Projections!C65 = "No") and the product spec (s1.4.6: "Charges and commissions will not be tiered").
-var IB_TIERED_BONUS_ON = false;
-var IB_TIERED_BONUS = [ { min: 0, bonus: 0 }, { min: 100000, bonus: 0.005 }, { min: 500000, bonus: 0.01 } ];
-function ibTieredBonus(singleContribution) {
-  var b = 0;
-  if (!IB_TIERED_BONUS_ON) return b;
-  IB_TIERED_BONUS.forEach(function(t) { if (singleContribution >= t.min) b = t.bonus; });
-  return b;
+// Tiered bonus commission on large single contributions (IB workbook "Tiered Bonus Commission",
+// Parameters C112:D114, used in Projections!C67). As in the workbook it is added to the allocation of the
+// single contribution, not to the commission paid. The rate for the highest tier reached applies to the
+// whole single contribution: from €100,000 +0.5%, from €500,000 +1%. Stacks with the special deal.
+var IB_TIERED_BONUS_ON = true;
+var IB_TIERED_BONUS = [
+  { min: 0,      bonus: 0 },
+  { min: 100000, bonus: 0.005 },
+  { min: 500000, bonus: 0.01 }
+];
+// The tier a single contribution falls in: { min, bonus }
+function ibTier(singleContribution) {
+  var tier = IB_TIERED_BONUS[0];
+  if (IB_TIERED_BONUS_ON) IB_TIERED_BONUS.forEach(function(t) { if (singleContribution >= t.min) tier = t; });
+  return tier;
 }
+function ibTieredBonus(singleContribution) { return ibTier(singleContribution).bonus; }
 
 // Product limits (from the product spec; the workbook does not hold them)
 var IB_MIN_SP = 10000;
@@ -102,6 +108,38 @@ var IB_CODES = {
 
   'M1': { version:'M', admin:0.014,  spUp:0.025, ongoing:0.005,  surrender:[0.03,0.02,0.01,0,0,0,0,0], rpUp:0.10, rpAllocBonus:1.01 },
   'M2': { version:'M', admin:0.014,  spUp:0.035, ongoing:0.005,  surrender:[0.05,0.04,0.03,0.02,0.01,0,0,0], rpUp:0.15, rpAllocBonus:1.00 }
+};
+
+// ── SP initial commission limits ────────────────────────────────────────────────
+// How far the adviser may move the single-contribution initial commission on each code: [min, max].
+// From the "SP Init Comm Range" column of the product spec appendix. Moving commission away from the
+// standard rate moves the allocation the other way (see ibSpAllocationRate). A special deal is added
+// on top of both ends (see ibSpCommLimits in engine_ib.js).
+var IB_SPECIAL_DEAL = 0.01;   // a special deal is either off or exactly this much extra initial commission
+var IB_SP_COMM_RANGE = {
+  'A1': [0, 0.04],
+
+  'B1': [0, 0.04], 'B2': [0, 0.04], 'B3': [0, 0.04],
+
+  'C1': [0, 0.04], 'C2': [0, 0.04], 'C3': [0, 0.04], 'C4': [0, 0.04], 'C5': [0, 0.04],
+
+  'D1': [0, 0.04], 'D2': [0, 0.04], 'D3': [0, 0.04], 'D4': [0, 0.04], 'D5': [0, 0.04], 'D6': [0, 0.05],
+
+  'E1': [0, 0.04], 'E2': [0, 0.04], 'E3': [0, 0.04], 'E4': [0, 0.04], 'E5': [0, 0.04], 'E6': [0, 0.05],
+
+  'F1': [0,     0.04], 'F2': [0.01,  0.04],
+
+  'G1': [0,     0.04], 'G2': [0.01,  0.04], 'G3': [0.015, 0.04], 'G4': [0.02,  0.04],
+
+  'H1': [0,     0.04], 'H2': [0.01,  0.04], 'H3': [0.015, 0.04], 'H4': [0.02,  0.04],
+
+  'J1': [0,     0.04], 'J2': [0.01,  0.04], 'J3': [0.015, 0.04], 'J4': [0.02,  0.04],
+
+  'K1': [0, 0.04], 'K2': [0, 0.04],
+
+  'L1': [0, 0.04], 'L2': [0, 0.04],
+
+  'M1': [0, 0.04], 'M2': [0, 0.04]
 };
 
 // Codes on which a regular premium is permitted at all
