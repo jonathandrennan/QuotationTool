@@ -491,13 +491,18 @@ var QT_TEXT = {
   // "Your personal and financial circumstances": {circumstancesSentence} is the client's profiler answers and is
   // empty unless the risk profiler has been completed. The wording of the profiler sentences themselves is in
   // risk_profiler_data.js. DRAFT.
-  // "Your sustainability preferences" — from the Step 3 answer and the SFDR classification of the
-  // recommended funds. With the risk profiler, its sustainability sentences (risk_profiler_data.js) replace
-  // sosEsgYes and sosEsgNo. DRAFT: new wording, needs Compliance sign-off.
+  // "Your sustainability preferences" — from the Step 3 answer. With the risk profiler, its sustainability
+  // sentences (risk_profiler_data.js) replace sosEsgYes and sosEsgNo. When the client has preferences, the
+  // adviser must set them out, and how the recommended funds meet them, in place of sosEsgPrompt: the pack
+  // cannot be generated while the prompt is left in. The tool does not say whether the funds meet the
+  // preferences (an SFDR Article 8 fund does not necessarily meet them). DRAFT: needs Compliance sign-off.
   sosEsgNo: 'You told us that you do not have sustainability preferences for this investment, so they were not a factor in our recommendation.',
   sosEsgYes: 'You told us that you have sustainability preferences.',
-  sosEsgAllArt8: 'All of the recommended funds are classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which means they promote environmental or social characteristics.',
-  sosEsgPartArt8: '{art8} of your portfolio is invested in funds classified under Article 8 of the EU Sustainable Finance Disclosure Regulation (SFDR), which promote environmental or social characteristics. The rest is invested in funds classified under Article 6, which do not.',
+  sosEsgPrompt: '[[Set out your client\'s sustainability preferences and how the recommended funds meet them]]',
+  // Step 3 note shown when the adviser records that the client has sustainability preferences. DRAFT.
+  esgYesNote: 'Your client has sustainability preferences. You must discuss them with your client and make sure the funds you recommend reflect them.',
+  // Step 7 message when sosEsgPrompt is still in the Statement of Suitability. DRAFT.
+  sosEsgMissing: 'Set out your client\'s sustainability preferences, and how the recommended funds meet them, in the Statement of Suitability.',
 
   // Footnotes for fund asset splits and fund charges. DRAFT: wording follows the PDC / Point of Sale
   // disclosures ("may be more or less than illustrated", "may vary in the future"); needs Compliance sign-off.

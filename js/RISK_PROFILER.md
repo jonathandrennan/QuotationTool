@@ -29,7 +29,7 @@ in it is a proposal, so change the numbers in `risk_profiler_data.js` only with 
 3. **Risk rating:** the lower of the attitude and the limits. The rating is set (`result.rated`) once Q1–Q6 are
    answered; `result.complete` also needs the knowledge, date of birth and sustainability questions.
 4. **Knowledge level:** from Q7, one level higher if Q8 is right (High stays High), one level lower if Q8 is wrong or "I don't know". It does not change the rating.
-5. **Important information:** after the introduction and before Q1 the client must choose "I accept". "I do not accept" shows a stop message with a way back. The time of acceptance is in `state.accepted` (pass it back as `accepted` when mounting) and in the pack's Risk profile section.
+5. **Important information:** after the introduction and before Q1 the broker confirms the client has accepted it ("The client accepts"). "The client does not accept" shows a stop message with a way back. The time of acceptance is in `state.accepted` (pass it back as `accepted` when mounting) and in the pack's Risk profile section.
 
 Q3 bands: under 3 years is capped at 3, 3 to under 5 years at 4, 5 or more has no cap.
 
@@ -75,7 +75,8 @@ var profiler = RiskProfilerUI.mount(document.getElementById('host'), {
   showFlags: true,                      // optional: list the adviser's flags on the result
   onChange: function(state) { /* state.answers, state.seen, state.result */ },
   onFinish: function(state) { /* optional: adds a button to the completed result */ },
-  finishLabel: 'Use this result'
+  finishLabel: 'Use this result',
+  onClose: function() { /* optional: lets the declined page offer "Close the profiler" */ }
 });
 profiler.goTo('attitude');              // or 'result'; profiler.section() gives the part on screen
 profiler.goToNext();                    // opens the first unanswered question

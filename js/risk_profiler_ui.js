@@ -13,7 +13,9 @@
 //     showFlags: true,                              // optional: list the adviser's flags on the result
 //     onChange: function(state) { ... },            // state = { answers, seen, result }
 //     onFinish: function(state) { ... },            // optional: adds a button to the completed result
-//     finishLabel: 'Use this result'                // its label
+//     finishLabel: 'Use this result',               // its label
+//     onClose: function() { ... }                   // optional: the host can close the profiler (e.g. a dialog).
+//                                                   // Adds a "Close the profiler" button where the wording asks for it
 //   });
 //   rp.getState(); rp.setAnswers(a, seen); rp.setContext(c); rp.reset(); rp.goToNext(); rp.goTo('finances' | 'result');
 //   rp.section(); rp.destroy();
@@ -293,9 +295,9 @@ var RiskProfilerUI = (function() {
       if (q.unit === 'years') return '<b>' + esc(cap1(RP.yearsText(a))) + '</b><span>' + esc(RP.band(q.id, a).shown) + '</span>';
       if (a <= 0) return '<b>' + esc(q.minLabel) + '</b><span>You would want to keep the full ' + eur(q.amount) + '.</span>';
       var top = a >= q.max, more = top ? ' or more' : '';
-      return '<b>' + (Math.round(a * 10) / 10) + '%' + more + '</b><span>A fall of ' + eur(q.amount * a / 100) + more + ', leaving ' + (top ? eur(q.amount * (1 - a / 100)) + ' or less' : eur(q.amount * (1 - a / 100))) + '.</span>';
+      return '<b>' + eur(q.amount * a / 100) + more + ' fall</b><span>Your ' + eur(q.amount) + ' would be worth ' + eur(q.amount * (1 - a / 100)) + (top ? ' or less' : '') + '.</span>';
     }
-    function sliderText(q, v) { return q.unit === 'years' ? cap1(RP.yearsText(v)) : v <= 0 ? q.minLabel : v + '%'; }
+    function sliderText(q, v) { return q.unit === 'years' ? cap1(RP.yearsText(v)) : v <= 0 ? q.minLabel : eur(q.amount * v / 100) + (v >= q.max ? ' or more' : '') + ' fall'; }
     function rankOrder(q, a) { return a && a.order ? a.order : q.start; }
     function bodyHtml(q) {
       var a = answers[q.id], h = '', k = 'data-q="' + q.id + '"';
@@ -315,7 +317,7 @@ var RiskProfilerUI = (function() {
       if (q.type === 'slider') {
         var set = typeof a === 'number', v = set ? a : q.min, pct = (v - q.min) / (q.max - q.min) * 100;
         var marks = '';
-        q.marks.forEach(function(mv, m) { marks += '<span>' + (m === 0 ? esc(q.minLabel) : m === q.marks.length - 1 ? esc(q.maxLabel) : mv + (q.unit === 'years' ? ' years' : '%')) + '</span>'; });
+        q.marks.forEach(function(mv, m) { marks += '<span>' + (m === 0 ? esc(q.minLabel) : m === q.marks.length - 1 ? esc(q.maxLabel) : q.unit === 'years' ? mv + ' years' : q.unit === 'eur' ? eur(q.amount * mv / 100) : mv + '%') + '</span>'; });
         return '<div class="rp-sld' + (set ? '' : ' unset') + '" data-sld="' + q.id + '"><div class="rp-sv" aria-hidden="true">' + sliderReadout(q, a) + '</div>' +
           '<input type="range" class="rp-range" ' + k + ' data-fk="' + q.id + '-range" min="' + q.min + '" max="' + q.max + '" step="' + q.step + '" value="' + v + '" style="--rp-p:' + pct + '%"' +
           ' aria-label="' + esc(q.text) + '" aria-valuetext="' + esc(set ? sliderText(q, a) : 'Not answered') + '">' +
@@ -440,7 +442,8 @@ var RiskProfilerUI = (function() {
       var O = order(), i = O.indexOf(cur), next = O[i + 1], h = '';
       if (cur === 'disclaimer') {
         var D = CFG.disclaimer;
-        foot.innerHTML = declined ? '<button type="button" class="rp-btn" data-act="undecline">' + esc(D.back) + '</button>'
+        foot.innerHTML = declined ? '<button type="button" class="rp-btn" data-act="undecline">' + esc(D.back) + '</button>' +
+            (opts.onClose ? '<span class="sp"></span><button type="button" class="rp-btn pri" data-act="close">Close the profiler</button>' : '')
           : '<span class="sp"></span><button type="button" class="rp-btn" data-act="decline">' + esc(D.decline) + '</button><button type="button" class="rp-btn pri" data-act="accept">' + esc(D.accept) + '</button>';
         return;
       }
@@ -466,7 +469,7 @@ var RiskProfilerUI = (function() {
       var el = body.querySelector('[data-panel="result"]'), r = result, T = CFG.text, h;
       if (!el) return;
       h = '<header class="rp-ph"><div><div class="rp-eb">' + (r.complete ? 'Complete' : 'Not finished yet') + '</div><h2 id="' + uid + '-h-result" tabindex="-1">Your result</h2>' +
-        '<p class="rp-lead">' + esc(r.complete ? T.resultLead : 'Your risk rating appears here once every question is answered.') + '</p></div></header>';
+        '<p class="rp-lead">' + esc(r.complete ? T.resultLead : (T.resultPending || 'The risk rating appears here once every question is answered.')) + '</p></div></header>';
       if (!r.complete) {
         h += '<ul class="rp-todo">' + secs().map(function(s) {
           var left = secLeft(s.id);
@@ -505,7 +508,8 @@ var RiskProfilerUI = (function() {
         h += '<div class="rp-notes"><div class="rp-note warn" data-flags><b>For the adviser: ' + r.flags.length + ' flag' + (r.flags.length > 1 ? 's' : '') + '</b><ul>' +
           r.flags.map(function(f) { return '<li data-flag="' + f.id + '"><b>' + esc(f.title) + ':</b> ' + esc(f.text) + '</li>'; }).join('') + '</ul></div></div>';
       }
-      h += '<div class="rp-note rp-imp" data-important><b>' + esc(T.resultNotice.title) + '</b><p>' + esc(T.resultNotice.text) + '</p></div>';
+      var N = T.screenNotice || T.resultNotice;
+      h += '<div class="rp-note rp-imp" data-important><b>' + esc(N.title) + '</b><p>' + esc(N.text) + '</p></div>';
       el.innerHTML = h;
     }
 
@@ -586,6 +590,7 @@ var RiskProfilerUI = (function() {
         else if (a === 'next') api.goToNext();
         else if (a === 'reset') api.reset();
         else if (a === 'finish') opts.onFinish(api.getState());
+        else if (a === 'close' && opts.onClose) opts.onClose();
         return;
       }
       var b = t.closest('button[data-q]');

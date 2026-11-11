@@ -60,29 +60,31 @@ var RP_CONFIG = {
     horizonShort: 'A horizon under 3 years is short for investing. Higher-risk funds need time to recover from falls, so check that the funds you recommend suit it.'
   },
 
-  // ─── "Important information": shown first. The client must accept it before the questions. DRAFT wording. ──
+  // ─── "Important information": shown after the introduction. Addressed to the broker, who confirms the client has
+  //     accepted it before the questions start. DRAFT wording. ──
   disclaimer: {
     title: 'Important information',
     paragraphs: [
-      'The Risk Profiler is a guide. It helps you and your adviser talk about how much risk you are comfortable with before you invest. It does not recommend a product or a fund.',
-      'The questions cover only some of the things that matter when choosing an investment. Before anything is recommended, your adviser will go through your wider situation and needs with you.'
+      'Please go through the following with your client before you start.',
+      'The Risk Profiler is a guide to help you and your client discuss how much investment risk they are comfortable with. It does not recommend a product or a fund, and its result does not replace your own assessment of suitability.',
+      'The questions cover only part of what matters when choosing an investment. Use the result alongside your fact find and your assessment of the client\'s wider circumstances, needs and objectives.'
     ],
-    confirmLead: 'By choosing "I accept", you confirm that:',
+    confirmLead: 'By choosing "The client accepts", you confirm that you have explained to the client, and they accept, that:',
     points: [
-      'you have not been given investment advice by Allianz through this tool; and',
-      'you understand that the Risk Profiler supports, but does not replace, the advice of your financial adviser.'
+      'they have not been given investment advice by Allianz through this tool; and',
+      'the Risk Profiler supports, but does not replace, your advice.'
     ],
-    accept: 'I accept',
-    decline: 'I do not accept',
-    declinedTitle: 'You have not accepted',
-    declinedText: 'The Risk Profiler cannot be used unless you accept the important information. Please talk to your adviser, who can explain it and help you decide how to go on.',
+    accept: 'The client accepts',
+    decline: 'The client does not accept',
+    declinedTitle: 'Important information not accepted',
+    declinedText: 'The Risk Profiler cannot be used unless the client accepts the important information. You can go back and discuss it with them again, or close the profiler and use your own risk profiling instead.',
     back: '← Go back'
   },
 
   // ─── Sections and questions ─────────────────────────────────────────────────────────
   // "short" is the label in the questionnaire's step strip. The introduction is shown before Q1.
   introTitle: 'Before you begin',
-  intro: 'These questions help your adviser recommend investments that suit you. They take about 5 minutes.\nWe will ask about:\n- Your finances, and how long you plan to invest\n- How you feel about risk, and what you would do if your investment fell in value\n- Your knowledge and experience of investing\nPlease answer as honestly and fully as you can. If your answers are not accurate and complete, we cannot recommend an investment.\nYour answers give a risk rating from 1 (very low risk) to 6 (high risk). Your adviser will go through it with you. Your adviser will review your risk profile with you at least once a year, and sooner if your circumstances change. If they do, tell your adviser.',
+  intro: 'Complete these questions with your client. They take about 5 minutes.\nThe questions cover:\n- The client\'s finances, and how long they plan to invest\n- Their attitude to risk, and what they would do if the investment fell in value\n- Their knowledge and experience of investing\nThe questions are worded to the client. Please record the answers the client gives, and make sure they are accurate and complete, because the result is only as reliable as the answers.\nThe answers give a suggested risk rating from 1 (very low risk) to 6 (high risk). Go through the result with the client. You can lower or raise it, with a recorded reason. We recommend that the client\'s risk profile is reviewed at least once a year, and sooner if their circumstances change.',
   sections: [
     { id: 'finances',       title: 'Your finances',                  short: 'Finances',         lead: 'How well you could cope if this investment fell in value.' },
     { id: 'timing',         title: 'Your timing',                    short: 'Timing',           lead: 'How long you plan to invest for.' },
@@ -132,7 +134,8 @@ var RP_CONFIG = {
     { id: 'loss', num: '4', section: 'attitude', type: 'slider', scored: true, short: 'Largest fall you could accept',
       text: 'If you invested €10,000 today and its value fell over the next 12 months, what is the maximum drop you would be willing to accept before considering a change to your investment?',
       help: 'Move the slider to the largest fall you could accept.',
-      min: 0, max: 40, step: 0.5, marks: [0, 10, 20, 30, 40], amount: 10000, minLabel: 'No fall', maxLabel: '40% or more',
+      // The value is held as a % of `amount` (0.5% = €50) so the bands and scoring are in %; the client sees only €.
+      min: 0, max: 40, step: 0.5, marks: [0, 10, 20, 30, 40], amount: 10000, unit: 'eur', minLabel: 'No fall', maxLabel: '€4,000 or more',
       bands: [
         { from: 0,   rating: 1, shown: 'No fall, or under €250' },
         { from: 2.5, rating: 2, shown: 'About €250 to €700' },
@@ -226,7 +229,7 @@ var RP_CONFIG = {
   text: {
     // {profiler} = name, {date} = date completed
     usedPhrase: '{profiler}, {date}',
-    riskSentence: 'In the risk profiler you told us that {loss}, that if your investment fell by 20% you would {reaction}, and that you want {objective}. Together these give an attitude to risk of {attitude} ({attitudeLabel}). Your capacity for loss was assessed as {capacity}.',
+    riskSentence: 'In the risk profiler you told us that {loss}, that if your €10,000 investment fell to €8,000 you would {reaction}, and that you want {objective}. Together these give an attitude to risk of {attitude} ({attitudeLabel}). Your capacity for loss was assessed as {capacity}.',
     lossSome: 'the largest fall in value over 12 months you could accept is {lossText}',
     lossNone: 'you could not accept any fall in value over 12 months',
     horizonPhrase: 'You plan to hold this investment for {term}.',
@@ -250,13 +253,19 @@ var RP_CONFIG = {
       HIGH: 'You are in a good position to absorb a fall in the value of this investment.'
     },
     capacityBasis: 'Based on your answers to Q1 (your financial cushion) and Q2 (the impact of a loss).',
-    // Shown at the end of the result and in the Risk profile record
+    // Shown at the end of the result screen, which the broker sees
+    screenNotice: {
+      title: 'Important information',
+      text: 'This result is a guide to support your discussion of risk with the client. It is not advice from Allianz, and it does not recommend a product or a fund. It is based only on the answers given, which cover part of what matters when choosing an investment, so consider it alongside your fact find before making a recommendation. We recommend that the client\'s risk profile is reviewed at least once a year, and sooner if their circumstances change.'
+    },
+    // Shown in the Risk profile record in the client's pack
     resultNotice: {
       title: 'Important information',
-      text: 'This result is a guide to help you and your adviser talk about risk. It is not advice, and it does not recommend a product or a fund. It is based only on the answers given, which cover just some of what matters when choosing an investment. Your adviser will look at your wider situation before recommending anything, and will review your risk profile with you at least once a year.'
+      text: 'This result is a guide to help you and your adviser talk about risk. It is not advice, and it does not recommend a product or a fund. It is based only on the answers given, which cover just some of what matters when choosing an investment. Your adviser will consider your wider situation before recommending anything. Your risk profile should be reviewed at least once a year, and sooner if your circumstances change.'
     },
     recordNote: 'Your answers have been recorded as you gave them.',
-    resultLead: 'Based on the answers given. Your adviser will go through the result with you.'
+    resultLead: 'Based on the client\'s answers. Go through the result with the client.',
+    resultPending: 'The risk rating appears here once every question is answered.'
   }
 };
 

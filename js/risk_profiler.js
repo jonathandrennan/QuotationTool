@@ -107,12 +107,12 @@
   function lower(level) { var L = CFG.levels.order, i = L.indexOf(level); return L[Math.max(0, i - 1)]; }
   function higher(level) { var L = CFG.levels.order, i = L.indexOf(level); return L[Math.min(L.length - 1, i + 1)]; }
   function fill(str, vals) { return String(str).replace(/\{(\w+)\}/g, function(m, k) { return vals[k] != null ? vals[k] : m; }); }
-  function fmtPct(v) { return (Math.round(v * 10) / 10) + '%'; }
   function fmtEur(n) { return '€' + Math.round(n).toLocaleString('en-IE'); }
+  // Q4's answer in euro: "€1,250 on €10,000", "€4,000 or more on €10,000" (the client never sees the %)
   function lossText(v) {
     var q = question('loss');
     if (v <= 0) return 'no fall';
-    return fmtPct(v) + (v >= q.max ? ' or more' : '') + ' (' + fmtEur(q.amount * v / 100) + (v >= q.max ? ' or more' : '') + ' on ' + fmtEur(q.amount) + ')';
+    return fmtEur(q.amount * v / 100) + (v >= q.max ? ' or more' : '') + ' on ' + fmtEur(q.amount);
   }
   function cap1(t) { return t.replace(/^./, function(c) { return c.toUpperCase(); }); }
   function list(xs) { return xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]; }
@@ -202,7 +202,7 @@
   function answerLines(q, a, answers) {
     if (q.type === 'date') return [fmtDob(a)];
     if (q.type === 'single') return [option(q, a).label];
-    if (q.type === 'slider') return [q.unit === 'years' ? cap1(yearsText(a)) : a <= 0 ? q.minLabel : cap1(lossText(a))];
+    if (q.type === 'slider') return [q.unit === 'years' ? cap1(yearsText(a)) : a <= 0 ? q.minLabel : 'A fall of ' + lossText(a)];
     if (q.type === 'rank') return a.dontKnow ? [q.dontKnow] : a.order.map(function(id, i) { return (i + 1) + '. ' + item(q, id).label; });
     if (q.type === 'multi') return a.map(function(id) { return option(q, id).label; });
     if (q.type === 'shares') return shareRows(q, answers).map(function(r) { return r.label.slice(0, 2) + ' ' + option(q, a[r.id]).label; });

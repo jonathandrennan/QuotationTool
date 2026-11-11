@@ -194,7 +194,7 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .tbl th.em { color:var(--navy); }
 
 /* Alerts */
-.alert { padding:12px 16px; border-radius:10px; font-size:13px; line-height:1.5; }
+.alert { padding:12px 16px; border-radius:10px; font-size:14px; line-height:1.5; }
 .alert.warn { background:var(--amb-bg); box-shadow:inset 0 0 0 1px #F3D3A2; color:var(--amb-ink); }
 .alert.err { background:var(--red-bg); box-shadow:inset 0 0 0 1px #F2B8C6; color:#8A0629; }
 .alert.info { background:var(--tint); color:var(--body); }
@@ -276,12 +276,13 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .strip b { color:var(--navy); }
 
 /* ─── Step 3: attitude to risk ──────────────────────────────────────────────── */
-.sri-pick { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:8px; align-items:end; }
-.sri-t { display:flex; flex-direction:column; gap:10px; padding:0; border:none; background:none; font:inherit; cursor:pointer; }
-.sri-t .blk { display:flex; align-items:center; justify-content:center; height:56px; border-radius:10px; color:#fff; font-size:22px; font-weight:700; transition:height .18s ease, font-size .18s ease; }
+/* Two shared rows (blocks, labels) so a label that wraps onto two lines can't push its block out of line */
+.sri-pick { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); grid-template-rows:auto auto; gap:10px 8px; }
+.sri-t { display:grid; grid-row:span 2; grid-template-rows:subgrid; row-gap:10px; padding:0; border:none; background:none; font:inherit; cursor:pointer; }
+.sri-t .blk { align-self:end; display:flex; align-items:center; justify-content:center; height:56px; border-radius:10px; color:#fff; font-size:22px; font-weight:700; transition:height .18s ease, font-size .18s ease; }
 .sri-t[data-n="4"] .blk { color:#2A2100; }
 .sri-t:hover .blk { filter:brightness(1.05); }
-.sri-t .lb { font-size:13px; color:var(--muted); text-align:center; }
+.sri-t .lb { align-self:start; font-size:13px; color:var(--muted); text-align:center; text-wrap:balance; }
 .sri-t.on .blk { height:84px; font-size:34px; box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--navy); }
 .sri-t.on .lb { font-weight:700; color:var(--navy); }
 .sri-scale { display:flex; justify-content:space-between; margin-top:18px; font-size:12px; color:var(--muted); }
@@ -310,6 +311,9 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .rpm-h p { margin:1px 0 0; font-size:13px; color:var(--muted); }
 .rpm-x { display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:none; border-radius:8px; background:none; color:var(--muted); font:inherit; font-size:24px; line-height:1; cursor:pointer; }
 .rpm-x:hover { background:var(--hdr); color:var(--ink); }
+.rpm-close { display:flex; align-items:center; gap:8px; height:38px; padding:0 14px; border:1px solid var(--inp); border-radius:8px; background:#fff; color:var(--ink); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+.rpm-close span { font-size:20px; line-height:1; color:var(--muted); }
+.rpm-close:hover { border-color:#B6C3D1; background:var(--hdr); }
 .rpm-b { flex:1; min-height:0; }
 #rpm.rpm-bg { padding:0; background:#fff; } #rpm .rpm { width:100%; height:100%; border-radius:0; box-shadow:none; }
 .rpm.info { width:860px; height:auto; max-height:100%; }
@@ -684,12 +688,12 @@ input::placeholder, textarea::placeholder { color:var(--faint); }
 .pj-assume b { color:var(--navy); }
 .pj-main { display:flex; flex-direction:column; gap:14px; padding:24px 26px 20px; min-width:0; }
 .pj-ch { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
-.wbox { padding:10px 14px; border:1.5px solid var(--ink); font-size:13px; font-weight:700; line-height:1.45; }
+.wbox { padding:10px 14px; border:1.5px solid var(--ink); font-size:14px; font-weight:700; line-height:1.45; }
 .tcard-s { margin:2px 0 0; font-size:13px; color:var(--muted); }
 .tcard-h .btn.sm { font-weight:600; color:var(--teal); }
 .warnpanel { margin-top:20px; padding:18px 22px; border:1.5px solid var(--ink); background:#fff; }
 .warnpanel h3 { margin:0 0 12px; font-size:15px; font-weight:700; }
-.warnpanel div { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px 32px; font-size:13px; font-weight:700; line-height:1.45; }
+.warnpanel div { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px 32px; font-size:14px; font-weight:700; line-height:1.45; }
 /* ─── Responsive: the content column is the container, so the rail width stops mattering ───
    Targets laptop and tablet (1024px viewport and up ≈ 620px of content). Components reflow by
    dropping columns; inputs never shrink below a usable size, they wrap onto the next line. */
@@ -888,9 +892,10 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
     <div class="fsec-h"><h2>Sustainability</h2><p>Recorded in the Statement of Suitability.</p></div>
     <div class="fields">
       <div class="esg-row">
-        <div><div class="q" id="esg-q">Does the client have sustainability preferences?</div><div class="hint">If yes, the portfolio's share in SFDR Article 8 funds is shown as you build it and the preference is noted in the Statement of Suitability.</div><div class="hint" id="esg-src" hidden>Set by the client's answers to the sustainability questions in the risk profiler.</div></div>
+        <div><div class="q" id="esg-q">Does the client have sustainability preferences?</div><div class="hint">If yes, you set out the client's preferences, and how the recommended funds meet them, in the Statement of Suitability.</div><div class="hint" id="esg-src" hidden>Set by the client's answers to the sustainability questions in the risk profiler.</div></div>
         <div class="seg" id="esg-seg" role="radiogroup" aria-labelledby="esg-q"><button type="button" data-v="yes" onclick="setEsg(true)">Yes</button><button type="button" data-v="no" onclick="setEsg(false)">No</button></div>
       </div>
+      <div class="alert info" id="esg-note" aria-live="polite" hidden></div>
     </div>
   </section>
   <!-- What the 1–7 ratings mean (copy: QT_CONTENT.riskScale) -->
@@ -905,7 +910,7 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
   <div class="rpm-bg" id="rpm" hidden>
     <div class="rpm" role="dialog" aria-modal="true" aria-labelledby="rpm-t" aria-describedby="rpm-d">
       <div class="rpm-h"><img src="allianz-logo.svg" alt="Allianz"><div class="t"><h2 id="rpm-t">Risk Profiler</h2><p id="rpm-d"></p></div>
-        <button type="button" class="rpm-x" aria-label="Close the risk profiler" onclick="closeProfiler()">×</button></div>
+        <button type="button" class="rpm-close" onclick="closeProfiler()" title="Your answers so far are kept">Close <span aria-hidden="true">×</span></button></div>
       <div class="rpm-b"><div id="rp-host"></div></div>
     </div>
   </div>
@@ -942,7 +947,7 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
             <div data-ct="sp"><label class="f" for="p-sp">Single contribution</label><div class="affix has-pre"><span class="pre">€</span><input type="text" inputmode="decimal" id="p-sp" data-p="sp"></div></div>
             <div data-ct="rp" class="rowstart"><label class="f" for="p-rp">Regular contribution</label><div class="affix has-pre has-suf long"><span class="pre">€</span><input type="text" inputmode="decimal" id="p-rp" data-p="rp"><span class="suf">per payment</span></div></div>
             <div data-ct="rp"><label class="f" for="p-freq">Frequency</label><select id="p-freq" data-p="freq"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annual">Annual</option></select></div>
-            <div data-ct="rp"><label class="f" for="p-esc">Yearly increase</label><div class="affix has-suf"><input type="number" id="p-esc" min="0" max="10" step="0.5" data-p="esc"><span class="suf">%</span></div></div>
+            <div data-ct="rp"><label class="f" for="p-esc">Yearly increase</label><select id="p-esc" data-p="esc"><option value="0">0%</option><option value="5">5%</option></select></div>
           </div>
           <div class="hint" id="p-contrib-hint"></div>
         </div>
@@ -996,7 +1001,7 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
             <div data-ct="sp"><label class="f" for="i-sp">Single contribution</label><div class="affix has-pre"><span class="pre">€</span><input type="text" inputmode="decimal" id="i-sp" data-i="contribution"></div><div class="hint">Minimum €10,000</div></div>
             <div data-ct="rp" class="rowstart"><label class="f" for="i-rp">Regular contribution</label><div class="affix has-pre has-suf long"><span class="pre">€</span><input type="text" inputmode="decimal" id="i-rp" data-i="rp"><span class="suf">per payment</span></div></div>
             <div data-ct="rp"><label class="f" for="i-freq">Frequency</label><select id="i-freq" data-i="freq"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annual">Annual</option></select></div>
-            <div data-ct="rp"><label class="f" for="i-esc">Yearly increase</label><div class="affix has-suf"><input type="number" id="i-esc" min="0" max="10" step="0.5" data-i="esc"><span class="suf">%</span></div></div>
+            <div data-ct="rp"><label class="f" for="i-esc">Yearly increase</label><select id="i-esc" data-i="esc"><option value="0">0%</option><option value="5">5%</option></select></div>
           </div>
           <div id="i-rp-warn"></div>
         </div>
@@ -1217,7 +1222,8 @@ input[type=text], input[type=number], input[type=date], select, textarea { min-w
 var BROKER_KEY = 'agl_qt_broker';
 var STEP_NAMES = ['Adviser', 'Product & client', 'Attitude to risk', 'Plan details', 'Portfolio', 'Results', 'Quotation pack'];
 var PRODUCT_LABELS = { prsa: 'PRSA', arf: 'ARF', ib: 'Investment Bond' };
-var COMM_STEP = 0.005;
+// Initial commission +/- step for the product on screen (IB_COMM_STEP / ARF_COMM_STEP; PRSA isn't editable)
+function commStep() { return S.product === 'ib' ? IB_COMM_STEP : ARF_COMM_STEP; }
 var ASSET_COLORS = { eq:'#003781', fi:'#0082be', cash:'#7fb2d9', com:'#c99a3a', alt:'#8a96a3' };
 var SWATCHES = ['#003781', '#3D6FB5', '#0082be', '#7fb2d9'];   // then each fund's own colour
 var SECTION_KEYS = ['cover', 'sos', 'riskprofile', 'summary', 'funds', 'projection', 'charges', 'remun', 'important', 'glossary', 'product', 'factsheets', 'kids', 'appform'];
@@ -1333,7 +1339,7 @@ function init() {
   $('r-profiler').addEventListener('input', function() { S.risk.profiler = this.value; });
   $('rp-reason').addEventListener('input', function() { S.risk.pReason = this.value; this.classList.remove('invalid'); setFootMsg(''); });
   rpUI = RiskProfilerUI.mount($('rp-host'), { answers: S.risk.pAnswers, seen: S.risk.pSeen, accepted: S.risk.pAccepted, context: rpContext(), sri: { labels: ESMA_LABELS, colors: ESMA_COLORS },
-    onChange: onProfilerChange, onFinish: finishProfiler, finishLabel: 'Use this result' });
+    onChange: onProfilerChange, onFinish: finishProfiler, finishLabel: 'Use this result', onClose: closeProfiler });
 
   document.querySelectorAll('[data-p]').forEach(function(el) {
     var k = el.getAttribute('data-p');
@@ -1364,6 +1370,12 @@ function init() {
       if (k === 'incomeType') { S.ib.incomeType = el.value; S.ib.incomeValue = 0; $('i-ival').value = ''; renderIbIncome(); invalidate(4); }
       else if (k === 'incomeStartAge') S.ib.incomeStartAge = el.value === '' ? null : parseInt(el.value, 10);
       else if (k === 'freq') S.ib.freq = el.value;
+      else if (k === 'contribution') {
+        // crossing a tiered-bonus threshold moves the standard rate, so clear any manual change against the old one
+        var tierWas = ibTieredBonus(S.ib.contribution || 0);
+        S.ib.contribution = parseNum(el.value);
+        if (ibTieredBonus(S.ib.contribution || 0) !== tierWas) S.ib.spUpOverride = null;
+      }
       else S.ib[k] = parseNum(el.value);
       el.classList.remove('invalid'); renderIbContribHint(); renderCodeInfo();
     });
@@ -1613,7 +1625,9 @@ function onNext() {
     if (pfView === 'pick') { pfToAlloc(); return; }
   }
   if (S.step === 7) {
-    // The Statement of Suitability is never forced, but leaving the example text untouched needs a second look
+    // The client's sustainability preferences must be set out before moving on
+    if (S.packStage === 'sos' && sosEsgMissing()) { setFootMsg(QT_TEXT.sosEsgMissing); return; }
+    // Otherwise the Statement of Suitability is never forced, but leaving the example text untouched needs a second look
     if (S.packStage === 'sos' && !sosEdited()) {
       var w = QT_TEXT.sosUneditedConfirm;
       qtConfirm(w.body, packNext, $('btn-next'), w);
@@ -1933,6 +1947,8 @@ function renderSriCards() {
     b.disabled = locked && !!prof.sustainability;   // set by the profiler's sustainability questions (when asked)
   });
   $('esg-src').hidden = !(locked && prof.sustainability);
+  $('esg-note').textContent = QT_TEXT.esgYesNote;
+  $('esg-note').hidden = S.risk.esg !== true;
   $('r-profiler').value = S.risk.profiler;
   $('sri-card').hidden = !(S.risk.method === 'own' || profilerDone());
   $('sri-cap').textContent = S.risk.method === 'own' ? 'Select the rating from your risk profiling.' : '';
@@ -2093,7 +2109,9 @@ function renderCodeInfo() {
     var isIb = pr === 'ib', tc = isIb ? IB_CODES[o.code] : ARF_CODES[o.code], isp = isIb ? ibSpUpRate(o) : arfSpUpRate(o);
     var base = isIb ? ibBaseSpUp(o) : arfBaseSpUp(o), sd = o.specialDeal || 0, alloc = isIb ? ibSpAllocationRate(o) : arfAllocationRate(o);
     var sv = tc.surrender.filter(function(x) { return x > 0; });
-    overview = 'Policy charge ' + pct(tc.admin) + ' · initial ' + pct(isp) + (sd ? ' incl. special deal' : '') + ' · exit charges ' + (sv.length ? sv.map(pct).join(' / ') : 'none');
+    var tier = isIb ? ibTier(o.contribution || 0) : null, tb = tier ? tier.bonus : 0;   // IB_TIERED_BONUS
+    var extras = [tb ? 'tiered bonus' : '', sd ? 'special deal' : ''].filter(Boolean).join(' and ');
+    overview = 'Policy charge ' + pct(tc.admin) + ' · initial ' + pct(isp) + (extras ? ' incl. ' + extras : '') + ' · exit charges ' + (sv.length ? sv.map(pct).join(' / ') : 'none');
     rows += commRow('Policy charge', 'of which trail commission ' + pct(tc.ongoing), '<span class="v">' + pct(tc.admin) + '</span>');
     // Special deal: paid by Allianz on top of the standard rate, so the amount invested is unchanged
     rows += commRow('Special deal', sd
@@ -2101,13 +2119,13 @@ function renderCodeInfo() {
         : 'Extra initial commission paid by Allianz. The amount invested is not reduced.',
       commStepper('sd', sd, 'special deal'));
     var spLim = isIb ? ibSpCommLimits(o) : arfSpCommLimits(o), rangeNote = ' · range ' + pct(spLim.min) + ' to ' + pct(spLim.max);
+    if (tb) rows += commRow('Tiered bonus', pct(tb) + ' bonus commission paid by Allianz Global Life for a single contribution of ' + fEUR(tier.min) + ' or more. The amount invested is not reduced.',
+      '<span class="v">' + pct(tb) + '</span>');
     rows += commRow('Initial commission' + (isIb ? ' — single contribution' : ''),
-      ovrNote('sp', isp, base, (sd ? 'Standard rate plus special deal' : 'Standard rate') + rangeNote, sd ? 'standard plus special deal' : 'standard'), commStepper('sp', isp, 'initial commission'));
+      ovrNote('sp', isp, base, (extras ? 'Standard rate plus ' + extras : 'Standard rate') + rangeNote, extras ? 'standard plus ' + extras : 'standard'), commStepper('sp', isp, 'initial commission'));
     var allocNote = Math.abs(isp - base) < 0.0001 ? 'All of the single contribution is invested'
       : isp > base ? 'Commission above ' + pct(base) + ' is paid from the contribution' : 'Commission below ' + pct(base) + ' is added to the contribution';
     if (isIb && tc.rpAllocBonus > 1) allocNote += Math.abs(isp - base) < 0.0001 ? ', plus ' + pct(tc.rpAllocBonus - 1) + ' extra on this version' : '. Includes ' + pct(tc.rpAllocBonus - 1) + ' extra on this version';
-    var tier = isIb ? ibTier(o.contribution || 0) : null;   // IB_TIERED_BONUS
-    if (tier && tier.bonus > 0) allocNote += '. Includes a ' + pct(tier.bonus) + ' bonus for a single contribution of ' + fEUR(tier.min) + ' or more';
     rows += commRow('Allocation' + (isIb ? ' — single contribution' : ''), allocNote, '<span class="v">' + pct(alloc) + '</span>');
     if (pr === 'ib' && ibCodeAllowsRp(o.code)) {
       rows += commRow('Initial commission — regular contributions', 'Regular contributions allocated at +' + pct(tc.rpAllocBonus - 1), '<span class="v">' + pct(tc.rpUp) + ' a year</span>');
@@ -2116,7 +2134,7 @@ function renderCodeInfo() {
   }
   $(pre + '-codeinfo').innerHTML = '<div class="comm"><button type="button" class="comm-h" aria-expanded="' + commOpen + '" aria-controls="' + pre + '-commbody" onclick="toggleComm()">' +
     '<span class="ct"><b>Commission and charges · ' + escHtml(o.code) + '</b><span class="ov">' + overview + (edited ? ' · <span class="ovr">Edited</span>' : '') + '</span></span><span class="chev" aria-hidden="true">▾</span></button>' +
-    '<div class="comm-b" id="' + pre + '-commbody"' + (commOpen ? '' : ' hidden') + '>' + (pr === 'prsa' ? '' : '<div class="comm-note">Initial commission adjusts in steps of ' + pct(COMM_STEP) + '.</div>') + rows + '</div></div>';
+    '<div class="comm-b" id="' + pre + '-commbody"' + (commOpen ? '' : ' hidden') + '>' + (pr === 'prsa' ? '' : '<div class="comm-note">Initial commission adjusts in steps of ' + pct(commStep()) + '.</div>') + rows + '</div></div>';
   renderPlanSummary();
 }
 var commOpen = false;   // the panel starts as a one-line overview
@@ -2155,7 +2173,7 @@ function stepComm(kind, dir) {
   cur = S.product === 'arf' ? arfSpUpRate(o) : ibSpUpRate(o);
   def = S.product === 'arf' ? arfBaseSpUp(o) : ibBaseSpUp(o);
   var lim = S.product === 'arf' ? arfSpCommLimits(o) : ibSpCommLimits(o); lo = lim.min; hi = lim.max;
-  var next = Math.max(lo, Math.min(hi, Math.round((cur + dir * COMM_STEP) * 2000) / 2000));
+  var next = Math.max(lo, Math.min(hi, Math.round((cur + dir * commStep()) * 2000) / 2000));
   var val = Math.abs(next - def) < 0.0001 ? null : next;
   o.spUpOverride = val;
   renderCodeInfo();
@@ -2301,7 +2319,7 @@ function planErrors(bad) {
     if (ctHas(p.ctype, 'ofv') && !(p.ofv > 0)) { e.push('Enter the transfer value.'); bad.push('p-ofv'); }
     if (ctHas(p.ctype, 'sp') && !(p.sp > 0)) { e.push('Enter the single contribution.'); bad.push('p-sp'); }
     if (ctHas(p.ctype, 'rp') && !(p.rp > 0)) { e.push('Enter the regular contribution.'); bad.push('p-rp'); }
-    if (ctHas(p.ctype, 'rp') && (isNaN(p.esc) || p.esc < 0 || p.esc > 10)) { e.push('Yearly increase must be between 0% and 10%.'); bad.push('p-esc'); }
+    if (ctHas(p.ctype, 'rp') && p.esc !== 0 && p.esc !== 5) { e.push('Yearly increase must be 0% or 5%.'); bad.push('p-esc'); }
   } else if (S.product === 'arf') {
     var a = S.arf, age = ageBetween(S.client.dobStr, S.startStr);
     if (!(a.contribution >= 20000)) { e.push('Minimum single contribution is €20,000.'); bad.push('a-contrib'); }
@@ -2318,7 +2336,7 @@ function planErrors(bad) {
     if (ctHas(i.ctype, 'rp') && !(i.rp > 0)) { e.push('Enter the regular contribution.'); bad.push('i-rp'); }
     if (ctHas(i.ctype, 'rp') && !ibCodeAllowsRp(i.code)) { e.push('The selected version does not support regular contributions — choose a K, L or M version.'); bad.push('i-ctchips'); }
     if (i.rp > 0 && i.incomeType !== 'none') { e.push('Regular contributions and income cannot both be selected.'); bad.push('i-rp'); }
-    if (ctHas(i.ctype, 'rp') && (isNaN(i.esc) || i.esc < 0 || i.esc > 10)) { e.push('Yearly increase must be between 0% and 10%.'); bad.push('i-esc'); }
+    if (ctHas(i.ctype, 'rp') && i.esc !== 0 && i.esc !== 5) { e.push('Yearly increase must be 0% or 5%.'); bad.push('i-esc'); }
     if (i.incomeType === 'custom_amount' && !(i.incomeValue > 0)) { e.push('Enter an annual income amount greater than zero.'); bad.push('i-ival'); }
     if (i.incomeType === 'custom_pct' && !(i.incomeValue > 0 && i.incomeValue <= 100)) { e.push('Enter an income percentage between 0 and 100.'); bad.push('i-ival'); }
     if (i.incomeType === 'custom_amount' && (isNaN(i.incomeEscalationPct) || i.incomeEscalationPct < 0 || i.incomeEscalationPct > 10)) { e.push('Yearly income increase must be between 0% and 10%.'); bad.push('i-iesc'); }
@@ -3009,7 +3027,7 @@ function renderPfSummary() {
   sf.className = '';
   if (!hasMix) sf.textContent = '–';
   else if (sp.unknown > 0.0001) sf.textContent = 'See fund details';
-  else if (sp.art8 > 0.9999) { sf.textContent = '100% Article 8 ✓'; sf.className = 'ok'; }
+  else if (sp.art8 > 0.9999) sf.textContent = '100% Article 8';   // no tick: Article 8 does not mean the client's preferences are met
   else { sf.textContent = Math.round(sp.art8 * 100) + '% Article 8 · ' + Math.round(sp.art6 * 100) + '% Article 6'; if (S.risk.esg) sf.className = 'warn'; }
   // Mismatch warning: appears once the adviser tries to proceed (or after an override is recorded)
   var rec = pf.mismatch && overrideValid();
@@ -3357,7 +3375,7 @@ function resRemuneration(r) {
     var trail = yearly.reduce(function(a, y){ return a + y.comm; }, 0) - r.initialComm;
     var spPart = S.product === 'ib' ? r.spUpRate * r.contribution : r.initialComm;
     var il2 = [fEUR(spPart) + ' · ' + pct(r.spUpRate) + ' of ' + (S.product === 'ib' ? 'single' : 'contribution') +
-      (r.specialDeal > 0 ? ' <span class="ovr">Special deal</span>' : '') + (r.spUpOverridden ? ' <span class="ovr">Edited</span>' : '')];
+      (r.tieredBonus > 0 ? ' <span class="ovr">Tiered bonus</span>' : '') + (r.specialDeal > 0 ? ' <span class="ovr">Special deal</span>' : '') + (r.spUpOverridden ? ' <span class="ovr">Edited</span>' : '')];
     if (S.product === 'ib' && r.rpInitialComm > 0) il2.push(fEUR(r.rpInitialComm) + ' · ' + pct(IB_CODES[r.code].rpUp) + ' of year-1 regular');
     h += kcard('Initial remuneration', fEUR(r.initialComm), il2.join('<br>'));
     h += kcard('Trail remuneration', fEUR(trail), pct(r.cc.ongoing) + ' a year of fund value, over ' + (S.product === 'ib' ? r.years : 40) + ' years at ' + pct(rate));
@@ -3411,7 +3429,7 @@ function packFoot() {
   else if (S.packStage === 'cover' || S.packStage === 'sos') {
     var left = docIssues(S.packStage);
     status = modeOf(S.packStage) === 'own' ? (left ? 'Write the ' + (S.packStage === 'cover' ? 'letter' : 'statement') + ' to continue' : 'Ready')
-      : S.packStage === 'sos' ? (sosEdited() ? 'Edited' : 'Example text: tailor it to your client')
+      : S.packStage === 'sos' ? (sosEsgMissing() ? 'Set out the client\'s sustainability preferences to continue' : sosEdited() ? 'Edited' : 'Example text: tailor it to your client')
       : left ? left + (left === 1 ? ' passage still to write' : ' passages still to write') : 'All passages written';
   }
   return { label: next ? STAGE_NEXT[next] : '', status: status };
@@ -3425,6 +3443,12 @@ function setMode(k, m) {
 function sosEdited() {
   if (modeOf('sos') === 'own') return !!S.own.sos.trim();
   return S.text.sos != null && S.text.sos !== S.basis.sos;
+}
+// True while the client has sustainability preferences and the template Statement of Suitability still has
+// the prompt to set them out. This one prompt must be written: the pack cannot be generated without it.
+function sosEsgMissing() {
+  return S.risk.esg === true && !!S.sections.sos && modeOf('sos') === 'template' &&
+    stripMarks(S.text.sos || '').indexOf(QT_TEXT.sosEsgPrompt) >= 0;
 }
 // Outstanding items in a document: prompts left (template) or 1 if "write your own" is still empty
 function docIssues(k) {
@@ -3479,17 +3503,15 @@ function textContext() {
   var remun = initial > 0
     ? 'We will receive initial remuneration of ' + fEUR(initial) + (r.cc.ongoing > 0 ? ' and trail remuneration of ' + pct(r.cc.ongoing) + ' a year of your fund value' : '') + ', paid by Allianz Global Life from its charges.'
     : (r.cc.ongoing > 0 ? 'We will receive trail remuneration of ' + pct(r.cc.ongoing) + ' a year of your fund value, paid by Allianz Global Life from its charges.' : 'We do not receive remuneration from Allianz Global Life for this policy.');
-  // Sustainability preferences, from Step 3 and the SFDR classification of the funds. DRAFT wording.
-  var sp = qtSfdrSplit(r.mix), esg;
   // Risk profiler answers (Step 3) fill the circumstances, attitude-to-risk and sustainability passages
-  var prof = profilerDone(), narr = null;
+  var prof = profilerDone(), narr = null, esg;
   if (prof) narr = RiskProfiler.narrative(S.risk.pAnswers, rpContext(), prof, { suggestedSri: prof.sri, chosenSri: S.risk.sri, overrideReason: S.risk.pReason });
-  var esgLead = narr && narr.sustainability ? narr.sustainability : T.sosEsgYes;
-  if (S.risk.esg === false) esg = narr && narr.sustainability ? narr.sustainability : T.sosEsgNo;
+  // Sustainability preferences, from Step 3. With preferences, the adviser writes how the funds meet them
+  // (sosEsgPrompt): the tool makes no claim that they do. DRAFT wording.
+  var esgLead = narr && narr.sustainability ? narr.sustainability : null;
+  if (S.risk.esg === false) esg = esgLead || T.sosEsgNo;
   else if (S.risk.esg !== true) esg = '';
-  else if (sp.unknown > 0.0001) esg = narr ? esgLead : '';
-  else if (sp.art8 > 0.9999) esg = esgLead + ' ' + T.sosEsgAllArt8;
-  else esg = esgLead + ' ' + qtFill(T.sosEsgPartArt8, { art8: Math.round(sp.art8 * 100) + '%' });
+  else esg = (esgLead || T.sosEsgYes) + ' ' + T.sosEsgPrompt;
   var ctx = {
     salutation: S.client.salutation, clientLast: S.client.last, productName: productName(),
     openingLine: T.coverOpening[S.product], enclosedList: enclosedList,
@@ -3909,6 +3931,7 @@ function edChanged(k) {
   });
   S.text[k] = edSerialize(ed);
   edSide(k);
+  if (k === 'sos' && footErr === QT_TEXT.sosEsgMissing && !sosEsgMissing()) footErr = '';
   renderFoot();
 }
 function edSide(k) {
@@ -3965,10 +3988,11 @@ function reviewChecks() {
   var out = [], pf = portfolioState();
   ['cover', 'sos'].forEach(function(k) {
     if (!S.sections[k]) return;
-    var nm = k === 'cover' ? 'Cover letter' : 'Statement of Suitability', n = docIssues(k);
+    var nm = k === 'cover' ? 'Cover letter' : 'Statement of Suitability', n = docIssues(k) - (k === 'sos' && sosEsgMissing() ? 1 : 0);   // the sustainability prompt is its own check below
     if (modeOf(k) === 'own') out.push({ ok: !n, text: n ? nm + ': still to write' : nm + ' written' });
     else if (!n) out.push({ ok: true, text: nm + ' complete' });
     else out.push({ ok: false, warn: true, text: nm + ': ' + n + (n === 1 ? ' passage' : ' passages') + ' not written — left out of the pack' });
+    if (k === 'sos' && sosEsgMissing()) out.push({ ok: false, text: 'Statement of Suitability: set out the client\'s sustainability preferences' });
   });
   out.push({ ok: allTabsSeen(), text: allTabsSeen() ? 'Results reviewed' : 'Results: review all three tabs' });
   if (!S.lite) out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk higher than the client\'s rating, reason recorded' : pf.direction === 'lower' ? 'Risk lower than the client\'s rating, no reason needed' : 'Risk aligned, no override needed' });

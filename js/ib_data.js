@@ -1,6 +1,6 @@
 // ib_data.js — Allianz Vantage Investment Bond data: product codes and product constants.
 //
-// Figures come from the Parameters sheet of the IB Illustration Generator workbook (v0.12; named ranges
+// Figures come from the Parameters sheet of the IB Illustration Generator workbook (v0.13; named ranges
 // Product_Parameters and Fund_Rates_Table) and agree with the appendix tables of the product specification
 // (v0.3) on admin charge, commission and allocation for every code.
 //
@@ -23,9 +23,11 @@ var IB_POLICYHOLDER_TYPES = [
 ];
 
 // Tiered bonus commission on large single contributions (IB workbook "Tiered Bonus Commission",
-// Parameters C112:D114, used in Projections!C67). As in the workbook it is added to the allocation of the
-// single contribution, not to the commission paid. The rate for the highest tier reached applies to the
-// whole single contribution: from €100,000 +0.5%, from €500,000 +1%. Stacks with the special deal.
+// Parameters C112:D114). Extra initial commission paid by Allianz to the adviser on top of the standard
+// rate. Like the special deal, it can only be taken as commission: it never changes the allocation.
+// The rate for the highest tier reached applies to the whole single contribution: from €100,000 +0.5%,
+// from €500,000 +1%. Stacks with the special deal. Matches workbook v0.13 (Projections C66);
+// v0.12 wrongly added it to the allocation instead.
 var IB_TIERED_BONUS_ON = true;
 var IB_TIERED_BONUS = [
   { min: 0,      bonus: 0 },
@@ -113,9 +115,10 @@ var IB_CODES = {
 // ── SP initial commission limits ────────────────────────────────────────────────
 // How far the adviser may move the single-contribution initial commission on each code: [min, max].
 // From the "SP Init Comm Range" column of the product spec appendix. Moving commission away from the
-// standard rate moves the allocation the other way (see ibSpAllocationRate). A special deal is added
-// on top of both ends (see ibSpCommLimits in engine_ib.js).
+// standard rate moves the allocation the other way (see ibSpAllocationRate). A special deal and the tiered
+// bonus are added on top of both ends (see ibSpCommLimits in engine_ib.js).
 var IB_SPECIAL_DEAL = 0.01;   // a special deal is either off or exactly this much extra initial commission
+var IB_COMM_STEP = 0.0025;    // the adviser's +/- buttons move the initial commission by this much
 var IB_SP_COMM_RANGE = {
   'A1': [0, 0.04],
 

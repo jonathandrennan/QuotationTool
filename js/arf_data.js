@@ -42,6 +42,7 @@ var ARF_CODES = {
 // moves the allocation the other way (see arfAllocationRate). A special deal is added on top
 // of both ends (see arfSpCommLimits in engine_arf.js).
 var ARF_SPECIAL_DEAL = 0.01;   // a special deal is either off or exactly this much extra initial commission
+var ARF_COMM_STEP = 0.0025;    // the adviser's +/- buttons move the initial commission by this much
 var ARF_SP_COMM_RANGE = {
   'A1': [0, 0.05], 'A2': [0, 0.05], 'A3': [0, 0.05], 'A4': [0, 0.05], 'A5': [0, 0.05],
 

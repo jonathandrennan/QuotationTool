@@ -401,7 +401,7 @@ function qtBuildPack(Q) {
     add(pr.flags.length ? '<ul>' + pr.flags.map(function(f) { return '<li><b>' + escHtml(f.title) + ':</b> ' + escHtml(f.text) + '</li>'; }).join('') + '</ul>'
       : '<p>No flags were raised.</p>', { hdr: 'broker' });
     add('<div class="imp"><b>' + escHtml(pcfg.text.resultNotice.title) + '</b><p>' + escHtml(pcfg.text.resultNotice.text) + '</p></div>', { hdr: 'broker' });
-    add('<p class="tiny">' + escHtml(pcfg.text.recordNote) + ' Questionnaire version ' + escHtml(pcfg.version) + '.' + (pf.accepted ? ' The client accepted the important information on ' + escHtml(fmtDateLong(pf.accepted.slice(0, 10))) + '.' : '') + '</p>', { hdr: 'broker' });
+    add('<p class="tiny">' + escHtml(pcfg.text.recordNote) + ' Questionnaire version ' + escHtml(pcfg.version) + '.' + (pf.accepted ? ' The adviser confirmed that the client accepted the important information on ' + escHtml(fmtDateLong(pf.accepted.slice(0, 10))) + '.' : '') + '</p>', { hdr: 'broker' });
   }
 
   // ── Allianz quotation: cover ──
@@ -576,15 +576,15 @@ function qtBuildPack(Q) {
     if (fRisk.footnote) p(fRisk.footnote, 'tiny');
     // The funds: brochure objective and key facts (largest holding first); opportunities and risks are left to the factsheets
     add('<h3 class="kwn">' + escHtml(FH.funds) + '</h3>');
-    p(T.packFundsFactsheets);
-    fundRows.forEach(function(fr) {
+    add('<p>' + escHtml(T.packFundsFactsheets) + '</p>', { cls: 'kwn' });
+    fundRows.forEach(function(fr, fi) {
       var f = fr.fund, info = qtFundInfo(f.id) || {}, cat = FUND_CATEGORY_MAP[fr.cat], lv = qtGteeLevel(f.id);
       var facts = [f.isin ? 'ISIN ' + escHtml(f.isin) : '', 'Risk ' + Math.round(f.esma) + ' of 7', 'Fund charge ' + pct(fr.fmc),
                    info.sfdr ? 'SFDR Article ' + info.sfdr : '', fr.gmab ? '<span class="g">Annual Guarantee' + (lv ? ' ' + lv : '') + '</span>' : ''].filter(Boolean);
       add('<div class="fcard"><div class="fch"><b>' + escHtml(f.name) + '</b><span>' + escHtml(info.category || (cat ? cat.label : '')) +
           ' &middot; ' + (+(fr.weight * 100).toFixed(1)) + '% of your plan</span></div>' +
           '<div class="fcm">' + facts.join(' &middot; ') + '</div>' +
-          '<p>' + escHtml(info.desc || f.desc || '') + '</p></div>');
+          '<p>' + escHtml(info.desc || f.desc || '') + '</p></div>', fi === fundRows.length - 1 ? { cls: 'kwn' } : null);   // last card goes over with the warnings below
     });
     // fmcNote says projections use the maximum FMC, which holds for the PRSA only (ARF / Bond illustrate at the quoted FMC)
     // kwn: if the warnings below don't fit, this note goes over with them rather than leaving them alone on a page
@@ -1001,6 +1001,11 @@ function qtPackCss() {
     '.pfoot { position: absolute; bottom: 8mm; left: 16mm; right: 16mm; font-size: 6.8pt; color: #8A96A3; border-top: 0.5pt solid #E2E8EF; padding-top: 2mm; display: flex; justify-content: space-between; gap: 6mm; }',
     '.pfoot .pn { white-space: nowrap; }',
     '.blk { margin-bottom: 3.2mm; }',
+    // Tighter spacing, used only on a page where it stops a section's last block spilling onto a page of its own
+    '.pbody.snug .blk { margin-bottom: 1.6mm; }',
+    '.pbody.snug p + p { margin-top: 1.2mm; }',
+    '.pbody.snug p, .pbody.snug li, .pbody.snug .tiny { line-height: 1.4; }',
+    '.pbody.snug .fcard p { margin-bottom: 1mm; }',
     'h1 { font-size: 19pt; color: #003680; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2mm; }',
     'h2 { font-size: 17pt; color: #003680; font-weight: 700; letter-spacing: -0.01em; padding-bottom: 1mm; }',
     'h3 { font-size: 10.5pt; color: #003680; font-weight: 700; margin-top: 1.5mm; }',
@@ -1025,7 +1030,7 @@ function qtPackCss() {
     'table { width: 100%; border-collapse: collapse; }',
     'table.num th { font-size: 7.4pt; color: #5E6B78; font-weight: 700; text-align: right; padding: 1.5mm 1.8mm; vertical-align: bottom; border-bottom: 1pt solid #003680; line-height: 1.3; }',
     'table.num th.em { color: #003680; }',
-    'table.num tr.ltr th { border-bottom: none; font-size: 9pt; color: #003680; padding-bottom: 0; }',
+    'table.num tr.ltr th { white-space: nowrap; border-bottom: none; font-size: 9pt; color: #003680; padding-bottom: 0; }',
     'table.num td { font-size: 8.4pt; text-align: right; padding: 1.5mm 1.8mm; border-bottom: 0.5pt solid #EEF2F6; }',
     'table.num th:first-child, table.num td:first-child { text-align: left; }',
     'table.num .l { text-align: left; }',
@@ -1036,10 +1041,10 @@ function qtPackCss() {
     'table.gloss td { font-size: 8.6pt; padding: 1.6mm 2mm; border-bottom: 0.5pt solid #EEF2F6; vertical-align: top; line-height: 1.45; }',
     'table.gloss td:first-child { width: 34%; color: #003680; }',
     '.imp { border-left: 2.5pt solid #003680; background: #EEF4FA; padding: 2.5mm 4mm; border-radius: 0 1.5mm 1.5mm 0; }',
-    '.imp b { font-size: 8.6pt; }',
-    '.imp p { font-size: 8.4pt; font-weight: 700; margin-top: 1.2mm; }',
+    '.imp b { font-size: 9pt; }',
+    '.imp p { font-size: 9pt; font-weight: 700; margin-top: 1.2mm; }',
     '.warn { background: #F4F7FA; border-radius: 2mm; padding: 3mm 4mm; }',
-    '.warn p { font-weight: 700; font-size: 8.6pt; }',
+    '.warn p { font-weight: 700; font-size: 9pt; }',
     '.catbar { display: flex; height: 3.5mm; border-radius: 1mm; overflow: hidden; background: #EEF2F6; }',
     '.catleg { display: flex; flex-wrap: wrap; gap: 1mm 5mm; font-size: 7.8pt; color: #5E6B78; margin-top: 1.5mm; }',
     '.catleg i { display: inline-block; width: 2.6mm; height: 2.6mm; border-radius: 0.6mm; margin-right: 1.4mm; vertical-align: -0.3mm; }',
@@ -1072,7 +1077,7 @@ function qtPackCss() {
     '.stat3 b { font-size: 16pt; color: #003680; line-height: 1.15; }',
     '.stat3 .sub { font-size: 8pt; }',
     // Boxed CPC warnings
-    '.wbox { padding: 3mm 4mm; border: 1.2pt solid #0E1E33; display: flex; flex-direction: column; gap: 1mm; font-size: 8.8pt; font-weight: 700; line-height: 1.45; }',
+    '.wbox { padding: 3mm 4mm; border: 1.2pt solid #0E1E33; display: flex; flex-direction: column; gap: 1mm; font-size: 9pt; font-weight: 700; line-height: 1.45; }',
     // Attitude-to-risk strip
     '.riskrow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6mm; align-items: center; padding: 4mm 4.5mm; background: #F4F7FA; }',
     '.riskrow .rl { display: flex; flex-direction: column; gap: 0.5mm; font-size: 9pt; }',
@@ -1182,7 +1187,7 @@ function qtPackCss() {
     '.backp .bpl { color: #A2D2DE; text-decoration: underline; }',
     '.backp .bprule { width: 70mm; border-top: 0.6pt solid #A2D2DE; }',
     '.backp .wbox { padding: 0; border: none; gap: 1.6mm; }',
-    '.backp .wbox span { display: block; border: 0.9pt solid #fff; padding: 1mm 2.4mm; font-size: 8.2pt; color: #fff; }',
+    '.backp .wbox span { display: block; border: 0.9pt solid #fff; padding: 1mm 2.4mm; font-size: 8.8pt; color: #fff; }',
     '.backp .bpr { margin-top: auto; display: flex; flex-direction: column; gap: 2mm; font-size: 7.4pt; line-height: 1.5; color: #fff; }',
     '@media print { body { background: #fff; } .topbar { display: none; } .page { margin: 0; } }'
   ].join('\n');
@@ -1240,7 +1245,7 @@ function qtPaginatorSrc() {
     function over() { return body.scrollHeight > body.clientHeight + 1; }
     function moveToNewPage(b, hdr) {
       var carry = [], prev = b.previousElementSibling;
-      while (prev && prev.classList.contains('kwn') && carry.length < 3 && prev.previousElementSibling) { carry.unshift(prev); prev = prev.previousElementSibling; }
+      while (prev && prev.classList.contains('kwn') && carry.length < 4 && prev.previousElementSibling) { carry.unshift(prev); prev = prev.previousElementSibling; }
       body.removeChild(b);
       carry.forEach(function(c) { body.removeChild(c); });
       newPage(hdr, grpCur);
@@ -1273,12 +1278,24 @@ function qtPaginatorSrc() {
         } else placed++;
       }
     }
-    blocks.forEach(function(b) {
+    // True when the block after b starts a new page anyway, so a spill of b would sit on a page by itself
+    function endsRun(i) {
+      var b = blocks[i], n = blocks[i + 1];
+      return !n || n.getAttribute('data-full') || n.classList.contains('newpage') ||
+        (n.getAttribute('data-hdr') || 'agl') !== (b.getAttribute('data-hdr') || 'agl') || (n.getAttribute('data-grp') || 'agl') !== (b.getAttribute('data-grp') || 'agl');
+    }
+    blocks.forEach(function(b, i) {
       var hdr = b.getAttribute('data-hdr') || 'agl', grp = b.getAttribute('data-grp') || 'agl';
       if (b.getAttribute('data-full')) { fullPage(b, grp); return; }
       if (!body || hdr !== cur || grp !== grpCur || (b.classList.contains('newpage') && body.children.length)) newPage(hdr, grp);
       body.appendChild(b);
       if (!over()) return;
+      // Last block before a page break: tighten this page's spacing rather than leave it alone on the next
+      if (endsRun(i) && body.children.length > 1 && !body.classList.contains('snug')) {
+        body.classList.add('snug');
+        if (!over()) return;
+        body.classList.remove('snug');
+      }
       if (b.classList.contains('split')) { splitTable(b, hdr); return; }
       if (body.children.length > 1) moveToNewPage(b, hdr);
     });

@@ -1,6 +1,6 @@
 // engine_ib.js — Investment Bond (IB) projection engine. Pure functions of their inputs; no DOM.
 //
-// Follows the actuarial IB Illustration Generator workbook (v0.12, sheet Projections). Cell and column
+// Follows the actuarial IB Illustration Generator workbook (v0.13, sheet Projections). Cell and column
 // references in the comments (e.g. Projections AX:BB, Parameters col F) point to that workbook.
 // The IB shares the ARF fund range, 6% growth cap and milestone-year convention, so it reuses
 // arfBlendedMetrics, arfMonthlyDecrementRate, arfSolveIRR, ARF_MILESTONES and ARF_FUNDS from engine_arf.js.
@@ -12,7 +12,7 @@
 //     does not depend on how tax is split between them. The engine therefore tracks one combined fund, plus
 //     an SP-only shadow pool (fundSP) used for the exit charge, which applies to the SP-sourced value only.
 //  2. The government levy (1% of every contribution) and the tiered bonus commission on large single
-//     contributions, added to the allocation (see IB_TIERED_BONUS in ib_data.js).
+//     contributions, paid as extra initial commission (see IB_TIERED_BONUS in ib_data.js).
 //
 // Load after ib_data.js, arf_data.js, quote_common.js and engine_arf.js.
 
@@ -32,31 +32,32 @@
 //   rateOverride            null or decimal
 // }
 
-// Base initial commission: standard rate plus any special deal (Parameters col F,
-// "SP Upfront Special Deal"). Paid by the company, so it doesn't change the allocation.
+// Base initial commission: standard rate plus any special deal (Parameters col F, "SP Upfront Special
+// Deal") plus the tiered bonus for a large single contribution. Both extras are paid by the company,
+// so they don't change the allocation.
 function ibBaseSpUp(inp) {
-  return IB_CODES[inp.code].spUp + (inp.specialDeal || 0);
+  return IB_CODES[inp.code].spUp + (inp.specialDeal || 0) + ibTieredBonus(inp.contribution || 0);
 }
 function ibSpUpRate(inp) {
   return inp.spUpOverride != null ? inp.spUpOverride : ibBaseSpUp(inp);
 }
 // Lowest and highest initial commission the adviser can set: the code's range (IB_SP_COMM_RANGE)
-// shifted up by any special deal, so the special deal always sits on top and the allocation
-// stays inside the range the spec allows.
+// shifted up by the company-paid extras (special deal + tiered bonus), so they always sit on top and
+// the allocation stays inside the range the spec allows.
 function ibSpCommLimits(inp) {
-  var range = IB_SP_COMM_RANGE[inp.code], sd = inp.specialDeal || 0;
-  return { min: range[0] + sd, max: range[1] + sd };
+  var range = IB_SP_COMM_RANGE[inp.code], extra = (inp.specialDeal || 0) + ibTieredBonus(inp.contribution || 0);
+  return { min: range[0] + extra, max: range[1] + extra };
 }
 function ibDefaultRate(inp) { return Math.min(arfBlendedMetrics(inp).gross, IB_MAX_RATE); }
 
 // Allocation rate applied to the single contribution: 100% +/- any manual commission change
-// against the base rate (lower commission -> higher allocation, and vice versa) +/- the tiered
-// large-case bonus. A special deal moves the base, so on its own it leaves allocation at 100%.
+// against the base rate (lower commission -> higher allocation, and vice versa). The special deal and
+// the tiered bonus move the base, so on their own they leave allocation at 100%.
 function ibSpAllocationRate(inp) {
   var cc = IB_CODES[inp.code];
   // K/L/M versions also invest 101% of the single contribution (Parameters col I = 1.01; spec 1.4.7)
   var versionBonus = cc.rpAllocBonus ? cc.rpAllocBonus - 1 : 0;
-  return 1 + (ibBaseSpUp(inp) - ibSpUpRate(inp)) + versionBonus + ibTieredBonus(inp.contribution || 0);
+  return 1 + (ibBaseSpUp(inp) - ibSpUpRate(inp)) + versionBonus;
 }
 function ibRpAllocationRate(inp) {
   var cc = IB_CODES[inp.code];
@@ -343,7 +344,7 @@ function runIbQuote(inp) {
     p: p, years: IB_PROJECTION_YEARS, rate: rate, rateOverridden: inp.rateOverride != null, bm: bm,
     startAge: p.startAge, contribution: inp.contribution, rp: inp.rp,
     spUpRate: p.spUpRate, spUpOverridden: p.spUpOverridden,
-    specialDeal: inp.specialDeal || 0, baseSpUp: ibBaseSpUp(inp),
+    specialDeal: inp.specialDeal || 0, tieredBonus: ibTieredBonus(inp.contribution || 0), baseSpUp: ibBaseSpUp(inp),
     spAllocRate: p.spAllocRate, rpAllocRate: p.rpAllocRate,
     initialComm: p.initialComm, rpInitialComm: p.rpInitialComm,
     clawback: p.spUpRate > 0 || p.rpInitialComm > 0,
