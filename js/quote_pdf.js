@@ -189,15 +189,23 @@ function qtPortfolioRisk(Q) {
   var T = QT_TEXT, r = Q.r;
   if (Q.product === 'prsa' && r.isGlidepath) {
     var gp = glidepathSriPath(r.stratObj, r.termMonths);
+    var gShort = 'strategy risk profile <b>' + escHtml(strategyProfile(r.stratObj) || 'Medium risk') + '</b>';
+    if (!PORTFOLIO_SRI_ON) return { line: '', scaleValue: null, label: '', short: gShort, glide: true, footnote: '' };
     if (!gp) return { line: '', scaleValue: null, label: '', footnote: '' };
     return { line: escHtml(qtFill(T.glidepathRiskPath, { start: fmtRisk(gp.start), end: fmtRisk(gp.end) })), scaleValue: gp.start, label: 'Plan at start',
              short: 'strategy risk profile <b>' + escHtml(strategyProfile(r.stratObj) || 'Medium risk') + '</b>', glide: true,
              footnote: qtFill(T.riskFootnoteGlidepath, { start: fmtRisk(gp.start, 1), end: fmtRisk(gp.end, 1) }) };
   }
+  if (!PORTFOLIO_SRI_ON) return { line: '', scaleValue: null, label: '', short: '', footnote: '' };
   var pr = Math.round(r.portfolioSri);
   return { line: 'Indicative portfolio risk: <b>' + pr + ' &ndash; ' + ESMA_LABELS[pr] + '</b>*', scaleValue: r.portfolioSri, label: 'Portfolio',
            short: 'indicative portfolio risk <b>' + pr + '</b>', mark: '*',
            footnote: qtFill(T.riskFootnote, { exact: fmtRisk(r.portfolioSri, 1) }) };
+}
+
+// ESMA scale explanation under the fund tables (summary and investment pages).
+function qtFundsIntro(Q) {
+  return Q.lite ? QT_TEXT.fundsIntroLite : PORTFOLIO_SRI_ON ? QT_TEXT.fundsIntro : QT_TEXT.fundsIntroNoSri;
 }
 
 // ─── Simple markup for adviser-edited text ────────────────────────────────────
@@ -490,13 +498,14 @@ function qtBuildPack(Q) {
     }
     var chargeRows = [
       [(isPrsa ? 'Annual management charge' : 'Policy charge') + ' (incl. trail commission)', pct(mix.admin) + ' a year'],
-      ['Fund charges, weighted', pct(mix.fmc) + ' a year'],
+      ['Fund charges, weighted by starting allocation*', pct(mix.fmc) + ' a year'],
       mix.gtee > 0 ? ['Guarantee charge, weighted', pct(mix.gtee) + ' a year'] : null,
       ['Contribution charge', (isPrsa ? (r.spContribCharge > 0 || r.rpContribCharge > 0) : qtAllocation(r).charge > 0) ? 'Applies, see Charges' : 'None'],
       ['Total annual charge', pct(mix.total) + ' a year', true]
     ];
     add('<div class="fgrid">' + qtFactBlock('YOU', youRows) + qtFactBlock('YOUR PLAN', planRows) +
         qtFactBlock('CONTRIBUTIONS', contribRows) + qtFactBlock('CHARGES', chargeRows) + '</div>');
+    p('* ' + (isPrsa && r.isGlidepath ? T.fundChargeMixNoteGlide : T.fundChargeMixNote), 'tiny');
 
     var ivRows = fundRows.map(function(fr) {
       return '<tr><td class="l">' + escHtml(fr.fund.name) +
@@ -504,11 +513,14 @@ function qtBuildPack(Q) {
         '<td>' + Math.round(fr.fund.esma) + '</td><td><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
     }).join('');
     add('<div class="fblk"><div class="fbh">YOUR INVESTMENT</div>' +
-        '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Risk</th><th class="em">Allocation</th></tr></thead>' +
+        '<table class="dt num split"><thead><tr><th class="l">Fund</th><th>Risk rating</th><th class="em">Allocation</th></tr></thead>' +
         '<tbody>' + ivRows + '</tbody></table></div>', { cls: 'split' });
+    p(qtFundsIntro(Q));   // the ESMA scale, worded as on the investment page
 
     var gRisk = qtPortfolioRisk(Q);
-    if (Q.lite) {
+    if (Q.lite && !r.isGlidepath && !PORTFOLIO_SRI_ON) {
+      // Lite mode with the portfolio risk switched off: no client rating and no portfolio figure to show
+    } else if (Q.lite) {
       // Lite mode: no client rating, so show the portfolio's own risk only
       var lr = Math.round(r.portfolioSri);
       add('<div class="riskrow"><div class="rl"><span>' + (r.isGlidepath ? 'Strategy risk profile' : 'Portfolio risk') + '</span><b>' +
@@ -526,15 +538,17 @@ function qtBuildPack(Q) {
   // ── Allianz quotation: investment and risk (fund split → asset split → portfolio risk → the funds) ──
   if (Q.sections.funds) {
     sec = 'funds';
-    pageTitle(T.sections.funds, Q.lite ? T.packLeads.fundsLite : T.packLeads.funds);
+    var PL = T.packLeads;
+    pageTitle(T.sections.funds, PORTFOLIO_SRI_ON ? (Q.lite ? PL.fundsLite : PL.funds) : (Q.lite ? PL.fundsLiteNoSri : PL.fundsNoSri));
     var FH = T.packFundsHeads, gp = isPrsa && r.isGlidepath, pr6 = Math.round(r.portfolioSri);
     // Fund split
     add('<h3 class="kwn">' + escHtml(FH.split) + '</h3>');
-    var ft = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th class="l">Category</th><th>Risk</th><th class="em">Allocation</th></tr></thead><tbody>';
+    var ft = '<table class="dt num split"><thead><tr><th class="l">Fund</th><th class="l">Category</th><th>Risk rating</th><th>Sustainability</th><th class="em">Allocation</th></tr></thead><tbody>';
     fundRows.forEach(function(fr) {
-      var lv = qtGteeLevel(fr.fund.id), cat = FUND_CATEGORY_MAP[fr.cat];
+      var lv = qtGteeLevel(fr.fund.id), cat = FUND_CATEGORY_MAP[fr.cat], sf = (qtFundInfo(fr.fund.id) || {}).sfdr;
       ft += '<tr><td class="l">' + escHtml(fr.fund.name) + (fr.gmab ? ' &middot; <span class="g">Guarantee' + (lv ? ' ' + lv : '') + '</span>' : '') + '</td>' +
-            '<td class="l">' + (cat ? escHtml(cat.short) : '&ndash;') + '</td><td>' + Math.round(fr.fund.esma) + '</td><td class="em"><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
+            '<td class="l">' + (cat ? escHtml(cat.short) : '&ndash;') + '</td><td>' + Math.round(fr.fund.esma) + '</td>' +
+            '<td>' + (sf ? 'Article ' + sf : '&ndash;') + '</td><td class="em"><b>' + (+(fr.weight * 100).toFixed(1)) + '%</b></td></tr>';
     });
     add(ft + '</tbody></table>', { cls: 'split' });
     if (gp) p(T.glidepathNote, 'small');
@@ -552,11 +566,13 @@ function qtBuildPack(Q) {
     }
     // Portfolio risk
     add('<h3 class="kwn">' + escHtml(FH.risk) + '</h3>');
-    var fRisk = qtPortfolioRisk(Q), sfs = qtSfdrSplit(r.mix);
-    var t2 = gp ? ['Investment strategy', escHtml(strategyFullName(r.stratObj)), 'risk profile ' + (strategyProfile(r.stratObj) || 'Medium risk')] : ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]];
-    var sus = sfs.unknown > 0.0001 ? '&ndash;' : sfs.art8 > 0.9999 ? '100% Article 8' : Math.round(sfs.art8 * 100) + '% Article 8';
-    add(qtStat3([Q.lite ? null : ['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], t2, ['Sustainability', sus]]));
-    p(Q.lite ? T.fundsIntroLite : T.fundsIntro);
+    // Sustainability (SFDR article) is a column in the fund table above, not a headline figure
+    var fRisk = qtPortfolioRisk(Q);
+    var t2 = gp ? ['Investment strategy', escHtml(strategyFullName(r.stratObj)), 'risk profile ' + (strategyProfile(r.stratObj) || 'Medium risk')]
+      : PORTFOLIO_SRI_ON ? ['Indicative portfolio risk*', pr6 + ' &ndash; ' + ESMA_LABELS[pr6]] : null;
+    var st = [Q.lite ? null : ['Your attitude to risk', Q.risk.sri + ' &ndash; ' + ESMA_LABELS[Q.risk.sri]], t2].filter(Boolean);
+    if (st.length) add(qtStat3(st));
+    p(qtFundsIntro(Q));
     if (Q.lite) {
       if (gp && fRisk.line) add('<p>' + fRisk.line + '</p>');   // no client rating to compare with
     } else if (gp) {
@@ -564,7 +580,7 @@ function qtBuildPack(Q) {
       if (fRisk.line) add('<p>' + fRisk.line + '</p>');
       if (fit.aligned) p(T.riskMatch);
       else p(qtFill(fit.direction === 'higher' ? T.riskHigherProfile : T.riskLowerProfile, { profile: profile, clientSriLabel: ESMA_LABELS[Q.risk.sri], reason: Q.risk.reason }));
-    } else {
+    } else if (PORTFOLIO_SRI_ON) {
       if (pr6 === Q.risk.sri) p(T.riskMatch);
       else p(qtFill(pr6 > Q.risk.sri ? T.riskHigher : T.riskLower, { portfolioSri: pr6, clientSri: Q.risk.sri, reason: Q.risk.reason }));
     }
@@ -579,7 +595,7 @@ function qtBuildPack(Q) {
     add('<p>' + escHtml(T.packFundsFactsheets) + '</p>', { cls: 'kwn' });
     fundRows.forEach(function(fr, fi) {
       var f = fr.fund, info = qtFundInfo(f.id) || {}, cat = FUND_CATEGORY_MAP[fr.cat], lv = qtGteeLevel(f.id);
-      var facts = [f.isin ? 'ISIN ' + escHtml(f.isin) : '', 'Risk ' + Math.round(f.esma) + ' of 7', 'Fund charge ' + pct(fr.fmc),
+      var facts = [f.isin ? 'ISIN ' + escHtml(f.isin) : '', 'Risk rating ' + Math.round(f.esma) + ' of 7', 'Fund charge ' + pct(fr.fmc),
                    info.sfdr ? 'SFDR Article ' + info.sfdr : '', fr.gmab ? '<span class="g">Annual Guarantee' + (lv ? ' ' + lv : '') + '</span>' : ''].filter(Boolean);
       add('<div class="fcard"><div class="fch"><b>' + escHtml(f.name) + '</b><span>' + escHtml(info.category || (cat ? cat.label : '')) +
           ' &middot; ' + (+(fr.weight * 100).toFixed(1)) + '% of your plan</span></div>' +
@@ -672,8 +688,9 @@ function qtBuildPack(Q) {
       ct += '<tr><td class="l">' + escHtml(fr.fund.name) + '</td><td>' + (fr.weight * 100).toFixed(1) + '%</td><td>' + pct(fr.admin) + '</td><td>' + pct(fr.fmc) + '</td><td>' + (fr.gtee > 0 ? pct(fr.gtee) : '&ndash;') + '</td><td>' + pct(fr.total) + '</td></tr>';
       bAdmin += fr.weight * fr.admin; bFmc += fr.weight * fr.fmc; bG += fr.weight * fr.gtee;
     });
-    ct += '<tr class="tot"><td class="l">Your portfolio' + (isPrsa && r.isGlidepath ? ' (initial mix)' : '') + '</td><td>100%</td><td>' + pct(bAdmin) + '</td><td>' + pct(bFmc) + '</td><td>' + (bG > 0 ? pct(bG) : '&ndash;') + '</td><td>' + pct(bAdmin + bFmc + bG) + '</td></tr>';
+    ct += '<tr class="tot"><td class="l">Your portfolio (starting allocation)</td><td>100%</td><td>' + pct(bAdmin) + '</td><td>' + pct(bFmc) + '</td><td>' + (bG > 0 ? pct(bG) : '&ndash;') + '</td><td>' + pct(bAdmin + bFmc + bG) + '</td></tr>';
     add(ct + '</tbody></table>', { cls: 'split' });
+    p(isPrsa && r.isGlidepath ? T.fundChargeMixNoteGlide : T.fundChargeMixNote, 'small');
     if (isPrsa) {
       if (r.isGlidepath) p(T.glidepathNote);
       // Contribution charges: one row per contribution in the plan, with the rule that sets the charge

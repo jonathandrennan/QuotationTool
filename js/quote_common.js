@@ -137,6 +137,12 @@ function strategyProfile(strat) {
   return null;
 }
 
+// Portfolio risk switch. The allocation-weighted SRI below is being replaced by a blended portfolio
+// SRI calculator; until that is ready it is switched off, so neither the tool nor the pack shows a
+// portfolio-level risk figure or compares one with the client's rating. Individual fund ratings and
+// the glidepath risk-profile check (strategyRiskFit) are not affected. Set to true to restore it.
+var PORTFOLIO_SRI_ON = false;
+
 // Weighted portfolio SRI from a list of { esma, weight } (weights sum to 1).
 // This is an indicative house measure, NOT a PRIIPs SRI (it ignores diversification).
 function weightedSri(items) {

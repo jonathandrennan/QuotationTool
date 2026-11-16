@@ -48,7 +48,7 @@ var QT_TEXT = {
     summary:   'Your quotation at a glance',
     projection:'Projected benefits',
     charges:   'Charges',
-    funds:     'Your investment and risk',
+    funds:     'Your investment',
     remun:     'Remuneration statement',
     product:   'Product Brochure',
     important: 'Important information',
@@ -117,6 +117,10 @@ var QT_TEXT = {
   // Why the Reduction in Yield (effect of charges) differs from the total annual charge
   riyWhy: 'The Reduction in Yield is higher than the annual charge because it accounts for all fees combined and their compounding effect on your fund over time.',
   guaranteeOnNote: 'Where you have chosen the optional guarantee on a fund, the projections assume the guarantee remains in place throughout. If you switch it off in the future, total charges will be lower than shown.',
+  // Fund charge for the portfolio: weighted by the allocation at the start, which is not maintained. DRAFT.
+  fundChargeMixNote: 'The fund charge for your portfolio is the average of each fund\'s charge, weighted by your allocation at the start of your plan. Your plan is not rebalanced back to this allocation, so as the value of each fund rises or falls, the mix of your funds and the overall fund charge can change.',
+  fundChargeMixNoteGlide: 'The fund charge for your portfolio is the average of each fund\'s charge, weighted by the strategy\'s allocation at the start of your plan. The fund mix changes as the strategy moves into lower-risk funds and as fund values rise or fall, so the overall fund charge can change.',
+  fundChargeMixShort: 'Weighted by the starting allocation. The plan is not rebalanced, so the fund charge can change as fund values move.',
   chargesFundNote: 'The illustration uses the current level of fund management charges, which may vary in the future. Further details are available in the Schedule of Fees and Charges.',
 
   // ─── Funds and risk — DRAFT ──────────────────────────────────────────────────
@@ -124,6 +128,9 @@ var QT_TEXT = {
   // The weighted-average explanation is in the footnote under the risk figures (riskFootnote), not repeated here
   fundsIntroLite: 'Each fund has a published ESMA risk rating from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Glidepath strategies change their fund mix as you approach retirement, so they are described by their risk profile instead.',
   fundsIntro: 'Each fund has a published ESMA risk rating from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Your own risk rating comes from the risk profiling your adviser carried out with you, and is compared below with the indicative risk of your portfolio. Glidepath strategies change their fund mix as you approach retirement, so they are matched to you on their risk profile instead.',
+  // Used instead of fundsIntro while PORTFOLIO_SRI_ON is false (no portfolio risk figure to compare with).
+  // Also printed under the fund table on "Your quotation at a glance". DRAFT.
+  fundsIntroNoSri: 'Each fund has a published ESMA risk rating from 1 (lower risk, typically lower rewards) to 7 (higher risk, typically higher rewards). Your own risk rating comes from the risk profiling your adviser carried out with you. Glidepath strategies change their fund mix as you approach retirement, so they are matched to you on their risk profile.',
   riskMatch: 'The risk of your portfolio is in line with your assessed attitude to risk.',
   riskHigher: 'The indicative risk of your portfolio ({portfolioSri}) is higher than your assessed attitude to risk ({clientSri}). Your adviser has recorded the reason for this recommendation: {reason}',
   riskLower: 'The indicative risk of your portfolio ({portfolioSri}) is lower than your assessed attitude to risk ({clientSri}).',
@@ -144,6 +151,9 @@ var QT_TEXT = {
 
   sosPortfolioRiskNumeric: 'Based on the weighted average of its funds\' published ESMA ratings, this portfolio has an indicative risk rating of about {portfolioSri} ({portfolioSriLabel}).',
   sosPortfolioRiskGlidepath: 'This strategy\'s target risk profile is {profile}. As a glidepath, its fund mix changes gradually as you approach retirement, so no single ESMA rating is published for it. Based on the weighted average of its funds\' ESMA ratings, its indicative risk is about {sriStart} at the start of your plan, reducing to about {sriEnd} by your retirement age.',
+  // While PORTFOLIO_SRI_ON is false: no weighted figures. DRAFT.
+  sosPortfolioRiskFunds: 'Each fund in this portfolio has its own published ESMA risk rating, shown in your quotation.',
+  sosPortfolioRiskGlidepathNoSri: 'This strategy\'s target risk profile is {profile}. As a glidepath, its fund mix changes gradually as you approach retirement, moving into lower-risk funds, so no single ESMA rating is published for it.',
   lowSriNote: 'For clients with a risk rating of 1 or 2, a DIY portfolio of cash and fixed income funds may be closer to their attitude to risk than any of the glidepath strategies.',
 
   // ─── Portfolio step (card and popover copy lives in quote_content.js) ─────────
@@ -234,6 +244,9 @@ var QT_TEXT = {
     charges:    'The charges that apply to your plan. All are yearly and taken from the value of your fund.',
     fundsLite:  'The funds you have chosen, how your money is invested, the indicative risk of your portfolio, and what each fund does.',
     funds:      'The funds you have chosen, how your money is split, how its risk compares with your attitude to risk, and what each fund does.',
+    // While PORTFOLIO_SRI_ON is false (no portfolio risk figure). DRAFT.
+    fundsLiteNoSri: 'The funds you have chosen, how your money is invested, the risk rating of each fund, and what each fund does.',
+    fundsNoSri: 'The funds you have chosen, how your money is split, the risk rating of each fund against your attitude to risk, and what each fund does.',
     remun:      'What {company} pays {brokerFirm} for arranging this plan. These payments are included in the charges.',
     important:  'Please read this page carefully before you decide.',
     glossary:   'The terms used in this quotation.'

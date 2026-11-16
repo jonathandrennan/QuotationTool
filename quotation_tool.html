@@ -2926,7 +2926,8 @@ function portfolioState() {
   // ratings their risk profile suits (strategyRiskFit) rather than a numeric comparison.
   var profile = isGlidepath ? strategyProfile(stratObj) : null;
   var fit = isGlidepath ? strategyRiskFit(stratObj, S.risk.sri) : null, pr = Math.round(sri);
-  var differs = !S.lite && ready && (isGlidepath ? !fit.aligned : pr !== S.risk.sri);   // lite: no client rating to compare with
+  // PORTFOLIO_SRI_ON false: an own fund selection has no portfolio figure, so it is not compared with the client's rating
+  var differs = !S.lite && ready && (isGlidepath ? !fit.aligned : PORTFOLIO_SRI_ON && pr !== S.risk.sri);   // lite: no client rating to compare with
   var direction = !differs ? null : isGlidepath ? fit.direction : (pr > S.risk.sri ? 'higher' : 'lower');
   var mismatch = direction === 'higher';   // only a higher-risk portfolio needs a recorded reason; lower risk needs none
   var message = mix.length ? 'Fund allocations must total 100% (currently ' + (+total.toFixed(2)) + '%).'
@@ -2947,7 +2948,7 @@ function buildPfSummary() {
   function line(id, label, cls) { return '<div class="crow' + (cls ? ' ' + cls : '') + '" id="' + id + '"><span class="cl-label">' + label + '</span><span class="cl-val"></span></div>'; }
   $('pf-summary').innerHTML =
     '<div id="ps-empty"><div class="kv lite-x"><span>Client risk rating</span><b id="ps-client0"></b></div><div class="kv lite-x"><span>Sustainability preference</span><b id="ps-esg0"></b></div>' +
-      '<div class="empty">Portfolio risk and charges appear here as you build.</div></div>' +
+      '<div class="empty">' + (PORTFOLIO_SRI_ON ? 'Portfolio risk and charges' : 'Charges') + ' appear here as you build.</div></div>' +
     '<div id="ps-full">' +
       '<div class="tiles"><div class="tile lite-x"><span class="k">Client</span><span class="v" id="ps-client"></span><span class="s" id="ps-client-l"></span></div>' +
         '<div class="tile"><span class="k" id="ps-risk-k">Portfolio</span><span class="v" id="ps-risk"></span><span class="s" id="ps-risk-l"></span></div></div>' +
@@ -2956,7 +2957,8 @@ function buildPfSummary() {
       '<div class="gsec lite-x"><div class="gsec-h">Asset split <small id="ps-cat-note"></small></div><div class="cbar" id="ps-cat">' + cat + '</div><div class="cleg">' + leg + '</div>' +
         '<div class="cnote" id="ps-cat-tm"></div></div>' +
       '<div class="gsec"><div class="gsec-h">Annual charges <small id="ps-chg-note"></small></div>' +
-        line('ps-amc', '') + line('ps-fmc', 'Blended fund charge') + line('ps-gch', 'Guarantee') + line('ps-total', 'Total annual charge', 'total') + '</div>' +
+        line('ps-amc', '') + line('ps-fmc', 'Blended fund charge') + line('ps-gch', 'Guarantee') + line('ps-total', 'Total annual charge', 'total') +
+        '<div class="cnote">' + escHtml(QT_TEXT.fundChargeMixShort) + '</div></div>' +
       '<div class="gsec sfdr-line"><span>SFDR</span><b id="ps-sfdr"></b></div>' +
     '</div>';
   $('pf-summary').setAttribute('data-built', '1');
@@ -2968,16 +2970,26 @@ function renderPfSummary() {
   var pf = portfolioState(), isPrsa = S.product === 'prsa', hasMix = pf.mix.length > 0;
   // Lite mode: no client risk rating or asset split
   document.querySelectorAll('#pf-summary .lite-x').forEach(function(el) { el.hidden = S.lite; });
-  $('pf-summary').querySelector('.tiles').style.gridTemplateColumns = S.lite ? '1fr' : '';
   function setLine(id, val) { $(id).querySelector('.cl-val').textContent = val; }
   var full = !!pf.isGlidepath || pfView === 'alloc' || (isPrsa && S.prsa.strat === 'diy' && hasMix);
   $('ps-empty').hidden = full; $('ps-full').hidden = !full;
   var client = S.risk.sri ? S.risk.sri + ' — ' + ESMA_LABELS[S.risk.sri] : '–';
   $('ps-client0').textContent = client; $('ps-esg0').textContent = esgText();
   $('ps-client').textContent = S.risk.sri || '–'; $('ps-client-l').textContent = S.risk.sri ? ESMA_LABELS[S.risk.sri] : '';
-  // Portfolio risk: indicative weighted SRI, or a glidepath's start → retirement path
-  var markAt = null;
-  if (pf.isGlidepath) {
+  // Portfolio risk: indicative weighted SRI, or a glidepath's start → retirement path.
+  // With PORTFOLIO_SRI_ON false: a glidepath shows its suitable ratings and profile; an own selection shows nothing.
+  var markAt = null, markRange = null, showPf = PORTFOLIO_SRI_ON || pf.isGlidepath;
+  $('ps-risk').parentNode.hidden = !showPf;
+  $('pf-summary').querySelector('.tiles').style.gridTemplateColumns = S.lite || !showPf ? '1fr' : '';
+  $('pf-summary').querySelector('.tiles').hidden = S.lite && !showPf;
+  $('ps-scale').hidden = S.lite && !showPf;
+  if (pf.isGlidepath && !PORTFOLIO_SRI_ON) {
+    var rg = strategySuitableRange(pf.stratObj);
+    $('ps-risk-k').textContent = 'Strategy';
+    $('ps-risk').textContent = rg ? fmtRatingRange(rg) : '–';
+    $('ps-risk-l').textContent = (pf.profile || 'Medium risk') + ' · suitable ratings';
+    markRange = rg;
+  } else if (pf.isGlidepath) {
     var path = glidepathSriPath(pf.stratObj, prsaTermMonths());
     $('ps-risk-k').textContent = 'Strategy';
     $('ps-risk').textContent = path ? fmtRisk(path.start) + ' → ' + fmtRisk(path.end) : '–';
@@ -2991,10 +3003,10 @@ function renderPfSummary() {
   }
   [].forEach.call($('ps-scale').querySelectorAll('[data-sri]'), function(d) {
     var n = +d.getAttribute('data-sri');
-    d.classList.toggle('pf', n === markAt); d.classList.toggle('cl', n === S.risk.sri);
+    d.classList.toggle('pf', markRange ? n >= markRange[0] && n <= markRange[1] : n === markAt); d.classList.toggle('cl', n === S.risk.sri);
   });
   var al = $('ps-align');
-  al.hidden = !pf.ready || S.lite;
+  al.hidden = !pf.ready || S.lite || !showPf;
   if (pf.ready) {
     var done = pf.mismatch && overrideValid();
     al.className = 'apill ' + (pf.mismatch ? 'warn' : 'ok');
@@ -3021,7 +3033,7 @@ function renderPfSummary() {
   $('ps-gch').hidden = !(pf.gteeCharge > 0);
   setLine('ps-gch', pct(pf.gteeCharge || 0));
   setLine('ps-total', hasMix ? pct(pf.charge) : '–');
-  $('ps-chg-note').textContent = pf.isGlidepath ? '(at start)' : '';
+  $('ps-chg-note').textContent = '(at starting allocation)';
   // SFDR: share of the portfolio in Article 8 funds
   var sp = qtSfdrSplit(pf.mix), sf = $('ps-sfdr');
   sf.className = '';
@@ -3184,6 +3196,7 @@ function resSummary(r) {
   var rows = qtFundRows({ product: S.product, r: r });
   var pf = portfolioState(), pr = Math.round(r.portfolioSri);
   var fitTxt = r.isGlidepath ? escHtml(strategyProfile(r.stratObj) || 'Medium risk') + ' profile'
+    : !PORTFOLIO_SRI_ON ? 'Own fund selection'
     : 'Portfolio risk ' + pr + (S.lite ? '' : ' · ' + (pr === S.risk.sri ? 'matches client' : 'differs from client'));
   var funds = sumCol('Funds', 5, escHtml(strategyName()), fitTxt,
     rows.slice(0, 4).map(function(fr) {
@@ -3304,9 +3317,9 @@ function resCharges(r) {
     bA += fr.weight * fr.admin; bF += fr.weight * fr.fmc; bG += fr.weight * fr.gtee;
     return { c: [escHtml(shortFundName(fr.fund)), pctW(fr.weight), pct(fr.admin), pct(fr.fmc), fr.gtee > 0 ? pct(fr.gtee) : '–', '<b>' + pct(fr.total) + '</b>'] };
   });
-  trs.push({ tot: true, c: ['Portfolio' + (isPrsa && r.isGlidepath ? ' (initial mix)' : ''), '100%', pct(bA), pct(bF), bG > 0 ? pct(bG) : '–', pct(bA + bF + bG)] });
+  trs.push({ tot: true, c: ['Portfolio (starting allocation)', '100%', pct(bA), pct(bF), bG > 0 ? pct(bG) : '–', pct(bA + bF + bG)] });
   // Reduction in yield (as worded in the pack) and the charges on contributions
-  var notes = [];
+  var notes = [isPrsa && r.isGlidepath ? T.fundChargeMixNoteGlide : T.fundChargeMixNote];
   if (isPrsa) {
     notes.push(qtFill(T.prsaRiy, { riy: pct(Math.max(0, r.grossRate - r.netRate)), gross: pct(r.grossRate), net: pct(r.netRate) }) + ' ' + qtRiyWhy('prsa', r));
     var cc = [];
@@ -3487,8 +3500,12 @@ function textContext() {
       : qtFill(fit.direction === 'higher' ? T.sosRiskHigher : T.sosRiskLower, { reason: S.risk.reason.trim() });
     // The SoS is printed, so indicative figures are rounded (decimals are shown on screen only)
     var path = glidepathSriPath(r.stratObj, r.termMonths);
-    portfolioRiskSentence = qtFill(T.sosPortfolioRiskGlidepath, { profile: profile || 'medium risk',
+    portfolioRiskSentence = !PORTFOLIO_SRI_ON ? qtFill(T.sosPortfolioRiskGlidepathNoSri, { profile: profile || 'medium risk' })
+      : qtFill(T.sosPortfolioRiskGlidepath, { profile: profile || 'medium risk',
       sriStart: path ? fmtRisk(path.start) : '–', sriEnd: path ? fmtRisk(path.end) : '–' });
+  } else if (!PORTFOLIO_SRI_ON) {
+    riskSentence = '';   // no portfolio figure to compare with the client's rating
+    portfolioRiskSentence = T.sosPortfolioRiskFunds;
   } else {
     var pr = Math.round(r.portfolioSri);
     riskSentence = pr === S.risk.sri ? T.sosRiskMatch : qtFill(pr > S.risk.sri ? T.sosRiskHigher : T.sosRiskLower, { reason: S.risk.reason.trim() });
@@ -3995,7 +4012,7 @@ function reviewChecks() {
     if (k === 'sos' && sosEsgMissing()) out.push({ ok: false, text: 'Statement of Suitability: set out the client\'s sustainability preferences' });
   });
   out.push({ ok: allTabsSeen(), text: allTabsSeen() ? 'Results reviewed' : 'Results: review all three tabs' });
-  if (!S.lite) out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk higher than the client\'s rating, reason recorded' : pf.direction === 'lower' ? 'Risk lower than the client\'s rating, no reason needed' : 'Risk aligned, no override needed' });
+  if (!S.lite && (PORTFOLIO_SRI_ON || pf.isGlidepath)) out.push({ ok: !pf.mismatch || overrideValid(), text: pf.mismatch ? 'Risk higher than the client\'s rating, reason recorded' : pf.direction === 'lower' ? 'Risk lower than the client\'s rating, no reason needed' : 'Risk aligned, no override needed' });
   return out;
 }
 // Warnings are the adviser's call to make; only hard failures hold the pack back.
